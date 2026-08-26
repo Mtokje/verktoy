@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verktøykassen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --steel: #E9EDF0;        /* bakgrunn – galvanisert stål / teknisk tegning */
+    --ink: #1C2733;          /* mørk marineblå tekst */
+    --ink-soft: #55636F;     /* dempet tekst */
+    --signal: #F26722;       /* signaloransje – vernetøy/verft */
+    --line: #C6CFD6;         /* streker */
+    --tag: #FFFFFF;          /* kortbakgrunn */
+    --radius: 6px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--steel);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---------- Topp ---------- */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding: 40px 0 28px;
+    background:
+      repeating-linear-gradient(-45deg,
+        transparent 0 26px,
+        rgba(28,39,51,0.04) 26px 52px);
+  }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: "Saira Condensed", sans-serif;
+    font-weight: 800;
+    font-size: clamp(38px, 6vw, 60px);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    line-height: 1;
+  }
+  h1 .accent { color: var(--signal); }
+  .intro {
+    margin-top: 10px;
+    max-width: 56ch;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+
+  /* ---------- Søk ---------- */
+  .toolbar { padding: 22px 0 6px; }
+  .search {
+    width: 100%;
+    max-width: 420px;
+    padding: 11px 14px;
+    font: 500 15px "IBM Plex Sans", sans-serif;
+    color: var(--ink);
+    background: var(--tag);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .search:focus {
+    outline: 2px solid var(--signal);
+    outline-offset: 1px;
+    border-color: var(--signal);
+  }
+  .count {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  /* ---------- Kategorier og kort ---------- */
+  .category { padding: 26px 0 6px; }
+  .category h2 {
+    font-family: "Saira Condensed", sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .category h2::after {
+    content: "";
+    flex: 1;
+    height: 1.5px;
+    background: var(--line);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  /* Kort utformet som utstyrsmerke med hull, slik utstyr ID-merkes */
+  .tag-card {
+    position: relative;
+    display: block;
+    background: var(--tag);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 16px 14px 44px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: border-color 120ms ease, transform 120ms ease;
+  }
+  .tag-card::before {           /* hullet i merket */
+    content: "";
+    position: absolute;
+    left: 15px; top: 19px;
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: var(--steel);
+    border: 2.5px solid var(--line);
+    transition: border-color 120ms ease;
+  }
+  .tag-card:hover, .tag-card:focus-visible {
+    border-color: var(--signal);
+    transform: translateY(-1px);
+  }
+  .tag-card:hover::before, .tag-card:focus-visible::before {
+    border-color: var(--signal);
+  }
+  .tag-card:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+  .tag-id {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+  }
+  .tag-name {
+    font-weight: 600;
+    font-size: 16.5px;
+    margin: 2px 0 4px;
+  }
+  .tag-desc {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+  }
+
+  .empty {
+    padding: 40px 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    display: none;
+  }
+
+  footer {
+    margin-top: 48px;
+    border-top: 1.5px solid var(--line);
+    padding: 18px 0 32px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tag-card { transition: none; }
+    .tag-card:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Digitale verktøy · fritt tilgjengelig</div>
+    <h1>Verktøy<span class="accent">kassen</span></h1>
+    <p class="intro">Frittstående småverktøy for læring og arbeid. Alt kjører rett i nettleseren – ingen innlogging, ingen installasjon.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <input class="search" id="search" type="search" placeholder="Søk etter verktøy …" aria-label="Søk etter verktøy">
+    <div class="count" id="count"></div>
+  </div>
+  <div id="catalog"></div>
+  <p class="empty" id="empty">Ingen treff. Prøv et annet søkeord.</p>
+</div>
+
+<footer>
+  <div class="wrap">Oppdatert automatisk fra verktøylisten · Kontakt Mats ved feil eller ønsker</div>
+</footer>
+
+<script>
+/* ============================================================
+   VERKTØYLISTEN – det eneste du trenger å redigere.
+   Nytt verktøy = én ny linje. Last opp html-filen til repoet,
+   og legg den inn her med filnavn, navn, beskrivelse, kategori.
+   Kategoriene lages automatisk ut fra det som står her.
+   ============================================================ */
+const TOOLS = [
+  { file: "eksempel-kalkulator.html", name: "Eksempelverktøy A", desc: "Kort beskrivelse av hva verktøyet gjør – bytt ut denne linjen.", cat: "Fagopplæring" },
+  { file: "eksempel-quiz.html",       name: "Eksempelverktøy B", desc: "Enda et eksempel. Slett eller erstatt med dine egne verktøy.", cat: "Fagopplæring" },
+  { file: "eksempel-sjekkliste.html", name: "Eksempelverktøy C", desc: "Kategorien bestemmer hvilken seksjon verktøyet havner i.", cat: "Diverse" },
+];
+/* ============================================================ */
+
+const catalog = document.getElementById("catalog");
+const search = document.getElementById("search");
+const count = document.getElementById("count");
+const empty = document.getElementById("empty");
+
+function render(filter) {
+  const q = (filter || "").trim().toLowerCase();
+  const hits = TOOLS.filter(t =>
+    !q || (t.name + " " + t.desc + " " + t.cat).toLowerCase().includes(q)
+  );
+  const cats = [...new Set(hits.map(t => t.cat))];
+  catalog.innerHTML = cats.map(cat => `
+    <section class="category">
+      <h2>${cat}</h2>
+      <div class="grid">
+        ${hits.filter(t => t.cat === cat).map((t) => {
+          const id = String(TOOLS.indexOf(t) + 1).padStart(3, "0");
+          return `
+          <a class="tag-card" href="${t.file}">
+            <span class="tag-id">NR ${id}</span>
+            <div class="tag-name">${t.name}</div>
+            <div class="tag-desc">${t.desc}</div>
+          </a>`;
+        }).join("")}
+      </div>
+    </section>`).join("");
+  count.textContent = hits.length + " av " + TOOLS.length + " verktøy";
+  empty.style.display = hits.length ? "none" : "block";
+}
+
+search.addEventListener("input", () => render(search.value));
+render();
+</script>
+
+</body>
+</html>

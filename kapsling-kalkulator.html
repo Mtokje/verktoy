@@ -1,0 +1,2418 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapslingskalkulator – demo for isolatørlærlinger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --steel-900:#171e26;
+    --steel-800:#1f2833;
+    --steel-700:#2a3542;
+    --steel-600:#33404e;
+    --steel-500:#4a5866;
+    --line:#38434f;
+    --paper:#e8ebee;
+    --paper-dim:#9aa6b1;
+    --monje:#d4552e;
+    --monje-dim:#8a3a22;
+    --chalk:#f4f6f8;
+    --ok:#5fae7d;
+    --warn:#e0a63c;
+    --mono:'IBM Plex Mono',monospace;
+    --cond:'IBM Plex Sans Condensed',sans-serif;
+    --sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--steel-900);color:var(--paper);font-family:var(--sans);font-size:15px;line-height:1.5}
+  a{color:inherit}
+
+  header{
+    border-bottom:1px solid var(--line);
+    padding:20px 24px 16px;
+    display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;
+  }
+  header h1{
+    font-family:var(--cond);font-weight:700;font-size:1.45rem;letter-spacing:.02em;text-transform:uppercase;
+  }
+  header h1 span{color:var(--monje)}
+  header .sub{font-family:var(--mono);font-size:.72rem;color:var(--paper-dim);letter-spacing:.04em}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 24px 60px;display:grid;grid-template-columns:300px 1fr;gap:22px}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+
+  /* ---------- input panel ---------- */
+  .panel{background:var(--steel-800);border:1px solid var(--line);border-radius:6px;align-self:start}
+  .panel h2, .card h2{
+    font-family:var(--cond);font-weight:600;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--paper-dim);padding:12px 16px 10px;border-bottom:1px solid var(--line);
+  }
+  .fields{padding:14px 16px 18px;display:grid;gap:14px}
+  .field label{
+    display:block;font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;color:var(--paper-dim);
+    text-transform:uppercase;margin-bottom:5px;
+  }
+  .field select,.field input{
+    width:100%;background:var(--steel-900);border:1px solid var(--line);border-radius:4px;
+    color:var(--chalk);font-family:var(--mono);font-size:.95rem;padding:8px 10px;
+  }
+  .field input:focus,.field select:focus{outline:2px solid var(--monje);outline-offset:1px}
+  .field .hint{font-size:.7rem;color:var(--paper-dim);margin-top:4px;font-family:var(--sans)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .seg button{
+    flex:1;background:var(--steel-900);border:0;color:var(--paper-dim);font-family:var(--mono);
+    font-size:.78rem;padding:8px 4px;cursor:pointer;
+  }
+  .seg button.on{background:var(--monje);color:#fff;font-weight:600}
+  .seg button:focus-visible{outline:2px solid var(--chalk);outline-offset:-2px}
+  .sectionlbl{font-family:var(--cond);font-weight:600;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--monje);margin:2px 0 -6px}
+  .compParams.hidden{display:none}
+
+  /* ---------- viz ---------- */
+  .right{display:grid;gap:22px;align-content:start}
+  .vizcard{background:var(--steel-800);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .viztabs{display:flex;border-bottom:1px solid var(--line)}
+  .viztabs button{
+    background:none;border:0;border-right:1px solid var(--line);color:var(--paper-dim);
+    font-family:var(--cond);font-weight:600;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;
+    padding:11px 22px;cursor:pointer;
+  }
+  .viztabs button.on{color:var(--chalk);background:var(--steel-700);box-shadow:inset 0 -2px 0 var(--monje)}
+  .viztabs .nts{margin-left:auto;align-self:center;padding:0 14px;font-family:var(--mono);font-size:.65rem;color:var(--paper-dim)}
+  .vizbody{position:relative;height:460px;background:
+    repeating-linear-gradient(0deg,transparent 0 39px,rgba(255,255,255,.025) 39px 40px),
+    repeating-linear-gradient(90deg,transparent 0 39px,rgba(255,255,255,.025) 39px 40px),
+    var(--steel-900)}
+  #flatView{position:absolute;inset:0}
+  #flatView svg{width:100%;height:100%;display:block}
+  #listView{position:absolute;inset:0;background:var(--steel-800)}
+  .hidden{display:none !important}
+  .listwrap{position:absolute;inset:0;overflow:auto;padding:16px 20px}
+  table.cut{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.8rem}
+  table.cut th{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;color:var(--paper-dim);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  table.cut td{padding:7px 8px;border-bottom:1px dashed var(--line);color:var(--chalk)}
+  table.cut td.r, table.cut th.r{text-align:right}
+  table.cut tr.sec td{font-family:var(--cond);color:var(--monje);text-transform:uppercase;letter-spacing:.12em;font-size:.7rem;border-bottom:1px solid var(--monje-dim);padding-top:14px}
+  table.cut tr.sum td{color:var(--chalk);font-weight:600;border-bottom:0;padding-top:12px}
+
+  /* ---------- results ---------- */
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media(max-width:700px){.cards{grid-template-columns:1fr}}
+  .card{background:var(--steel-800);border:1px solid var(--line);border-radius:6px}
+  .card .body{padding:14px 16px 16px}
+
+  .kapp{border-color:var(--monje-dim)}
+  .kapp h2{color:var(--monje)}
+  .kapprow{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .kapprow:last-child{border-bottom:0}
+  .kapprow .n{font-family:var(--sans);font-size:.85rem;color:var(--paper-dim)}
+  .kapprow .v{font-family:var(--mono);font-size:1.35rem;font-weight:600;color:var(--chalk)}
+  .kapprow .v small{font-size:.7rem;color:var(--paper-dim);font-weight:400;margin-left:3px}
+  .kapprow.big .v{color:var(--monje);font-size:1.6rem}
+
+  .formula{
+    margin:12px 16px 16px;padding:12px 14px;background:var(--steel-900);border:1px solid var(--line);
+    border-radius:4px;font-family:var(--mono);font-size:.78rem;line-height:1.9;color:var(--paper-dim);
+  }
+  .formula b{color:var(--chalk);font-weight:600}
+  .formula .m{color:var(--monje)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:.83rem}
+  table.t td{padding:6px 0;border-bottom:1px dashed var(--line);vertical-align:baseline}
+  table.t tr:last-child td{border-bottom:0}
+  table.t td:first-child{color:var(--paper-dim)}
+  table.t td:last-child{text-align:right;font-family:var(--mono);color:var(--chalk)}
+  .approx{color:var(--paper-dim);font-size:.7rem}
+
+  .alert{
+    display:none;margin:0 0 4px;padding:11px 14px;border:1px solid var(--warn);border-radius:6px;
+    background:rgba(224,166,60,.08);color:var(--warn);font-size:.85rem;font-family:var(--mono);
+  }
+  .alert.show{display:block}
+
+  #view3d{position:absolute;inset:0;touch-action:none;overscroll-behavior:contain}
+  #view3d canvas{display:block;width:100%;height:100%;touch-action:none}
+  .dragtip{position:absolute;right:10px;bottom:8px;font-family:var(--mono);font-size:.65rem;color:var(--paper-dim);pointer-events:none}
+
+  /* ---------- info-knapper og modal ---------- */
+  .infoBtn{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:15px;height:15px;margin-left:5px;vertical-align:1px;
+    border:1px solid var(--paper-dim);border-radius:50%;background:none;
+    color:var(--paper-dim);font-family:var(--mono);font-size:.6rem;font-style:italic;
+    cursor:pointer;line-height:1;padding:0;
+  }
+  .infoBtn:hover,.infoBtn:focus-visible{border-color:var(--monje);color:var(--monje);outline:none}
+  .modalBack{
+    position:fixed;inset:0;background:rgba(10,14,18,.72);display:none;z-index:50;
+    align-items:flex-start;justify-content:center;padding:60px 20px 20px;overflow:auto;
+  }
+  .modalBack.show{display:flex}
+  .modal{max-width:580px;width:100%;background:var(--steel-800);border:1px solid var(--line);border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .modal .mhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid var(--line)}
+  .modal .mhead h3{font-family:var(--cond);font-weight:700;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;color:var(--monje)}
+  .modal .mclose{background:none;border:1px solid var(--line);border-radius:4px;color:var(--paper-dim);font-family:var(--mono);font-size:.85rem;padding:3px 10px;cursor:pointer}
+  .modal .mclose:hover{border-color:var(--monje);color:var(--monje)}
+  .modal .mbody{padding:16px 18px;font-size:.9rem;line-height:1.65;color:var(--paper)}
+  .modal .mbody p{margin-bottom:10px}
+  .modal .mlinks{padding:0 18px 18px;font-size:.82rem}
+  .modal .mlinks .mlbl{font-family:var(--cond);font-weight:600;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim);margin-bottom:6px}
+  .modal .mlinks a{display:block;color:var(--monje);text-decoration:none;font-family:var(--mono);font-size:.78rem;padding:3px 0}
+  .modal .mlinks a:hover{text-decoration:underline}
+
+  /* ---------- moduser ---------- */
+  .modenav{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-left:auto}
+  .modenav button{
+    background:var(--steel-800);border:0;border-right:1px solid var(--line);color:var(--paper-dim);
+    font-family:var(--cond);font-weight:600;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;
+    padding:9px 18px;cursor:pointer;
+  }
+  .modenav button:last-child{border-right:0}
+  .modenav button.on{background:var(--monje);color:#fff}
+  .modeview.hidden{display:none}
+
+  .btn{
+    background:var(--monje);border:0;border-radius:4px;color:#fff;cursor:pointer;
+    font-family:var(--cond);font-weight:600;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;
+    padding:8px 14px;
+  }
+  .btn:hover{background:#e0663f}
+  .btn.ghost{background:none;border:1px solid var(--line);color:var(--paper-dim)}
+  .btn.ghost:hover{border-color:var(--monje);color:var(--monje)}
+  .btn.small{padding:5px 10px;font-size:.68rem}
+
+  .subnav{display:grid;gap:6px;padding:12px 16px 16px}
+  .subnav button{
+    text-align:left;background:var(--steel-900);border:1px solid var(--line);border-radius:4px;
+    color:var(--paper-dim);font-family:var(--cond);font-weight:600;font-size:.8rem;
+    letter-spacing:.06em;text-transform:uppercase;padding:9px 12px;cursor:pointer;
+  }
+  .subnav button.on{border-color:var(--monje);color:var(--chalk);box-shadow:inset 3px 0 0 var(--monje)}
+  .subview.hidden{display:none}
+
+  .task{background:var(--steel-800);border:1px solid var(--line);border-radius:6px;margin-bottom:18px}
+  .task .thead{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line)}
+  .task .thead h3{font-family:var(--cond);font-weight:700;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--monje)}
+  .task .tbody{padding:14px 16px;font-size:.9rem;line-height:1.6}
+  .task .tqs{margin-top:10px;padding-left:18px}
+  .task .tqs li{margin-bottom:4px;font-family:var(--mono);font-size:.83rem}
+  .task .fasit{margin-top:12px;padding:12px 14px;background:var(--steel-900);border:1px solid var(--ok);border-radius:4px;font-family:var(--mono);font-size:.8rem;line-height:1.9}
+  .task .fasit b{color:var(--ok)}
+  .task .fasit.hidden{display:none}
+
+  .chk{display:grid;grid-template-columns:1fr 130px 24px;gap:8px 10px;align-items:center;margin-top:10px}
+  .chk label{font-size:.85rem;color:var(--paper-dim)}
+  .chk input{background:var(--steel-900);border:1px solid var(--line);border-radius:4px;color:var(--chalk);font-family:var(--mono);padding:6px 8px;text-align:right}
+  .chk input.ok{border-color:var(--ok);color:var(--ok)}
+  .chk input.err{border-color:var(--monje);color:var(--monje)}
+  .chk .mark{font-family:var(--mono);font-size:1rem}
+  .chk .mark.ok{color:var(--ok)} .chk .mark.err{color:var(--monje)}
+
+  .qz{margin-bottom:16px;padding:12px 14px;background:var(--steel-800);border:1px solid var(--line);border-radius:6px}
+  .qz .qq{font-size:.9rem;margin-bottom:8px}
+  .qz label{display:block;font-size:.85rem;padding:5px 8px;border:1px solid transparent;border-radius:4px;cursor:pointer}
+  .qz label:hover{border-color:var(--line)}
+  .qz label.right{border-color:var(--ok);color:var(--ok)}
+  .qz label.wrong{border-color:var(--monje);color:var(--monje)}
+  .qz input{margin-right:8px;accent-color:var(--monje)}
+
+  table.proj{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.8rem}
+  table.proj th{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;color:var(--paper-dim);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  table.proj td{padding:7px 8px;border-bottom:1px dashed var(--line);color:var(--chalk)}
+  table.proj td.r,table.proj th.r{text-align:right}
+  table.proj tr.sum td{font-weight:600;border-bottom:0;padding-top:12px}
+  table.proj .del{background:none;border:0;color:var(--paper-dim);cursor:pointer;font-family:var(--mono)}
+  table.proj .del:hover{color:var(--monje)}
+
+  #nestSvg svg{width:100%;height:auto;display:block;background:var(--steel-900);border-radius:4px}
+
+  /* ---------- utskrift ---------- */
+  #printArea{display:none}
+  @media print{
+    body.printing > *:not(#printArea){display:none !important}
+    body.printing #printArea{display:block;background:#fff;color:#000}
+    #printArea .ppage{page-break-after:always;font-family:'IBM Plex Sans',sans-serif;color:#000}
+    #printArea .ppage:last-child{page-break-after:auto}
+    #printArea h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:14pt;margin:0 0 4mm;border-bottom:1px solid #000;padding-bottom:2mm}
+    #printArea .ptask{border:1px solid #000;border-radius:2mm;padding:4mm;margin-bottom:5mm;font-size:10.5pt;line-height:1.5}
+    #printArea .ptask h3{font-size:11pt;margin:0 0 2mm}
+    #printArea .ptask ol{margin:2mm 0 0 6mm;font-family:'IBM Plex Mono',monospace;font-size:9.5pt}
+    #printArea .pfasit{margin-top:3mm;padding:3mm;border:1px dashed #000;font-family:'IBM Plex Mono',monospace;font-size:9pt;line-height:1.7}
+    #printArea .pmeta{font-size:8pt;color:#333;margin-bottom:4mm}
+    #printArea svg{display:block}
+    #printArea .tilelbl{font-family:'IBM Plex Mono',monospace;font-size:8pt;margin:0 0 2mm}
+  }
+
+  footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;font-size:.72rem;color:var(--paper-dim)}
+  footer p{margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Kapsling<span>／</span>kalkulator</h1>
+  <div class="sub">RETT KAPSEL · SEGMENTBEND · KON · T-STYKKE · ENDEBUNN &nbsp;—&nbsp; utfolding, m², vekt og pris regnes fortløpende &nbsp;·&nbsp; demo for isolatørlærlinger</div>
+  <div class="modenav">
+    <button id="navCalc" class="on" type="button">Kalkulator</button>
+    <button id="navLearn" type="button">Læring</button>
+    <button id="navProd" type="button">Produksjon</button>
+  </div>
+</header>
+
+<div class="wrap modeview" id="modeCalc">
+
+  <!-- ================= INPUT ================= -->
+  <div class="panel">
+    <h2>Parametere</h2>
+    <div class="fields">
+
+      <div class="field">
+        <label for="comp">Komponent</label>
+        <select id="comp">
+          <option value="rett" selected>Rett kapsel (rør)</option>
+          <option value="bend">Segmentbend</option>
+          <option value="kon">Konisk overgang (reduksjon)</option>
+          <option value="tstk">T-stykke / avstikker</option>
+          <option value="ende">Endebunn (avslutning)</option>
+        </select>
+      </div>
+
+      <div class="two">
+        <div class="field">
+          <label for="dn">Rørdimensjon</label>
+          <select id="dn"></select>
+        </div>
+        <div class="field">
+          <label for="iso">Isolasjonstykk. (mm)</label>
+          <input id="iso" type="number" value="50" min="0" max="300" step="5">
+        </div>
+      </div>
+      <div class="field">
+        <div class="hint">Kapseldiameter D = rørets utvendige diameter + 2 × isolasjonstykkelse. D vises i komponentdata.</div>
+      </div>
+
+      <div class="field">
+        <label>Materiale</label>
+        <div class="seg" id="matSeg">
+          <button class="on" data-m="alu" type="button">Aluminium</button>
+          <button data-m="rf" type="button">Rustfritt 316</button>
+          <button data-m="az" type="button">Alu-sink</button>
+        </div>
+      </div>
+
+      <div class="two">
+        <div class="field">
+          <label for="thk">Platetykkelse</label>
+          <select id="thk"></select>
+        </div>
+        <div class="field">
+          <label for="prisM2">Platepris (kr/m²)</label>
+          <input id="prisM2" type="number" value="300" min="0" step="10">
+        </div>
+      </div>
+      <div class="field">
+        <div class="hint" id="thkHint"></div>
+      </div>
+
+      <div class="two">
+        <div class="field">
+          <label for="ol">Overlapp langsgående (mm)</label>
+          <input id="ol" type="number" value="40" min="0" max="100" step="5">
+        </div>
+        <div class="field">
+          <label for="eol">Ende-overlapp (mm)</label>
+          <input id="eol" type="number" value="50" min="0" max="150" step="5">
+        </div>
+      </div>
+
+      <!-- RETT -->
+      <div class="compParams" id="p_rett">
+        <div class="sectionlbl">Rett kapsel</div>
+        <div class="fields" style="padding:10px 0 0">
+          <div class="two">
+            <div class="field">
+              <label for="rL">Rørlengde å kapsle (mm)</label>
+              <input id="rL" type="number" value="2400" min="50" step="10">
+            </div>
+            <div class="field">
+              <label for="rPl">Maks kapsellengde (mm)</label>
+              <input id="rPl" type="number" value="1000" min="200" max="2000" step="50">
+            </div>
+          </div>
+          <div class="field">
+            <div class="hint">Lengder over maks kapsellengde deles i flere kapsler. Hver skjøt bruker ende-overlappen.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BEND -->
+      <div class="compParams hidden" id="p_bend">
+        <div class="sectionlbl">Segmentbend</div>
+        <div class="fields" style="padding:10px 0 0">
+          <div class="two">
+            <div class="field">
+              <label for="bAng">Bendvinkel (°)</label>
+              <input id="bAng" type="number" value="90" min="15" max="90" step="5">
+            </div>
+            <div class="field">
+              <label for="bSeg">Antall deler</label>
+              <input id="bSeg" type="number" value="4" min="2" max="9" step="1">
+            </div>
+          </div>
+          <div class="field">
+            <label for="bR">Bendradius senterlinje (mm)</label>
+            <input id="bR" type="number" value="230" min="50" step="10">
+            <div class="hint">Følg radien på rørbenden (LR = 1,5 × DN). Antall deler inkluderer de to endestykkene (halve segmenter).</div>
+          </div>
+          <div class="field">
+            <label for="bMonn">Skjøtemonn pr. segmentkant (mm)</label>
+            <input id="bMonn" type="number" value="12" min="0" max="30" step="1">
+          </div>
+        </div>
+      </div>
+
+      <!-- KON -->
+      <div class="compParams hidden" id="p_kon">
+        <div class="sectionlbl">Konisk overgang</div>
+        <div class="fields" style="padding:10px 0 0">
+          <div class="field">
+            <label>Type</label>
+            <div class="seg" id="konSeg">
+              <button class="on" data-k="kons" type="button">Konsentrisk</button>
+              <button data-k="eks" type="button">Eksentrisk</button>
+            </div>
+          </div>
+          <div class="two">
+            <div class="field">
+              <label for="kDn2">Rør 2 (liten ende)</label>
+              <select id="kDn2"></select>
+            </div>
+            <div class="field">
+              <label for="kIso2">Isolasjon rør 2 (mm)</label>
+              <input id="kIso2" type="number" value="50" min="0" max="300" step="5">
+            </div>
+          </div>
+          <div class="field">
+            <label for="kL">Konlengde langs senter (mm)</label>
+            <input id="kL" type="number" value="200" min="30" step="10">
+            <div class="hint">Eksentrisk kon har rett side i bunn (flatsiden) og utfoldes med trekantmetoden.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- T -->
+      <div class="compParams hidden" id="p_tstk">
+        <div class="sectionlbl">T-stykke / avstikker</div>
+        <div class="fields" style="padding:10px 0 0">
+          <div class="two">
+            <div class="field">
+              <label for="tDn2">Avstikker – rør</label>
+              <select id="tDn2"></select>
+            </div>
+            <div class="field">
+              <label for="tIso2">Isolasjon avstikker (mm)</label>
+              <input id="tIso2" type="number" value="50" min="0" max="300" step="5">
+            </div>
+          </div>
+          <div class="two">
+            <div class="field">
+              <label for="tAng">Avstikkervinkel (°)</label>
+              <input id="tAng" type="number" value="90" min="30" max="90" step="5">
+            </div>
+            <div class="field">
+              <label for="tH">Høyde fra senter (mm)</label>
+              <input id="tH" type="number" value="300" min="50" step="10">
+            </div>
+          </div>
+          <div class="field">
+            <div class="hint">90° = rett T-stykke. Mindre vinkel gir skrå avstikker (Y-grein). Høyden måles langs avstikkerens akse fra senter hovedrør.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENDE -->
+      <div class="compParams hidden" id="p_ende">
+        <div class="sectionlbl">Endebunn</div>
+        <div class="fields" style="padding:10px 0 0">
+          <div class="field">
+            <label for="eKrage">Kragebredde / omslag (mm)</label>
+            <input id="eKrage" type="number" value="25" min="0" max="80" step="5">
+            <div class="hint">Ring fra kapseldiameter inn til bart rør, med krage som brettes rundt kapsel og rør.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="ant">Antall like komponenter</label>
+        <input id="ant" type="number" value="1" min="1" max="200" step="1">
+      </div>
+
+      <!-- FESTEMATERIELL -->
+      <div class="sectionlbl">Festemateriell</div>
+      <div class="field">
+        <label>Festemiddel i sømmer</label>
+        <div class="seg" id="festSeg">
+          <button class="on" data-f="skrue" type="button">Plateskrue A2</button>
+          <button data-f="nagle" type="button">Popnagle</button>
+        </div>
+        <div class="hint" id="festHint"></div>
+      </div>
+      <div class="two">
+        <div class="field">
+          <label for="cc">c/c-avstand (mm)</label>
+          <input id="cc" type="number" value="100" min="30" max="400" step="10">
+        </div>
+        <div class="field">
+          <label for="prisFest">Pris pr. stk (kr)</label>
+          <input id="prisFest" type="number" value="1.50" min="0" step="0.10">
+        </div>
+      </div>
+      <div class="two">
+        <div class="field">
+          <label for="festOverstyr">Antall (overstyr)</label>
+          <input id="festOverstyr" type="number" value="" min="0" step="1" placeholder="auto">
+        </div>
+        <div class="field">
+          <label for="band">Strammebånd pr. kapsel</label>
+          <input id="band" type="number" value="0" min="0" max="10" step="1">
+        </div>
+      </div>
+      <div class="field">
+        <label for="prisBand">Pris pr. bånd m/lås (kr)</label>
+        <input id="prisBand" type="number" value="15" min="0" step="1">
+        <div class="hint">Antall foreslås fra sømlengde og c/c – vurder selv og overstyr ved behov. Offshore-praksis: SS316-strammebånd, typisk 4 pr. kapsel.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= RIGHT ================= -->
+  <div class="right">
+
+    <div class="alert" id="alert"></div>
+
+    <div class="vizcard">
+      <div class="viztabs">
+        <button id="tabFlat" class="on" type="button">Utfolding</button>
+        <button id="tab3d" type="button">Ferdig del</button>
+        <button id="tabList" type="button">Kappliste</button>
+        <span class="nts" id="ntsLabel">NTS – ikke i målestokk</span>
+      </div>
+      <div class="vizbody">
+        <div id="flatView"></div>
+        <div id="view3d" class="hidden"><span class="dragtip">dra = roter · knip/rull = zoom</span></div>
+        <div id="listView" class="hidden"><div class="listwrap"><table class="cut" id="cutTable"></table></div></div>
+      </div>
+    </div>
+
+    <div class="cards">
+
+      <!-- MENGDER -->
+      <div class="card kapp">
+        <h2>Mengder</h2>
+        <div class="body">
+          <div class="kapprow big"><span class="n">Plateareal med overlapp/monn</span><span class="v" id="aBrutto">–<small>m²</small></span></div>
+          <div class="kapprow"><span class="n">Teoretisk areal uten overlapp</span><span class="v" id="aNetto">–<small>m²</small></span></div>
+          <div class="kapprow big"><span class="n">Vekt</span><span class="v" id="vekt">–<small>kg</small></span></div>
+          <div class="kapprow"><span class="n">Antall plateemner å kappe</span><span class="v" id="nDeler">–<small>stk</small></span></div>
+          <div class="kapprow"><span class="n">Produksjon</span><button class="btn small" id="addProj" type="button">+ Legg i prosjekt</button></div>
+        </div>
+        <div class="formula" id="formula"></div>
+      </div>
+
+      <!-- PRIS -->
+      <div class="card kapp">
+        <h2>Pris <span class="approx">(overslag – rediger satsene)</span></h2>
+        <div class="body">
+          <div class="kapprow"><span class="n" id="prisPlateN">Plate</span><span class="v" id="prisPlate">–<small>kr</small></span></div>
+          <div class="kapprow"><span class="n" id="prisFestN">Festemiddel</span><span class="v" id="prisFestV">–<small>kr</small></span></div>
+          <div class="kapprow" id="prisBandRow"><span class="n" id="prisBandN">Strammebånd</span><span class="v" id="prisBandV">–<small>kr</small></span></div>
+          <div class="kapprow big"><span class="n">Sum materiell</span><span class="v" id="prisSum">–<small>kr</small></span></div>
+        </div>
+      </div>
+
+      <!-- KOMPONENTDATA -->
+      <div class="card">
+        <h2>Komponentdata</h2>
+        <div class="body">
+          <table class="t" id="compTable"></table>
+        </div>
+      </div>
+
+      <!-- KAPPEMÅL -->
+      <div class="card">
+        <h2>Kappemål <span class="approx">(omskrevet rektangel pr. emne)</span></h2>
+        <div class="body">
+          <table class="t" id="cutDimTable"></table>
+        </div>
+      </div>
+
+      <!-- FESTEMATERIELL -->
+      <div class="card">
+        <h2>Festemateriell <span class="approx">(forslag – vurder selv)</span></h2>
+        <div class="body">
+          <table class="t" id="festTable"></table>
+        </div>
+      </div>
+
+      <!-- MATERIAL -->
+      <div class="card">
+        <h2>Materiale</h2>
+        <div class="body">
+          <table class="t" id="matTable"></table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Materialer og minstetykkelser etter vanlig praksis / NORSOK M-004: aluminium (AlMn1), rustfritt stål AISI 316 2D og alu-sink (kun landanlegg med lavt korrosivt miljø). Utfoldinger etter klassisk platekonstruksjon: rett kapsel = rektangel, segmentbend = sinuskurver, konsentrisk kon = ringsektor, eksentrisk kon = trekantmetoden, avstikker = fiskemunn + hull i hovedkapsel.</p>
+  <p>Priser på plate og festemateriell er veiledende utgangspunkt og varierer med leverandør, mengde og marked – rediger satsene og kontrollér mot egne innkjøpspriser. Demo bygget med Claude. Kontrollér alltid mot isometrisk tegning, isolasjonsklasse og gjeldende spek før produksjon.</p>
+</footer>
+
+<!-- ================= LÆRING ================= -->
+<div class="wrap modeview hidden" id="modeLearn">
+  <div class="panel">
+    <h2>Læring</h2>
+    <div class="subnav">
+      <button id="subOppg" class="on" type="button">Oppgavegenerator</button>
+      <button id="subKtr" type="button">Kontrollmodus</button>
+      <button id="subFeil" type="button">Finn feilen</button>
+      <button id="subFag" type="button">Fagprøve-case</button>
+      <button id="subTeori" type="button">Teoriquiz</button>
+    </div>
+    <div class="fields" id="lsOppg">
+      <div class="field">
+        <label for="oNiva">Vanskelighetsgrad</label>
+        <select id="oNiva">
+          <option value="1">1 – Grunnleggende (rett kapsel, enkle bend)</option>
+          <option value="2" selected>2 – Videregående (bend, kon, T-stykke)</option>
+          <option value="3">3 – Avansert (eksentrisk, skrå avstikker)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="oAnt">Antall oppgaver</label>
+        <input id="oAnt" type="number" value="4" min="1" max="10" step="1">
+      </div>
+      <button class="btn" id="oGen" type="button">Generer oppgavesett</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn ghost small" id="oPrint" type="button">Skriv ut uten fasit</button>
+        <button class="btn ghost small" id="oPrintF" type="button">Skriv ut med fasit</button>
+      </div>
+      <div class="field"><div class="hint">Hver oppgave har full fasit regnet av samme motor som kalkulatoren – trykk «Vis fasit» på oppgaven, eller skriv ut sett til papirprøve. Alle får ulike tall.</div></div>
+    </div>
+    <div class="fields hidden" id="lsKtr">
+      <button class="btn" id="kNy" type="button">Ny tilfeldig komponent</button>
+      <button class="btn ghost small" id="kFraKalk" type="button">Hent fra kalkulatoren</button>
+      <div class="field"><div class="hint">Regn nøkkeltallene for hånd og tast inn – appen sjekker mot motoren med toleranse og viser hvor det glapp.</div></div>
+    </div>
+    <div class="fields hidden" id="lsFeil">
+      <button class="btn" id="fNy" type="button">Ny arbeidsseddel</button>
+      <div class="field"><div class="hint">Én verdi på arbeidsseddelen er feil. Finn den før «platen kappes» – ferdigheten som skiller en god fagarbeider.</div></div>
+    </div>
+    <div class="fields hidden" id="lsFag">
+      <button class="btn" id="gNy" type="button">Nytt fagprøve-case</button>
+      <div class="field"><div class="hint">Komplett case med flere komponenter: mengder, festemateriell og pris. Svar med toleranse, sensor-sjekkliste etterpå.</div></div>
+    </div>
+    <div class="fields hidden" id="lsTeori">
+      <button class="btn" id="tStart" type="button">Start quiz</button>
+      <div class="field"><div class="hint">12 spørsmål fra fagteorien. Etter retting kan du åpne forklaringen på hvert begrep via i-knappen.</div></div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="subview" id="cOppg"><div class="task"><div class="tbody" style="color:var(--paper-dim)">Velg nivå og trykk «Generer oppgavesett».</div></div></div>
+    <div class="subview hidden" id="cKtr"></div>
+    <div class="subview hidden" id="cFeil"></div>
+    <div class="subview hidden" id="cFag"></div>
+    <div class="subview hidden" id="cTeori"></div>
+  </div>
+</div>
+
+<!-- ================= PRODUKSJON ================= -->
+<div class="wrap modeview hidden" id="modeProd">
+  <div class="panel">
+    <h2>Produksjon</h2>
+    <div class="fields">
+      <div class="sectionlbl">Prosjekt</div>
+      <div class="field"><div class="hint">Bygg jobblisten fra kalkulatoren: still inn en komponent der og trykk «+ Legg i prosjekt». Listen holder samlet mengde, vekt og pris. NB: listen lagres ikke når siden lukkes.</div></div>
+      <button class="btn ghost small" id="pTom" type="button">Tøm prosjektet</button>
+
+      <div class="sectionlbl">Nesting – plate</div>
+      <div class="field">
+        <label for="plSize">Platestørrelse</label>
+        <select id="plSize">
+          <option value="1000x2000" selected>1000 × 2000 mm</option>
+          <option value="1250x2500">1250 × 2500 mm</option>
+          <option value="egen">Egen …</option>
+        </select>
+      </div>
+      <div class="two" id="plCustom" style="display:none">
+        <div class="field"><label for="plW">Bredde (mm)</label><input id="plW" type="number" value="1000" min="300" step="50"></div>
+        <div class="field"><label for="plH">Lengde (mm)</label><input id="plH" type="number" value="2000" min="300" step="50"></div>
+      </div>
+      <div class="field">
+        <label for="plMarg">Margin mellom emner (mm)</label>
+        <input id="plMarg" type="number" value="10" min="0" max="50" step="5">
+      </div>
+
+      <div class="sectionlbl">Eksport – aktiv komponent</div>
+      <div class="field"><div class="hint">Eksporterer utfoldingen slik den står i kalkulatoren nå.</div></div>
+      <button class="btn" id="dxfBtn" type="button">Last ned DXF</button>
+      <div class="field">
+        <label for="papir">Papir for 1:1-utskrift</label>
+        <select id="papir"><option value="a4" selected>A4</option><option value="a3">A3</option></select>
+      </div>
+      <button class="btn" id="p11Btn" type="button">Skriv ut 1:1 (flislagt)</button>
+      <div class="field"><div class="hint">Skrives i målestokk 1:1 fordelt på ark med skjæremerker og flisnummer – lim sammen, legg på platen og riss. Kontroller alltid 100 mm-linjalen på side 1 med tommestokk (skriverens «tilpass til side» må være AV).</div></div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="card">
+      <h2>Prosjektliste</h2>
+      <div class="body"><table class="proj" id="projTable"></table></div>
+    </div>
+    <div class="card">
+      <h2>Nesting <span class="approx">(omskrevne rektangler – kurvede emner får konservativ plass)</span></h2>
+      <div class="body">
+        <table class="t" id="nestStats"></table>
+        <div id="nestSvg" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="printArea"></div>
+
+<div class="modalBack" id="modalBack">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead"><h3 id="mTitle"></h3><button class="mclose" id="mClose" type="button">Lukk ✕</button></div>
+    <div class="mbody" id="mBody"></div>
+    <div class="mlinks"><div class="mlbl">Lær mer</div><div id="mLinks"></div></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ============================================================
+   DATATABELLER
+   ============================================================ */
+const PIPE = {
+  25:{nps:1,od:33.4}, 40:{nps:1.5,od:48.3}, 50:{nps:2,od:60.3}, 65:{nps:2.5,od:73.0},
+  80:{nps:3,od:88.9}, 100:{nps:4,od:114.3}, 150:{nps:6,od:168.3}, 200:{nps:8,od:219.1},
+  250:{nps:10,od:273.0}, 300:{nps:12,od:323.8}, 350:{nps:14,od:355.6}, 400:{nps:16,od:406.4},
+};
+const MAT = {
+  alu:{navn:'Aluminium AlMn1', rho:2700, thk:[0.6,0.8,1.0], def:0.8,
+       pris:{0.6:240, 0.8:300, 1.0:360},
+       hint:'Vanligst offshore/industri. NORSOK M-004 minstetykkelse 0,7–0,9 mm etter diameter; 0,8 mm er typisk lagervare.'},
+  rf: {navn:'Rustfritt AISI 316 (2D)', rho:7980, thk:[0.5,0.6,0.8], def:0.6,
+       pris:{0.5:420, 0.6:490, 0.8:640},
+       hint:'Kreves ofte i klasse 5 (brann) og korrosivt miljø. Tyngre og stivere – 0,5–0,6 mm vanligst på rør.'},
+  az: {navn:'Alu-sink (185 g/m²)', rho:7850, thk:[0.5,0.7,1.0], def:0.7,
+       pris:{0.5:150, 0.7:200, 1.0:270},
+       hint:'Varmgalvanisert stål med Al/Zn-belegg. Kun landanlegg med lav korrosjonsrisiko iht. NORSOK M-004.'},
+};
+const FEST = {
+  skrue:{navn:'Plateskrue A2 4,2×13 mm', pris:1.50,
+         hint:'Selvborende blikkskrue i rustfritt A2 – standard i langsgående og tverrgående skjøter. A4 i korrosivt miljø.'},
+  nagle:{navn:'Popnagle alu Ø4,0×10 mm', pris:0.80,
+         hint:'Blindnagle i aluminium (rustfri dor) – vanlig på segmentbend og der skruehoder er uønsket.'},
+};
+
+const $ = id => document.getElementById(id);
+const fmt = (v,d=0)=> (Math.round(v*10**d)/10**d).toLocaleString('nb-NO',{minimumFractionDigits:d,maximumFractionDigits:d});
+let matKey = 'alu', konKey = 'kons', festKey = 'skrue';
+
+/* fyll dimensjonsvelgere */
+function fillDN(sel, def){
+  for (const dn of Object.keys(PIPE)){
+    const o = document.createElement('option');
+    o.value = dn; o.textContent = 'DN'+dn+'  ('+PIPE[dn].nps+'" · Ø'+PIPE[dn].od+')';
+    if (dn === def) o.selected = true;
+    sel.appendChild(o);
+  }
+}
+fillDN($('dn'),'100'); fillDN($('kDn2'),'50'); fillDN($('tDn2'),'50');
+
+function fillThk(){
+  const m = MAT[matKey], sel = $('thk');
+  sel.innerHTML = '';
+  m.thk.forEach(t=>{
+    const o = document.createElement('option');
+    o.value = t; o.textContent = t.toLocaleString('nb-NO',{minimumFractionDigits:1})+' mm';
+    if (t === m.def) o.selected = true;
+    sel.appendChild(o);
+  });
+  $('thkHint').textContent = m.hint + ' Prisen er et veiledende utgangspunkt – rediger fritt.';
+  $('prisM2').value = m.pris[+sel.value];
+}
+function suggestPris(){
+  const m = MAT[matKey];
+  const p = m.pris[+$('thk').value];
+  if (p) $('prisM2').value = p;
+}
+function fillFest(){
+  $('prisFest').value = FEST[festKey].pris.toFixed(2);
+  $('festHint').textContent = FEST[festKey].hint;
+}
+fillThk(); fillFest();
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+function readInputs(){
+  const comp = $('comp').value;
+  const dn   = +$('dn').value;
+  const iso  = Math.max(0, +$('iso').value || 0);
+  const D    = PIPE[dn].od + 2*iso;
+  const thk  = +$('thk').value;
+  const OL   = Math.max(0, +$('ol').value || 0);
+  const EOL  = Math.max(0, +$('eol').value || 0);
+  const ant  = Math.max(1, Math.round(+$('ant').value || 1));
+
+  return {comp,dn,iso,D,thk,OL,EOL,ant,mat:MAT[matKey],matKey,
+    prisM2:Math.max(0,+$('prisM2').value||0),
+    fest:FEST[festKey], festKey,
+    cc:Math.max(30,+$('cc').value||100),
+    prisFest:Math.max(0,+$('prisFest').value||0),
+    festOverstyr:Math.max(0,Math.round(+$('festOverstyr').value||0)),
+    band:Math.max(0,Math.round(+$('band').value||0)),
+    prisBand:Math.max(0,+$('prisBand').value||0),
+    rL:Math.max(50,+$('rL').value||0), rPl:Math.max(200,+$('rPl').value||1000),
+    bAng:Math.min(90,Math.max(15,+$('bAng').value||90)),
+    bSeg:Math.min(9,Math.max(2,Math.round(+$('bSeg').value||4))),
+    bR:Math.max(50,+$('bR').value||230),
+    bMonn:Math.max(0,+$('bMonn').value||0),
+    kType:konKey,
+    kD2:PIPE[+$('kDn2').value].od + 2*Math.max(0,+$('kIso2').value||0),
+    kL:Math.max(30,+$('kL').value||200),
+    tD2:PIPE[+$('tDn2').value].od + 2*Math.max(0,+$('tIso2').value||0),
+    tAng:Math.min(90,Math.max(30,+$('tAng').value||90)),
+    tH:Math.max(50,+$('tH').value||300),
+    eKrage:Math.max(0,+$('eKrage').value||0),
+  };
+}
+
+/* Bygg tilstand uten DOM – felles motor for læring og produksjon */
+function stateFrom(p){
+  p = p||{};
+  const dn = p.dn ?? 100, iso = p.iso ?? 50;
+  const mk = p.matKey ?? 'alu', thk = p.thk ?? MAT[mk].def;
+  const od = PIPE[dn].od, D = od + 2*iso;
+  return {
+    comp:p.comp??'rett', dn, iso, D, thk,
+    OL:p.OL??40, EOL:p.EOL??50, ant:p.ant??1,
+    mat:MAT[mk], matKey:mk,
+    prisM2:p.prisM2 ?? (MAT[mk].pris[thk] ?? 300),
+    fest:FEST[p.festKey??'skrue'], festKey:p.festKey??'skrue',
+    cc:p.cc??100, prisFest:p.prisFest??FEST[p.festKey??'skrue'].pris,
+    festOverstyr:0, band:p.band??0, prisBand:p.prisBand??15,
+    rL:p.rL??2400, rPl:p.rPl??1000,
+    bAng:p.bAng??90, bSeg:p.bSeg??4,
+    bR:p.bR ?? Math.max(Math.round(1.5*od/10)*10, Math.ceil((D/2+30)/10)*10),
+    bMonn:p.bMonn??12,
+    kType:p.kType??'kons',
+    kDn2:p.kDn2??50, kIso2:p.kIso2??iso,
+    kD2:PIPE[p.kDn2??50].od + 2*(p.kIso2??iso),
+    kL:p.kL??200,
+    tDn2:p.tDn2??50, tIso2:p.tIso2??iso,
+    tD2:PIPE[p.tDn2??50].od + 2*(p.tIso2??iso),
+    tAng:p.tAng??90, tH:p.tH??300,
+    eKrage:p.eKrage??25,
+  };
+}
+
+/* ============================================================
+   BEREGNING PR. KOMPONENT
+   Returnerer: {emner:[{navn,ant,B,H,areal}], aNetto, aBrutto,
+                seam (mm søm pr. komponent), nKapsler,
+                comp:[[n,v]], form, warn}
+   ============================================================ */
+function calc(s){
+  const C  = Math.PI * s.D;
+  const Cb = C + s.OL;
+  let r;
+  switch (s.comp){
+    case 'rett': r = calcRett(s,C,Cb); break;
+    case 'bend': r = calcBend(s,C,Cb); break;
+    case 'kon':  r = s.kType==='eks' ? calcKonEks(s) : calcKon(s); break;
+    case 'tstk': r = calcT(s,C,Cb);    break;
+    default:     r = calcEnde(s);      break;
+  }
+  r.aNettoT  = r.aNetto  * s.ant;
+  r.aBruttoT = r.aBrutto * s.ant;
+  r.vekt = r.aBruttoT/1e6 * (s.thk/1000) * s.mat.rho;
+  r.nEmner = r.emner.reduce((a,e)=>a+e.ant,0) * s.ant;
+
+  /* --- pris --- */
+  r.prisPlate = r.aBruttoT/1e6 * s.prisM2;
+  r.nFestAuto = (Math.ceil((r.seam||0)/s.cc)+1) * s.ant;
+  r.nFest = s.festOverstyr>0 ? s.festOverstyr : r.nFestAuto;
+  r.prisFestV = r.nFest * s.prisFest;
+  const kapsler = (r.nKapsler||1) * s.ant;
+  r.nBand = s.band * kapsler;
+  r.prisBandV = r.nBand * s.prisBand;
+  r.prisSum = r.prisPlate + r.prisFestV + r.prisBandV;
+  return r;
+}
+
+/* ---------- rett kapsel ---------- */
+function calcRett(s,C,Cb){
+  const eff = s.rPl - s.EOL;
+  let n, rest;
+  if (s.rL <= s.rPl){ n = 1; rest = s.rL; }
+  else {
+    n = Math.ceil((s.rL - s.rPl)/eff) + 1;
+    rest = s.rL - (n-1)*eff;
+  }
+  const emner = [];
+  if (n > 1) emner.push({navn:'Kapsel full lengde', ant:n-1, B:Cb, H:s.rPl, areal:Cb*s.rPl});
+  emner.push({navn: n>1 ? 'Kapsel sluttlengde' : 'Kapsel', ant:1, B:Cb, H:rest, areal:Cb*rest});
+  const aBrutto = emner.reduce((a,e)=>a+e.areal*e.ant,0);
+  const aNetto  = C * s.rL;
+  const seam = ((n-1)*s.rPl + rest) + (n-1)*C;   // langsgående + tverrgående skjøter
+  return {emner,aNetto,aBrutto,seam,nKapsler:n,raw:{B:Cb,n,rest,aB:aBrutto},
+    comp:[
+      ['Kapseldiameter D', fmt(s.D,1)+' mm'],
+      ['Omkrets π·D', fmt(C,0)+' mm'],
+      ['Platebredde π·D + overlapp', fmt(Cb,0)+' mm'],
+      ['Antall kapsler', n+' stk'],
+      ['Sluttkapsel lengde', fmt(rest,0)+' mm'],
+      ['Skjøter (ende-overlapp)', (n-1)+' stk'],
+    ],
+    form:`<b>Rett kapsel</b><br>
+B <span class="m">=</span> π·D + overlapp <span class="m">=</span> π·${fmt(s.D,1)} + ${s.OL} <span class="m">=</span> <b>${fmt(Cb,0)} mm</b><br>
+Antall <span class="m">=</span> ⌈(L − Lk)/(Lk − ende-ol.)⌉ + 1 <span class="m">=</span> <b>${n} stk</b><br>
+Areal <span class="m">=</span> Σ (B × H) <span class="m">=</span> <b>${fmt(aBrutto/1e6,3)} m²</b>`};
+}
+
+/* ---------- segmentbend ---------- */
+function calcBend(s,C,Cb){
+  const rc = s.D/2, R = s.bR, N = s.bSeg;
+  let warn = '';
+  if (R < rc + 10) warn = 'Bendradius er mindre enn kapselradius – halsen kolliderer. Øk radius eller reduser isolasjon.';
+  const beta = (s.bAng * Math.PI/180) / (2*(N-1));
+  const tb = Math.tan(beta);
+  const hMin = Math.max(0,(R - rc)*tb), hMax = (R + rc)*tb;
+  const aEnd = 2*Math.PI*rc*R*tb;
+  const aMid = 2*aEnd;
+  const nMid = N-2;
+  const scale = Cb/C;
+  const monnEnd = Cb*s.bMonn, monnMid = 2*Cb*s.bMonn;
+  const emner = [
+    {navn:'Endestykke (halvt segment)', ant:2, B:Cb, H:hMax + s.bMonn, areal:aEnd*scale + monnEnd},
+  ];
+  if (nMid>0) emner.push({navn:'Mellomstykke (fullt segment)', ant:nMid, B:Cb, H:2*hMax + 2*s.bMonn, areal:aMid*scale + monnMid});
+  const aBrutto = emner.reduce((a,e)=>a+e.areal*e.ant,0);
+  const aNetto  = 2*aEnd + nMid*aMid;
+  /* søm: (N−1) segmentskjøter rundt omkretsen + langsgående i halsen pr. segment */
+  const seam = (N-1)*C + 2*(hMin+s.bMonn) + nMid*(2*hMin+2*s.bMonn);
+  return {emner,aNetto,aBrutto,seam,warn,raw:{betaDeg:beta*180/Math.PI,hMax,hMin,B:Cb},
+    comp:[
+      ['Kapseldiameter D', fmt(s.D,1)+' mm'],
+      ['Bendradius R', fmt(R,0)+' mm'],
+      ['Gjæringsvinkel β pr. snitt', fmt(beta*180/Math.PI,2)+'°'],
+      ['Høyde rygg (maks)', fmt(hMax,1)+' mm  (×2 midtstk.)'],
+      ['Høyde hals (min)', fmt(hMin,1)+' mm'],
+      ['Snitt (gjæringer)', (N-1)+' stk'],
+    ],
+    form:`<b>Segmentbend</b> – ${s.bAng}° i ${N} deler<br>
+β <span class="m">=</span> vinkel / (2·(N−1)) <span class="m">=</span> ${s.bAng}° / ${2*(N-1)} <span class="m">=</span> <b>${fmt(beta*180/Math.PI,2)}°</b><br>
+Rygg <span class="m">=</span> (R + D/2)·tanβ <span class="m">=</span> <b>${fmt(hMax,1)} mm</b> &nbsp;·&nbsp; Hals <span class="m">=</span> (R − D/2)·tanβ <span class="m">=</span> <b>${fmt(hMin,1)} mm</b><br>
+Kurven i utfoldingen: h(φ) <span class="m">=</span> (R − (D/2)·cos φ)·tanβ &nbsp;(skjøt i halsen)`};
+}
+
+/* ---------- konsentrisk kon ---------- */
+function calcKon(s){
+  const D1 = Math.max(s.D, s.kD2), D2v = Math.min(s.D, s.kD2);
+  let warn = '';
+  if (Math.abs(D1-D2v) < 2) warn = 'Endene er (nesten) like store – bruk rett kapsel i stedet.';
+  const h = s.kL;
+  const slant = Math.sqrt(h*h + ((D1-D2v)/2)**2);
+  const Rb = D1===D2v ? 1e9 : slant * D1/(D1-D2v);
+  const Rs = Rb - slant;
+  const theta = Math.PI * D1 / Rb;
+  const aSec = 0.5*theta*(Rb*Rb - Rs*Rs);
+  const aOL  = s.OL * slant;
+  const aBrutto = aSec + aOL;
+  const aNetto  = Math.PI*(D1+D2v)/2 * slant;
+  const half = theta/2;
+  const W = half >= Math.PI/2 ? 2*Rb : 2*Rb*Math.sin(half);
+  const Hh = Rb - (half>=Math.PI/2 ? -Rb*Math.abs(Math.cos(half)) : Rs*Math.cos(half));
+  const emner = [{navn:'Konutbrett (ringsektor)', ant:1, B:W, H:Hh, areal:aBrutto}];
+  const seam = slant + Math.PI*(D1+D2v);   // langsgående søm + tilslutning begge ender
+  return {emner,aNetto,aBrutto,seam,warn,raw:{slant,Rb,Rs,thetaDeg:theta*180/Math.PI,bue:Math.PI*D1,D1,D2:D2v},
+    comp:[
+      ['D1 (stor ende)', fmt(D1,1)+' mm'],
+      ['D2 (liten ende)', fmt(D2v,1)+' mm'],
+      ['Slantlengde s', fmt(slant,1)+' mm'],
+      ['Utbrettradius stor R', fmt(Rb,0)+' mm'],
+      ['Utbrettradius liten r', fmt(Rs,0)+' mm'],
+      ['Sektorvinkel θ', fmt(theta*180/Math.PI,1)+'°'],
+    ],
+    form:`<b>Konsentrisk kon</b> – ringsektor<br>
+s <span class="m">=</span> √(L² + ((D1−D2)/2)²) <span class="m">=</span> <b>${fmt(slant,1)} mm</b><br>
+R <span class="m">=</span> s·D1/(D1−D2) <span class="m">=</span> <b>${fmt(Rb,0)} mm</b> &nbsp;·&nbsp; r <span class="m">=</span> R − s <span class="m">=</span> <b>${fmt(Rs,0)} mm</b><br>
+θ <span class="m">=</span> 180°·D1/R <span class="m">=</span> <b>${fmt(theta*180/Math.PI,1)}°</b>`};
+}
+
+/* ---------- eksentrisk kon (trekantmetoden) ---------- */
+function eksUnroll(D1,D2v,L,M){
+  /* flat side i bunn. 3D: stor sirkel R1 senter origo, liten R2 senter (0, R2−R1, L).
+     Utfolding fra toppgenerator (θ=π/2) og halvveis rundt til flatsiden, speiles. */
+  const R1=D1/2, R2=D2v/2, cy = R2-R1;
+  const P3=[],Q3=[];
+  for(let k=0;k<=M;k++){
+    const th = Math.PI/2 + k/M*Math.PI;   // topp → bunn (flatside)
+    P3.push([R1*Math.cos(th), R1*Math.sin(th), 0]);
+    Q3.push([R2*Math.cos(th), R2*Math.sin(th)+cy, L]);
+  }
+  const d3=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+  const trilat=(A,B,dA,dB)=>{
+    const dx=B[0]-A[0], dy=B[1]-A[1];
+    const d=Math.hypot(dx,dy);
+    const a=(dA*dA-dB*dB+d*d)/(2*d);
+    const h2=Math.max(0,dA*dA-a*a), h=Math.sqrt(h2);
+    const mx=A[0]+a*dx/d, my=A[1]+a*dy/d;
+    const c1=[mx+h*dy/d, my-h*dx/d], c2=[mx-h*dy/d, my+h*dx/d];
+    return c1[0]>=c2[0] ? [c1,c2] : [c2,c1];  // [høyre, venstre]
+  };
+  const p=[[0,0]], q=[[0, d3(P3[0],Q3[0])]];
+  let area3=0;
+  const triA=(a,b,c)=>{ // 3D-trekantareal
+    const u=[b[0]-a[0],b[1]-a[1],b[2]-a[2]], v=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];
+    const cx=u[1]*v[2]-u[2]*v[1], cy2=u[2]*v[0]-u[0]*v[2], cz=u[0]*v[1]-u[1]*v[0];
+    return 0.5*Math.hypot(cx,cy2,cz); };
+  for(let k=0;k<M;k++){
+    area3 += triA(P3[k],Q3[k],P3[k+1]) + triA(Q3[k],P3[k+1],Q3[k+1]);
+    const pk=p[k], qk=q[k];
+    const pNext = trilat(pk,qk, d3(P3[k],P3[k+1]), d3(Q3[k],P3[k+1]))[0];
+    p.push(pNext);
+    const qNext = trilat(pNext,qk, d3(P3[k+1],Q3[k+1]), d3(Q3[k],Q3[k+1]))[0];
+    q.push(qNext);
+  }
+  return {p,q,areaHalf:area3, genTop:d3(P3[0],Q3[0]), genFlat:d3(P3[M],Q3[M])};
+}
+function calcKonEks(s){
+  const D1 = Math.max(s.D, s.kD2), D2v = Math.min(s.D, s.kD2);
+  let warn='';
+  if (Math.abs(D1-D2v) < 2) warn = 'Endene er (nesten) like store – bruk rett kapsel i stedet.';
+  const u = eksUnroll(D1,D2v,s.kL,48);
+  const aNetto = 2*u.areaHalf;
+  const aBrutto = aNetto + s.OL*u.genFlat;   // overlapp langs flatside-generatoren (skjøten)
+  /* omskrevet rektangel: speilet mønster */
+  let xMax=0,yMin=1e9,yMax=-1e9;
+  for(const pt of [...u.p,...u.q]){ xMax=Math.max(xMax,pt[0]); yMin=Math.min(yMin,pt[1]); yMax=Math.max(yMax,pt[1]); }
+  const emner=[{navn:'Eksentrisk konutbrett', ant:1, B:2*xMax, H:yMax-yMin, areal:aBrutto}];
+  const seam = u.genFlat + Math.PI*(D1+D2v);
+  return {emner,aNetto,aBrutto,seam,warn,_eks:u,raw:{genTop:u.genTop,genFlat:u.genFlat,e:(D1-D2v)/2,D1,D2:D2v},
+    comp:[
+      ['D1 (stor ende)', fmt(D1,1)+' mm'],
+      ['D2 (liten ende)', fmt(D2v,1)+' mm'],
+      ['Eksentrisitet e = (D1−D2)/2', fmt((D1-D2v)/2,1)+' mm'],
+      ['Generator flatside (kortest)', fmt(u.genFlat,1)+' mm'],
+      ['Generator topp (lengst)', fmt(u.genTop,1)+' mm'],
+      ['Konlengde L', fmt(s.kL,0)+' mm'],
+    ],
+    form:`<b>Eksentrisk kon</b> – trekantmetoden<br>
+Del begge sirklene i like mange punkter, finn <b>sanne lengder</b> mellom punktene<br>
+og legg trekant for trekant flatt: P<sub>k</sub>Q<sub>k</sub>P<sub>k+1</sub>, så Q<sub>k</sub>P<sub>k+1</sub>Q<sub>k+1</sub><br>
+Generator topp <span class="m">=</span> <b>${fmt(u.genTop,1)} mm</b> &nbsp;·&nbsp; flatside <span class="m">=</span> <b>${fmt(u.genFlat,1)} mm</b> (skjøt her)`};
+}
+
+/* ---------- T-stykke / skrå avstikker ---------- */
+function calcT(s,C,Cb){
+  const Rm=s.D/2, rb0=s.tD2/2;
+  const alpha = s.tAng*Math.PI/180, sa=Math.sin(alpha), ca=Math.cos(alpha);
+  let warn = '';
+  if (rb0 > Rm) warn = 'Avstikkeren er større enn hovedkapselen – bytt om dimensjonene.';
+  const rb = Math.min(rb0, Rm-0.01);
+  /* t(φ) = avstand langs avstikkeraksen fra senter hovedrør til kapselflaten
+     t(φ) = [√(R² − r²cos²φ) − r·sinφ·cosα]/sinα ; h(φ) = H − t(φ) */
+  const M=720; let aAvst=0, hMaxA=0, hMinA=1e9, sadel=0, tPrev=null;
+  const tOf = phi => (Math.sqrt(Math.max(0,Rm*Rm - rb*rb*Math.cos(phi)**2)) - rb*Math.sin(phi)*ca)/sa;
+  for (let i=0;i<=M;i++){
+    const phi = i/M * 2*Math.PI;
+    const t = tOf(phi);
+    const hh = s.tH - t;
+    if (i<M) aAvst += Math.max(0,hh) * (2*Math.PI*rb/M);
+    hMaxA=Math.max(hMaxA,hh); hMinA=Math.min(hMinA,hh);
+    if (tPrev!==null) sadel += Math.hypot(2*Math.PI*rb/M, t-tPrev);
+    tPrev=t;
+  }
+  if (hMinA < 0) warn = 'Avstikkerhøyden er for liten – kapselen når ikke rundt sadelen. Øk høyden.';
+  const Cb2 = 2*Math.PI*rb + s.OL;
+  const aAvstB = aAvst * Cb2/(2*Math.PI*rb);
+  const holeC = 2*Rm*Math.asin(Math.min(1,rb/Rm));
+  /* hullets aksiale utstrekning på hovedrøret */
+  let hxMin=1e9,hxMax=-1e9;
+  for (let i=0;i<=M;i++){
+    const phi=i/M*2*Math.PI, t=tOf(phi);
+    const hx = t*ca - rb*Math.sin(phi)*sa;
+    hxMin=Math.min(hxMin,hx); hxMax=Math.max(hxMax,hx);
+  }
+  const emner = [{navn:'Avstikker-kapsel (fiskemunn)', ant:1, B:Cb2, H:Math.max(0,hMaxA), areal:aAvstB}];
+  const seam = sadel + Math.max(0,hMaxA);
+  return {emner,aNetto:aAvst,aBrutto:aAvstB,seam,warn,raw:{hMax:Math.max(0,hMaxA),hMin:Math.max(0,hMinA),sadel,holeW:hxMax-hxMin,holeH:2*holeC},
+    comp:[
+      ['Hovedkapsel D', fmt(s.D,1)+' mm'],
+      ['Avstikker-kapsel d', fmt(s.tD2,1)+' mm'],
+      ['Avstikkervinkel', fmt(s.tAng,0)+'°'],
+      ['Avstikkerhøyde H (langs akse)', fmt(s.tH,0)+' mm'],
+      ['Lengste kant', fmt(Math.max(0,hMaxA),1)+' mm'],
+      ['Korteste kant', fmt(Math.max(0,hMinA),1)+' mm'],
+      ['Hull i hovedkapsel (aksial × omkrets)', fmt(hxMax-hxMin,0)+' × '+fmt(2*holeC,0)+' mm'],
+      ['Sadelkurvens lengde', fmt(sadel,0)+' mm'],
+    ],
+    form:`<b>${s.tAng===90?'T-stykke – 90° avstikker':'Skrå avstikker – '+fmt(s.tAng,0)+'°'}</b><br>
+Kuttkurve: h(φ) <span class="m">=</span> H − [√(R² − r²·cos²φ) − r·sinφ·cosα] / sinα<br>
+Lengst <span class="m">=</span> <b>${fmt(Math.max(0,hMaxA),1)} mm</b> &nbsp;·&nbsp; Kortest <span class="m">=</span> <b>${fmt(Math.max(0,hMinA),1)} mm</b><br>
+Ved α = 90° forenkles til h(φ) <span class="m">=</span> H − √(R² − r²·cos²φ). Hullet i hovedkapselen blir avlangt når α &lt; 90°.`};
+}
+
+/* ---------- endebunn ---------- */
+function calcEnde(s){
+  const Dk = s.D, dr = PIPE[s.dn].od, b = s.eKrage;
+  const aRing  = Math.PI/4*(Dk*Dk - dr*dr);
+  const aKrage = Math.PI*Dk*b + Math.PI*dr*b;
+  const aBrutto = aRing + aKrage;
+  const emner = [{navn:'Endebunn (ring m/ krage)', ant:1, B:Dk+2*b, H:Dk+2*b, areal:aBrutto}];
+  const seam = Math.PI*Dk + Math.PI*dr;
+  return {emner,aNetto:aRing,aBrutto,seam,raw:{aRing,kvadrat:Dk+2*b,Dk,dr},
+    comp:[
+      ['Ytre diameter (kapsel)', fmt(Dk,1)+' mm'],
+      ['Indre diameter (bart rør)', fmt(dr,1)+' mm'],
+      ['Ringbredde (isolasjon)', fmt((Dk-dr)/2,1)+' mm'],
+      ['Krage ut/inn', fmt(b,0)+' mm'],
+      ['Emne (kvadrat)', fmt(Dk+2*b,0)+' × '+fmt(Dk+2*b,0)+' mm'],
+    ],
+    form:`<b>Endebunn</b><br>
+Ring <span class="m">=</span> π/4·(D² − d²) <span class="m">=</span> <b>${fmt(aRing/1e6,3)} m²</b><br>
+Krage <span class="m">=</span> π·D·b + π·d·b <span class="m">=</span> <b>${fmt(aKrage/1e6,3)} m²</b><br>
+Klippes med snepper i kragen for å brette rundt kapsel og rør.`};
+}
+
+/* ============================================================
+   SVG-UTFOLDING
+   ============================================================ */
+function svgOpen(x0,y0,w,h){
+  return `<svg viewBox="${x0} ${y0} ${w} ${h}" preserveAspectRatio="xMidYMid meet" font-family="IBM Plex Mono,monospace">`;
+}
+function dimH(x1,x2,y,txt,lw,fs){
+  return `<g stroke="#9aa6b1" stroke-width="${lw}" fill="none">
+    <line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/>
+    <line x1="${x1}" y1="${y-3*lw}" x2="${x1}" y2="${y+3*lw}"/>
+    <line x1="${x2}" y1="${y-3*lw}" x2="${x2}" y2="${y+3*lw}"/></g>
+    <text x="${(x1+x2)/2}" y="${y-2*lw}" font-size="${fs}" fill="#e8ebee" text-anchor="middle">${txt}</text>`;
+}
+function dimV(x,y1,y2,txt,lw,fs){
+  return `<g stroke="#9aa6b1" stroke-width="${lw}" fill="none">
+    <line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}"/>
+    <line x1="${x-3*lw}" y1="${y1}" x2="${x+3*lw}" y2="${y1}"/>
+    <line x1="${x-3*lw}" y1="${y2}" x2="${x+3*lw}" y2="${y2}"/></g>
+    <text x="${x+2*lw}" y="${(y1+y2)/2}" font-size="${fs}" fill="#e8ebee" dominant-baseline="middle">${txt}</text>`;
+}
+/* ---------- festemiddel-markører ---------- */
+const FCOL='#5fae7d';
+function fdots(pts,r){return pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${r.toFixed(2)}" fill="${FCOL}" stroke="#171e26" stroke-width="${(r*0.4).toFixed(2)}"/>`).join('');}
+function fdotsHollow(pts,r){return pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${r.toFixed(2)}" fill="none" stroke="${FCOL}" stroke-width="${(r*0.5).toFixed(2)}"/>`).join('');}
+function lineDots(x1,y1,x2,y2,cc){
+  const L=Math.hypot(x2-x1,y2-y1); if(L<=0) return [];
+  const n=Math.max(2,Math.ceil(L/cc)+1); const pts=[];
+  for(let i=0;i<n;i++){const t=i/(n-1);pts.push([x1+(x2-x1)*t,y1+(y2-y1)*t]);}
+  return pts;
+}
+function curveDots(f,u0,u1,cc,closed=false,steps=300){
+  const P=[]; let len=0, prev=f(u0); P.push({s:0,p:prev});
+  for(let i=1;i<=steps;i++){const u=u0+(u1-u0)*i/steps;const p=f(u);
+    len+=Math.hypot(p[0]-prev[0],p[1]-prev[1]);P.push({s:len,p});prev=p;}
+  if(len<=0) return [];
+  const n=closed? Math.max(3,Math.ceil(len/cc)) : Math.max(2,Math.ceil(len/cc)+1);
+  const pts=[]; let j=0;
+  const kMax = closed? n-1 : n-1;
+  for(let i=0;i<=(closed?n-1:n-1);i++){
+    const t=closed? len*i/n : len*i/(n-1);
+    while(j<P.length-1&&P[j+1].s<t)j++;
+    pts.push(P[j].p);
+  }
+  return pts;
+}
+function festLegend(x,y,fs,s){const r=fs*0.3;
+  return `<circle cx="${x+r}" cy="${y-fs*0.3}" r="${r}" fill="${FCOL}" stroke="#171e26" stroke-width="${(r*0.4).toFixed(2)}"/>`+
+  `<text x="${x+r*2+fs*0.4}" y="${y}" font-size="${fs*0.8}" fill="#9aa6b1">= ${s.festKey==='skrue'?'plateskrue':'popnagle'} · c/c ${fmt(s.cc,0)} mm · veiledende plassering</text>`;}
+
+function drawFlat(s,c){
+  const el = $('flatView');
+  let svg = '';
+  if (s.comp==='rett') svg = svgRett(s,c);
+  else if (s.comp==='bend') svg = svgBend(s,c);
+  else if (s.comp==='kon') svg = s.kType==='eks' ? svgKonEks(s,c) : svgKon(s,c);
+  else if (s.comp==='tstk') svg = svgT(s,c);
+  else svg = svgEnde(s,c);
+  el.innerHTML = svg;
+}
+
+/* ---------- rett ---------- */
+function svgRett(s,c){
+  const B = Math.PI*s.D + s.OL;
+  const first = c.emner[0];
+  const Hd = first.H;
+  const pad = Math.max(B,Hd)*0.18;
+  const lw = Math.max(B,Hd)/450, fs = Math.max(B,Hd)/26;
+  let g = svgOpen(-pad,-pad,B+2.6*pad,Hd+2*pad);
+  g += `<rect x="0" y="0" width="${B}" height="${Hd}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
+  g += `<rect x="${B-s.OL}" y="0" width="${s.OL}" height="${Hd}" style="fill:rgba(224,166,60,.14);stroke:#e0a63c;stroke-width:${lw};stroke-dasharray:${lw*4} ${lw*3}"/>`;
+  g += `<text x="${B-s.OL/2}" y="${Hd/2}" font-size="${fs*0.8}" fill="#e0a63c" text-anchor="middle" transform="rotate(90 ${B-s.OL/2} ${Hd/2})">OVERLAPP ${s.OL}</text>`;
+  g += `<line x1="0" y1="${s.EOL}" x2="${B}" y2="${s.EOL}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*6} ${lw*4}"/>`;
+  g += `<text x="${B*0.02}" y="${s.EOL-fs*0.4}" font-size="${fs*0.7}" fill="#9aa6b1">ende-overlapp ${s.EOL} mm</text>`;
+  g += dimH(0,B,-pad*0.4,`B = π·D + ol = ${fmt(B,0)} mm`,lw,fs);
+  g += dimV(B+pad*0.4,0,Hd,`${fmt(Hd,0)} mm`,lw,fs);
+  g += `<text x="${B*0.03}" y="${Hd-fs}" font-size="${fs*0.85}" fill="#d4552e">${first.navn.toUpperCase()}${first.ant>1?' × '+first.ant:''}${c.emner.length>1?'  (+ sluttkapsel '+fmt(c.emner[1].H,0)+' mm)':''}</text>`;
+  /* festemiddel: langsgående søm midt i overlappen + tverrsøm midt i ende-overlappen */
+  const rd = fs*0.3;
+  if (s.OL>0) g += fdots(lineDots(B-s.OL/2, rd*2.5, B-s.OL/2, Hd-rd*2.5, s.cc), rd);
+  if (c.nKapsler>1 && s.EOL>0) g += fdots(lineDots(rd*3, s.EOL/2, B-s.OL-rd*3, s.EOL/2, s.cc), rd);
+  g += festLegend(0, Hd+pad*0.62, fs, s);
+  return g+'</svg>';
+}
+
+/* ---------- bend ---------- */
+function svgBend(s,c){
+  const rc = s.D/2, R = s.bR, N = s.bSeg;
+  const beta = (s.bAng*Math.PI/180)/(2*(N-1)), tb = Math.tan(beta);
+  const Cn = Math.PI*s.D, B = Cn + s.OL;
+  const hMax = (R+rc)*tb;
+  const gap = hMax*0.35 + s.D*0.06;
+  const P = 120;
+  const hOf = u => (R - rc*Math.cos(u))*tb;
+  let y=0, totH=0;
+  const seg = [{type:'end'}];
+  for(let i=0;i<N-2;i++) seg.push({type:'mid'});
+  seg.push({type:'end'});
+  const monn = s.bMonn;
+  const items=[];
+  for(const sg of seg){
+    if(sg.type==='end'){
+      const H = hMax + monn;
+      items.push({y, H, path:(yy)=>{
+        let d = `M0 ${yy+H} L${B} ${yy+H} L${B} ${yy+H-monn-hOf(2*Math.PI)} `;
+        for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;d+=`L${(u/(2*Math.PI)*Cn+s.OL).toFixed(1)} ${(yy+H-monn-hOf(u)).toFixed(1)} `;}
+        d+=`L0 ${yy+H-monn-hOf(0)} Z`; return d;},
+        lbl:'ENDESTYKKE ×2', H1:hMax, full:false});
+      y += H + gap; totH = y;
+    } else {
+      const H = 2*hMax + 2*monn;
+      items.push({y, H, path:(yy)=>{
+        let d='';
+        for(let i=0;i<=P;i++){const u=i/P*2*Math.PI;d+=(i?'L':'M')+((u/(2*Math.PI)*Cn)).toFixed(1)+' '+(yy+monn+hMax-hOf(u)).toFixed(1)+' ';}
+        d+=`L${B} ${(yy+monn+hMax-hOf(2*Math.PI)).toFixed(1)} L${B} ${(yy+monn+hMax+hOf(2*Math.PI)).toFixed(1)} `;
+        for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;d+=`L${(u/(2*Math.PI)*Cn).toFixed(1)} ${(yy+monn+hMax+hOf(u)).toFixed(1)} `;}
+        d+='Z'; return d;},
+        lbl:'MELLOMSTYKKE'+(N-2>1?' ×'+(N-2):''), H1:2*hMax, full:true});
+      y += H + gap; totH = y;
+    }
+  }
+  totH -= gap;
+  const pad = Math.max(B,totH)*0.16;
+  const lw = Math.max(B,totH)/480, fs = Math.max(B,totH)/30;
+  let g = svgOpen(-pad,-pad,B+2.8*pad,totH+2*pad);
+  let drawnMid=false, drawnEnd=false;
+  for(const it of items){
+    g += `<path d="${it.path(it.y)}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
+    g += `<line x1="${s.OL}" y1="${it.y}" x2="${s.OL}" y2="${it.y+it.H}" stroke="#e0a63c" stroke-width="${lw}" stroke-dasharray="${lw*4} ${lw*3}"/>`;
+    const showLbl = (it.full&&!drawnMid)||(!it.full&&!drawnEnd);
+    if(showLbl){
+      g += `<text x="${B*0.02}" y="${it.y+fs*1.1}" font-size="${fs*0.8}" fill="#d4552e">${it.lbl}</text>`;
+      g += dimV(B+pad*0.35, it.y, it.y+it.H, `${fmt(it.H,0)}`, lw, fs*0.9);
+      if(it.full) drawnMid=true; else drawnEnd=true;
+    }
+    /* festemiddel: øvre kurvekant = én skjøt pr. stykke, + kort søm i halsen */
+    const rd = fs*0.32, yy = it.y;
+    if (it.full){
+      g += fdots(curveDots(u=>[u/(2*Math.PI)*Cn, yy+monn+hMax-hOf(u)], 0, 2*Math.PI, s.cc), rd);
+      if (s.OL>0) g += fdots(lineDots(s.OL/2, yy+monn+hMax-hOf(0), s.OL/2, yy+monn+hMax+hOf(0), s.cc), rd);
+    } else {
+      g += fdots(curveDots(u=>[u/(2*Math.PI)*Cn+s.OL, yy+it.H-monn-hOf(u)], 0, 2*Math.PI, s.cc), rd);
+      if (s.OL>0) g += fdots(lineDots(s.OL/2, yy+it.H-monn-hOf(0), s.OL/2, yy+it.H, s.cc), rd);
+    }
+  }
+  g += dimH(0,B,-pad*0.35,`B = π·D + ol = ${fmt(B,0)} mm`,lw,fs);
+  g += `<text x="0" y="${totH+pad*0.55}" font-size="${fs*0.8}" fill="#9aa6b1">β = ${fmt(beta*180/Math.PI,2)}°  ·  rygg midtstk. 2·(R+D/2)·tanβ = ${fmt(2*hMax,0)} mm  ·  hals ${fmt(2*(R-rc)*tb,0)} mm  ·  monn ${monn} mm pr. kant</text>`;
+  g += festLegend(0, totH+pad*0.9, fs, s);
+  return g+'</svg>';
+}
+
+/* ---------- konsentrisk kon ---------- */
+function svgKon(s,c){
+  const D1 = Math.max(s.D,s.kD2), D2v = Math.min(s.D,s.kD2), h = s.kL;
+  const slant = Math.sqrt(h*h + ((D1-D2v)/2)**2);
+  const Rb = slant*D1/(D1-D2v||1), Rs = Rb - slant;
+  const th = Math.PI*D1/Rb;
+  const a0 = -Math.PI/2 - th/2, a1 = -Math.PI/2 + th/2;
+  const P = 90;
+  const arc=(rad,rev)=>{let p='';for(let i=0;i<=P;i++){const j=rev?P-i:i;const a=a0+j/P*th;p+=(p?'L':'')+ (rad*Math.cos(a)).toFixed(1)+' '+(rad*Math.sin(a)).toFixed(1)+' ';}return p;};
+  let d = 'M'+arc(Rb,false)+'L'+arc(Rs,true)+'Z';
+  const yTop=-Rb, yBot= th/2>=Math.PI/2 ? Rb*Math.abs(Math.cos(Math.PI-th/2)) : -Rs*Math.cos(th/2);
+  const xW = th/2>=Math.PI/2 ? Rb : Rb*Math.sin(th/2);
+  const w=2*xW, hh=yBot-yTop;
+  const pad=Math.max(w,hh)*0.2, lw=Math.max(w,hh)/460, fs=Math.max(w,hh)/28;
+  let g = svgOpen(-xW-pad, yTop-pad, w+2.6*pad, hh+2.2*pad);
+  g += `<path d="${d}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
+  g += `<line x1="0" y1="0" x2="${Rb*Math.cos(a0)}" y2="${Rb*Math.sin(a0)}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*5} ${lw*4}"/>`;
+  g += `<line x1="0" y1="0" x2="${Rb*Math.cos(a1)}" y2="${Rb*Math.sin(a1)}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*5} ${lw*4}"/>`;
+  g += `<text x="0" y="${-Rs-fs*0.6}" font-size="${fs}" fill="#e8ebee" text-anchor="middle">R = ${fmt(Rb,0)} · r = ${fmt(Rs,0)}</text>`;
+  g += `<text x="0" y="${-Rb-fs*0.8}" font-size="${fs}" fill="#e8ebee" text-anchor="middle">bue stor ende = π·D1 = ${fmt(Math.PI*D1,0)} mm</text>`;
+  g += `<text x="0" y="${yBot+fs*1.6}" font-size="${fs*0.85}" fill="#9aa6b1" text-anchor="middle">θ = ${fmt(th*180/Math.PI,1)}°  ·  slant s = ${fmt(slant,1)} mm  ·  + overlapp ${s.OL} mm langs én slantkant</text>`;
+  const ox=Rb*Math.cos(a1), oy=Rb*Math.sin(a1), ix=Rs*Math.cos(a1), iy=Rs*Math.sin(a1);
+  const nx=Math.cos(a1+Math.PI/2), ny=Math.sin(a1+Math.PI/2);
+  g += `<path d="M${ox} ${oy} L${ox+nx*s.OL} ${oy+ny*s.OL} L${ix+nx*s.OL} ${iy+ny*s.OL} L${ix} ${iy} Z" style="fill:rgba(224,166,60,.14);stroke:#e0a63c;stroke-width:${lw};stroke-dasharray:${lw*4} ${lw*3}"/>`;
+  /* festemiddel: slantsøm midt i fliken + tilslutning mot nabokapsler langs begge buer */
+  const rd = fs*0.3;
+  if (s.OL>0) g += fdots(lineDots(ox+nx*s.OL/2, oy+ny*s.OL/2, ix+nx*s.OL/2, iy+ny*s.OL/2, s.cc), rd);
+  g += fdots(curveDots(a=>[Rb*Math.cos(a),Rb*Math.sin(a)], a0, a1, s.cc), rd);
+  g += fdots(curveDots(a=>[Rs*Math.cos(a),Rs*Math.sin(a)], a0, a1, s.cc), rd);
+  g += festLegend(-xW, yBot+fs*2.8, fs, s);
+  return g+'</svg>';
+}
+
+/* ---------- eksentrisk kon ---------- */
+function svgKonEks(s,c){
+  const u = c._eks;
+  const M = u.p.length-1;
+  /* speil: høyre halvdel = p/q, venstre = speilet om x=0 */
+  const mir = pts => pts.map(pt=>[-pt[0],pt[1]]);
+  const pL = mir(u.p), qL = mir(u.q);
+  /* omriss: ytterkant (stor ende): venstre bakover + høyre framover, så liten ende tilbake */
+  let d='M';
+  for(let k=M;k>=1;k--) d+=pL[k][0].toFixed(1)+' '+pL[k][1].toFixed(1)+' L';
+  for(let k=0;k<=M;k++) d+=u.p[k][0].toFixed(1)+' '+u.p[k][1].toFixed(1)+(k<M?' L':' ');
+  d+='L'+u.q[M][0].toFixed(1)+' '+u.q[M][1].toFixed(1)+' ';
+  for(let k=M-1;k>=0;k--) d+='L'+u.q[k][0].toFixed(1)+' '+u.q[k][1].toFixed(1)+' ';
+  for(let k=1;k<=M;k++) d+='L'+qL[k][0].toFixed(1)+' '+qL[k][1].toFixed(1)+' ';
+  d+='Z';
+  let xMax=0,yMin=1e9,yMax=-1e9;
+  for(const pt of [...u.p,...u.q]){ xMax=Math.max(xMax,pt[0]); yMin=Math.min(yMin,pt[1]); yMax=Math.max(yMax,pt[1]); }
+  const w=2*xMax, hh=yMax-yMin;
+  const pad=Math.max(w,hh)*0.2, lw=Math.max(w,hh)/460, fs=Math.max(w,hh)/28;
+  let g=svgOpen(-xMax-pad, yMin-pad, w+2.6*pad, hh+2.4*pad);
+  g += `<path d="${d}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
+  /* trekantlinjer (hver 6.) – viser metoden */
+  for(let k=0;k<=M;k+=6){
+    g+=`<line x1="${u.p[k][0]}" y1="${u.p[k][1]}" x2="${u.q[k][0]}" y2="${u.q[k][1]}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*4} ${lw*4}"/>`;
+    g+=`<line x1="${pL[k][0]}" y1="${pL[k][1]}" x2="${qL[k][0]}" y2="${qL[k][1]}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*4} ${lw*4}"/>`;
+  }
+  /* senterlinje (toppgenerator) */
+  g+=`<line x1="0" y1="${u.p[0][1]}" x2="0" y2="${u.q[0][1]}" stroke="#9aa6b1" stroke-width="${lw}" stroke-dasharray="${lw*8} ${lw*4}"/>`;
+  g+=`<text x="0" y="${yMin-fs*0.8}" font-size="${fs*0.85}" fill="#e8ebee" text-anchor="middle">stor ende – bue π·D1 = ${fmt(Math.PI*Math.max(s.D,s.kD2),0)} mm</text>`;
+  g+=`<text x="0" y="${yMax+fs*1.6}" font-size="${fs*0.8}" fill="#9aa6b1" text-anchor="middle">trekantmetoden – stiplede linjer er sanne lengder · skjøt i flatsiden (ytterkantene) · gen. topp ${fmt(u.genTop,0)} / flatside ${fmt(u.genFlat,0)} mm</text>`;
+  /* overlappflik langs høyre flatside-generator */
+  const pF=u.p[M], qF=u.q[M];
+  const gx=qF[0]-pF[0], gy=qF[1]-pF[1], gl=Math.hypot(gx,gy);
+  const nx2=gy/gl, ny2=-gx/gl;
+  g+=`<path d="M${pF[0]} ${pF[1]} L${pF[0]+nx2*s.OL} ${pF[1]+ny2*s.OL} L${qF[0]+nx2*s.OL} ${qF[1]+ny2*s.OL} L${qF[0]} ${qF[1]} Z" style="fill:rgba(224,166,60,.14);stroke:#e0a63c;stroke-width:${lw};stroke-dasharray:${lw*4} ${lw*3}"/>`;
+  /* festemiddel: søm i flatsiden + tilslutning langs begge endekurver (høyre halvdel + speil) */
+  const rd = fs*0.3;
+  if (s.OL>0) g += fdots(lineDots(pF[0]+nx2*s.OL/2, pF[1]+ny2*s.OL/2, qF[0]+nx2*s.OL/2, qF[1]+ny2*s.OL/2, s.cc), rd);
+  const onPoly = pts => t => { const k=t*M, i=Math.min(M-1,Math.floor(k)), f2=k-i;
+    const a=pts[i], b=pts[i+1]; return [a[0]+(b[0]-a[0])*f2, a[1]+(b[1]-a[1])*f2]; };
+  const pc = curveDots(onPoly(u.p), 0, 1, s.cc);
+  const qc = curveDots(onPoly(u.q), 0, 1, s.cc);
+  g += fdots(pc,rd) + fdots(qc,rd) + fdots(mir(pc),rd) + fdots(mir(qc),rd);
+  g += festLegend(-xMax, yMax+fs*3.0, fs, s);
+  return g+'</svg>';
+}
+
+/* ---------- T-stykke / skrå avstikker ---------- */
+function svgT(s,c){
+  const Rm=s.D/2, rb=Math.min(s.tD2/2,Rm-0.01), H=s.tH;
+  const alpha=s.tAng*Math.PI/180, sa=Math.sin(alpha), ca=Math.cos(alpha);
+  const Cn=2*Math.PI*rb, B=Cn+s.OL;
+  const P=140;
+  const tOf=phi=>(Math.sqrt(Math.max(0,Rm*Rm-rb*rb*Math.cos(phi)**2)) - rb*Math.sin(phi)*ca)/sa;
+  const hOf=phi=>Math.max(0,H-tOf(phi));
+  let hMax=0,hMin=1e9;
+  for(let i=0;i<=P;i++){const phi=i/P*2*Math.PI;hMax=Math.max(hMax,hOf(phi));hMin=Math.min(hMin,hOf(phi));}
+  let d=`M0 0 L${B} 0 L${B} ${hOf(0).toFixed(1)} `;
+  for(let i=P;i>=0;i--){const phi=i/P*2*Math.PI;d+=`L${(phi/(2*Math.PI)*Cn).toFixed(1)} ${hOf(phi).toFixed(1)} `;}
+  d+='Z';
+  /* hull i hovedkapsel: aksial x = t·cosα − r·sinφ·sinα, omkrets y = R·asin(r·cosφ/R) */
+  let hole='', hxMin=1e9,hxMax=-1e9;
+  const hpts=[];
+  for(let i=0;i<=P;i++){const phi=i/P*2*Math.PI;
+    const t=tOf(phi);
+    const hx=t*ca - rb*Math.sin(phi)*sa;
+    const hy=Rm*Math.asin(Math.max(-1,Math.min(1,rb*Math.cos(phi)/Rm)));
+    hpts.push([hx,hy]); hxMin=Math.min(hxMin,hx); hxMax=Math.max(hxMax,hx);}
+  const hxMid=(hxMin+hxMax)/2;
+  for(let i=0;i<=P;i++){hole+=(i?'L':'M')+(hpts[i][0]-hxMid).toFixed(1)+' '+hpts[i][1].toFixed(1)+' ';}
+  hole+='Z';
+  const holeW=hxMax-hxMin, holeH=2*Rm*Math.asin(rb/Rm);
+  const gapX=B*0.16+holeW;
+  const totW=B+gapX+holeW, totH=Math.max(hMax,holeH);
+  const pad=Math.max(totW,totH)*0.16, lw=Math.max(totW,totH)/480, fs=Math.max(totW,totH)/30;
+  let g=svgOpen(-pad,-pad,totW+2.4*pad,totH+2.2*pad);
+  g+=`<path d="${d}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
+  g+=`<line x1="${Cn}" y1="0" x2="${Cn}" y2="${hOf(0)}" stroke="#e0a63c" stroke-width="${lw}" stroke-dasharray="${lw*4} ${lw*3}"/>`;
+  g+=`<text x="${B*0.02}" y="${fs*1.2}" font-size="${fs*0.8}" fill="#d4552e">AVSTIKKER ${fmt(s.tAng,0)}° – FISKEMUNN</text>`;
+  g+=dimH(0,B,-pad*0.35,`B = π·d + ol = ${fmt(B,0)} mm`,lw,fs);
+  g+=dimV(B+pad*0.3,0,hMax,`${fmt(hMax,0)}`,lw,fs*0.9);
+  const hx0=B+gapX-holeW/2, hy0=totH/2;
+  g+=`<g transform="translate(${hx0} ${hy0})"><path d="${hole}" style="fill:rgba(224,166,60,.10);stroke:#e0a63c;stroke-width:${lw*2}"/></g>`;
+  g+=`<text x="${hx0}" y="${hy0-holeH/2-fs*0.6}" font-size="${fs*0.8}" fill="#e0a63c" text-anchor="middle">HULL I HOVEDKAPSEL</text>`;
+  g+=`<text x="${hx0}" y="${hy0+holeH/2+fs*1.4}" font-size="${fs*0.75}" fill="#9aa6b1" text-anchor="middle">${fmt(holeW,0)} × ${fmt(holeH,0)} mm (aksial × langs omkrets)</text>`;
+  /* festemiddel: langs sadelkurven, i langsgående søm, og samme fester sett fra hovedkapselen */
+  const rd = fs*0.32;
+  g += fdots(curveDots(phi=>[phi/(2*Math.PI)*Cn, hOf(phi)], 0, 2*Math.PI, s.cc), rd);
+  if (s.OL>0 && hOf(0)>rd*5) g += fdots(lineDots((Cn+B)/2, rd*2.5, (Cn+B)/2, hOf(0)-rd*2.5, s.cc), rd);
+  const hd = curveDots(phi=>{const t=tOf(phi);
+    return [t*ca - rb*Math.sin(phi)*sa - hxMid,
+            Rm*Math.asin(Math.max(-1,Math.min(1,rb*Math.cos(phi)/Rm)))];}, 0, 2*Math.PI, s.cc, true);
+  g += `<g transform="translate(${hx0} ${hy0})">`+fdotsHollow(hd,rd)+`</g>`;
+  g += festLegend(0, totH+pad*0.85, fs, s);
+  g += `<circle cx="${B*0.55+rd}" cy="${totH+pad*0.85-fs*0.3}" r="${rd}" fill="none" stroke="${FCOL}" stroke-width="${(rd*0.5).toFixed(2)}"/>`;
+  g += `<text x="${B*0.55+rd*2+fs*0.4}" y="${totH+pad*0.85}" font-size="${fs*0.8}" fill="#9aa6b1">= samme fester sett fra hovedkapselen</text>`;
+  return g+'</svg>';
+}
+
+/* ---------- endebunn ---------- */
+function svgEnde(s,c){
+  const Dk=s.D, dr=PIPE[s.dn].od, b=s.eKrage;
+  const Rtot=Dk/2+b;
+  const pad=Rtot*0.35, lw=Rtot/230, fs=Rtot/13;
+  let g=svgOpen(-Rtot-pad,-Rtot-pad,2*(Rtot+pad)+pad,2*(Rtot+pad));
+  g+=`<circle cx="0" cy="0" r="${Rtot}" style="fill:rgba(224,166,60,.08);stroke:#e0a63c;stroke-width:${lw};stroke-dasharray:${lw*5} ${lw*4}"/>`;
+  g+=`<circle cx="0" cy="0" r="${Dk/2}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
+  g+=`<circle cx="0" cy="0" r="${dr/2}" style="fill:#171e26;stroke:#d4552e;stroke-width:${lw*2}"/>`;
+  if(b>0) g+=`<circle cx="0" cy="0" r="${Math.max(1,dr/2-b)}" style="fill:none;stroke:#e0a63c;stroke-width:${lw};stroke-dasharray:${lw*5} ${lw*4}"/>`;
+  for(let i=0;i<16;i++){const a=i/16*2*Math.PI;
+    g+=`<line x1="${(Dk/2)*Math.cos(a)}" y1="${(Dk/2)*Math.sin(a)}" x2="${Rtot*Math.cos(a)}" y2="${Rtot*Math.sin(a)}" stroke="#e0a63c" stroke-width="${lw*0.8}"/>`;}
+  g+=dimH(-Dk/2,Dk/2,-Rtot-pad*0.4,`D = ${fmt(Dk,0)} mm`,lw,fs);
+  g+=dimH(-dr/2,dr/2,0,`d = ${fmt(dr,0)}`,lw,fs*0.8);
+  g+=`<text x="0" y="${Rtot+pad*0.65}" font-size="${fs*0.75}" fill="#9aa6b1" text-anchor="middle">stiplet = krage ${b} mm med snepper, brettes 90° rundt kapsel og rør</text>`;
+  /* festemiddel: gjennom kragen rundt kapsel (ytre) og rundt rør (indre) */
+  const rd = fs*0.28;
+  const rOut = b>0 ? Dk/2 + b/2 : Dk/2;
+  const rIn  = b>0 ? Math.max(rd*3, dr/2 - b/2) : dr/2;
+  g += fdots(curveDots(a=>[rOut*Math.cos(a),rOut*Math.sin(a)], 0, 2*Math.PI, s.cc, true), rd);
+  g += fdots(curveDots(a=>[rIn*Math.cos(a),rIn*Math.sin(a)], 0, 2*Math.PI, s.cc, true), rd);
+  g += festLegend(-Rtot, Rtot+pad*0.97, fs, s);
+  return g+'</svg>';
+}
+
+/* ============================================================
+   KAPPLISTE + KORT
+   ============================================================ */
+function drawList(s,c){
+  let pos=0, rows='';
+  const row=(ant,navn,maal,areal,vekt)=>{pos++;
+    return `<tr><td>${pos}</td><td class="r">${ant}</td><td>${navn}</td><td class="r">${maal}</td><td class="r">${areal}</td><td class="r">${vekt}</td></tr>`;};
+  rows += `<tr class="sec"><td colspan="6">${$('comp').selectedOptions[0].textContent} · ${s.mat.navn} ${s.thk.toLocaleString('nb-NO',{minimumFractionDigits:1})} mm</td></tr>`;
+  for(const e of c.emner){
+    const antTot=e.ant*s.ant;
+    const kg=e.areal/1e6*(s.thk/1000)*s.mat.rho;
+    rows += row(antTot, e.navn, fmt(e.B,0)+' × '+fmt(e.H,0)+' mm',
+      fmt(e.areal/1e6,3)+' m²', fmt(kg,2)+' kg/stk');
+  }
+  rows += `<tr class="sec"><td colspan="6">Festemateriell</td></tr>`;
+  rows += row(c.nFest + (s.festOverstyr>0?' (overstyrt)':''), s.fest.navn,
+    'c/c '+fmt(s.cc,0)+' mm', 'søm ≈ '+fmt((c.seam||0)*s.ant/1000,2)+' m', fmt(c.prisFestV,0)+' kr');
+  if (c.nBand>0) rows += row(c.nBand, 'Strammebånd SS316 m/lås', s.band+' pr. kapsel', '', fmt(c.prisBandV,0)+' kr');
+  rows += `<tr class="sum"><td></td><td class="r">${c.nEmner}</td><td>Sum ${s.ant>1?'('+s.ant+' komponenter)':''}</td><td class="r"></td><td class="r">${fmt(c.aBruttoT/1e6,3)} m² · ${fmt(c.vekt,1)} kg</td><td class="r">${fmt(c.prisSum,0)} kr</td></tr>`;
+  $('cutTable').innerHTML =
+    '<tr><th>Pos</th><th class="r">Ant</th><th>Emne / artikkel</th><th class="r">Mål</th><th class="r">Areal / søm</th><th class="r">Vekt / pris</th></tr>'+rows;
+}
+
+function drawCards(s,c){
+  $('aBrutto').innerHTML = fmt(c.aBruttoT/1e6,3)+'<small>m²</small>';
+  $('aNetto').innerHTML  = fmt(c.aNettoT/1e6,3)+'<small>m²</small>';
+  $('vekt').innerHTML    = fmt(c.vekt, c.vekt<10?2:1)+'<small>kg</small>';
+  $('nDeler').innerHTML  = c.nEmner+'<small>stk</small>';
+  $('formula').innerHTML = c.form;
+
+  /* pris */
+  $('prisPlateN').textContent = 'Plate: '+fmt(c.aBruttoT/1e6,3)+' m² × '+fmt(s.prisM2,0)+' kr/m²';
+  $('prisPlate').innerHTML = fmt(c.prisPlate,0)+'<small>kr</small>';
+  $('prisFestN').textContent = s.fest.navn.split(' ')[0]+': '+c.nFest+' stk × '+fmt(s.prisFest,2)+' kr';
+  $('prisFestV').innerHTML = fmt(c.prisFestV,0)+'<small>kr</small>';
+  $('prisBandRow').style.display = c.nBand>0 ? '' : 'none';
+  $('prisBandN').textContent = 'Strammebånd: '+c.nBand+' stk × '+fmt(s.prisBand,0)+' kr';
+  $('prisBandV').innerHTML = fmt(c.prisBandV,0)+'<small>kr</small>';
+  $('prisSum').innerHTML = fmt(c.prisSum,0)+'<small>kr</small>';
+
+  $('compTable').innerHTML = c.comp.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+
+  $('cutDimTable').innerHTML = c.emner.map(e=>
+    `<tr><td>${e.navn}${e.ant>1?' ×'+e.ant:''}</td><td>${fmt(e.B,0)} × ${fmt(e.H,0)} mm</td></tr>`).join('');
+
+  $('festTable').innerHTML = `
+    <tr><td>Festemiddel</td><td>${s.fest.navn}</td></tr>
+    <tr><td>Sømlengde totalt</td><td>${fmt((c.seam||0)*s.ant/1000,2)} m</td></tr>
+    <tr><td>c/c-avstand</td><td>${fmt(s.cc,0)} mm</td></tr>
+    <tr><td>Foreslått antall</td><td>${c.nFestAuto} stk</td></tr>
+    <tr><td>Benyttet antall</td><td>${c.nFest} stk${s.festOverstyr>0?' (overstyrt)':''}</td></tr>
+    ${c.nBand>0?`<tr><td>Strammebånd</td><td>${c.nBand} stk</td></tr>`:''}`;
+
+  const m=s.mat;
+  $('matTable').innerHTML = `
+    <tr><td>Materiale</td><td>${m.navn}</td></tr>
+    <tr><td>Tykkelse</td><td>${s.thk.toLocaleString('nb-NO',{minimumFractionDigits:1})} mm</td></tr>
+    <tr><td>Tetthet</td><td>${fmt(m.rho,0)} kg/m³</td></tr>
+    <tr><td>Flatevekt</td><td>${fmt(m.rho*s.thk/1000,2)} kg/m²</td></tr>
+    <tr><td>Platepris</td><td>${fmt(s.prisM2,0)} kr/m²</td></tr>
+    <tr><td>Antall komponenter</td><td>${s.ant} stk</td></tr>`;
+}
+
+/* ============================================================
+   ORDBOK – info-knapper med forklaring og lenker
+   ============================================================ */
+const L_FROSIO = ['FROSIO-boka – isolering, kapsling og værbeskyttelse','https://frosiobook.no'];
+const L_NORSOK = ['NORSOK M-004 hos Standard Norge','https://www.standard.no'];
+const L_UDIR   = ['Udir – læreplaner (søk «isolatørfaget»)','https://www.udir.no/lk20/'];
+const L_SHEET  = ['Wikipedia – Sheet metal (platearbeid og utfolding)','https://en.wikipedia.org/wiki/Sheet_metal'];
+const ndla = q => ['NDLA – søk: «'+q+'»','https://ndla.no/search?query='+encodeURIComponent(q)];
+
+const GLOSS = {
+kapsling:{t:'Kapsling / mantling',d:`<p>Kapsling (også kalt mantling) er det ytre metallskallet som monteres utenpå ferdig isolasjon på rør, tanker og utstyr. Den beskytter isolasjonen mot vær, mekanisk slitasje, UV-stråling og fugler – og gir anlegget et ryddig, profesjonelt utseende.</p><p>Kapsling er en kjernedel av isolatørfaget: isolatøren måler opp, folder ut, kapper, knekker/runder og monterer kapslene selv, ofte prefabrikkert i eget blikkenslagerverksted. Denne kalkulatoren regner på nettopp denne delen av jobben – etter at isolasjonen er lagt.</p>`,links:[L_FROSIO,ndla('kapsling isolering'),L_UDIR]},
+iso:{t:'Isolasjonstykkelse',d:`<p>Tykkelsen på isolasjonslaget mellom røret og kapselen. Den bestemmes av isolasjonsklassen – om formålet er å begrense varmetap, beskytte personell mot varme/kalde flater, hindre kondens eller gi brannbeskyttelse – og hentes fra tabeller i spesifikasjoner som NORSOK.</p><p>For kapslingen er tykkelsen avgjørende fordi den bestemmer kapseldiameteren: D = rørets utvendige diameter + 2 × isolasjonstykkelse. Alle utfoldingene i denne appen regnes fra denne diameteren, ikke fra selve røret.</p>`,links:[L_FROSIO,L_NORSOK]},
+materialer:{t:'Kapslingsmaterialer',d:`<p>De tre vanligste materialene er <b>aluminium (AlMn1)</b>, <b>rustfritt stål AISI 316</b> og <b>alu-sink</b> (varmgalvanisert stål med aluminium/sink-belegg, 185 g/m²).</p><p>Aluminium er lett, enkel å forme og standardvalget offshore og i industrien – tillatt for alle isolasjonsklasser unntatt brannklasse. Rustfritt 316 kreves gjerne til brannisolering og i svært korrosivt miljø, og som perforert plate til personellbeskyttelse over varme flater. Alu-sink er et rimeligere alternativ som etter NORSOK M-004 bare kan vurderes på landanlegg med lav korrosjonsrisiko. Materialvalget skal alltid godkjennes av kunden.</p>`,links:[L_NORSOK,L_FROSIO]},
+tykkelse:{t:'Platetykkelse',d:`<p>NORSOK M-004 setter minstetykkelser for mantling som øker med diameteren – typisk 0,7–0,9 mm for aluminium på rør, og minst 1,0 mm på tanker og beholdere. Rustfritt stål er stivere og kan brukes tynnere (0,5–0,6 mm er vanlig på rør).</p><p>Tynnere plate er lettere å forme og billigere, men buler og «trommer» lettere og tåler mindre tråkk og slag. Tykkelsen påvirker både vekt og pris direkte – prøv å bytte tykkelse i appen og se utslaget.</p>`,links:[L_NORSOK,L_FROSIO]},
+overlapp:{t:'Langsgående overlapp',d:`<p>Den langsgående skjøten der platekanten legges utenpå seg selv når kapselen rulles rundt isolasjonen – typisk 30–50 mm. Platebredden blir derfor π·D + overlapp.</p><p>Skjøten plasseres slik at vann renner <i>av</i> og ikke <i>inn</i>: på horisontale rør legges den nede på siden (klokka 4 eller 8, aldri rett opp), og alltid med le-siden ytterst i værutsatte områder. Festemidlene settes midt i overlappen.</p>`,links:[L_FROSIO,ndla('mantling rør')]},
+endeoverlapp:{t:'Ende-overlapp (tverrskjøt)',d:`<p>Skjøten mellom to kapsler i lengderetningen, typisk 50 mm. På vertikale rør skal øvre kapsel alltid ligge <i>utenpå</i> nedre – som takstein – slik at vann ledes utover og ned.</p><p>Kantene sikkes eller falses gjerne for stivhet og tetthet. I appen bestemmer ende-overlappen hvor mye av kapsellengden som «spises» av hver skjøt når et langt rørstrekk deles i flere kapsler.</p>`,links:[L_FROSIO]},
+utfolding:{t:'Utfolding (utbrett)',d:`<p>Utfolding er å tegne en tredimensjonal form flatt ut på plate – slik at den etter kapping og forming får riktig fasong. Rette kapsler folder ut til rektangler, kjegler til ringsektorer, og skjæringer mellom sylindre gir kurver som må konstrueres punkt for punkt.</p><p>Dette er kjernekompetansen i platearbeidet: å finne <b>sanne lengder</b> og overføre dem til platen. Kalkulatoren viser resultatet, men på fagprøven må du kunne konstruere det samme med passer, linjal og formlene i formelkortet.</p>`,links:[ndla('utfolding plate'),L_SHEET]},
+segmentbend:{t:'Segmentbend',d:`<p>Et bend bygget av rette sylinderstykker («segmenter») som kappes på skrå og settes sammen til en kurve – ofte kalt hummerrygg. Man bruker segmenter fordi plate ikke kan strekkes glatt rundt to krumninger samtidig.</p><p>Bendet består av to halve endestykker og et antall hele mellomstykker. Flere deler gir jevnere kurve, men mer arbeid. Hvert stykke folder ut til en stripe avgrenset av sinuskurver – legg merke til at mellomstykkene har kurve både oppe og nede.</p>`,links:[ndla('segmentbøy utfolding'),L_SHEET]},
+gjaering:{t:'Gjæringsvinkel β',d:`<p>Vinkelen hvert kappesnitt danner med planet vinkelrett på rørets akse. For et bend med total vinkel V fordelt på N deler er β = V / (2·(N−1)) – endestykkene «bruker» én β hver, mellomstykkene to.</p><p>Fra β følger alle målene i utfoldingen: rygghøyden (R + D/2)·tanβ og halshøyden (R − D/2)·tanβ. Sjekk gjerne håndregningen mot komponentdata-kortet.</p>`,links:[ndla('gjæring'),L_SHEET]},
+bendradius:{t:'Bendradius',d:`<p>Radien fra bendets senterpunkt til rørets senterlinje. Kapslingen må følge radien på rørbenden under isolasjonen – standard rørbend er LR (long radius) med R = 1,5 × nominell diameter, eller SR (short radius) med R = 1,0 × D.</p><p>Er kapselradien (D/2 over isolasjon) større enn bendradien, kolliderer halsen – da varsler appen. I praksis løses det med større radius eller segmentering med flere deler.</p>`,links:[L_FROSIO]},
+monn:{t:'Skjøtemonn',d:`<p>Ekstra materiale som legges til hver kurvekant på segmentene, slik at stykkene kan falses/sikkes og tres i hverandre i skjøtene – typisk 10–15 mm per kant.</p><p>Uten monn ville segmentene bare møtes kant i kant uten mulighet for tett og stiv sammenføyning. Monnet inngår i kappemålet og arealet, men ikke i den teoretiske (netto) flaten.</p>`,links:[ndla('falseskjøt'),L_SHEET]},
+kon:{t:'Konisk overgang (reduksjon)',d:`<p>Overgangen mellom to rørdimensjoner. En <b>konsentrisk</b> kon har samme senterlinje i begge ender og folder ut til en ringsektor: slantlengden s = √(L² + ((D1−D2)/2)²), utbrettradius R = s·D1/(D1−D2) og sektorvinkel θ = 180°·D1/R.</p><p>Denne konstruksjonen med passer – to buer og en vinkel – er en klassiker i platefaget, og formlene står i formelkortet så du kan kontrollregne.</p>`,links:[ndla('kjegle utfolding'),L_SHEET]},
+eksentrisk:{t:'Eksentrisk kon og trekantmetoden',d:`<p>En eksentrisk reduksjon har en rett side («flatsiden») – den brukes når rørene ligger med felles underkant, f.eks. på rørgater der isolert rør skal ligge an mot støtter. Den kan ikke foldes ut som ringsektor fordi generatorene har ulik lengde.</p><p>Løsningen er <b>trekantmetoden</b>: del begge sirklene i like mange punkter, finn den sanne lengden av hver forbindelseslinje, og legg trekant for trekant flatt ut på platen. Utfoldingen i appen viser trianguleringslinjene stiplet – akkurat slik du konstruerer det for hånd.</p>`,links:[ndla('trekantmetoden utfolding'),L_SHEET]},
+fiskemunn:{t:'Fiskemunn og sadel',d:`<p>Når en avstikker møter et hovedrør, må avstikkerkapselen kappes etter en kurve som følger hovedrørets runding – kurven ligner en fiskemunn, og området der de møtes kalles sadelen. Samtidig skal det skjæres et tilsvarende hull i hovedkapselen.</p><p>Kurven konstrueres punkt for punkt: for hver posisjon rundt avstikkeren regnes høyden ned til hovedrørets flate. Ved 90° er kurven symmetrisk; ved skrå avstikker blir den asymmetrisk og hullet avlangt. Formelen står i formelkortet.</p>`,links:[ndla('rørgjennomføring utfolding'),L_SHEET]},
+avstikker:{t:'Avstikkervinkel',d:`<p>Vinkelen mellom avstikkerens akse og hovedrøret. 90° gir et rett T-stykke; mindre vinkel gir en skrå avstikker (Y-grein), som brukes der rørene grener av på skrå.</p><p>Jo spissere vinkel, desto mer asymmetrisk blir fiskemunn-kurven og desto lengre blir hullet i hovedkapselen i rørets lengderetning. Prøv å dra vinkelen fra 90° mot 30° og se hvordan begge deler endrer seg.</p>`,links:[ndla('grenrør utfolding'),L_SHEET]},
+endebunn:{t:'Endebunn / avslutning',d:`<p>Der isolasjonen slutter – typisk mot en flens, ventil eller uisolert rørstrekk – avsluttes kapslingen med en endebunn: en ring fra kapseldiameteren inn til det bare røret.</p><p>Ringen får en krage (omslag) som klippes med snepper og brettes 90° rundt både kapselen og røret, slik at avslutningen blir stiv og tett og hindrer at vann trenger inn i isolasjonen. Mot flenser lages ofte demonterbare jakker i stedet.</p>`,links:[L_FROSIO]},
+cc:{t:'c/c-avstand',d:`<p>Senteravstanden mellom festemidlene langs en skjøt («centre to centre»). Vanlig praksis er 100–150 mm i langsgående og tverrgående skjøter.</p><p>For stor avstand gjør at platekantene gaper og slipper inn vann; for liten avstand svekker platen og koster unødig tid og materiell. Festene fordeles jevnt over sømlengden – man deler inn, ikke «starter i én ende og ser hvor langt man kommer». Prikkene i utfoldingen følger verdien du setter her.</p>`,links:[L_FROSIO]},
+festemiddel:{t:'Plateskruer og popnagler',d:`<p><b>Plateskruer</b> (selvborende «blikkskruer», typisk 4,2×13 mm) i rustfritt A2 er standard i skjøtene – raske å sette og mulige å skru ut ved demontering. I sterkt korrosivt miljø, f.eks. offshore, brukes syrefast A4.</p><p><b>Popnagler</b> (blindnagler, typisk Ø4,0 mm aluminium med rustfri dor) gir en glattere og mer permanent sammenføyning, og er vanlige på segmentbend og der utstikkende skruehoder er uønsket. Merk galvanisk korrosjon: bruk festemiddel som passer platematerialet.</p>`,links:[['Wikipedia – Self-tapping screw','https://en.wikipedia.org/wiki/Self-tapping_screw'],['Wikipedia – Rivet (blindnagle)','https://en.wikipedia.org/wiki/Rivet']]},
+band:{t:'Strammebånd',d:`<p>Bånd av rustfritt stål (SS316) med låser som strammes rundt kapselen og holder den på plass uten å perforere platen – viktig der man vil unngå hull, eller som tillegg til skruer på store diametre.</p><p>Vanlig offshore-praksis etter NORSOK er rundt 4 bånd per kapsel / 5 per meter på værbeskyttelse. Sett antallet per kapsel i feltet, så regnes totalen og prisen ut.</p>`,links:[L_NORSOK,L_FROSIO]},
+};
+
+function openInfo(key){
+  const g = GLOSS[key]; if(!g) return;
+  $('mTitle').textContent = g.t;
+  $('mBody').innerHTML = g.d;
+  $('mLinks').innerHTML = g.links.map(l=>`<a href="${l[1]}" target="_blank" rel="noopener">↗ ${l[0]}</a>`).join('');
+  $('modalBack').classList.add('show');
+}
+$('mClose').addEventListener('click',()=>$('modalBack').classList.remove('show'));
+$('modalBack').addEventListener('click',e=>{ if(e.target===$('modalBack')) $('modalBack').classList.remove('show'); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('modalBack').classList.remove('show'); });
+
+/* sett inn info-knapper ved etikettene */
+(function(){
+  const btn = t => ` <button type="button" class="infoBtn" data-term="${t}" aria-label="Forklaring">i</button>`;
+  const forMap = {comp:'kapsling', iso:'iso', thk:'tykkelse', ol:'overlapp', eol:'endeoverlapp',
+    bAng:'gjaering', bR:'bendradius', bMonn:'monn', tAng:'avstikker', eKrage:'endebunn',
+    cc:'cc', band:'band'};
+  for (const id in forMap){
+    const lab = document.querySelector('label[for="'+id+'"]');
+    if (lab) lab.insertAdjacentHTML('beforeend', btn(forMap[id]));
+  }
+  const txtMap = {'Materiale':'materialer','Type':'eksentrisk','Festemiddel i sømmer':'festemiddel'};
+  document.querySelectorAll('label:not([for])').forEach(l=>{
+    const t=l.textContent.trim(); if(txtMap[t]) l.insertAdjacentHTML('beforeend', btn(txtMap[t]));
+  });
+  const secMap = {'Rett kapsel':'utfolding','Segmentbend':'segmentbend','Konisk overgang':'kon','T-stykke / avstikker':'fiskemunn'};
+  document.querySelectorAll('.sectionlbl').forEach(l=>{
+    const t=l.textContent.trim(); if(secMap[t]) l.insertAdjacentHTML('beforeend', btn(secMap[t]));
+  });
+  document.addEventListener('click',e=>{
+    const b = e.target.closest('.infoBtn');
+    if (b){ e.preventDefault(); e.stopPropagation(); openInfo(b.dataset.term); }
+  });
+})();
+
+/* ============================================================
+   3D – FERDIG DEL
+   ============================================================ */
+let three = null, last3d = null;
+const MATCOL = {alu:0xc7ccd1, rf:0xe0e3e7, az:0x9aa0a6};
+function ensure3d(){
+  if (three) return true;
+  if (typeof THREE==='undefined'){
+    $('view3d').insertAdjacentHTML('afterbegin','<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9aa6b1;font-family:var(--mono);font-size:.8rem;text-align:center;padding:20px">3D-visning krever internett-tilgang<br>(three.js lastes fra CDN)</div>');
+    return false;
+  }
+  const holder = $('view3d');
+  const renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  holder.prepend(renderer.domElement);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 1, 1, 200000);
+  scene.add(new THREE.HemisphereLight(0xe8ebee, 0x171e26, 0.85));
+  const dl = new THREE.DirectionalLight(0xffffff, 0.9); dl.position.set(1,2,2); scene.add(dl);
+  const dl2 = new THREE.DirectionalLight(0xd4552e, 0.15); dl2.position.set(-2,-1,1); scene.add(dl2);
+  three = {renderer,scene,camera,group:null,rx:-0.45,ry:0.7,dist:900};
+  /* én finger/peker = roter · to fingre = knip-zoom · hjul = zoom.
+     setPointerCapture + touch-action:none gjør at siden ikke scroller. */
+  const ptrs = new Map();
+  let pinchD = 0;
+  const clampDist = ()=>{ three.dist = Math.min(Math.max(three.dist, 60), 60000); };
+  holder.addEventListener('pointerdown',e=>{
+    holder.setPointerCapture(e.pointerId);
+    ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+    if (ptrs.size===2){
+      const a=[...ptrs.values()];
+      pinchD=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);
+    }
+    e.preventDefault();
+  });
+  holder.addEventListener('pointermove',e=>{
+    if (!ptrs.has(e.pointerId)) return;
+    const prev = ptrs.get(e.pointerId);
+    ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+    if (ptrs.size===1){
+      three.ry += (e.clientX-prev[0])*0.008;
+      three.rx += (e.clientY-prev[1])*0.008;
+    } else if (ptrs.size===2){
+      const a=[...ptrs.values()];
+      const d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);
+      if (pinchD>0 && d>0){ three.dist *= pinchD/d; clampDist(); }
+      pinchD=d;
+    }
+    e.preventDefault();
+  });
+  const endPtr = e=>{ ptrs.delete(e.pointerId); pinchD=0; };
+  holder.addEventListener('pointerup', endPtr);
+  holder.addEventListener('pointercancel', endPtr);
+  holder.addEventListener('lostpointercapture', endPtr);
+  holder.addEventListener('wheel',e=>{e.preventDefault();three.dist*=(1+Math.sign(e.deltaY)*0.1);clampDist();},{passive:false});
+  (function loop(){
+    requestAnimationFrame(loop);
+    if (!three.group || $('view3d').classList.contains('hidden')) return;
+    const w=holder.clientWidth, h=holder.clientHeight;
+    if (w&&h){ three.renderer.setSize(w,h,false); three.camera.aspect=w/h; three.camera.updateProjectionMatrix(); }
+    three.group.rotation.x=three.rx; three.group.rotation.y=three.ry;
+    three.camera.position.set(0,0,three.dist); three.camera.lookAt(0,0,0);
+    three.renderer.render(three.scene,three.camera);
+  })();
+  return true;
+}
+function cylBetween(a,b,r,mat,rTop){
+  const v=new THREE.Vector3().subVectors(b,a);
+  const g=new THREE.CylinderGeometry(rTop===undefined?r:rTop,r,v.length(),64,1,true); // åpen = hul
+  const m=new THREE.Mesh(g,mat);
+  m.position.copy(a).add(v.clone().multiplyScalar(0.5));
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), v.clone().normalize());
+  return m;
+}
+/* flate mellom to kantkurver med rette generatorer – eksakt gjæret/kappet skall */
+function stripGeo(ring1,ring2){
+  const pos=[]; const idx=[]; const m=ring1.length;
+  [ring1,ring2].forEach(r=>r.forEach(p=>pos.push(p[0],p[1],p[2])));
+  for(let j=0;j<m-1;j++){
+    const a=j,b=j+1,c2=m+j,d2=m+j+1;
+    idx.push(a,c2,b, b,c2,d2);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setIndex(idx); g.computeVertexNormals(); return g;
+}
+function build3d(s,c){
+  if (!ensure3d()) return;
+  if (three.group){
+    three.scene.remove(three.group);
+    three.group.traverse(o=>{ if(o.geometry) o.geometry.dispose(); });
+  }
+  const matM = new THREE.MeshStandardMaterial({color:MATCOL[matKey], metalness:0.85,
+    roughness: matKey==='rf'?0.22 : matKey==='alu'?0.4 : 0.55, side:THREE.DoubleSide});
+  const matF = new THREE.MeshStandardMaterial({color:0x5fae7d, metalness:0.2, roughness:0.45});
+  const inner = new THREE.Group();
+  const add = m => inner.add(m);
+  const dotR = Math.max(2.4, s.D*0.018);
+  const off  = dotR*0.55;                       // fester ligger så vidt utenpå platen
+  const sphGeo = new THREE.SphereGeometry(dotR,10,10);
+  const sph = p => { const m=new THREE.Mesh(sphGeo,matF);
+    m.position.set(p[0]!==undefined?p[0]:p.x, p[1]!==undefined?p[1]:p.y, p[2]!==undefined?p[2]:p.z); return m; };
+  const R = s.D/2, X = THREE.Vector3;
+  const seamN = len => Math.max(2, Math.ceil(len/s.cc)+1);
+
+  if (s.comp==='rett'){
+    const eff = s.rPl - s.EOL, n = c.nKapsler;
+    let x = 0;
+    for (let i=0;i<n;i++){
+      const len = i<n-1 ? s.rPl : c.emner[c.emner.length-1].H;
+      add(cylBetween(new X(x,0,0), new X(x+len,0,0), R, matM));
+      const ns = seamN(len);                                   // langsgående søm (topp, på platen)
+      for(let k=0;k<ns;k++) add(sph([x+dotR*2+(len-dotR*4)*k/(ns-1), R+off, 0]));
+      if (i>0){                                                // tverrskjøt midt i ende-overlappen
+        const xr = x + s.EOL/2, nr = Math.max(4,Math.round(2*Math.PI*R/s.cc));
+        for(let k=0;k<nr;k++){const a=k/nr*2*Math.PI;
+          add(sph([xr, (R+off)*Math.cos(a), (R+off)*Math.sin(a)]));}
+      }
+      x += eff;
+    }
+  }
+  else if (s.comp==='bend'){
+    /* Bygges av NØYAKTIG samme snittformel som 2D-utfoldingen:
+       h(u) = (R − rc·cos u)·tanβ, u = 0 i halsen. Rette generatorer
+       langs hvert stykkes akse mellom gjæringsplanene. */
+    const N=s.bSeg, Rb=s.bR, rc=R;
+    const V=s.bAng*Math.PI/180, beta=V/(2*(N-1)), tb=Math.tan(beta);
+    const hCl = u => Math.max(0,(Rb - rc*Math.cos(u))*tb);
+    const frame = phi => ({
+      O:  new X(Rb*Math.cos(phi), Rb*Math.sin(phi), 0),
+      xh: new X(-Math.cos(phi), -Math.sin(phi), 0),   // mot bendsenter = halsen (u=0)
+      yh: new X(-Math.sin(phi),  Math.cos(phi), 0),   // stykkets akse
+      zh: new X(0,0,1),
+    });
+    const pt=(f,y,u,rr)=>[
+      f.O.x+f.yh.x*y+f.xh.x*rr*Math.cos(u)+f.zh.x*rr*Math.sin(u),
+      f.O.y+f.yh.y*y+f.xh.y*rr*Math.cos(u)+f.zh.y*rr*Math.sin(u),
+      f.O.z+f.yh.z*y+f.xh.z*rr*Math.cos(u)+f.zh.z*rr*Math.sin(u)];
+    const ringOf=(f,yFn,rr,m=72)=>{const p=[];
+      for(let j=0;j<=m;j++){const u=j/m*2*Math.PI;p.push(pt(f,yFn(u),u,rr));}return p;};
+    const pieces=[];                                    // {f, yBot(u), yTop(u)}
+    pieces.push({f:frame(0),   yBot:()=>0,      yTop:u=>hCl(u)});
+    for(let i=1;i<=N-2;i++)
+      pieces.push({f:frame(2*beta*i), yBot:u=>-hCl(u), yTop:u=>hCl(u)});
+    pieces.push({f:frame(V),   yBot:u=>-hCl(u), yTop:()=>0});
+    pieces.forEach((pc,i)=>{
+      add(new THREE.Mesh(stripGeo(ringOf(pc.f,pc.yBot,rc), ringOf(pc.f,pc.yTop,rc)), matM));
+      /* halssøm: langs u=0-generatoren, på platen */
+      const y0=pc.yBot(0), y1=pc.yTop(0);
+      const ns=seamN(Math.abs(y1-y0));
+      for(let k=0;k<ns;k++) add(sph(pt(pc.f, y0+(y1-y0)*k/Math.max(1,ns-1), 0, rc+off)));
+      /* segmentskjøt: fester langs øvre gjæringskant (én ring pr. skjøt) */
+      if (i<pieces.length-1){
+        const nr=Math.max(4,Math.round(2*Math.PI*rc/s.cc));
+        for(let k=0;k<nr;k++){const u=k/nr*2*Math.PI;
+          add(sph(pt(pc.f, pc.yTop(u), u, rc+off)));}
+      }
+    });
+  }
+  else if (s.comp==='kon'){
+    const r1=Math.max(s.D,s.kD2)/2, r2=Math.min(s.D,s.kD2)/2, L=s.kL;
+    const eks = s.kType==='eks', e = eks? (r1-r2) : 0;
+    const geo=new THREE.CylinderGeometry(r2,r1,L,72,1,true);   // åpen = hul
+    if (eks){
+      const pos=geo.attributes.position;
+      for(let i=0;i<pos.count;i++){
+        const y=pos.getY(i);
+        pos.setZ(i, pos.getZ(i) - e*(y/L+0.5));
+      }
+      geo.computeVertexNormals();
+    }
+    geo.rotateZ(-Math.PI/2);                                   // akse langs x, flatside mot −z
+    add(new THREE.Mesh(geo,matM));
+    /* fester: tilslutning i begge ender + søm langs flatside/generator */
+    const endRing=(x,rr,zc)=>{const n=Math.max(4,Math.round(2*Math.PI*rr/s.cc));
+      for(let k=0;k<n;k++){const a=k/n*2*Math.PI;
+        add(sph([x,(rr+off)*Math.sin(a), zc+(rr+off)*Math.cos(a)]));}};
+    endRing(-L/2, r1, 0);
+    endRing( L/2, r2, -e);
+    const nsm=seamN(Math.hypot(L, (r1-r2)-e));
+    for(let k=0;k<nsm;k++){const t=k/Math.max(1,nsm-1);
+      add(sph([-L/2+L*t, 0, -( r1+(e+r2-r1)*t + off )]));}     // eks: rett flatside; kons: langs generator
+  }
+  else if (s.comp==='tstk'){
+    /* Avstikker kappet av NØYAKTIG samme sadelkurve som 2D-utfoldingen. */
+    const rb=Math.min(s.tD2/2, R-0.01), H=s.tH;
+    const al=s.tAng*Math.PI/180, sa=Math.sin(al), ca=Math.cos(al);
+    const a=new X(ca,sa,0), e1=new X(0,0,1), e2=new X(sa,-ca,0);
+    const tOf=u=>(Math.sqrt(Math.max(0,R*R-rb*rb*Math.cos(u)**2)) + rb*Math.sin(u)*ca)/sa;
+    const bp=(t,u,rr)=>[
+      a.x*t+e1.x*rr*Math.cos(u)+e2.x*rr*Math.sin(u),
+      a.y*t+e1.y*rr*Math.cos(u)+e2.y*rr*Math.sin(u),
+      a.z*t+e1.z*rr*Math.cos(u)+e2.z*rr*Math.sin(u)];
+    let tMax=0; for(let i=0;i<72;i++) tMax=Math.max(tMax,tOf(i/72*2*Math.PI));
+    const Lm=Math.max(4.2*R, 2*(Math.abs(H*ca)+rb)+2.4*R);
+    add(cylBetween(new X(-Lm/2,0,0), new X(Lm/2,0,0), R, matM));   // hovedkapsel, hul
+    const m=72, rSad=[], rTop=[];
+    for(let j=0;j<=m;j++){const u=j/m*2*Math.PI; rSad.push(bp(tOf(u),u,rb)); rTop.push(bp(H,u,rb));}
+    add(new THREE.Mesh(stripGeo(rSad,rTop), matM));                // avstikker, hul, fiskemunn-kuttet
+    const nr=Math.max(6,Math.round(2*Math.PI*rb/s.cc));            // fester langs sadelkurven
+    for(let k=0;k<nr;k++){const u=k/nr*2*Math.PI; add(sph(bp(tOf(u),u,rb+off)));}
+    const ns=seamN(H-tOf(0));                                      // langsgående søm avstikker (u=0)
+    for(let k=0;k<ns;k++){const t=tOf(0)+(H-tOf(0))*k/Math.max(1,ns-1); add(sph(bp(t,0,rb+off)));}
+  }
+  else {  /* endebunn */
+    const dr=PIPE[s.dn].od/2, b=Math.max(s.eKrage,0);
+    add(cylBetween(new X(-1.8*R,0,0), new X(0,0,0), R, matM));     // kapsel, hul
+    const ringG=new THREE.RingGeometry(dr, R, 72, 1);              // selve bunnen (ring)
+    ringG.rotateY(Math.PI/2);
+    add(new THREE.Mesh(ringG, matM));
+    if (b>0){
+      add(cylBetween(new X(-b,0,0), new X(0,0,0), R+1.2, matM));   // ytterkrage utenpå kapselen
+      add(cylBetween(new X(0,0,0), new X(b,0,0), dr+1.2, matM));   // innerkrage utenpå røret
+    }
+    const rings=[[-Math.max(b,8)/2, R+1.2], [Math.max(b,8)/2, dr+1.2]];
+    for(const [x,rr] of rings){
+      const n=Math.max(4,Math.round(2*Math.PI*rr/s.cc));
+      for(let k=0;k<n;k++){const aa=k/n*2*Math.PI;
+        add(sph([x,(rr+off)*Math.cos(aa),(rr+off)*Math.sin(aa)]));}
+    }
+  }
+
+  three.group=new THREE.Group();
+  three.group.add(inner);
+  three.scene.add(three.group);
+  const box=new THREE.Box3().setFromObject(three.group);
+  const ctr=box.getCenter(new THREE.Vector3());
+  inner.position.sub(ctr);
+  const size=box.getSize(new THREE.Vector3()).length();
+  three.dist=Math.max(size*1.35, 250);
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(){
+  const s = readInputs();
+  ['rett','bend','kon','tstk','ende'].forEach(k=>{
+    $('p_'+k).classList.toggle('hidden', s.comp!==k);
+  });
+  const c = calc(s);
+  last3d = {s,c};
+  const al = $('alert');
+  if (c.warn){ al.textContent='⚠ '+c.warn; al.classList.add('show'); }
+  else al.classList.remove('show');
+  drawFlat(s,c);
+  drawList(s,c);
+  drawCards(s,c);
+  if (three && !$('view3d').classList.contains('hidden')) build3d(s,c);
+}
+
+/* ============================================================
+   UI
+   ============================================================ */
+['comp','dn','iso','ol','eol','ant','rL','rPl','bAng','bSeg','bR','bMonn',
+ 'kDn2','kIso2','kL','tDn2','tIso2','tAng','tH','eKrage',
+ 'prisM2','cc','prisFest','festOverstyr','band','prisBand'].forEach(id=>{
+  $(id).addEventListener('input', render);
+});
+$('thk').addEventListener('input',()=>{ suggestPris(); render(); });
+$('matSeg').querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    $('matSeg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); matKey=b.dataset.m; fillThk(); render();
+  });
+});
+$('konSeg').querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    $('konSeg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); konKey=b.dataset.k; render();
+  });
+});
+$('festSeg').querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    $('festSeg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); festKey=b.dataset.f; fillFest(); render();
+  });
+});
+function showTab(which){
+  const tabs = {flat:$('tabFlat'), t3d:$('tab3d'), list:$('tabList')};
+  const views = {flat:$('flatView'), t3d:$('view3d'), list:$('listView')};
+  for (const k in tabs){
+    tabs[k].classList.toggle('on', k===which);
+    views[k].classList.toggle('hidden', k!==which);
+  }
+  $('ntsLabel').textContent = which==='flat' ? 'NTS – ikke i målestokk'
+                            : which==='t3d' ? 'I målestokk · fester = grønne'
+                            : 'Verkstedsliste';
+  if (which==='t3d' && last3d) build3d(last3d.s, last3d.c);
+}
+$('tabFlat').addEventListener('click',()=>showTab('flat'));
+$('tab3d').addEventListener('click',()=>showTab('t3d'));
+$('tabList').addEventListener('click',()=>showTab('list'));
+
+function suggestBendR(){
+  const od = PIPE[+$('dn').value].od;
+  const D  = od + 2*Math.max(0, +$('iso').value||0);
+  const std = Math.round(1.5*od/10)*10;                 // følger LR-bend på røret
+  const min = Math.ceil((D/2+30)/10)*10;                // klarering for kapselhalsen
+  $('bR').value = Math.max(std, min);
+}
+$('dn').addEventListener('change',()=>{ suggestBendR(); render(); });
+$('iso').addEventListener('change',()=>{
+  const D = PIPE[+$('dn').value].od + 2*Math.max(0, +$('iso').value||0);
+  if (+$('bR').value < D/2 + 15) suggestBendR();        // bare hvis dagens radius ville kollidert
+  render();
+});
+
+/* ============================================================
+   MODUSER
+   ============================================================ */
+function setMode(m){
+  const map={calc:'modeCalc',learn:'modeLearn',prod:'modeProd'};
+  for(const k in map){
+    $(map[k]).classList.toggle('hidden', k!==m);
+    $('nav'+k[0].toUpperCase()+k.slice(1)).classList.toggle('on', k===m);
+  }
+  if (m==='prod') renderProj();
+}
+['Calc','Learn','Prod'].forEach(n=>$('nav'+n).addEventListener('click',()=>setMode(n.toLowerCase())));
+
+function setSub(which){
+  const subs={Oppg:1,Ktr:1,Feil:1,Fag:1,Teori:1};
+  for(const k in subs){
+    $('sub'+k).classList.toggle('on', k===which);
+    $('c'+k).classList.toggle('hidden', k!==which);
+    $('ls'+k).classList.toggle('hidden', k!==which);
+  }
+}
+['Oppg','Ktr','Feil','Fag','Teori'].forEach(k=>$('sub'+k).addEventListener('click',()=>setSub(k)));
+
+/* ============================================================
+   FELLES: utskrift
+   ============================================================ */
+function doPrint(html){
+  $('printArea').innerHTML = html;
+  document.body.classList.add('printing');
+  window.print();
+  setTimeout(()=>{document.body.classList.remove('printing');$('printArea').innerHTML='';},800);
+}
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+/* ============================================================
+   LÆRING 1 – OPPGAVEGENERATOR
+   Samme motor regner fasit: garantert riktig retting.
+   ============================================================ */
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const ri = (a,b,st=1) => a + st*Math.floor(Math.random()*((b-a)/st+1));
+
+const QGEN = {
+  rett:{lvl:1, make(){ return stateFrom({comp:'rett', dn:pick([50,80,100,150,200]), iso:pick([30,40,50,60]),
+      rL:ri(1200,3800,100), OL:pick([30,40,50]), EOL:pick([40,50])}); },
+    title:s=>'Rett kapsel DN'+s.dn,
+    text:s=>`Et rørstrekk DN${s.dn} (Ø${PIPE[s.dn].od} mm) med ${s.iso} mm isolasjon skal kapsles i ${s.mat.navn} ${s.thk.toLocaleString('nb-NO',{minimumFractionDigits:1})} mm. Strekket er ${fmt(s.rL,0)} mm. Maks kapsellengde ${fmt(s.rPl,0)} mm, langsgående overlapp ${s.OL} mm, ende-overlapp ${s.EOL} mm.`,
+    qs:(s,c)=>[
+      {q:'Platebredde B (π·D + overlapp)', ans:c.raw.B, unit:'mm', dec:0, tol:1},
+      {q:'Antall kapsler', ans:c.raw.n, unit:'stk', dec:0, tol:0},
+      {q:'Sluttkapselens lengde', ans:c.raw.rest, unit:'mm', dec:0, tol:1},
+      {q:'Samlet plateareal med overlapp', ans:c.aBrutto/1e6, unit:'m²', dec:3, tol:c.aBrutto/1e6*0.01},
+    ],
+    sol:(s,c)=>[
+      `D = ${PIPE[s.dn].od} + 2·${s.iso} = ${fmt(s.D,1)} mm`,
+      `B = π·${fmt(s.D,1)} + ${s.OL} = ${fmt(c.raw.B,0)} mm`,
+      `Antall = ⌈(${fmt(s.rL,0)} − ${fmt(s.rPl,0)})/(${fmt(s.rPl,0)} − ${s.EOL})⌉ + 1 = ${c.raw.n} stk`,
+      `Sluttkapsel = ${fmt(s.rL,0)} − ${c.raw.n-1}·(${fmt(s.rPl,0)} − ${s.EOL}) = ${fmt(c.raw.rest,0)} mm`,
+      `Areal = Σ B×H = ${fmt(c.aBrutto/1e6,3)} m²`,
+    ]},
+  bend:{lvl:1, make(lvl){ const dn=pick([80,100,150,200]), iso=pick([40,50,60]);
+      return stateFrom({comp:'bend', dn, iso, bAng: lvl>=2? pick([45,60,90]) : 90,
+      bSeg: lvl>=2? ri(3,6):4, bMonn:12}); },
+    title:s=>`Segmentbend ${s.bAng}° · ${s.bSeg} deler`,
+    text:s=>`Et ${s.bAng}°-bend på DN${s.dn} med ${s.iso} mm isolasjon (kapseldiameter D = ${fmt(s.D,1)} mm) skal kapsles som segmentbend i ${s.bSeg} deler. Bendradius på senterlinjen er ${fmt(s.bR,0)} mm.`,
+    qs:(s,c)=>[
+      {q:'Gjæringsvinkel β', ans:c.raw.betaDeg, unit:'°', dec:2, tol:0.05},
+      {q:'Rygghøyde mellomstykke (2·(R+D/2)·tanβ)', ans:2*c.raw.hMax, unit:'mm', dec:0, tol:1},
+      {q:'Halshøyde mellomstykke (2·(R−D/2)·tanβ)', ans:2*c.raw.hMin, unit:'mm', dec:0, tol:1},
+      {q:'Platebredde B', ans:c.raw.B, unit:'mm', dec:0, tol:1},
+    ],
+    sol:(s,c)=>[
+      `β = ${s.bAng}° / (2·(${s.bSeg}−1)) = ${fmt(c.raw.betaDeg,2)}°`,
+      `Rygg = 2·(${fmt(s.bR,0)} + ${fmt(s.D/2,1)})·tan ${fmt(c.raw.betaDeg,2)}° = ${fmt(2*c.raw.hMax,0)} mm`,
+      `Hals = 2·(${fmt(s.bR,0)} − ${fmt(s.D/2,1)})·tan ${fmt(c.raw.betaDeg,2)}° = ${fmt(2*c.raw.hMin,0)} mm`,
+      `B = π·${fmt(s.D,1)} + ${s.OL} = ${fmt(c.raw.B,0)} mm`,
+    ]},
+  kon:{lvl:2, make(){ const dn=pick([100,150,200]);
+      return stateFrom({comp:'kon', kType:'kons', dn, iso:pick([40,50,60]),
+      kDn2:pick([50,65,80]), kIso2:pick([40,50]), kL:ri(150,350,50)}); },
+    title:s=>'Konsentrisk kon',
+    text:s=>`Overgang fra DN${s.dn} til DN${s.kDn2}. Diameter over isolasjon: D1 = ${fmt(Math.max(s.D,s.kD2),1)} mm og D2 = ${fmt(Math.min(s.D,s.kD2),1)} mm. Konlengden langs senterlinjen er ${fmt(s.kL,0)} mm.`,
+    qs:(s,c)=>[
+      {q:'Slantlengde s', ans:c.raw.slant, unit:'mm', dec:1, tol:0.5},
+      {q:'Utbrettradius stor R', ans:c.raw.Rb, unit:'mm', dec:0, tol:2},
+      {q:'Utbrettradius liten r', ans:c.raw.Rs, unit:'mm', dec:0, tol:2},
+      {q:'Sektorvinkel θ', ans:c.raw.thetaDeg, unit:'°', dec:1, tol:0.3},
+    ],
+    sol:(s,c)=>[
+      `s = √(${fmt(s.kL,0)}² + ((${fmt(c.raw.D1,1)}−${fmt(c.raw.D2,1)})/2)²) = ${fmt(c.raw.slant,1)} mm`,
+      `R = s·D1/(D1−D2) = ${fmt(c.raw.Rb,0)} mm`,
+      `r = R − s = ${fmt(c.raw.Rs,0)} mm`,
+      `θ = 180°·D1/R = ${fmt(c.raw.thetaDeg,1)}°`,
+    ]},
+  eks:{lvl:3, make(){ const dn=pick([100,150,200]);
+      return stateFrom({comp:'kon', kType:'eks', dn, iso:pick([40,50,60]),
+      kDn2:pick([50,65,80]), kIso2:pick([40,50]), kL:ri(150,350,50)}); },
+    title:s=>'Eksentrisk kon (trekantmetoden)',
+    text:s=>`Eksentrisk overgang med flatside: D1 = ${fmt(Math.max(s.D,s.kD2),1)} mm, D2 = ${fmt(Math.min(s.D,s.kD2),1)} mm, konlengde L = ${fmt(s.kL,0)} mm.`,
+    qs:(s,c)=>[
+      {q:'Eksentrisitet e = (D1−D2)/2', ans:c.raw.e, unit:'mm', dec:1, tol:0.5},
+      {q:'Generator flatside (kortest)', ans:c.raw.genFlat, unit:'mm', dec:1, tol:1},
+      {q:'Generator topp (lengst)', ans:c.raw.genTop, unit:'mm', dec:1, tol:1},
+    ],
+    sol:(s,c)=>[
+      `e = (${fmt(c.raw.D1,1)} − ${fmt(c.raw.D2,1)})/2 = ${fmt(c.raw.e,1)} mm`,
+      `Flatside = L = ${fmt(c.raw.genFlat,1)} mm (rett generator)`,
+      `Topp = √(L² + (2e)²) = ${fmt(c.raw.genTop,1)} mm`,
+      `Utfoldingen konstrueres med trekantmetoden – sanne lengder trekant for trekant.`,
+    ]},
+  tstk:{lvl:2, make(lvl){ const dn=pick([150,200,250]);
+      const iso=pick([40,50,60]);
+      const s0=stateFrom({comp:'tstk', dn, iso, tDn2:pick([50,80]), tIso2:iso,
+        tAng: lvl>=3? pick([45,60,75]):90});
+      s0.tH = Math.ceil((s0.D/2 + ri(120,220,20))/10)*10;
+      return s0; },
+    title:s=>s.tAng===90?'T-stykke 90°':'Skrå avstikker '+s.tAng+'°',
+    text:s=>`Avstikker DN${s.tDn2} (d = ${fmt(s.tD2,1)} mm over isolasjon) på hovedrør DN${s.dn} (D = ${fmt(s.D,1)} mm), vinkel ${s.tAng}°. Avstikkerens høyde langs egen akse fra senter hovedrør er ${fmt(s.tH,0)} mm.`,
+    qs:(s,c)=>[
+      {q:'Lengste kant på fiskemunn-utfoldingen', ans:c.raw.hMax, unit:'mm', dec:1, tol:1},
+      {q:'Korteste kant', ans:c.raw.hMin, unit:'mm', dec:1, tol:1},
+      {q:'Hullets lengde i hovedkapselen (aksialt)', ans:c.raw.holeW, unit:'mm', dec:0, tol:2},
+    ],
+    sol:(s,c)=>[
+      `h(φ) = H − [√(R² − r²·cos²φ) − r·sinφ·cosα]/sinα`,
+      `Lengst (mot rygg) = ${fmt(c.raw.hMax,1)} mm`,
+      `Kortest (topp av sadel) = ${fmt(c.raw.hMin,1)} mm`,
+      `Hull aksialt = ${fmt(c.raw.holeW,0)} mm${s.tAng<90?' (avlangt pga. skrå vinkel)':''}`,
+    ]},
+  ende:{lvl:1, make(){ return stateFrom({comp:'ende', dn:pick([80,100,150]), iso:pick([40,50,60]), eKrage:pick([20,25,30])}); },
+    title:s=>'Endebunn',
+    text:s=>`Endebunn der isolasjonen slutter på DN${s.dn}: kapseldiameter ${fmt(s.D,1)} mm, rørets ytre diameter ${PIPE[s.dn].od} mm, krage ${s.eKrage} mm.`,
+    qs:(s,c)=>[
+      {q:'Ringens areal (uten krage)', ans:c.raw.aRing/1e6, unit:'m²', dec:3, tol:c.raw.aRing/1e6*0.01},
+      {q:'Kvadratisk emne (side)', ans:c.raw.kvadrat, unit:'mm', dec:0, tol:1},
+    ],
+    sol:(s,c)=>[
+      `Ring = π/4·(${fmt(c.raw.Dk,1)}² − ${fmt(c.raw.dr,1)}²) = ${fmt(c.raw.aRing/1e6,3)} m²`,
+      `Emne = D + 2·krage = ${fmt(c.raw.kvadrat,0)} mm`,
+    ]},
+};
+const LVLPOOL = {1:['rett','bend','ende'], 2:['bend','kon','tstk','rett'], 3:['eks','tstk','bend','kon']};
+
+let taskSet = [];
+function genTasks(){
+  const lvl = +$('oNiva').value, n = Math.max(1,Math.min(10,+$('oAnt').value||4));
+  taskSet = [];
+  for (let i=0;i<n;i++){
+    const key = pick(LVLPOOL[lvl]);
+    const g = QGEN[key];
+    const s = g.make(lvl);
+    const c = calc(s);
+    taskSet.push({key, s, c, g});
+  }
+  $('cOppg').innerHTML = taskSet.map((t,i)=>`
+    <div class="task">
+      <div class="thead"><h3>Oppgave ${i+1} · ${esc(t.g.title(t.s))}</h3>
+        <button class="btn ghost small" data-fasit="${i}" type="button">Vis fasit</button></div>
+      <div class="tbody">${esc(t.g.text(t.s))}
+        <ol class="tqs">${t.g.qs(t.s,t.c).map(q=>`<li>${esc(q.q)} <span style="color:var(--paper-dim)">[${q.unit}]</span></li>`).join('')}</ol>
+        <div class="fasit hidden" id="fasit${i}">${t.g.qs(t.s,t.c).map(q=>`<b>${fmt(q.ans,q.dec)} ${q.unit}</b> — ${esc(q.q)}`).join('<br>')}
+        <br><span style="color:var(--paper-dim)">Utregning:</span><br>${t.g.sol(t.s,t.c).map(esc).join('<br>')}</div>
+      </div>
+    </div>`).join('');
+  $('cOppg').querySelectorAll('[data-fasit]').forEach(b=>b.addEventListener('click',()=>{
+    const f=$('fasit'+b.dataset.fasit); f.classList.toggle('hidden');
+    b.textContent = f.classList.contains('hidden') ? 'Vis fasit' : 'Skjul fasit';
+  }));
+}
+$('oGen').addEventListener('click',genTasks);
+function printTasks(withFasit){
+  if (!taskSet.length) genTasks();
+  const lvl=$('oNiva').selectedOptions[0].textContent;
+  doPrint(`<div class="ppage"><h2>Kapsling – oppgavesett</h2>
+    <div class="pmeta">Nivå: ${esc(lvl)} · Navn: ______________________ · Dato: ____________</div>
+    ${taskSet.map((t,i)=>`<div class="ptask"><h3>Oppgave ${i+1} · ${esc(t.g.title(t.s))}</h3>
+      ${esc(t.g.text(t.s))}
+      <ol>${t.g.qs(t.s,t.c).map(q=>`<li>${esc(q.q)} [${q.unit}] = ______________</li>`).join('')}</ol>
+      ${withFasit?`<div class="pfasit"><b>FASIT:</b> ${t.g.qs(t.s,t.c).map(q=>`${esc(q.q)} = ${fmt(q.ans,q.dec)} ${q.unit}`).join(' · ')}<br>${t.g.sol(t.s,t.c).map(esc).join('<br>')}</div>`:''}
+    </div>`).join('')}</div>`);
+}
+$('oPrint').addEventListener('click',()=>printTasks(false));
+$('oPrintF').addEventListener('click',()=>printTasks(true));
+
+/* ============================================================
+   LÆRING 2 – KONTROLLMODUS
+   ============================================================ */
+let ktr = null;
+function checkField(inp, ans, tol){
+  const v = parseFloat(String(inp.value).replace(',','.'));
+  const ok = isFinite(v) && Math.abs(v-ans) <= Math.max(tol, Math.abs(ans)*0.005);
+  inp.classList.toggle('ok',ok); inp.classList.toggle('err',!ok);
+  return ok;
+}
+function newKtr(s){
+  if (!s){ const lvl=2, key=pick(LVLPOOL[lvl]); s=QGEN[key].make(lvl); s._key=key; }
+  else { s._key = s.comp==='kon' ? (s.kType==='eks'?'eks':'kon') : s.comp; }
+  const g=QGEN[s._key], c=calc(s), qs=g.qs(s,c);
+  ktr={s,c,g,qs};
+  $('cKtr').innerHTML=`<div class="task"><div class="thead"><h3>${esc(g.title(s))}</h3>
+      <button class="btn small" id="kSjekk" type="button">Kontroller</button></div>
+    <div class="tbody">${esc(g.text(s))}
+      <div class="chk">${qs.map((q,i)=>`<label>${esc(q.q)} [${q.unit}]</label><input id="ki${i}" inputmode="decimal"><span class="mark" id="km${i}"></span>`).join('')}</div>
+      <div class="fasit hidden" id="kFasit">${g.sol(s,c).map(esc).join('<br>')}</div>
+      <div style="margin-top:10px"><button class="btn ghost small hidden" id="kVis" type="button">Vis full utregning</button></div>
+    </div></div>`;
+  $('kSjekk').addEventListener('click',()=>{
+    let all=true;
+    qs.forEach((q,i)=>{ const ok=checkField($('ki'+i),q.ans,q.tol);
+      $('km'+i).textContent = ok?'✓':'✗';
+      $('km'+i).className='mark '+(ok?'ok':'err');
+      if(!ok) all=false; });
+    $('kVis').classList.remove('hidden');
+    if (all) $('kVis').textContent='Alt riktig! Vis utregningen likevel';
+  });
+  $('kVis').addEventListener('click',()=>$('kFasit').classList.toggle('hidden'));
+}
+$('kNy').addEventListener('click',()=>newKtr());
+$('kFraKalk').addEventListener('click',()=>{ if(last3d) newKtr({...last3d.s}); });
+
+/* ============================================================
+   LÆRING 3 – FINN FEILEN
+   ============================================================ */
+function newFeil(){
+  const key=pick(['bend','kon','rett']);
+  const g=QGEN[key], s=g.make(2), c=calc(s), qs=g.qs(s,c);
+  const idx=Math.floor(Math.random()*qs.length);
+  const FEIL={  /* typiske regnefeil */
+    bend:{0:{f:x=>s.bAng/(2*s.bSeg), e:'β regnet med N i stedet for N−1 i nevneren.'},
+          1:{f:x=>2*(s.bR - s.D/2)*Math.tan(c.raw.betaDeg*Math.PI/180), e:'Rygg regnet med minus – (R−D/2) er halsen, ikke ryggen.'},
+          2:{f:x=>2*(s.bR + s.D/2)*Math.tan(c.raw.betaDeg*Math.PI/180), e:'Hals regnet med pluss – (R+D/2) er ryggen.'},
+          3:{f:x=>Math.PI*s.D, e:'Overlappen er glemt: B = π·D + overlapp.'}},
+    kon:{0:{f:x=>s.kL, e:'Slant satt lik konlengden – hypotenusen √(L²+((D1−D2)/2)²) er glemt.'},
+         1:{f:x=>c.raw.slant*c.raw.D2/(c.raw.D1-c.raw.D2), e:'R regnet med D2 (liten ende) – skal være s·D1/(D1−D2).'},
+         2:{f:x=>c.raw.Rb+c.raw.slant, e:'r = R − s, ikke R + s.'},
+         3:{f:x=>180*c.raw.D1/c.raw.Rs, e:'θ regnet med liten radius – skal være 180°·D1/R (stor).'}},
+    rett:{0:{f:x=>Math.PI*s.D, e:'Overlappen er glemt i platebredden.'},
+          1:{f:x=>Math.ceil(s.rL/s.rPl), e:'Antall regnet uten hensyn til ende-overlappen som «spises» i hver skjøt.'},
+          2:{f:x=>s.rL-(c.raw.n-1)*s.rPl, e:'Sluttlengden regnet uten fratrekk for ende-overlapp per skjøt.'},
+          3:{f:x=>c.aNetto/1e6, e:'Arealet regnet uten overlapp – dette er teoretisk flate, ikke platebehov.'}},
+  };
+  const feil=FEIL[key][idx];
+  const wrongVal=feil.f();
+  const lines=qs.map((q,i)=>({q:q.q, v:fmt(i===idx?wrongVal:q.ans, q.dec)+' '+q.unit}));
+  $('cFeil').innerHTML=`<div class="task"><div class="thead"><h3>Arbeidsseddel · ${esc(g.title(s))}</h3></div>
+    <div class="tbody">${esc(g.text(s))}
+      <p style="margin-top:10px;color:var(--warn)">Én av verdiene under er feil. Hvilken?</p>
+      <div class="qz" style="margin-top:8px">${lines.map((l,i)=>`<label><input type="radio" name="feilR" value="${i}"> ${esc(l.q)}: <b style="font-family:var(--mono)">${l.v}</b></label>`).join('')}</div>
+      <button class="btn small" id="feilSjekk" type="button">Sjekk</button>
+      <div class="fasit hidden" id="feilFasit"></div>
+    </div></div>`;
+  $('feilSjekk').addEventListener('click',()=>{
+    const sel=document.querySelector('input[name=feilR]:checked');
+    if(!sel) return;
+    const right=+sel.value===idx;
+    document.querySelectorAll('#cFeil .qz label').forEach((l,i)=>{
+      l.classList.toggle('right', i===idx);
+      l.classList.toggle('wrong', i===+sel.value && !right);
+    });
+    $('feilFasit').classList.remove('hidden');
+    $('feilFasit').innerHTML=(right?'<b>Riktig!</b> ':'<b>Ikke helt.</b> Feilen lå i «'+esc(qs[idx].q)+'». ')
+      +esc(feil.e)+'<br>Riktig verdi: <b>'+fmt(qs[idx].ans,qs[idx].dec)+' '+qs[idx].unit+'</b>'
+      +'<br><br><span style="color:var(--paper-dim)">Full utregning:</span><br>'+g.sol(s,c).map(esc).join('<br>');
+  });
+}
+$('fNy').addEventListener('click',newFeil);
+
+/* ============================================================
+   LÆRING 4 – FAGPRØVE-CASE
+   ============================================================ */
+function newFag(){
+  const variant=pick([0,1,2]);
+  let title, beskr, parts, cc=100;
+  if (variant===0){
+    const dn=pick([150,200]), iso=pick([50,60]), L=ri(2800,3800,100);
+    parts=[ stateFrom({comp:'rett',dn,iso,rL:L}),
+            stateFrom({comp:'bend',dn,iso,bSeg:5}),
+            stateFrom({comp:'ende',dn,iso,eKrage:25}) ];
+    title='Rørstrekk med bend og avslutning';
+    beskr=`Et rørstrekk DN${dn} med ${iso} mm isolasjon skal kapsles i aluminium 0,8 mm: ${fmt(L,0)} mm rett strekk, ett 90°-segmentbend i 5 deler (radius ${fmt(parts[1].bR,0)} mm) og én endebunn med 25 mm krage. Langsgående overlapp 40 mm, ende-overlapp 50 mm, plateskruer c/c ${cc} mm. Platepris ${parts[0].prisM2} kr/m², skruer 1,50 kr/stk.`;
+  } else if (variant===1){
+    const dn=pick([100,150]), dn2=pick([50,80]), iso=50;
+    parts=[ stateFrom({comp:'rett',dn,iso,rL:2000}),
+            stateFrom({comp:'kon',kType:'kons',dn,iso,kDn2:dn2,kIso2:iso,kL:250}),
+            stateFrom({comp:'rett',dn:dn2,iso,rL:1500}) ];
+    title='Dimensjonsovergang';
+    beskr=`Strekk med reduksjon, alt med ${iso} mm isolasjon og aluminium 0,8 mm: 2000 mm DN${dn}, konsentrisk kon (L = 250 mm) ned til DN${dn2}, deretter 1500 mm DN${dn2}. Overlapper 40/50 mm, skruer c/c ${cc} mm.`;
+  } else {
+    const dn=pick([200,250]), iso=pick([60,80]);
+    const p2=stateFrom({comp:'tstk',dn,iso,tDn2:80,tIso2:50});
+    p2.tH=Math.ceil((p2.D/2+200)/10)*10;
+    parts=[ stateFrom({comp:'rett',dn,iso,rL:2600}), p2 ];
+    title='Hovedrør med avstikker';
+    beskr=`Hovedrør DN${dn} med ${iso} mm isolasjon: 2600 mm rett strekk med 90° avstikker DN80 (50 mm isolasjon, høyde ${fmt(p2.tH,0)} mm fra senter). Aluminium 0,8 mm, overlapper 40/50 mm, skruer c/c ${cc} mm.`;
+  }
+  const results=parts.map(p=>{p.cc=cc; return calc(p);});
+  const sum={
+    m2: results.reduce((a,r)=>a+r.aBruttoT,0)/1e6,
+    kg: results.reduce((a,r)=>a+r.vekt,0),
+    skruer: results.reduce((a,r)=>a+r.nFest,0),
+    kr: results.reduce((a,r)=>a+r.prisSum,0),
+  };
+  const qs=[
+    {q:'Samlet plateareal med overlapp', ans:sum.m2, unit:'m²', dec:2, tol:sum.m2*0.02},
+    {q:'Samlet vekt', ans:sum.kg, unit:'kg', dec:1, tol:sum.kg*0.02},
+    {q:'Antall plateskruer (c/c '+cc+' mm)', ans:sum.skruer, unit:'stk', dec:0, tol:Math.max(4,sum.skruer*0.12)},
+    {q:'Samlet materiellkostnad', ans:sum.kr, unit:'kr', dec:0, tol:sum.kr*0.03},
+  ];
+  const SJEKK=['Kapseldiameter regnet fra rør-OD + 2× isolasjon','Overlapp medregnet i platebredde','Ende-overlapp trukket fra ved oppdeling','Alle komponenter tatt med i summene','Festemiddel regnet fra sømlengde og c/c','Pris = areal × sats + antall × stykkpris'];
+  $('cFag').innerHTML=`<div class="task"><div class="thead"><h3>Fagprøve-case · ${esc(title)}</h3>
+      <button class="btn small" id="gSjekk" type="button">Lever til sensor</button></div>
+    <div class="tbody">${esc(beskr)}
+      <div class="chk">${qs.map((q,i)=>`<label>${esc(q.q)} [${q.unit}]</label><input id="gi${i}" inputmode="decimal"><span class="mark" id="gm${i}"></span>`).join('')}</div>
+      <div class="fasit hidden" id="gFasit"></div>
+    </div></div>`;
+  $('gSjekk').addEventListener('click',()=>{
+    let hits=0;
+    qs.forEach((q,i)=>{ const ok=checkField($('gi'+i),q.ans,q.tol);
+      $('gm'+i).textContent=ok?'✓':'✗'; $('gm'+i).className='mark '+(ok?'ok':'err'); if(ok)hits++; });
+    $('gFasit').classList.remove('hidden');
+    $('gFasit').innerHTML=`<b>Sensor: ${hits}/${qs.length} innenfor toleranse.</b><br><br>`
+      +`<span style="color:var(--paper-dim)">Sjekkliste:</span><br>${SJEKK.map(x=>'☑ '+esc(x)).join('<br>')}<br><br>`
+      +`<span style="color:var(--paper-dim)">Fasit per komponent:</span><br>`
+      +parts.map((p,i)=>`${i+1}. ${esc(QGEN[p.comp==='kon'?(p.kType==='eks'?'eks':'kon'):p.comp].title(p))}: `
+        +`${fmt(results[i].aBruttoT/1e6,3)} m² · ${fmt(results[i].vekt,2)} kg · ${results[i].nFest} skruer · ${fmt(results[i].prisSum,0)} kr`).join('<br>')
+      +`<br><b>Sum: ${fmt(sum.m2,2)} m² · ${fmt(sum.kg,1)} kg · ${sum.skruer} skruer · ${fmt(sum.kr,0)} kr</b>`;
+  });
+}
+$('gNy').addEventListener('click',newFag);
+
+/* ============================================================
+   LÆRING 5 – TEORIQUIZ
+   ============================================================ */
+const QUIZ=[
+ {q:'Hva er hovedformålet med kapsling?',a:['Å øke isolasjonsevnen','Å beskytte isolasjonen mot vær og mekanisk slitasje','Å jorde røret elektrisk','Å redusere rørets vekt'],r:1,term:'kapsling'},
+ {q:'Kapseldiameter for DN100 (Ø114,3 mm) med 60 mm isolasjon?',a:['174,3 mm','234,3 mm','228,6 mm','120,3 mm'],r:1,term:'iso'},
+ {q:'Hvorfor bygges bend av segmenter?',a:['Det sparer materiale','Plate kan ikke formes glatt med dobbeltkrumning','Det ser bedre ut','Segmenter veier mindre'],r:1,term:'segmentbend'},
+ {q:'Gjæringsvinkel β for 90° bend i 5 deler?',a:['18,00°','9,00°','11,25°','22,50°'],r:2,term:'gjaering'},
+ {q:'Hvor legges langsgående skjøt på et horisontalt rør?',a:['Rett opp (kl. 12)','Nede på siden (kl. 4 eller 8)','Rett ned (kl. 6)','Spiller ingen rolle'],r:1,term:'overlapp'},
+ {q:'Hvilket materiale krever NORSOK til brannisolering (klasse 5)?',a:['Aluminium','Alu-sink','Rustfritt stål','PVC'],r:2,term:'materialer'},
+ {q:'Trekantmetoden brukes til å folde ut …',a:['rette kapsler','segmentbend','eksentriske koner','endebunner'],r:2,term:'eksentrisk'},
+ {q:'«Fiskemunn» er …',a:['kuttkurven der avstikkeren møter hovedrøret','et spesialverktøy','en type falseskjøt','hullet i endebunnen'],r:0,term:'fiskemunn'},
+ {q:'Typisk c/c-avstand for festemiddel i skjøter?',a:['25–50 mm','100–150 mm','300–400 mm','500 mm'],r:1,term:'cc'},
+ {q:'Når velges syrefast A4 fremfor A2?',a:['Innendørs tørt','I sterkt korrosivt miljø, f.eks. offshore','Aldri','Bare på aluminium'],r:1,term:'festemiddel'},
+ {q:'På vertikale rør skal …',a:['nedre kapsel ligge utenpå øvre','øvre kapsel ligge utenpå nedre','kapslene stumpes kant i kant','skjøten fuges med silikon'],r:1,term:'endeoverlapp'},
+ {q:'En konsentrisk kon folder ut til …',a:['et rektangel','en ellipse','en ringsektor','en sinuskurve'],r:2,term:'kon'},
+];
+function startQuiz(){
+  $('cTeori').innerHTML = QUIZ.map((z,i)=>`<div class="qz" id="qz${i}"><div class="qq">${i+1}. ${esc(z.q)}</div>
+    ${z.a.map((alt,j)=>`<label><input type="radio" name="qz${i}" value="${j}">${esc(alt)}</label>`).join('')}</div>`).join('')
+    +`<button class="btn" id="quizRett" type="button">Rett quizen</button><div class="task hidden" id="quizRes" style="margin-top:16px"><div class="tbody" id="quizResB"></div></div>`;
+  $('quizRett').addEventListener('click',()=>{
+    let score=0;
+    QUIZ.forEach((z,i)=>{
+      const sel=document.querySelector(`input[name=qz${i}]:checked`);
+      const labels=$('qz'+i).querySelectorAll('label');
+      labels.forEach((l,j)=>{
+        l.classList.toggle('right', j===z.r);
+        l.classList.toggle('wrong', sel && j===+sel.value && j!==z.r);
+      });
+      if (sel && +sel.value===z.r) score++;
+      $('qz'+i).querySelector('.qq').insertAdjacentHTML('beforeend',
+        ` <button type="button" class="infoBtn" data-term="${z.term}">i</button>`);
+    });
+    $('quizRes').classList.remove('hidden');
+    $('quizResB').innerHTML=`<b style="color:var(--monje);font-size:1.2rem">${score} / ${QUIZ.length} riktige.</b> `
+      +(score===QUIZ.length?'Full pott!':score>=8?'Solid – sjekk i-knappene på de du bommet på.':'Les forklaringene via i-knappene og prøv igjen.');
+  });
+}
+$('tStart').addEventListener('click',startQuiz);
+
+/* ============================================================
+   PRODUKSJON – PROSJEKT
+   ============================================================ */
+const project=[];
+function projDesc(s){
+  const g=QGEN[s.comp==='kon'?(s.kType==='eks'?'eks':'kon'):s.comp];
+  return g? g.title(s) : s.comp;
+}
+$('addProj').addEventListener('click',()=>{
+  if(!last3d) return;
+  const s=JSON.parse(JSON.stringify(last3d.s)); s.mat=MAT[s.matKey]; s.fest=FEST[s.festKey];
+  project.push({s, c:calc(s)});
+  const b=$('addProj'); b.textContent='✓ Lagt til ('+project.length+')';
+  setTimeout(()=>b.textContent='+ Legg i prosjekt',1200);
+});
+$('pTom').addEventListener('click',()=>{project.length=0;renderProj();});
+function renderProj(){
+  if(!project.length){
+    $('projTable').innerHTML='<tr><td style="color:var(--paper-dim)">Tomt – legg til komponenter fra kalkulatoren.</td></tr>';
+    $('nestStats').innerHTML=''; $('nestSvg').innerHTML=''; return;
+  }
+  let m2=0,kg=0,kr=0;
+  $('projTable').innerHTML='<tr><th>Pos</th><th>Komponent</th><th class="r">Ant</th><th class="r">m²</th><th class="r">kg</th><th class="r">kr</th><th></th></tr>'
+    +project.map((p,i)=>{ m2+=p.c.aBruttoT/1e6; kg+=p.c.vekt; kr+=p.c.prisSum;
+      return `<tr><td>${i+1}</td><td>${esc(projDesc(p.s))} · DN${p.s.dn}</td><td class="r">${p.s.ant}</td>`
+        +`<td class="r">${fmt(p.c.aBruttoT/1e6,3)}</td><td class="r">${fmt(p.c.vekt,1)}</td><td class="r">${fmt(p.c.prisSum,0)}</td>`
+        +`<td><button class="del" data-i="${i}" type="button">✕</button></td></tr>`;}).join('')
+    +`<tr class="sum"><td></td><td>Sum prosjekt</td><td></td><td class="r">${fmt(m2,3)}</td><td class="r">${fmt(kg,1)}</td><td class="r">${fmt(kr,0)}</td><td></td></tr>`;
+  $('projTable').querySelectorAll('.del').forEach(b=>b.addEventListener('click',()=>{project.splice(+b.dataset.i,1);renderProj();}));
+  renderNest();
+}
+/* ---------- nesting: hylle-algoritme (FFDH) på omskrevne rektangler ---------- */
+function plateDims(){
+  const v=$('plSize').value;
+  $('plCustom').style.display = v==='egen'?'grid':'none';
+  if(v==='egen') return [Math.max(300,+$('plW').value||1000), Math.max(300,+$('plH').value||2000)];
+  const [w,h]=v.split('x').map(Number); return [w,h];
+}
+function renderNest(){
+  const [PW,PH]=plateDims(), marg=Math.max(0,+$('plMarg').value||0);
+  const rects=[];
+  project.forEach((p,pi)=>p.c.emner.forEach(e=>{
+    for(let k=0;k<e.ant*p.s.ant;k++) rects.push({w:e.B+marg,h:e.H+marg,label:(pi+1)+'',name:e.navn});
+  }));
+  if(!rects.length){$('nestStats').innerHTML='';$('nestSvg').innerHTML='';return;}
+  let oversize=0;
+  rects.forEach(r=>{ if(Math.min(r.w,r.h)>PW || Math.max(r.w,r.h)>Math.max(PW,PH)){oversize++;}
+    if(r.w>PW && r.h<=PW){const t=r.w;r.w=r.h;r.h=t;r.rot=1;} });
+  rects.sort((a,b)=>b.h-a.h);
+  const plates=[]; 
+  const place=r=>{
+    for(const pl of plates){
+      for(const sh of pl.shelves){
+        if (r.h<=sh.h && sh.x+r.w<=PW){ sh.rects.push({...r,x:sh.x,y:sh.y}); sh.x+=r.w; return true; }
+      }
+      const usedH=pl.shelves.reduce((a,s2)=>a+s2.h,0);
+      if (usedH+r.h<=PH && r.w<=PW){ pl.shelves.push({y:usedH,h:r.h,x:r.w,rects:[{...r,x:0,y:usedH}]}); return true; }
+    }
+    if (r.w<=PW && r.h<=PH){ plates.push({shelves:[{y:0,h:r.h,x:r.w,rects:[{...r,x:0,y:0}]}]}); return true; }
+    return false;
+  };
+  let placed=0; rects.forEach(r=>{ if(place(r)) placed++; });
+  const areaRects=rects.reduce((a,r)=>a+r.w*r.h,0);
+  const util=plates.length? areaRects/(plates.length*PW*PH)*100 : 0;
+  $('nestStats').innerHTML=`
+    <tr><td>Emner å plassere</td><td>${rects.length} stk${placed<rects.length?' <span style="color:var(--warn)">('+(rects.length-placed)+' for store for platen!)</span>':''}</td></tr>
+    <tr><td>Plater ${PW}×${PH}</td><td><b style="color:var(--monje)">${plates.length} stk</b></td></tr>
+    <tr><td>Utnyttelsesgrad</td><td>${fmt(util,0)} %</td></tr>
+    <tr><td>Restareal</td><td>${fmt((plates.length*PW*PH-areaRects)/1e6,2)} m²</td></tr>`;
+  const sc=Math.min(1, 900/(plates.length*(PW+60)));
+  $('nestSvg').innerHTML=`<svg viewBox="0 0 ${plates.length*(PW+60)} ${PH+40}">`
+    +plates.map((pl,pi)=>{
+      const x0=pi*(PW+60);
+      return `<rect x="${x0}" y="20" width="${PW}" height="${PH}" fill="none" stroke="#4a5866" stroke-width="3"/>`
+        +`<text x="${x0}" y="14" font-size="${PH/28}" fill="#9aa6b1" font-family="IBM Plex Mono">Plate ${pi+1}</text>`
+        +pl.shelves.map(sh=>sh.rects.map(r=>
+          `<rect x="${x0+r.x}" y="${20+r.y}" width="${r.w-marg}" height="${r.h-marg}" fill="rgba(212,85,46,.15)" stroke="#d4552e" stroke-width="2"/>`
+          +`<text x="${x0+r.x+(r.w-marg)/2}" y="${20+r.y+(r.h-marg)/2}" font-size="${Math.min((r.h-marg)*0.5,PH/22)}" fill="#e8ebee" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono">${r.label}${r.rot?'↻':''}</text>`).join('')).join('');
+    }).join('')+'</svg>';
+}
+['plSize','plW','plH','plMarg'].forEach(id=>$(id).addEventListener('input',renderNest));
+
+/* ============================================================
+   PRODUKSJON – UTFOLDINGS-OMRISS (felles for DXF og 1:1)
+   ============================================================ */
+function outlines(s,c){
+  const out=[], P=96;
+  const poly=(pts,closed,name)=>out.push({pts,closed,name});
+  if (s.comp==='rett'){
+    let x0=0;
+    const uniq=c.emner;
+    uniq.forEach(e=>{
+      poly([[x0,0],[x0+e.B,0],[x0+e.B,e.H],[x0,e.H]],true,e.navn);
+      poly([[x0+e.B-s.OL,0],[x0+e.B-s.OL,e.H]],false,'overlapp');
+      if (s.EOL>0) poly([[x0,s.EOL],[x0+e.B,s.EOL]],false,'ende-ol');
+      x0+=e.B+100;
+    });
+  } else if (s.comp==='bend'){
+    const rc=s.D/2,R=s.bR,N=s.bSeg,beta=(s.bAng*Math.PI/180)/(2*(N-1)),tb=Math.tan(beta);
+    const Cn=Math.PI*s.D,B=Cn+s.OL,monn=s.bMonn,hOf=u=>(R-rc*Math.cos(u))*tb,hMax=(R+rc)*tb;
+    let y=0;
+    /* endestykke */
+    {const H=hMax+monn,pts=[[0,y+H],[B,y+H]];
+     for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;pts.push([u/(2*Math.PI)*Cn+s.OL,y+H-monn-hOf(u)]);}
+     pts.push([0,y+H-monn-hOf(0)]); poly(pts,true,'endestykke ×2'); y+=H+60;}
+    if (N>2){const H=2*hMax+2*monn,pts=[];
+     for(let i=0;i<=P;i++){const u=i/P*2*Math.PI;pts.push([u/(2*Math.PI)*Cn,y+monn+hMax-hOf(u)]);}
+     pts.push([B,y+monn+hMax-hOf(2*Math.PI)],[B,y+monn+hMax+hOf(2*Math.PI)]);
+     for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;pts.push([u/(2*Math.PI)*Cn,y+monn+hMax+hOf(u)]);}
+     poly(pts,true,'mellomstykke ×'+(N-2));}
+  } else if (s.comp==='kon' && s.kType!=='eks'){
+    const D1=Math.max(s.D,s.kD2),D2v=Math.min(s.D,s.kD2),h=s.kL;
+    const sl=Math.sqrt(h*h+((D1-D2v)/2)**2),Rb=sl*D1/(D1-D2v||1),Rs=Rb-sl,th=Math.PI*D1/Rb;
+    const a0=-Math.PI/2-th/2,a1=-Math.PI/2+th/2,pts=[];
+    for(let i=0;i<=P;i++){const a=a0+i/P*th;pts.push([Rb*Math.cos(a),Rb*Math.sin(a)]);}
+    for(let i=P;i>=0;i--){const a=a0+i/P*th;pts.push([Rs*Math.cos(a),Rs*Math.sin(a)]);}
+    poly(pts,true,'kon');
+    const nx=Math.cos(a1+Math.PI/2),ny=Math.sin(a1+Math.PI/2);
+    poly([[Rb*Math.cos(a1),Rb*Math.sin(a1)],[Rb*Math.cos(a1)+nx*s.OL,Rb*Math.sin(a1)+ny*s.OL],
+          [Rs*Math.cos(a1)+nx*s.OL,Rs*Math.sin(a1)+ny*s.OL],[Rs*Math.cos(a1),Rs*Math.sin(a1)]],true,'overlappflik');
+  } else if (s.comp==='kon'){
+    const u=c._eks,M=u.p.length-1,mir=p=>p.map(q=>[-q[0],q[1]]);
+    const pL=mir(u.p),qL=mir(u.q),pts=[];
+    for(let k=M;k>=1;k--)pts.push(pL[k]);
+    for(let k=0;k<=M;k++)pts.push(u.p[k]);
+    for(let k=M;k>=0;k--)pts.push(u.q[k]);
+    for(let k=1;k<=M;k++)pts.push(qL[k]);
+    poly(pts,true,'eksentrisk kon');
+  } else if (s.comp==='tstk'){
+    const Rm=s.D/2,rb=Math.min(s.tD2/2,Rm-0.01),H=s.tH,al=s.tAng*Math.PI/180,sa=Math.sin(al),ca=Math.cos(al);
+    const Cn=2*Math.PI*rb,B=Cn+s.OL;
+    const tOf=phi=>(Math.sqrt(Math.max(0,Rm*Rm-rb*rb*Math.cos(phi)**2))-rb*Math.sin(phi)*ca)/sa;
+    const hOf=phi=>Math.max(0,H-tOf(phi));
+    const pts=[[0,0],[B,0],[B,hOf(0)]];
+    for(let i=P;i>=0;i--){const phi=i/P*2*Math.PI;pts.push([phi/(2*Math.PI)*Cn,hOf(phi)]);}
+    poly(pts,true,'avstikker');
+    let hxMin=1e9; const hp=[];
+    for(let i=0;i<=P;i++){const phi=i/P*2*Math.PI,t=tOf(phi);
+      const hx=t*ca-rb*Math.sin(phi)*sa;hxMin=Math.min(hxMin,hx);
+      hp.push([hx,Rm*Math.asin(Math.max(-1,Math.min(1,rb*Math.cos(phi)/Rm)))]);}
+    let hMaxV=0; for(let i=0;i<=P;i++)hMaxV=Math.max(hMaxV,hOf(i/P*2*Math.PI));
+    poly(hp.map(q=>[q[0]-hxMin+B+120,q[1]+hMaxV/2]),true,'hull i hovedkapsel');
+  } else {
+    const Dk=s.D,dr=PIPE[s.dn].od,b=s.eKrage;
+    const circ=(r,cx=0,cy=0)=>{const p=[];for(let i=0;i<=72;i++){const a=i/72*2*Math.PI;p.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);}return p;};
+    if(b>0)poly(circ(Dk/2+b),true,'klippekant');
+    poly(circ(Dk/2),true,'brettelinje ytre');
+    poly(circ(dr/2),true,'brettelinje indre');
+    if(b>0)poly(circ(Math.max(2,dr/2-b)),true,'klippekant indre');
+  }
+  return out;
+}
+function outBBox(outs){
+  let x0=1e12,y0=1e12,x1=-1e12,y1=-1e12;
+  outs.forEach(o=>o.pts.forEach(p=>{x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1]);}));
+  return {x0,y0,w:x1-x0,h:y1-y0};
+}
+
+/* ---------- DXF (R12 POLYLINE) ---------- */
+function dxfExport(){
+  if(!last3d) return;
+  const outs=outlines(last3d.s,last3d.c);
+  let d='0\nSECTION\n2\nENTITIES\n';
+  outs.forEach(o=>{
+    d+='0\nPOLYLINE\n8\n0\n66\n1\n70\n'+(o.closed?1:0)+'\n';
+    o.pts.forEach(p=>{d+='0\nVERTEX\n8\n0\n10\n'+p[0].toFixed(2)+'\n20\n'+(-p[1]).toFixed(2)+'\n';});
+    d+='0\nSEQEND\n';
+  });
+  d+='0\nENDSEC\n0\nEOF\n';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([d],{type:'application/dxf'}));
+  a.download='kapsling-'+last3d.s.comp+'-utfolding.dxf';
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+$('dxfBtn').addEventListener('click',dxfExport);
+
+/* ---------- 1:1-utskrift, flislagt med skjæremerker ---------- */
+function print1to1(){
+  if(!last3d) return;
+  const outs=outlines(last3d.s,last3d.c), bb=outBBox(outs);
+  const [uw,uh] = $('papir').value==='a3' ? [277,400] : [190,277];  // brukbart areal, mm
+  const cols=Math.max(1,Math.ceil(bb.w/uw)), rows=Math.max(1,Math.ceil(bb.h/uh));
+  const paths=outs.map(o=>'<path d="M'+o.pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L')+(o.closed?' Z':'')
+    +'" fill="none" stroke="#000" stroke-width="0.4"/>').join('');
+  let pages='';
+  for(let r=0;r<rows;r++)for(let cix=0;cix<cols;cix++){
+    const vx=bb.x0+cix*uw, vy=bb.y0+r*uh;
+    pages+=`<div class="ppage"><div class="tilelbl">${esc(projDesc(last3d.s))} · MÅLESTOKK 1:1 · flis ${r*cols+cix+1}/${rows*cols} (rad ${r+1}, kol ${cix+1}) · «tilpass til side» må være AV</div>
+      <svg width="${uw}mm" height="${uh}mm" viewBox="${vx} ${vy} ${uw} ${uh}" xmlns="http://www.w3.org/2000/svg">
+        <rect x="${vx}" y="${vy}" width="${uw}" height="${uh}" fill="none" stroke="#000" stroke-width="0.15" stroke-dasharray="3 3"/>
+        ${(r===0&&cix===0)?`<line x1="${vx+10}" y1="${vy+8}" x2="${vx+110}" y2="${vy+8}" stroke="#000" stroke-width="0.6"/>
+          <line x1="${vx+10}" y1="${vy+5}" x2="${vx+10}" y2="${vy+11}" stroke="#000" stroke-width="0.6"/>
+          <line x1="${vx+110}" y1="${vy+5}" x2="${vx+110}" y2="${vy+11}" stroke="#000" stroke-width="0.6"/>
+          <text x="${vx+60}" y="${vy+6.5}" font-size="4" text-anchor="middle" font-family="monospace">kontroll: 100 mm</text>`:''}
+        ${paths}
+      </svg></div>`;
+  }
+  doPrint(pages);
+}
+$('p11Btn').addEventListener('click',print1to1);
+
+render();
+</script>
+</body>
+</html>

@@ -155,6 +155,13 @@
     color: var(--ink-soft);
   }
 
+  .placeholder {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    color: var(--ink-soft);
+    padding: 2px 0 10px;
+  }
+
   .empty {
     padding: 40px 0;
     color: var(--ink-soft);
@@ -205,8 +212,11 @@
    VERKTØYLISTEN – det eneste du trenger å redigere.
    Nytt verktøy = én ny linje. Last opp html-filen til repoet,
    og legg den inn her med filnavn, navn, beskrivelse, kategori.
-   Kategoriene lages automatisk ut fra det som står her.
+   Kategoriene under vises alltid, i denne rekkefølgen.
+   Eksterne lenker (Nettsider): bruk full adresse i "file".
    ============================================================ */
+const CATEGORIES = ["Fagopplæring", "Andre verktøy", "Nettsider"];
+
 const TOOLS = [
   { file: "spool-kalkulator.html", name: "Spool-kalkulator", desc: "Kuttlengder, ISO-tegning, 3D og øvingsmodus for flens–rør–bend-spooler. Med TE, rullet offset og ordliste.", cat: "Fagopplæring" },
   { file: "kapsling-kalkulator.html", name: "Kapslingskalkulator", desc: "Utfoldinger, mengder, vekt og pris for kapsling av isolerte rør – med 3D, oppgavegenerator, fagprøve-case, nesting og DXF/1:1-utskrift.", cat: "Fagopplæring" },
@@ -223,24 +233,27 @@ function render(filter) {
   const hits = TOOLS.filter(t =>
     !q || (t.name + " " + t.desc + " " + t.cat).toLowerCase().includes(q)
   );
-  const cats = [...new Set(hits.map(t => t.cat))];
-  catalog.innerHTML = cats.map(cat => `
-    <section class="category">
-      <h2>${cat}</h2>
-      <div class="grid">
-        ${hits.filter(t => t.cat === cat).map((t) => {
-          const id = String(TOOLS.indexOf(t) + 1).padStart(3, "0");
-          return `
+  const extra = [...new Set(TOOLS.map(t => t.cat))].filter(c => !CATEGORIES.includes(c));
+  const cats = [...CATEGORIES, ...extra].filter(cat => !q || hits.some(t => t.cat === cat));
+  catalog.innerHTML = cats.map(cat => {
+    const items = hits.filter(t => t.cat === cat);
+    const cards = items.map((t) => {
+      const id = String(TOOLS.indexOf(t) + 1).padStart(3, "0");
+      return `
           <a class="tag-card" href="${t.file}">
             <span class="tag-id">NR ${id}</span>
             <div class="tag-name">${t.name}</div>
             <div class="tag-desc">${t.desc}</div>
           </a>`;
-        }).join("")}
-      </div>
-    </section>`).join("");
+    }).join("");
+    return `
+    <section class="category">
+      <h2>${cat}</h2>
+      ${items.length ? `<div class="grid">${cards}</div>` : `<p class="placeholder">Ingen verktøy her ennå.</p>`}
+    </section>`;
+  }).join("");
   count.textContent = hits.length + " av " + TOOLS.length + " verktøy";
-  empty.style.display = hits.length ? "none" : "block";
+  empty.style.display = (q && hits.length === 0) ? "block" : "none";
 }
 
 search.addEventListener("input", () => render(search.value));

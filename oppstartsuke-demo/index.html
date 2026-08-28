@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oppstartsuke 2026-kull</title>
+<script src="content/qrcode.min.js"></script>
+<script src="content/dashboard-data.js"></script>
+<style>
+  :root{
+    color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,.10);
+    --accent:#00577d; --accent-soft:#cfe6ef;
+    --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+    --g-a:#2a78d6; --g-b:#eb6834; --g-c:#1baf7a;
+    --chip:#f0efec;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme: dark;
+      --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+      --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,.10);
+      --accent:#3aa5c9; --accent-soft:#0d4258;
+      --g-a:#3987e5; --g-b:#d95926; --g-c:#199e70;
+      --chip:#262624;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--page);color:var(--ink);line-height:1.45;padding-bottom:60px}
+  header{background:var(--surface);border-bottom:1px solid var(--grid);padding:22px 28px 0}
+  .head-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;max-width:1200px;margin:0 auto}
+  h1{font-size:1.55rem;font-weight:700}
+  .sub{color:var(--ink-2);font-size:.95rem}
+  .proto-badge{margin-left:auto;font-size:.75rem;font-weight:600;color:var(--serious);border:1px solid var(--serious);border-radius:999px;padding:3px 10px;white-space:nowrap}
+  nav{display:flex;gap:2px;overflow-x:auto;max-width:1200px;margin:16px auto 0;scrollbar-width:thin}
+  nav button{appearance:none;border:none;background:none;font:inherit;font-size:.9rem;font-weight:600;color:var(--ink-2);padding:10px 14px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+  nav button:hover{color:var(--ink)}
+  nav button.active{color:var(--accent);border-bottom-color:var(--accent)}
+  main{max-width:1200px;margin:24px auto;padding:0 28px}
+  section{display:none}
+  section.active{display:block}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+  h2{font-size:1.15rem;margin-bottom:4px}
+  h3{font-size:.95rem;margin-bottom:8px}
+  .hint{color:var(--muted);font-size:.85rem;margin-bottom:14px}
+  .note{background:var(--chip);border-left:3px solid var(--warn);border-radius:6px;padding:9px 12px;font-size:.85rem;color:var(--ink-2);margin-bottom:16px}
+  .ex-badge{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.04em;color:var(--muted);border:1px dashed var(--baseline);border-radius:4px;padding:1px 6px;vertical-align:middle;margin-left:8px}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--baseline)}
+  td{padding:9px 10px;border-bottom:1px solid var(--grid);vertical-align:middle}
+  tr:hover td{background:var(--chip)}
+  .num{font-variant-numeric:tabular-nums}
+  .gr-dot{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;color:#fff;font-size:.7rem;font-weight:700}
+  .gr-A{background:var(--g-a)} .gr-B{background:var(--g-b)} .gr-C{background:var(--g-c)}
+  input[type=text],input[type=search],select,textarea{font:inherit;font-size:.88rem;color:var(--ink);background:var(--surface);border:1px solid var(--baseline);border-radius:8px;padding:7px 10px}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .btn{font:inherit;font-size:.85rem;font-weight:600;border:1px solid var(--baseline);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 14px;cursor:pointer}
+  .btn:hover{border-color:var(--accent);color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{opacity:.9;color:#fff}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+  .toolbar .spacer{flex:1}
+  /* Timeplan */
+  .wk-toggle{display:inline-flex;border:1px solid var(--baseline);border-radius:8px;overflow:hidden}
+  .wk-toggle button{font:inherit;font-size:.85rem;font-weight:600;border:none;background:var(--surface);color:var(--ink-2);padding:7px 16px;cursor:pointer}
+  .wk-toggle button.active{background:var(--accent);color:#fff}
+  .tp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .tp-day{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;min-width:0}
+  .tp-day h3{border-bottom:2px solid var(--baseline);padding-bottom:6px}
+  .tp-day h3 span{color:var(--muted);font-weight:400;font-size:.78rem}
+  .vert{font-size:.72rem;color:var(--muted);margin:4px 0 8px}
+  .tp-item{border-left:3px solid var(--accent);background:var(--chip);border-radius:0 6px 6px 0;padding:6px 8px;margin-bottom:6px;font-size:.78rem}
+  .tp-item .tid{font-weight:700;font-variant-numeric:tabular-nums}
+  .tp-item .sted{color:var(--muted)}
+  .tp-item.lunsj{border-left-color:var(--baseline);color:var(--muted)}
+  .tp-item .gr-tag{font-size:.66rem;font-weight:700;border-radius:4px;padding:0 5px;color:#fff;margin-left:4px}
+  @media(max-width:900px){.tp-grid{grid-template-columns:1fr}}
+  /* Grupper */
+  .grp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:900px){.grp-grid{grid-template-columns:1fr}}
+  .grp-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .grp-head{padding:12px 16px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+  .grp-head .cnt{font-size:.8rem;opacity:.9}
+  .grp-card ul{list-style:none;padding:8px 16px 14px}
+  .grp-card li{padding:7px 0;border-bottom:1px solid var(--grid);font-size:.88rem;display:flex;justify-content:space-between;gap:8px}
+  .grp-card li:last-child{border-bottom:none}
+  .grp-card li .fag{color:var(--muted);font-size:.78rem}
+  .grp-leder{padding:9px 16px;border-bottom:1px solid var(--grid);font-size:.85rem;color:var(--ink-2)}
+  /* Faglige ledere */
+  .fl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .fl-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+  .fl-card .navn{font-weight:700}
+  .fl-card .rolle{color:var(--accent);font-size:.82rem;font-weight:600;margin-bottom:6px}
+  .fl-card .meta{font-size:.82rem;color:var(--ink-2)}
+  /* Nettlæring */
+  .nl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,300px));gap:14px}
+  .nl-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+  .nl-card .qr{display:flex;justify-content:center;margin:10px 0;background:#fff;border-radius:8px;padding:8px;width:fit-content;margin-inline:auto}
+  .nl-card .tittel{font-weight:700;margin-bottom:2px}
+  .nl-card .desc{font-size:.8rem;color:var(--muted);margin-bottom:6px}
+  .nl-card a{color:var(--accent);font-size:.8rem;word-break:break-all}
+  .film-liste{display:grid;gap:10px}
+  .film-rad{display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+  .film-rad .film-ikon{font-size:1.3rem;line-height:1.4}
+  .film-rad .film-tekst{flex:1;min-width:0}
+  .film-rad .film-tittel{font-weight:700;margin-bottom:2px}
+  .film-rad .film-desc{font-size:.82rem;color:var(--ink-2)}
+  .film-rad .film-meta{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .film-tag{font-size:.7rem;font-weight:700;letter-spacing:.03em;border-radius:999px;padding:2px 9px;border:1px solid var(--border);color:var(--muted)}
+  .film-tag.intern{border-color:var(--warn);color:var(--warn)}
+  .film-rad .film-knapp{flex:none;align-self:center;background:var(--accent);color:#fff;text-decoration:none;font-size:.82rem;font-weight:600;border-radius:8px;padding:8px 16px;white-space:nowrap}
+  @media(max-width:640px){.film-rad{flex-wrap:wrap}.film-rad .film-knapp{width:100%;text-align:center}}
+  /* Tilbakemelding */
+  .tb-topp{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px}
+  .tb-kpi{flex:1;min-width:150px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+  .tb-kpi .lab{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px}
+  .tb-kpi .tall{font-size:1.7rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+  .tb-kpi .av{font-size:.8rem;color:var(--muted);font-weight:400}
+  .tb-blokk{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+  .tb-blokk h3{margin-bottom:10px}
+  .tb-rad{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:.82rem}
+  .tb-rad .navn{flex:none;width:132px;color:var(--ink-2)}
+  .tb-rad .stolpe{flex:1;background:var(--chip);border-radius:5px;height:20px;overflow:hidden}
+  .tb-rad .fyll{display:block;min-width:3px;height:100%;background:var(--accent);border-radius:5px}
+  .tb-rad .fyll.midt{background:var(--good)}
+  .tb-rad .ant{flex:none;width:52px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+  .tb-komm{border-left:3px solid var(--accent);background:var(--chip);border-radius:0 8px 8px 0;padding:10px 13px;margin-bottom:9px;font-size:.88rem;white-space:pre-wrap}
+  .tb-komm .meta{font-size:.72rem;color:var(--muted);margin-top:6px;white-space:normal}
+  /* GBU */
+  .gbu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:900px){.gbu-grid{grid-template-columns:1fr}}
+  .gbu-col{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .gbu-head{padding:11px 14px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+  .gbu-good .gbu-head{background:var(--good)}
+  .gbu-bad .gbu-head{background:var(--warn);color:#0b0b0b}
+  .gbu-ugly .gbu-head{background:var(--crit)}
+  .gbu-list{padding:10px 12px;flex:1;min-height:80px}
+  .gbu-item{background:var(--chip);border-radius:8px;padding:8px 10px;font-size:.85rem;margin-bottom:8px;position:relative}
+  .gbu-item .meta{display:block;font-size:.7rem;color:var(--muted);margin-top:3px}
+  .gbu-item .del{position:absolute;top:4px;right:6px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:.85rem}
+  .gbu-item .del:hover{color:var(--crit)}
+  .gbu-add{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--grid)}
+  .gbu-add input{flex:1;min-width:0}
+  /* Aksjoner */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid var(--baseline);border-radius:999px;padding:5px 12px;font-size:.84rem;font-weight:600;cursor:grab;user-select:none}
+  .chip:active{cursor:grabbing}
+  .chip .av{width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:.62rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+  .chip .rm{border:none;background:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:0}
+  .chip .rm:hover{color:var(--crit)}
+  .aks-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;transition:box-shadow .15s,border-color .15s}
+  .aks-item.dragover{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+  .aks-item.ferdig .aks-text{text-decoration:line-through;color:var(--muted)}
+  .aks-top{display:flex;align-items:flex-start;gap:10px}
+  .aks-text{flex:1;font-size:.92rem}
+  .aks-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
+  .aks-resp{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .aks-resp .chip{cursor:default;padding:3px 10px;font-size:.78rem}
+  .aks-resp .tom{font-size:.78rem;color:var(--muted);font-style:italic;border:1px dashed var(--baseline);border-radius:999px;padding:3px 12px}
+  .aks-actions{display:flex;gap:6px;align-items:center}
+  .icon-btn{border:none;background:none;cursor:pointer;font-size:1rem;color:var(--muted);padding:2px}
+  .icon-btn:hover{color:var(--ink)}
+  .aks-new{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .aks-new input[type=text]{flex:1;min-width:220px}
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+  .stat .v{font-size:1.6rem;font-weight:700}
+  .stat .l{font-size:.78rem;color:var(--muted)}
+  .empty{color:var(--muted);font-size:.85rem;font-style:italic;padding:12px 0}
+  .om-check{width:18px;height:18px;accent-color:var(--good);cursor:pointer}
+  footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:30px}
+  .login-wrap{position:fixed;inset:0;background:var(--page);display:flex;align-items:center;justify-content:center;z-index:100}
+  .login-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;width:min(380px,92vw)}
+  .login-box h2{margin-bottom:4px}
+  .login-box form{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+  .login-err{color:var(--crit);font-size:.85rem;display:none}
+  .db-status{font-size:.75rem;color:var(--muted);white-space:nowrap;transition:opacity .4s}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div style="background:#e8842c;color:#fff;text-align:center;font-size:.8rem;font-weight:700;padding:6px 12px">DEMO – alle navn, telefonnumre og data er fiktive. Ingen database er tilkoblet; endringer lagres bare i nettleseren til du laster siden på nytt.</div>
+<div class="login-wrap hidden" id="login">
+  <div class="login-box">
+    <h2>Oppstartsuke 2026-kull</h2>
+    <p class="hint" style="margin:0">Logg inn med felleskontoen for instruktørteamet.</p>
+    <form id="login-form">
+      <input type="email" id="li-epost" placeholder="E-post" autocomplete="username" required>
+      <input type="password" id="li-passord" placeholder="Passord" autocomplete="current-password" required>
+      <div class="login-err" id="li-err"></div>
+      <button class="btn primary" type="submit">Logg inn</button>
+    </form>
+  </div>
+</div>
+<header>
+  <div class="head-top">
+    <h1>Oppstartsuke 2026-kull</h1>
+    <div class="sub">Uke 33–34 &middot; 10.–21. august 2026 &middot; Yard Academy</div>
+    <span class="db-status" id="db-status"></span>
+    <button class="btn" id="logg-ut" style="display:none">Logg ut</button>
+  </div>
+  <nav id="tabs"></nav>
+</header>
+<main id="main"></main>
+<footer>Oppstartsuke 2026-kull &middot; Yard Academy &middot; verftet</footer>
+<script>
+/* Data lastes fra content/dashboard-data.js */
+/* ================= TILSTAND (kun i denne økten) ================= */
+const state = {
+  oppmote:{},   // "dato|id" -> {start,slutt,kommentar}
+  gbu:{good:[],bad:[],ugly:[]},
+  personer:[], personerId:{},
+  aksjoner:[],
+  oppslag:[], oppslagEdit:null,
+  seksjoner:[], sekEdit:null,
+  tilbake:[],
+  valgtDag:"2026-08-10",
+  valgtUke:33
+};
+/* ================= SUPABASE ================= */
+let sb=null;
+function setStatus(t,ok=true){
+  const el=$("#db-status"); if(!el)return;
+  el.textContent=t; el.style.color=ok?"var(--muted)":"var(--crit)";
+  el.style.opacity=1; clearTimeout(setStatus._t);
+  if(ok) setStatus._t=setTimeout(()=>{el.style.opacity=0},2500);
+}
+async function dbTry(q,melding){
+  if(!sb)return true;
+  const {error}=await q;
+  if(error){console.error(error);setStatus("⚠ Lagring feilet – sjekk nett/innlogging",false);return false;}
+  setStatus(melding||"Lagret ✓");return true;
+}
+function dbOppmote(id){
+  if(!sb)return;const o=omGet(id);
+  dbTry(sb.from("oppmote").upsert({dato:state.valgtDag,larling_id:id,start_dag:o.start,slutt_dag:o.slutt,kommentar:o.kommentar}));
+}
+function dbOppmoteAlle(){
+  if(!sb)return;
+  const rows=LARLINGER.map(l=>{const o=omGet(l.id);return {dato:state.valgtDag,larling_id:l.id,start_dag:o.start,slutt_dag:o.slutt,kommentar:o.kommentar}});
+  dbTry(sb.from("oppmote").upsert(rows));
+}
+async function dbGbuAdd(key,t,m){
+  if(!sb){state.gbu[key].push({id:Date.now(),t,m});renderGbu();return;}
+  const {data,error}=await sb.from("gbu_notater").insert({kategori:key,tekst:t,meta:m}).select().single();
+  if(error){console.error(error);setStatus("⚠ Lagring feilet",false);return;}
+  state.gbu[key].push({id:data.id,t,m});setStatus("Lagret ✓");renderGbu();
+}
+function dbGbuDel(key,id){
+  state.gbu[key]=state.gbu[key].filter(x=>x.id!=id);renderGbu();
+  if(sb)dbTry(sb.from("gbu_notater").delete().eq("id",id),"Slettet ✓");
+}
+async function dbPersonAdd(navn){
+  if(!sb){state.personer.push(navn);renderAksjoner();return;}
+  const {data,error}=await sb.from("personer").insert({navn}).select().single();
+  if(error){console.error(error);setStatus("⚠ Lagring feilet",false);return;}
+  state.personer.push(navn);state.personerId[navn]=data.id;setStatus("Lagret ✓");renderAksjoner();
+}
+function dbPersonDel(navn){
+  state.personer=state.personer.filter(p=>p!==navn);renderAksjoner();
+  if(sb&&state.personerId[navn])dbTry(sb.from("personer").delete().eq("id",state.personerId[navn]),"Slettet ✓");
+}
+async function dbAksAdd(tekst,m){
+  if(!sb){state.aksjoner.push({id:Date.now(),tekst,resp:[],ferdig:false,m});renderAksjoner();return;}
+  const {data,error}=await sb.from("aksjoner").insert({tekst,resp:[],ferdig:false,meta:m}).select().single();
+  if(error){console.error(error);setStatus("⚠ Lagring feilet",false);return;}
+  state.aksjoner.push({id:data.id,tekst,resp:[],ferdig:false,m});setStatus("Lagret ✓");renderAksjoner();
+}
+function dbAksUpd(a){
+  if(sb)dbTry(sb.from("aksjoner").update({resp:a.resp,ferdig:a.ferdig}).eq("id",a.id));
+}
+function dbAksDel(id){
+  state.aksjoner=state.aksjoner.filter(x=>x.id!=id);renderAksjoner();
+  if(sb)dbTry(sb.from("aksjoner").delete().eq("id",id),"Slettet ✓");
+}
+async function dbOppslagSave(tittel,tekst,viktig){
+  if(!sb){setStatus("⚠ Ingen databasekobling",false);return;}
+  if(state.oppslagEdit){
+    const ok=await dbTry(sb.from("oppslag").update({tittel,tekst,viktig}).eq("id",state.oppslagEdit),"Oppdatert ✓ – live på infosiden");
+    if(!ok)return;
+    const o=state.oppslag.find(x=>x.id===state.oppslagEdit);
+    if(o){o.tittel=tittel;o.tekst=tekst;o.viktig=viktig;}
+    state.oppslagEdit=null;
+  }else{
+    const {data,error}=await sb.from("oppslag").insert({tittel,tekst,viktig}).select().single();
+    if(error){console.error(error);setStatus("⚠ Lagring feilet",false);return;}
+    state.oppslag.unshift(data);setStatus("Publisert ✓ – live på infosiden");
+  }
+  renderOppslag();
+}
+function dbOppslagDel(id){
+  state.oppslag=state.oppslag.filter(x=>x.id!=id);
+  if(state.oppslagEdit==id)state.oppslagEdit=null;
+  renderOppslag();
+  if(sb)dbTry(sb.from("oppslag").delete().eq("id",id),"Slettet ✓");
+}
+async function dbSekSave(ikon,tittel,innhold){
+  if(!sb){setStatus("⚠ Ingen databasekobling",false);return;}
+  if(state.sekEdit){
+    const ok=await dbTry(sb.from("info_seksjoner").update({ikon,tittel,innhold,oppdatert:new Date().toISOString()}).eq("id",state.sekEdit),"Oppdatert ✓ – live på infosiden");
+    if(!ok)return;
+    const x=state.seksjoner.find(v=>v.id===state.sekEdit);
+    if(x){x.ikon=ikon;x.tittel=tittel;x.innhold=innhold;}
+    state.sekEdit=null;
+  }else{
+    const rk=Math.max(0,...state.seksjoner.map(v=>v.rekkefolge))+10;
+    const {data,error}=await sb.from("info_seksjoner").insert({ikon,tittel,innhold,rekkefolge:rk}).select().single();
+    if(error){console.error(error);setStatus("⚠ Lagring feilet",false);return;}
+    state.seksjoner.push(data);setStatus("Publisert ✓ – live på infosiden");
+  }
+  renderOppslag();
+}
+function dbSekDel(id){
+  state.seksjoner=state.seksjoner.filter(v=>v.id!=id);
+  if(state.sekEdit==id)state.sekEdit=null;
+  renderOppslag();
+  if(sb)dbTry(sb.from("info_seksjoner").delete().eq("id",id),"Slettet ✓");
+}
+function dbSekSynlig(id){
+  const x=state.seksjoner.find(v=>v.id==id);if(!x)return;
+  x.synlig=!x.synlig;renderOppslag();
+  if(sb)dbTry(sb.from("info_seksjoner").update({synlig:x.synlig}).eq("id",id),x.synlig?"Vises ✓":"Skjult ✓");
+}
+function dbSekFlytt(id,retn){
+  const liste=state.seksjoner;
+  const i=liste.findIndex(v=>v.id==id);
+  const j=i+retn;
+  if(i<0||j<0||j>=liste.length)return;
+  const a=liste[i],b=liste[j];
+  [a.rekkefolge,b.rekkefolge]=[b.rekkefolge,a.rekkefolge];
+  liste.sort((x,y)=>x.rekkefolge-y.rekkefolge);
+  renderOppslag();
+  if(sb){dbTry(sb.from("info_seksjoner").update({rekkefolge:a.rekkefolge}).eq("id",a.id));
+         dbTry(sb.from("info_seksjoner").update({rekkefolge:b.rekkefolge}).eq("id",b.id),"Rekkefølge lagret ✓");}
+}
+async function lastData(){
+  const [pe,ak,gb,om,op,se,tb]=await Promise.all([
+    sb.from("personer").select("*").order("id"),
+    sb.from("aksjoner").select("*").order("created_at"),
+    sb.from("gbu_notater").select("*").order("created_at"),
+    sb.from("oppmote").select("*"),
+    sb.from("oppslag").select("*").order("created_at",{ascending:false}),
+    sb.from("info_seksjoner").select("*").order("rekkefolge"),
+    sb.from("tilbakemelding").select("*").order("created_at",{ascending:false})
+  ]);
+  if(pe.error||ak.error||gb.error||om.error){
+    console.error(pe.error||ak.error||gb.error||om.error);
+    setStatus("⚠ Fikk ikke lastet data – er databasetabellene opprettet?",false);
+    return;
+  }
+  state.personer=pe.data.map(p=>p.navn);
+  state.personerId=Object.fromEntries(pe.data.map(p=>[p.navn,p.id]));
+  state.aksjoner=ak.data.map(a=>({id:a.id,tekst:a.tekst,resp:a.resp||[],ferdig:a.ferdig,m:a.meta||""}));
+  state.gbu={good:[],bad:[],ugly:[]};
+  gb.data.forEach(n=>{if(state.gbu[n.kategori])state.gbu[n.kategori].push({id:n.id,t:n.tekst,m:n.meta||""})});
+  state.oppmote={};
+  om.data.forEach(r=>{state.oppmote[r.dato+"|"+r.larling_id]={start:r.start_dag,slutt:r.slutt_dag,kommentar:r.kommentar||""}});
+  state.oppslag=(op&&!op.error&&op.data)?op.data:[];
+  state.seksjoner=(se&&!se.error&&se.data)?se.data:[];
+  state.tilbake=(tb&&!tb.error&&tb.data)?tb.data:[];
+  setStatus("Data lastet ✓");
+}
+/* ================= HJELPERE ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials=n=>n.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const grTag=g=>g==="Alle"?"":`<span class="gr-tag gr-${g}" style="background:var(--g-${g.toLowerCase()})">${g}</span>`;
+function omKey(id){return state.valgtDag+"|"+id}
+function omGet(id){return state.oppmote[omKey(id)] || (state.oppmote[omKey(id)]={start:false,slutt:false,kommentar:""})}
+function nedlast(navn,innhold,type){
+  const b=new Blob([innhold],{type:type||"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=navn;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+/* ================= FANER ================= */
+const TABS=[
+  {id:"timeplan", navn:"Timeplan"},
+  {id:"larlinger", navn:"Lærlinger"},
+  {id:"grupper", navn:"Grupper"},
+  {id:"oppmote", navn:"Oppmøte"},
+  {id:"ledere", navn:"Faglige ledere"},
+  {id:"nettlaring", navn:"Nettlæring"},
+  {id:"oppslag", navn:"Infoside"},
+  {id:"gbu", navn:"Good · Bad · Ugly"},
+  {id:"aksjoner", navn:"Aksjoner"},
+  {id:"tilbakemelding", navn:"Tilbakemelding"}
+];
+function byggFaner(){
+  $("#tabs").innerHTML=TABS.map(t=>`<button data-tab="${t.id}">${t.navn}</button>`).join("");
+  $("#main").innerHTML=TABS.map(t=>`<section id="sec-${t.id}"></section>`).join("");
+  $("#tabs").addEventListener("click",e=>{
+    const b=e.target.closest("button");if(!b)return;
+    visFane(b.dataset.tab);
+  });
+}
+function visFane(id){
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));
+  document.querySelectorAll("main section").forEach(s=>s.classList.toggle("active",s.id==="sec-"+id));
+}
+/* ================= TIMEPLAN ================= */
+function renderTimeplan(){
+  const dager=DAGER.filter(d=>d.uke===state.valgtUke);
+  $("#sec-timeplan").innerHTML=`
+    <div class="toolbar">
+      <div class="wk-toggle">
+        <button class="${state.valgtUke===33?'active':''}" data-uke="33">Uke 33</button>
+        <button class="${state.valgtUke===34?'active':''}" data-uke="34">Uke 34</button>
+      </div>
+      <span class="ex-badge">Med forbehold om endringer – sjekk innom hver morgen</span>
+    </div>
+    ${(state.valgtUke===33&&typeof KLASSEROM_OPPGAVER!=="undefined")?`<div class="note">${esc(KLASSEROM_OPPGAVER)}</div>`:""}
+    <div class="tp-grid">
+      ${dager.map(d=>`
+        <div class="tp-day">
+          <h3>${d.label} <span>${d.kort}</span></h3>
+          ${(typeof VERTER!=="undefined"&&VERTER[d.dato])?`<div class="vert">Klasseromsansvarlig: ${esc(VERTER[d.dato])}</div>`:""}
+          ${(TIMEPLAN[d.dato]||[]).map(t=>`
+            <div class="tp-item ${t.lunsj?'lunsj':''}">
+              <span class="tid">${t.tid}</span> ${esc(t.tittel)}${grTag(t.gr)}${t.sted?`<br><span class="sted">${esc(t.sted)}</span>`:""}
+            </div>`).join("") || '<div class="empty">Ingen økter</div>'}
+        </div>`).join("")}
+    </div>`;
+  $("#sec-timeplan .wk-toggle").addEventListener("click",e=>{
+    const b=e.target.closest("button");if(!b)return;
+    state.valgtUke=+b.dataset.uke;renderTimeplan();
+  });
+}
+/* ================= LÆRLINGER ================= */
+function renderLarlinger(filter=""){
+  const f=filter.toLowerCase();
+  const rows=LARLINGER.filter(l=>!f||l.navn.toLowerCase().includes(f)||l.fag.toLowerCase().includes(f)||l.leder.toLowerCase().includes(f));
+  $("#sec-larlinger").innerHTML=`
+    <div class="card">
+      <h2>Oversikt lærlinger <span class="ex-badge">Lærlingliste 05.08</span></h2>
+      <p class="hint">${LARLINGER.length} lærlinger i 2026-kullet. Søk på navn, fag eller faglig leder.</p>
+      <div class="toolbar"><input type="search" id="l-sok" placeholder="Søk …" value="${esc(filter)}" style="min-width:240px"></div>
+      <table>
+        <thead><tr><th>Navn</th><th>Fag</th><th>Gruppe</th><th>Faglig leder</th><th>Telefon</th></tr></thead>
+        <tbody>
+          ${rows.map(l=>`<tr>
+            <td><strong>${esc(l.navn)}</strong></td>
+            <td>${esc(l.fag)}</td>
+            <td><span class="gr-dot gr-${l.gruppe}">${l.gruppe}</span></td>
+            <td>${esc(l.leder)}</td>
+            <td class="num">${l.tlf?esc(l.tlf):"–"}</td>
+          </tr>`).join("") || `<tr><td colspan="5" class="empty">Ingen treff</td></tr>`}
+        </tbody>
+      </table>
+    </div>`;
+  const inp=$("#l-sok");
+  inp.addEventListener("input",()=>{const v=inp.value;renderLarlinger(v);const ni=$("#l-sok");ni.focus();ni.setSelectionRange(v.length,v.length)});
+}
+/* ================= GRUPPER ================= */
+function renderGrupper(){
+  const grupper=["A","B","C"];
+  $("#sec-grupper").innerHTML=`
+    <p class="hint">Fra lærlinglisten 05.08. Gruppene er delt inn fagvis.</p>
+    <div class="grp-grid">
+      ${grupper.map(g=>{
+        const medl=LARLINGER.filter(l=>l.gruppe===g);
+        return `<div class="grp-card">
+          <div class="grp-head" style="background:var(--g-${g.toLowerCase()})">
+            <strong>Gruppe ${g}</strong><span class="cnt">${medl.length} lærlinger</span>
+          </div>
+          ${(typeof GRUPPELEDERE!=="undefined"&&GRUPPELEDERE[g])?`<div class="grp-leder">Gruppeleder: <strong>${esc(GRUPPELEDERE[g])}</strong></div>`:""}
+          <ul>${medl.map(l=>`<li><span>${esc(l.navn)}</span><span class="fag">${esc(l.fag.replace("faget",""))}</span></li>`).join("")}</ul>
+        </div>`;
+      }).join("")}
+    </div>`;
+}
+/* ================= OPPMØTE ================= */
+function renderOppmote(){
+  const dag=DAGER.find(d=>d.dato===state.valgtDag);
+  let start=0,slutt=0;
+  LARLINGER.forEach(l=>{const o=state.oppmote[omKey(l.id)];if(o){if(o.start)start++;if(o.slutt)slutt++;}});
+  $("#sec-oppmote").innerHTML=`
+    <div class="note">Oppmøte lagres fortløpende i databasen. «Eksporter CSV» gir utskrift/backup.</div>
+    <div class="toolbar">
+      <label for="om-dag" style="font-weight:600;font-size:.88rem">Dag:</label>
+      <select id="om-dag">${DAGER.map(d=>`<option value="${d.dato}" ${d.dato===state.valgtDag?'selected':''}>Uke ${d.uke} – ${d.label} ${d.kort}</option>`).join("")}</select>
+      <div class="spacer"></div>
+      <button class="btn" id="om-alle">Huk av alle (start)</button>
+      <button class="btn" id="om-csv">Eksporter CSV</button>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="v num">${start}/${LARLINGER.length}</div><div class="l">Møtt – start av dag</div></div>
+      <div class="stat"><div class="v num">${slutt}/${LARLINGER.length}</div><div class="l">Til stede – slutt av dag</div></div>
+      <div class="stat"><div class="v num">${LARLINGER.length-start}</div><div class="l">Ikke registrert (start)</div></div>
+    </div>
+    <div class="card">
+      <h2>Oppmøte – ${dag.label} ${dag.kort} (uke ${dag.uke})</h2>
+      <table>
+        <thead><tr><th>Lærling</th><th>Gruppe</th><th style="text-align:center">Start av dag</th><th style="text-align:center">Slutt av dag</th><th style="width:32%">Kommentar</th></tr></thead>
+        <tbody>
+          ${LARLINGER.map(l=>{const o=omGet(l.id);return `<tr>
+            <td><strong>${esc(l.navn)}</strong></td>
+            <td><span class="gr-dot gr-${l.gruppe}">${l.gruppe}</span></td>
+            <td style="text-align:center"><input type="checkbox" class="om-check" data-id="${l.id}" data-felt="start" ${o.start?'checked':''} aria-label="Start ${esc(l.navn)}"></td>
+            <td style="text-align:center"><input type="checkbox" class="om-check" data-id="${l.id}" data-felt="slutt" ${o.slutt?'checked':''} aria-label="Slutt ${esc(l.navn)}"></td>
+            <td><input type="text" class="om-komm" data-id="${l.id}" value="${esc(o.kommentar)}" placeholder="F.eks. syk, kom 09:15 …" style="width:100%"></td>
+          </tr>`}).join("")}
+        </tbody>
+      </table>
+    </div>`;
+  $("#om-dag").addEventListener("change",e=>{state.valgtDag=e.target.value;renderOppmote()});
+  $("#om-alle").addEventListener("click",()=>{LARLINGER.forEach(l=>omGet(l.id).start=true);dbOppmoteAlle();renderOppmote()});
+  $("#om-csv").addEventListener("click",()=>{
+    const rader=[["Dato","Navn","Gruppe","Start","Slutt","Kommentar"]];
+    Object.entries(state.oppmote).forEach(([k,o])=>{
+      const [dato,id]=k.split("|");const l=LARLINGER.find(x=>x.id==id);
+      if(l&&(o.start||o.slutt||o.kommentar))rader.push([dato,l.navn,l.gruppe,o.start?"Ja":"Nei",o.slutt?"Ja":"Nei",o.kommentar]);
+    });
+    nedlast("oppmote-2026-kull.csv","﻿"+rader.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n"));
+  });
+  document.querySelectorAll(".om-check").forEach(c=>c.addEventListener("change",()=>{
+    omGet(+c.dataset.id)[c.dataset.felt]=c.checked;dbOppmote(+c.dataset.id);renderOppmote();
+  }));
+  document.querySelectorAll(".om-komm").forEach(i=>i.addEventListener("change",()=>{
+    omGet(+i.dataset.id).kommentar=i.value;dbOppmote(+i.dataset.id);
+  }));
+}
+/* ================= FAGLIGE LEDERE ================= */
+function renderLedere(){
+  $("#sec-ledere").innerHTML=`
+    <p class="hint">Faglige ledere per fag (oversikt 03.08). Telefon og e-post legges inn når det er klart.</p>
+    <div class="fl-grid">
+      ${LEDERE.map(p=>`<div class="fl-card">
+          <div class="navn">${esc(p.navn)}</div>
+          <div class="rolle">${esc(p.fag)}</div>
+          ${p.merknad?`<div class="meta">${esc(p.merknad)}</div>`:""}
+        </div>`).join("")}
+    </div>`;
+}
+/* ================= NETTLÆRING ================= */
+function renderNettlaring(){
+  $("#sec-nettlaring").innerHTML=`
+    <p class="hint">Skann QR-koden med mobilen, eller bruk lenken.</p>
+    <div class="nl-grid">
+      ${NETTLARING.map((n,i)=>`
+        <div class="nl-card">
+          <div class="tittel">${esc(n.tittel)}</div>
+          <div class="desc">${esc(n.desc)}</div>
+          <div class="qr" id="qr-${i}"></div>
+          <a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.url)}</a>
+        </div>`).join("")}
+    </div>
+    <h3 style="margin:26px 0 4px">Filmer</h3>
+    <p class="hint">Vises i klasserommet. Filmer merket <span class="film-tag intern">KREVER INTERN PÅLOGGING</span> må åpnes fra en PC som er logget inn i Verftet AS.</p>
+    <div class="film-liste">
+      ${FILMER.map(f=>`
+        <div class="film-rad">
+          <div class="film-ikon">🎬</div>
+          <div class="film-tekst">
+            <div class="film-tittel">${esc(f.tittel)}</div>
+            <div class="film-desc">${esc(f.desc)}</div>
+            <div class="film-meta">
+              <span class="film-tag">${esc(f.kilde)}</span>
+              ${f.intern?'<span class="film-tag intern">KREVER INTERN PÅLOGGING</span>':'<span class="film-tag">ÅPEN LENKE</span>'}
+            </div>
+          </div>
+          <a class="film-knapp" href="${esc(f.url)}" target="_blank" rel="noopener">Spill av ↗</a>
+        </div>`).join("")}
+    </div>`;
+  if(typeof QRCode!=="undefined"){
+    NETTLARING.forEach((n,i)=>{new QRCode(document.getElementById("qr-"+i),{text:n.url,width:120,height:120,colorDark:"#0b0b0b",colorLight:"#ffffff"});});
+  }else{
+    NETTLARING.forEach((n,i)=>{document.getElementById("qr-"+i).innerHTML='<span style="font-size:.75rem;color:#898781;padding:20px">QR utilgjengelig offline<br>– bruk lenken under</span>';});
+  }
+}
+/* ================= INFOSIDE / OPPSLAG ================= */
+function renderOppslag(){
+  const red=state.oppslagEdit?state.oppslag.find(x=>x.id===state.oppslagEdit):null;
+  const fmt=ts=>{try{return new Date(ts).toLocaleString("nb-NO",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}catch(e){return ""}};
+  $("#sec-oppslag").innerHTML=`
+    <div class="note">Beskjeder her publiseres <strong>umiddelbart</strong> øverst på den åpne lærlingsiden (/info) – ingen deploy nødvendig. Bruk «Viktig» for rød markering.</div>
+    <div class="card">
+      <h2>${red?"Rediger beskjed":"Ny beskjed til lærlingsiden"}</h2>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+        <input type="text" id="op-tittel" placeholder="Tittel – f.eks. «Endret oppmøtested i morgen»" value="${red?esc(red.tittel):""}">
+        <textarea id="op-tekst" rows="4" placeholder="Tekst (linjeskift beholdes)">${red?esc(red.tekst):""}</textarea>
+        <label style="font-size:.88rem;display:flex;gap:8px;align-items:center"><input type="checkbox" id="op-viktig" class="om-check" ${red&&red.viktig?"checked":""}> Viktig (rød markering)</label>
+        <div style="display:flex;gap:8px">
+          <button class="btn primary" id="op-lagre">${red?"Oppdater":"Publiser"}</button>
+          ${red?'<button class="btn" id="op-avbryt">Avbryt</button>':""}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Publiserte beskjeder (${state.oppslag.length})</h3>
+      ${state.oppslag.map(o=>`
+        <div class="aks-item">
+          <div class="aks-top">
+            <div style="flex:1">
+              <div class="aks-text"><strong>${o.viktig?"📌 ":""}${esc(o.tittel)}</strong></div>
+              <div style="font-size:.85rem;color:var(--ink-2);white-space:pre-line">${esc(o.tekst)}</div>
+              <div class="aks-meta">${fmt(o.created_at)}${o.viktig?" · VIKTIG":""}</div>
+            </div>
+            <div class="aks-actions">
+              <button class="btn" data-red="${o.id}">Rediger</button>
+              <button class="icon-btn" data-slett="${o.id}" title="Slett">🗑</button>
+            </div>
+          </div>
+        </div>`).join("") || '<div class="empty">Ingen beskjeder publisert ennå.</div>'}
+    </div>`;
+  $("#op-lagre").addEventListener("click",()=>{
+    const t=$("#op-tittel").value.trim();if(!t)return;
+    dbOppslagSave(t,$("#op-tekst").value.trim(),$("#op-viktig").checked);
+  });
+  const av=$("#op-avbryt");if(av)av.addEventListener("click",()=>{state.oppslagEdit=null;renderOppslag();});
+  document.querySelectorAll("[data-red]").forEach(b=>b.addEventListener("click",()=>{state.oppslagEdit=+b.dataset.red;renderOppslag();}));
+  document.querySelectorAll("[data-slett]").forEach(b=>b.addEventListener("click",()=>dbOppslagDel(b.dataset.slett)));
+  /* --- seksjoner --- */
+  const sred=state.sekEdit?state.seksjoner.find(v=>v.id===state.sekEdit):null;
+  $("#sec-oppslag").insertAdjacentHTML("beforeend",`
+    <div class="card">
+      <h2>${sred?"Rediger seksjon":"Ny seksjon på lærlingsiden"}</h2>
+      <p class="hint" style="margin-bottom:8px">Formatering: blank linje = nytt avsnitt · linjer med «- » = punktliste · avsnitt som starter med «!» = uthevet boks · **tekst** = fet.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:8px">
+          <input type="text" id="sek-ikon" placeholder="Emoji" style="width:70px" value="${sred?esc(sred.ikon||""):""}">
+          <input type="text" id="sek-tittel" placeholder="Tittel" style="flex:1" value="${sred?esc(sred.tittel):""}">
+        </div>
+        <textarea id="sek-innhold" rows="7" placeholder="Innhold …">${sred?esc(sred.innhold||""):""}</textarea>
+        <div style="display:flex;gap:8px">
+          <button class="btn primary" id="sek-lagre">${sred?"Oppdater":"Legg til seksjon"}</button>
+          ${sred?'<button class="btn" id="sek-avbryt">Avbryt</button>':""}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Seksjoner på lærlingsiden (${state.seksjoner.length})</h3>
+      <p class="hint">Rekkefølgen her er rekkefølgen på siden. Skjulte seksjoner er kun borte for lærlingene – ikke slettet.</p>
+      ${state.seksjoner.map((v,i)=>`
+        <div class="aks-item" style="${v.synlig?"":"opacity:.55"}">
+          <div class="aks-top">
+            <div style="flex:1">
+              <div class="aks-text">${esc(v.ikon||"")} <strong>${esc(v.tittel)}</strong>${v.synlig?"":' <span class="ex-badge">SKJULT</span>'}</div>
+              <div class="aks-meta">${esc((v.innhold||"").replace(/\n+/g," ").slice(0,90))}…</div>
+            </div>
+            <div class="aks-actions">
+              <button class="icon-btn" data-sflytt="-1" data-sid="${v.id}" title="Flytt opp" ${i===0?"disabled":""}>▲</button>
+              <button class="icon-btn" data-sflytt="1" data-sid="${v.id}" title="Flytt ned" ${i===state.seksjoner.length-1?"disabled":""}>▼</button>
+              <button class="btn" data-ssyn="${v.id}">${v.synlig?"Skjul":"Vis"}</button>
+              <button class="btn" data-sred="${v.id}">Rediger</button>
+              <button class="icon-btn" data-sslett="${v.id}" title="Slett">🗑</button>
+            </div>
+          </div>
+        </div>`).join("") || '<div class="empty">Ingen seksjoner i databasen ennå – i demoversjonen er databasen frakoblet.</div>'}
+    </div>`);
+  $("#sek-lagre").addEventListener("click",()=>{
+    const t=$("#sek-tittel").value.trim();if(!t)return;
+    dbSekSave($("#sek-ikon").value.trim(),t,$("#sek-innhold").value);
+  });
+  const sav=$("#sek-avbryt");if(sav)sav.addEventListener("click",()=>{state.sekEdit=null;renderOppslag();});
+  document.querySelectorAll("[data-sred]").forEach(b=>b.addEventListener("click",()=>{state.sekEdit=+b.dataset.sred;renderOppslag();window.scrollTo(0,0);}));
+  document.querySelectorAll("[data-sslett]").forEach(b=>b.addEventListener("click",()=>dbSekDel(b.dataset.sslett)));
+  document.querySelectorAll("[data-ssyn]").forEach(b=>b.addEventListener("click",()=>dbSekSynlig(b.dataset.ssyn)));
+  document.querySelectorAll("[data-sflytt]").forEach(b=>b.addEventListener("click",()=>dbSekFlytt(b.dataset.sid,+b.dataset.sflytt)));
+}
+/* ================= GOOD / BAD / UGLY ================= */
+function renderGbu(){
+  const KOL=[
+    {key:"good", tittel:"The Good", ikon:"👍", cls:"gbu-good", ph:"Hva fungerte bra?"},
+    {key:"bad",  tittel:"The Bad",  ikon:"👎", cls:"gbu-bad",  ph:"Hva fungerte dårlig?"},
+    {key:"ugly", tittel:"The Ugly", ikon:"⚠️", cls:"gbu-ugly", ph:"Hva må vi aldri gjenta?"}
+  ];
+  $("#sec-gbu").innerHTML=`
+    <div class="note">Notatene lagres i databasen – skriv inn fortløpende gjennom ukene.</div>
+    <div class="gbu-grid">
+      ${KOL.map(k=>`
+        <div class="gbu-col ${k.cls}">
+          <div class="gbu-head">${k.ikon} ${k.tittel} <span style="margin-left:auto;font-size:.8rem">${state.gbu[k.key].length}</span></div>
+          <div class="gbu-list">
+            ${state.gbu[k.key].map((it,i)=>`
+              <div class="gbu-item">${esc(it.t)}
+                <span class="meta">${esc(it.m)}</span>
+                <button class="del" data-k="${k.key}" data-id="${it.id}" title="Slett">✕</button>
+              </div>`).join("") || '<div class="empty">Ingen notater ennå</div>'}
+          </div>
+          <div class="gbu-add">
+            <input type="text" data-k="${k.key}" placeholder="${k.ph}">
+            <button class="btn" data-add="${k.key}">+</button>
+          </div>
+        </div>`).join("")}
+    </div>`;
+  const leggTil=key=>{
+    const inp=document.querySelector(`.gbu-add input[data-k="${key}"]`);
+    const v=inp.value.trim();if(!v)return;
+    const d=DAGER.find(x=>x.dato===state.valgtDag);
+    inp.value="";
+    dbGbuAdd(key,v,(d?`Uke ${d.uke} · ${d.label} ${d.kort}`:""));
+  };
+  document.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>leggTil(b.dataset.add)));
+  document.querySelectorAll(".gbu-add input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")leggTil(i.dataset.k)}));
+  document.querySelectorAll(".gbu-item .del").forEach(b=>b.addEventListener("click",()=>{
+    dbGbuDel(b.dataset.k,b.dataset.id);
+  }));
+}
+/* ================= AKSJONER ================= */
+function renderAksjoner(){
+  const apne=state.aksjoner.filter(a=>!a.ferdig).length;
+  $("#sec-aksjoner").innerHTML=`
+    <div class="note">Dra et navn fra listen og slipp det på en aksjon for å sette ansvarlig – eller bruk nedtrekksmenyen. Alt lagres i databasen.</div>
+    <div class="card">
+      <h3>Personer</h3>
+      <p class="hint" style="margin-bottom:4px">Legg til navn som kan settes som ansvarlige.</p>
+      <div class="chips" id="pers-chips">
+        ${state.personer.map((p,i)=>`
+          <span class="chip" draggable="true" data-p="${esc(p)}">
+            <span class="av">${initials(p)}</span>${esc(p)}
+            <button class="rm" data-navn="${esc(p)}" title="Fjern">✕</button>
+          </span>`).join("")}
+      </div>
+      <div class="toolbar" style="margin:8px 0 0">
+        <input type="text" id="ny-person" placeholder="Nytt navn …">
+        <button class="btn" id="legg-person">Legg til person</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Aksjoner <span class="ex-badge">${apne} åpne</span></h2>
+      <div class="aks-new">
+        <input type="text" id="ny-aksjon" placeholder="Ny aksjon – hva skal gjøres?">
+        <button class="btn primary" id="legg-aksjon">Legg til aksjon</button>
+        <button class="btn" id="aks-csv">Eksporter CSV</button>
+      </div>
+      <div id="aks-liste">
+        ${state.aksjoner.map(a=>`
+          <div class="aks-item ${a.ferdig?'ferdig':''}" data-aid="${a.id}">
+            <div class="aks-top">
+              <input type="checkbox" class="om-check aks-done" data-aid="${a.id}" ${a.ferdig?'checked':''} title="Merk som ferdig">
+              <div style="flex:1">
+                <div class="aks-text">${esc(a.tekst)}</div>
+                <div class="aks-meta">${esc(a.m||"")}</div>
+                <div class="aks-resp">
+                  ${a.resp.length?a.resp.map(p=>`
+                    <span class="chip"><span class="av">${initials(p)}</span>${esc(p)}
+                      <button class="rm" data-aid="${a.id}" data-p="${esc(p)}" title="Fjern ansvarlig">✕</button>
+                    </span>`).join("")
+                  :'<span class="tom">Slipp et navn her – ingen ansvarlig ennå</span>'}
+                </div>
+              </div>
+              <div class="aks-actions">
+                <select class="aks-velg" data-aid="${a.id}" title="Legg til ansvarlig">
+                  <option value="">+ ansvarlig</option>
+                  ${state.personer.filter(p=>!a.resp.includes(p)).map(p=>`<option>${esc(p)}</option>`).join("")}
+                </select>
+                <button class="icon-btn aks-slett" data-aid="${a.id}" title="Slett aksjon">🗑</button>
+              </div>
+            </div>
+          </div>`).join("") || '<div class="empty">Ingen aksjoner ennå – legg til den første over.</div>'}
+      </div>
+    </div>`;
+  /* personer */
+  const leggP=()=>{
+    const v=$("#ny-person").value.trim();if(!v)return;
+    if(!state.personer.includes(v))dbPersonAdd(v);
+  };
+  $("#legg-person").addEventListener("click",leggP);
+  $("#ny-person").addEventListener("keydown",e=>{if(e.key==="Enter")leggP()});
+  document.querySelectorAll("#pers-chips .rm").forEach(b=>b.addEventListener("click",()=>{
+    dbPersonDel(b.dataset.navn);
+  }));
+  /* dra og slipp */
+  document.querySelectorAll("#pers-chips .chip").forEach(c=>{
+    c.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",c.dataset.p);e.dataTransfer.effectAllowed="copy"});
+  });
+  document.querySelectorAll(".aks-item").forEach(el=>{
+    el.addEventListener("dragover",e=>{e.preventDefault();e.dataTransfer.dropEffect="copy";el.classList.add("dragover")});
+    el.addEventListener("dragleave",()=>el.classList.remove("dragover"));
+    el.addEventListener("drop",e=>{
+      e.preventDefault();el.classList.remove("dragover");
+      const p=e.dataTransfer.getData("text/plain");if(!p)return;
+      const a=state.aksjoner.find(x=>x.id==el.dataset.aid);
+      if(a&&!a.resp.includes(p)){a.resp.push(p);dbAksUpd(a);renderAksjoner();}
+    });
+  });
+  /* aksjoner */
+  const leggA=()=>{
+    const v=$("#ny-aksjon").value.trim();if(!v)return;
+    const d=new Date();
+    dbAksAdd(v,`Opprettet ${d.toLocaleDateString("nb-NO",{day:"numeric",month:"short"})}`);
+  };
+  $("#legg-aksjon").addEventListener("click",leggA);
+  $("#ny-aksjon").addEventListener("keydown",e=>{if(e.key==="Enter")leggA()});
+  document.querySelectorAll(".aks-done").forEach(c=>c.addEventListener("change",()=>{
+    const a=state.aksjoner.find(x=>x.id==c.dataset.aid);a.ferdig=c.checked;dbAksUpd(a);renderAksjoner();
+  }));
+  document.querySelectorAll(".aks-slett").forEach(b=>b.addEventListener("click",()=>{
+    dbAksDel(b.dataset.aid);
+  }));
+  document.querySelectorAll(".aks-velg").forEach(s=>s.addEventListener("change",()=>{
+    if(!s.value)return;
+    const a=state.aksjoner.find(x=>x.id==s.dataset.aid);
+    if(a&&!a.resp.includes(s.value)){a.resp.push(s.value);dbAksUpd(a);}
+    renderAksjoner();
+  }));
+  document.querySelectorAll(".aks-resp .rm").forEach(b=>b.addEventListener("click",()=>{
+    const a=state.aksjoner.find(x=>x.id==b.dataset.aid);
+    if(a){a.resp=a.resp.filter(p=>p!==b.dataset.p);dbAksUpd(a);}
+    renderAksjoner();
+  }));
+}
+/* ================= INIT ================= */
+/* ================= TILBAKEMELDING ================= */
+const TB_LUFT=["Alt for trangt","Litt for trangt","Passelig","Litt mye dødtid","Alt for mye dødtid"];
+function tbFordeling(rader,felt,etiketter,midt){
+  const n=etiketter.length, tell=Array(n).fill(0);
+  rader.forEach(r=>{const v=r[felt];if(v>=1&&v<=n)tell[v-1]++;});
+  const maks=Math.max(1,...tell), sum=tell.reduce((a,b)=>a+b,0);
+  return tell.map((c,i)=>`
+    <div class="tb-rad">
+      <span class="navn">${esc(etiketter[i])}</span>
+      <span class="stolpe"><span class="fyll${midt&&i===2?" midt":""}" style="width:${Math.round(c/maks*100)}%"></span></span>
+      <span class="ant">${c}${sum?" · "+Math.round(c/sum*100)+"%":""}</span>
+    </div>`).join("");
+}
+function tbSnitt(rader,felt){
+  const v=rader.map(r=>r[felt]).filter(x=>x>=1&&x<=5);
+  return v.length?{snitt:(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1),n:v.length}:{snitt:"–",n:0};
+}
+function renderTilbake(){
+  const rader=state.tilbake||[];
+  const f=tbSnitt(rader,"info_forkant"), u=tbSnitt(rader,"info_underveis");
+  const komm=rader.filter(r=>(r.kommentar||"").trim());
+  const lenke=location.origin+"/tilbakemelding/";
+  $("#sec-tilbakemelding").innerHTML=`
+    <div class="card">
+      <h2>Tilbakemelding fra lærlingene</h2>
+      <p class="hint">Anonyme svar fra <a href="${esc(lenke)}" target="_blank" rel="noopener">${esc(lenke)}</a>.
+        Ingen navn, ingen innlogging – svarene kan ikke spores tilbake til enkeltpersoner.</p>
+      <div class="tb-topp">
+        <div class="tb-kpi"><div class="lab">Antall svar</div><div class="tall">${rader.length}</div></div>
+        <div class="tb-kpi"><div class="lab">Info i forkant</div><div class="tall">${f.snitt}<span class="av"> / 5 · ${f.n} svar</span></div></div>
+        <div class="tb-kpi"><div class="lab">Info underveis</div><div class="tall">${u.snitt}<span class="av"> / 5 · ${u.n} svar</span></div></div>
+      </div>
+      ${rader.length?`
+      <div class="tb-blokk"><h3>Informasjon i forkant av oppstart</h3>
+        ${tbFordeling(rader,"info_forkant",["1 – svært dårlig","2","3","4","5 – svært bra"],false)}</div>
+      <div class="tb-blokk"><h3>Informasjon underveis i første uke</h3>
+        ${tbFordeling(rader,"info_underveis",["1 – svært dårlig","2","3","4","5 – svært bra"],false)}</div>
+      <div class="tb-blokk"><h3>Luft i programmet <span class="ex-badge">grønn = midten, det vi sikter mot</span></h3>
+        ${tbFordeling(rader,"luft",TB_LUFT,true)}</div>
+      <div class="tb-blokk"><h3>Kommentarer (${komm.length})</h3>
+        ${komm.length?komm.map(r=>`<div class="tb-komm">${esc(r.kommentar.trim())}
+          <div class="meta">${new Date(r.created_at).toLocaleString("nb-NO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}${r.luft?" · luft: "+esc(TB_LUFT[r.luft-1]):""}</div></div>`).join(""):'<p class="hint">Ingen kommentarer ennå.</p>'}
+      </div>`:'<p class="hint">Ingen svar registrert ennå. Del QR-koden med lærlingene, så dukker svarene opp her.</p>'}
+    </div>`;
+}
+function renderAlt(){
+  renderTimeplan();renderLarlinger();renderGrupper();renderOppmote();
+  renderLedere();renderNettlaring();renderGbu();renderAksjoner();renderOppslag();renderTilbake();
+}
+function visApp(vis){
+  document.querySelector("header").classList.toggle("hidden",!vis);
+  document.querySelector("main").classList.toggle("hidden",!vis);
+  document.querySelector("footer").classList.toggle("hidden",!vis);
+  $("#login").classList.toggle("hidden",vis);
+}
+async function startApp(){
+  visApp(true);
+  $("#logg-ut").style.display="";
+  await lastData();
+  renderAlt();
+}
+async function init(){
+  byggFaner();renderAlt();visFane("timeplan");
+  if(typeof SB_URL==="undefined"||typeof supabase==="undefined"){return;} // lokal modus uten database
+  sb=supabase.createClient(SB_URL,SB_KEY);
+  const {data:{session}}=await sb.auth.getSession();
+  if(session){await startApp();}else{visApp(false);}
+  $("#login-form").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const err=$("#li-err");err.style.display="none";
+    const {error}=await sb.auth.signInWithPassword({email:$("#li-epost").value.trim(),password:$("#li-passord").value});
+    if(error){err.textContent="Feil e-post eller passord.";err.style.display="block";return;}
+    await startApp();
+  });
+  $("#logg-ut").addEventListener("click",async()=>{await sb.auth.signOut();location.reload();});
+}
+init();
+</script>
+<script>
+/* Demo-stub: alle databasekall blir no-ops som lykkes */
+sb=(function(){const t=function(){};const p=new Proxy(t,{get:(o,k)=>k==="then"?(r=>r({data:[],error:null})):p,apply:()=>p});return p})();
+</script>
+</body>
+</html>

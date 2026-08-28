@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lærlinginfo – Oppstartsuke 2026</title>
+<style>
+  :root{
+    --navy:#141c2b; --navy-2:#1d2842; --orange:#e8842c; --blue:#3b74d9;
+    --page:#f4f5f7; --surface:#ffffff; --ink:#1a2030; --ink-2:#4a5262; --muted:#8a91a0;
+    --grid:#e3e6ea; --baseline:#c9cdd5; --border:rgba(20,28,43,.08);
+    --chip:#eef0f3; --accent:#3b74d9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--page);color:var(--ink);line-height:1.55;padding-bottom:0}
+  .serif{font-family:Georgia,"Times New Roman",serif}
+  .hero{background:var(--navy);color:#fff;padding:30px 22px 26px;text-align:center}
+  .hero .merke{font-size:.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#aeb6c6;margin-bottom:8px}
+  .hero h1{font-family:Georgia,"Times New Roman",serif;font-size:1.7rem;font-weight:700;margin-bottom:8px}
+  .hero p{font-size:.95rem;color:#c6cddb;max-width:520px;margin:0 auto}
+  .hero .datoer{display:inline-block;margin-top:14px;background:var(--orange);color:#fff;border-radius:4px;padding:5px 16px;font-size:.85rem;font-weight:700}
+  nav{position:sticky;top:0;background:var(--navy);display:flex;gap:6px;overflow-x:auto;padding:10px 16px;scrollbar-width:none;z-index:5;box-shadow:0 2px 8px rgba(20,28,43,.25)}
+  nav::-webkit-scrollbar{display:none}
+  nav a{flex:none;text-decoration:none;color:#d9dee8;background:transparent;border:1px solid #37415a;border-radius:6px;padding:6px 13px;font-size:.82rem;font-weight:600;white-space:nowrap}
+  nav a:hover,nav a:active{background:var(--navy-2);color:#fff;border-color:var(--orange)}
+  main{max-width:660px;margin:0 auto;padding:20px 16px}
+  .sek{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 22px;margin-bottom:16px;scroll-margin-top:62px;box-shadow:0 1px 3px rgba(20,28,43,.05)}
+  .sek h2{font-family:Georgia,"Times New Roman",serif;font-size:1.18rem;display:flex;align-items:center;gap:10px;margin-bottom:12px;border-left:4px solid var(--orange);padding-left:12px}
+  .sek h2 .ikon{font-size:1.15rem}
+  .sek p{font-size:.93rem;color:var(--ink-2);margin-bottom:9px}
+  .sek p:last-child{margin-bottom:0}
+  .sek ul{margin:4px 0 9px 20px;font-size:.93rem;color:var(--ink-2)}
+  .sek li{margin-bottom:5px}
+  .sek strong{color:var(--ink)}
+  .sek a{color:var(--blue)}
+  .viktig{background:#fdf4e9;border-left:3px solid var(--orange);border-radius:0 6px 6px 0;padding:10px 13px;font-size:.9rem;margin:9px 0;color:var(--ink-2)}
+  .kontakt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--grid);font-size:.9rem}
+  .kontakt:last-child{border-bottom:none}
+  .kontakt .rolle{color:var(--muted);font-size:.8rem;display:block}
+  .kontakt a{font-weight:700;text-decoration:none;color:var(--blue);white-space:nowrap}
+  .uketogg{display:inline-flex;border:1px solid var(--baseline);border-radius:6px;overflow:hidden;margin-bottom:12px}
+  .uketogg button{font:inherit;font-size:.85rem;font-weight:600;border:none;background:var(--surface);color:var(--ink-2);padding:7px 18px;cursor:pointer}
+  .uketogg button.aktiv{background:var(--navy);color:#fff}
+  .tpd{margin-bottom:16px}
+  .tpd h3{font-size:.94rem;border-bottom:2px solid var(--grid);padding-bottom:5px;margin-bottom:8px}
+  .tpd h3 span{color:var(--muted);font-weight:400;font-size:.78rem}
+  .tpi{border-left:3px solid var(--blue);background:#f7f8fa;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;font-size:.84rem}
+  .tpi.lunsj{border-left-color:var(--baseline);color:var(--muted);background:#fafafb}
+  .tpi b{font-variant-numeric:tabular-nums}
+  .std{color:var(--muted);font-size:.76rem}
+  .grtag{font-size:.66rem;font-weight:700;border-radius:4px;padding:1px 6px;color:#fff;margin-left:4px}
+  .grA{background:#2a78d6}.grB{background:#eb6834}.grC{background:#1baf7a}
+  .grpblokk{margin-bottom:12px;border:1px solid var(--grid);border-radius:8px;overflow:hidden}
+  .grphead{padding:9px 13px;color:#fff;font-weight:700;font-size:.9rem;display:flex;justify-content:space-between}
+  .grphead .gl{font-weight:400;font-size:.78rem;opacity:.95}
+  .grpblokk ul{list-style:none;padding:6px 13px}
+  .grpblokk li{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--grid);font-size:.85rem}
+  .grpblokk li:last-child{border-bottom:none}
+  .grpblokk li span:last-child{color:var(--muted);font-size:.76rem}
+  .meny-panel{position:fixed;left:0;right:0;background:var(--surface);border-bottom:2px solid var(--orange);box-shadow:0 8px 20px rgba(20,28,43,.18);z-index:6;display:none;max-height:62vh;overflow:auto}
+  .meny-panel.vis{display:block}
+  .meny-panel a{display:block;padding:12px 18px;border-bottom:1px solid var(--grid);text-decoration:none;color:var(--ink);font-size:.92rem}
+  .meny-panel a:last-child{border-bottom:none}
+  .meny-panel a:hover{background:var(--chip)}
+  .meny-panel .ptit{padding:10px 18px;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--chip)}
+  nav button.navknapp{flex:none;font:inherit;color:#d9dee8;background:transparent;border:1px solid #37415a;border-radius:6px;padding:6px 13px;font-size:.82rem;font-weight:600;white-space:nowrap;cursor:pointer}
+  nav button.navknapp:hover,nav button.navknapp.aktiv{background:var(--navy-2);color:#fff;border-color:var(--orange)}
+  /* Snarveier øverst */
+  .snarvei{max-width:660px;margin:0 auto;padding:18px 16px 4px}
+  .snarvei h2{font-family:Georgia,"Times New Roman",serif;font-size:1.05rem;margin-bottom:10px;color:var(--ink)}
+  .kort2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:520px){.kort2{grid-template-columns:1fr}}
+  .kort{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-decoration:none;color:inherit;display:block;box-shadow:0 1px 3px rgba(20,28,43,.06);border-top:4px solid var(--orange)}
+  .kort:hover{box-shadow:0 4px 12px rgba(20,28,43,.12)}
+  .kort .ktit{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .kort .ktxt{font-size:.83rem;color:var(--muted)}
+  .grvalg{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+  .grvalg a{flex:1;min-width:64px;text-align:center;text-decoration:none;font-size:.8rem;font-weight:700;color:#fff;border-radius:6px;padding:7px 4px}
+  .gvA{background:#2a78d6}.gvB{background:#eb6834}.gvC{background:#1baf7a}
+  .kart-boks{margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid var(--grid);cursor:zoom-in}
+  .kart-boks img{width:100%;display:block}
+  .modal{position:fixed;inset:0;background:rgba(10,14,22,.94);z-index:50;display:none;overflow:auto;-webkit-overflow-scrolling:touch}
+  .modal.vis{display:block}
+  .modal img{width:180%;max-width:none;display:block}
+  .modal .lukk{position:fixed;top:12px;right:12px;background:var(--orange);color:#fff;border:none;border-radius:8px;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer;z-index:51}
+  .modal .hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:.78rem;padding:6px 14px;border-radius:20px;z-index:51}
+  .pdfrad{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .pdfrad a{text-decoration:none;font-size:.82rem;font-weight:600;color:var(--blue);background:#f2f5fb;border:1px solid #dbe4f5;border-radius:6px;padding:6px 12px}
+  footer{background:var(--navy);color:#aeb6c6;text-align:center;font-size:.78rem;margin-top:28px;padding:24px 20px;line-height:1.8}
+  footer strong{color:#fff}
+  footer a{color:#d9dee8}
+</style>
+</head>
+<body>
+<div style="background:#e8842c;color:#fff;text-align:center;font-size:.8rem;font-weight:700;padding:6px 12px">DEMO – alle navn og data er fiktive</div>
+<div class="hero">
+  <div class="merke">Verftet AS · Yard Academy</div>
+  <h1>Velkommen som lærling!</h1>
+  <p>Alt du trenger å vite før og under oppstartsukene – beskjeder, timeplan og praktisk info.</p>
+  <div class="datoer">Uke 33–34 · 10.–21. august 2026</div>
+</div>
+<nav id="nav"></nav>
+<div class="meny-panel" id="meny-panel"></div>
+<main id="main"></main>
+<footer><strong>Yard Academy</strong> – Kompetansesenter for verftet<br>Demoveien 1<br>Siden oppdateres fortløpende – sjekk gjerne innom hver morgen.</footer>
+<script src="../content/info-data.js"></script>
+<script src="../content/dashboard-data.js"></script>
+<script>
+/* Tekstseksjoner + beskjeder hentes fra Supabase (redigeres i dashbordet).
+   Faller tilbake til ../content/info-data.js hvis databasen ikke svarer.
+   Timeplan/grupper/faglige ledere: ../content/dashboard-data.js (git). */
+const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slug=s=>s.toLowerCase().replace(/[^a-zæøå0-9]+/g,"-").replace(/^-|-$/g,"");
+let infoUke=33;
+function inline(t){
+  return esc(t)
+    .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g,"<em>$1</em>")
+    .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+}
+function fmtInnhold(txt){
+  return String(txt||"").split(/\n\s*\n/).map(b=>{
+    b=b.replace(/^\n+|\n+$/g,"");if(!b.trim())return"";
+    const lines=b.split("\n");
+    if(lines.every(l=>l.trim().startsWith("- ")))
+      return "<ul>"+lines.map(l=>`<li>${inline(l.trim().slice(2))}</li>`).join("")+"</ul>";
+    if(b.trim().startsWith("!"))
+      return `<div class="viktig">${inline(b.trim().slice(1).trim()).replace(/\n/g,"<br>")}</div>`;
+    return `<p>${inline(b).replace(/\n/g,"<br>")}</p>`;
+  }).join("");
+}
+function tpHtml(){
+  return DAGER.filter(d=>d.uke===infoUke).map(d=>`
+    <div class="tpd">
+      <h3>${d.label} <span>${d.kort}</span>${(typeof VERTER!=="undefined"&&VERTER[d.dato])?` <span>· Klasseromsansvarlig: ${esc(VERTER[d.dato])}</span>`:""}</h3>
+      ${(TIMEPLAN[d.dato]||[]).map(t=>`
+        <div class="tpi ${t.lunsj?'lunsj':''}"><b>${t.tid}</b> ${esc(t.tittel)}${t.gr!=="Alle"?`<span class="grtag gr${t.gr}">${t.gr}</span>`:""}${t.sted?`<div class="std">${esc(t.sted)}</div>`:""}</div>`).join("")}
+    </div>`).join("");
+}
+function ekstra(){
+  const grupper=["A","B","C"].map(g=>{
+    const medl=LARLINGER.filter(l=>l.gruppe===g);
+    const farge={A:"#2a78d6",B:"#eb6834",C:"#1baf7a"}[g];
+    return `<div class="grpblokk">
+      <div class="grphead" style="background:${farge}"><span>Gruppe ${g} · ${medl.length} lærlinger</span><span class="gl">Gruppeleder: ${esc(GRUPPELEDERE[g]||"")}</span></div>
+      <ul>${medl.map(l=>`<li><span>${esc(l.navn)}</span><span>${esc(l.fag.replace("faget",""))}</span></li>`).join("")}</ul>
+    </div>`;}).join("");
+  return `
+  <section class="sek" id="timeplan">
+    <h2><span class="ikon">🗓️</span>Timeplan</h2>
+    <div class="uketogg"><button data-u="33" class="aktiv">Uke 33</button><button data-u="34">Uke 34</button></div>
+    <div id="tp-holder">${tpHtml()}</div>
+    <div class="pdfrad">
+      <a href="../filer/GruppeA-uke_33-2026.pdf" target="_blank" rel="noopener">📄 A uke 33</a>
+      <a href="../filer/GruppeB-uke_33-2026.pdf" target="_blank" rel="noopener">📄 B uke 33</a>
+      <a href="../filer/GruppeC-uke_33-2026.pdf" target="_blank" rel="noopener">📄 C uke 33</a>
+      <a href="../filer/GruppeA-uke_34-2026.pdf" target="_blank" rel="noopener">📄 A uke 34</a>
+      <a href="../filer/GruppeB-uke_34-2026.pdf" target="_blank" rel="noopener">📄 B uke 34</a>
+      <a href="../filer/GruppeC-uke_34-2026.pdf" target="_blank" rel="noopener">📄 C uke 34</a>
+    </div>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:8px">Med forbehold om endringer – sjekk innom hver morgen.</p>
+  </section>
+  <section class="sek" id="grupper">
+    <h2><span class="ikon">👥</span>Grupper</h2>
+    ${grupper}
+    <p style="font-size:.78rem;color:var(--muted)">Finn navnet ditt for å se hvilken gruppe du er i. Endringer i gruppene kan skje – sjekk igjen før oppstart.</p>
+  </section>
+  <section class="sek" id="faglige-ledere">
+    <h2><span class="ikon">🧑‍🏭</span>Faglige ledere</h2>
+    ${LEDERE.map(p=>`<div class="kontakt"><span><strong>${esc(p.navn)}</strong><span class="rolle">${esc(p.fag)}</span></span></div>`).join("")}
+  </section>`;
+}
+function byggNav(){
+  const FAST={beskjeder:"📣 Beskjeder",grupper:"👥 Grupper","faglige-ledere":"🧑‍🏭 Faglige ledere"};
+  const nav=document.getElementById("nav");
+  const alle=[...document.querySelectorAll("main .sek")];
+  let html='<a href="#timeplan">🗓️ Timeplan</a>';
+  alle.forEach(sec=>{ if(FAST[sec.id]) html+=`<a href="#${sec.id}">${FAST[sec.id]}</a>`; });
+  const ovrige=alle.filter(sec=>sec.id!=="timeplan"&&!FAST[sec.id]);
+  if(ovrige.length) html+='<button class="navknapp" id="nav-praktisk">📋 Praktisk info ▾</button>';
+  nav.innerHTML=html;
+  const panel=document.getElementById("meny-panel");
+  panel.innerHTML='<div class="ptit">Praktisk info</div>'+ovrige.map(sec=>{
+    const h=sec.querySelector("h2");
+    const ikon=h.querySelector(".ikon")?h.querySelector(".ikon").textContent:"";
+    const tittel=h.textContent.replace(ikon,"").trim();
+    return `<a href="#${sec.id}">${ikon} ${tittel}</a>`;
+  }).join("");
+  const knapp=document.getElementById("nav-praktisk");
+  if(knapp){
+    const plasser=()=>{panel.style.top=nav.getBoundingClientRect().bottom+"px";};
+    const lukkP=()=>{panel.classList.remove("vis");knapp.classList.remove("aktiv");};
+    knapp.addEventListener("click",e=>{
+      e.stopPropagation();
+      if(panel.classList.contains("vis")){lukkP();return;}
+      plasser();panel.classList.add("vis");knapp.classList.add("aktiv");
+    });
+    panel.addEventListener("click",lukkP);
+    document.addEventListener("click",e=>{if(!panel.contains(e.target)&&e.target!==knapp)lukkP();});
+    window.addEventListener("scroll",()=>{if(panel.classList.contains("vis"))plasser();});
+    window.addEventListener("resize",()=>{if(panel.classList.contains("vis"))plasser();});
+  }
+}
+async function init(){
+  let dbSek=null,dbOpp=null;
+  if(typeof supabase!=="undefined"&&typeof SB_URL!=="undefined"){
+    try{
+      const sb=supabase.createClient(SB_URL,SB_KEY);
+      const [se,op]=await Promise.all([
+        sb.from("info_seksjoner").select("*").eq("synlig",true).order("rekkefolge"),
+        sb.from("oppslag").select("*").order("created_at",{ascending:false})
+      ]);
+      if(!se.error&&se.data&&se.data.length)dbSek=se.data;
+      if(!op.error&&op.data&&op.data.length)dbOpp=op.data;
+    }catch(e){console.warn("Database utilgjengelig – bruker lokalt innhold.",e);}
+  }
+  const fmt=ts=>{try{return new Date(ts).toLocaleString("nb-NO",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}catch(e){return ""}};
+  const beskjeder=dbOpp?`
+    <section class="sek" id="beskjeder"><h2><span class="ikon">📣</span>Beskjeder</h2>
+    ${dbOpp.map(o=>`
+      <div class="${o.viktig?'viktig':''}" style="margin-bottom:10px${o.viktig?';border-left-color:#d03b3b':''}">
+        <strong>${esc(o.tittel)}</strong>
+        <div style="white-space:pre-line;font-size:.9rem;color:var(--ink-2)">${esc(o.tekst)}</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:3px">${fmt(o.created_at)}</div>
+      </div>`).join("")}
+    </section>`:"";
+  const tekst=dbSek
+    ? dbSek.map(s=>`<section class="sek" id="sek-${s.id}"><h2><span class="ikon">${esc(s.ikon||"")}</span>${esc(s.tittel)}</h2>${fmtInnhold(s.innhold)}</section>`).join("")
+    : SEKSJONER.map(s=>`<section class="sek" id="${slug(s.tittel)}"><h2><span class="ikon">${s.ikon}</span>${s.tittel}</h2>${s.innhold}</section>`).join("");
+  document.getElementById("main").innerHTML=beskjeder+ekstra()+tekst;
+  byggNav();
+  document.querySelector(".uketogg").addEventListener("click",e=>{
+    const b=e.target.closest("button");if(!b)return;
+    infoUke=+b.dataset.u;
+    document.querySelectorAll(".uketogg button").forEach(x=>x.classList.toggle("aktiv",x===b));
+    document.getElementById("tp-holder").innerHTML=tpHtml();
+  });
+}
+init();
+</script>
+</body>
+</html>

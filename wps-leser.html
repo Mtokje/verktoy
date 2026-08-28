@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WPS-leser – lær å lese en sveiseprosedyre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --steel-900:#171e26;
+    --steel-800:#1f2833;
+    --steel-700:#2a3542;
+    --steel-600:#33404e;
+    --line:#38434f;
+    --paper:#e8ebee;
+    --paper-dim:#9aa6b1;
+    --monje:#d4552e;
+    --monje-dim:#8a3a22;
+    --chalk:#f4f6f8;
+    --ok:#5fae7d;
+    --warn:#e0a63c;
+    --mono:'IBM Plex Mono',monospace;
+    --cond:'IBM Plex Sans Condensed',sans-serif;
+    --sans:'IBM Plex Sans',sans-serif;
+    /* områdefarger */
+    --a1:#d4552e; --a2:#e0a63c; --a3:#5fae7d; --a4:#4f9ad6; --a5:#b07cd6; --a6:#e07a9a;
+    --a7:#3ec1b7; --a8:#f0c24b; --a9:#8ea3ff; --a10:#c9a27a; --a11:#a5d65f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--steel-900);color:var(--paper);font-family:var(--sans);font-size:15px;line-height:1.5}
+  a{color:inherit}
+  button{font-family:inherit}
+
+  header{
+    border-bottom:1px solid var(--line);
+    padding:18px 24px 14px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  header h1{font-family:var(--cond);font-weight:700;font-size:1.45rem;letter-spacing:.02em;text-transform:uppercase}
+  header h1 span{color:var(--monje)}
+  header .sub{font-family:var(--mono);font-size:.72rem;color:var(--paper-dim);letter-spacing:.04em}
+  header .back{margin-left:auto;font-family:var(--mono);font-size:.72rem;color:var(--paper-dim);text-decoration:none;border:1px solid var(--line);border-radius:4px;padding:5px 10px}
+  header .back:hover{border-color:var(--monje);color:var(--monje)}
+
+  /* ---------- modusvelger ---------- */
+  .modebar{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:12px 24px;border-bottom:1px solid var(--line);background:var(--steel-800);
+    position:sticky;top:0;z-index:20;
+  }
+  .modebar .lbl{font-family:var(--cond);font-weight:600;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim)}
+  .seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .seg button{
+    background:var(--steel-900);border:0;color:var(--paper-dim);font-family:var(--mono);
+    font-size:.78rem;padding:8px 14px;cursor:pointer;border-right:1px solid var(--line);
+  }
+  .seg button:last-child{border-right:0}
+  .seg button.on{background:var(--monje);color:#fff;font-weight:600}
+  .seg button:focus-visible{outline:2px solid var(--chalk);outline-offset:-2px}
+  .modehint{font-size:.8rem;color:var(--paper-dim);flex:1;min-width:220px}
+  .modehint b{color:var(--chalk);font-weight:500}
+
+  /* ---------- hovedoppsett ---------- */
+  .wrap{max-width:1380px;margin:0 auto;padding:20px 24px 60px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:22px;align-items:start}
+  @media(max-width:1000px){.wrap{grid-template-columns:1fr;padding:14px 12px 120px}}
+
+  .paperWrap{position:relative;overflow:auto;-webkit-overflow-scrolling:touch}
+  .paperScale{transform-origin:top left}
+
+  /* ---------- selve WPS-arket ---------- */
+  .paper{
+    width:900px;background:#fff;color:#000;
+    font-family:Arial,Helvetica,sans-serif;font-size:11.5px;line-height:1.25;
+    border:1px solid #000;padding:6px;box-shadow:0 20px 60px rgba(0,0,0,.45);
+    user-select:text;
+  }
+  .paper .v{font-family:"Courier New",Courier,monospace;font-weight:700;font-size:11.5px;white-space:nowrap}
+  .paper .l{font-size:11px}
+  .paper .u{font-size:8.5px;color:#222}
+  .paper .sec{font-weight:700;font-size:12.5px}
+  .row{display:grid;border-bottom:1px solid #000}
+  .row:last-child{border-bottom:0}
+  .cell{padding:3px 5px;border-right:1px solid #000;min-height:20px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .cell:last-child{border-right:0}
+  .cell.c{justify-content:center}
+  .cell.r{justify-content:flex-end}
+  .cell.hd{flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;line-height:1.15;padding-bottom:3px}
+
+  /* hodet */
+  .head{display:grid;grid-template-columns:1.45fr 1.75fr 1.55fr;border-bottom:2px solid #000}
+  .head .logo{display:flex;align-items:center;gap:8px;padding:10px 12px;border-right:1px solid #000}
+  .head .logo .mark{width:34px;height:34px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px}
+  .head .logo .mark i{background:#1d4f9c;display:block}
+  .head .logo .mark i:nth-child(1){background:#3d7cc9}
+  .head .logo .mark i:nth-child(2){background:#1d4f9c;border-radius:0 12px 0 0}
+  .head .logo .mark i:nth-child(3){background:#1d4f9c}
+  .head .logo .mark i:nth-child(4){background:#3d7cc9;border-radius:0 0 12px 0}
+  .head .logo .name{font-size:22px;letter-spacing:-.5px;color:#243a5a}
+  .head .logo .name b{font-weight:700}
+  .head .title{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:17px;line-height:1.2;padding:10px;border-right:1px solid #000}
+  .head .meta{display:grid;grid-template-rows:1fr 1fr 1fr}
+  .head .meta > div{display:flex;align-items:center;gap:6px;padding:2px 8px;border-bottom:1px solid #000}
+  .head .meta > div:last-child{border-bottom:0}
+  .head .meta .split{display:grid;grid-template-columns:1fr 1fr;padding:0}
+  .head .meta .split > span{padding:2px 8px;display:flex;align-items:center;gap:6px}
+  .head .meta .split > span:first-child{border-right:1px solid #000}
+
+  /* spesifikasjonsblokk */
+  .spec{border-bottom:2px solid #000}
+  .spec .row{border-bottom:0;grid-template-columns:repeat(3,1fr)}
+  .spec .row .cell{border-right:0;min-height:19px;padding:1px 5px}
+  .spec .wpqr{grid-template-columns:1.2fr repeat(6,1fr)}
+
+  /* prosessblokk */
+  .proc{display:grid;grid-template-columns:150px 1fr 1fr 1fr;border-bottom:1px solid #000}
+  .proc .labels{display:grid;grid-template-rows:1fr 1fr 1fr;border-right:1px solid #000}
+  .proc .labels div{padding:2px 5px;border-bottom:1px solid #000;display:flex;align-items:center}
+  .proc .labels div:last-child{border-bottom:0}
+  .proc .gcol{display:grid;grid-template-columns:14px 1fr;border-right:1px solid #000}
+  .proc .gcol:last-child{border-right:0}
+  .proc .gcol .idx{grid-row:1/4;display:flex;align-items:center;justify-content:center;font-weight:700;border-right:1px solid #000}
+  .proc .gcol > .c{padding:2px 5px;border-bottom:1px solid #000;display:flex;align-items:center;gap:6px;min-height:21px}
+  .proc .gcol > .c:last-child{border-bottom:0}
+
+  /* generelle opplysninger + tegning */
+  .mid{display:grid;grid-template-columns:430px 1fr;border-bottom:2px solid #000}
+  .gen{border-right:1px solid #000}
+  .gen .row{grid-template-columns:150px 1fr}
+  .gen .row .cell{min-height:22px;padding:2px 5px}
+  .gen .row .cell.vv{justify-content:space-between}
+  .draw{position:relative;padding:8px 10px;display:grid;grid-template-columns:1fr 150px;gap:8px}
+  .draw .ex{font-family:"Times New Roman",serif;font-size:12px;text-align:center}
+  .draw .ex .cap{text-align:left;margin:16px 0 4px 10px}
+  .draw svg{width:100%;height:auto;display:block}
+  .tbl{border-collapse:collapse;font-family:"Times New Roman",serif;font-size:11px;width:100%}
+  .tbl td{border:1px solid #000;padding:2px 5px;white-space:nowrap}
+  .tbl caption{font-family:"Times New Roman",serif;font-size:11px;text-align:left;padding:0 0 3px;caption-side:top}
+
+  /* grunnmateriale */
+  .pm .top{display:grid;grid-template-columns:200px repeat(6,1fr);border-bottom:1px solid #000}
+  .pm .top .cell{border-right:0;min-height:22px}
+  .pm .grid{display:grid;grid-template-columns:26px 175px 215px 70px 145px 130px 1fr}
+  .pm .grid .cell{border-bottom:1px solid #000}
+  .pm .grid .cell.hd{min-height:34px}
+  .pm .grid .cell:nth-last-child(-n+7){border-bottom:0}
+  .pm{border-bottom:2px solid #000}
+
+  /* tilsett */
+  .fm{border-bottom:2px solid #000}
+  .fm .grid{display:grid;grid-template-columns:52px 175px 250px 100px 1fr}
+  .fm .grid .cell{border-bottom:1px solid #000;min-height:22px}
+  .fm .grid .cell:nth-last-child(-n+5){border-bottom:0}
+
+  /* parametre */
+  .wp{border-bottom:2px solid #000}
+  .wp .top{display:grid;grid-template-columns:1fr 250px 1fr;border-bottom:1px solid #000}
+  .wp .grid{display:grid;grid-template-columns:44px 36px 36px 54px 72px 84px 84px 60px 90px 88px 56px 1fr}
+  .wp .grid .cell{border-bottom:1px solid #000;min-height:20px;padding:2px 4px}
+  .wp .grid .cell.hd{min-height:48px}
+  .wp .grid .cell.dash{justify-content:center;color:#000}
+  .wp .grid .cell:nth-last-child(-n+12){border-bottom:0}
+
+  /* varmebehandling */
+  .ht{border-bottom:2px solid #000}
+  .ht .row{grid-template-columns:1fr}
+  .ht .line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:3px 5px;border-bottom:1px solid #000}
+  .ht .line:last-child{border-bottom:0}
+  .ht .kv{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .ht .sp{flex:1}
+
+  /* merknader og signatur */
+  .rem{display:grid;grid-template-columns:1fr 250px;border-bottom:2px solid #000}
+  .rem .txt{padding:4px 6px;border-right:1px solid #000;display:grid;grid-template-columns:60px 1fr;gap:4px 6px;align-content:start}
+  .rem .txt .v{white-space:normal}
+  .rem .sig{display:grid;grid-template-rows:auto 1fr 1fr}
+  .rem .sig > div{padding:3px 6px;border-bottom:1px solid #000}
+  .rem .sig > div:last-child{border-bottom:0}
+  .rem .sig .who{display:flex;justify-content:space-between}
+  .rem .sig .script{font-family:"Brush Script MT","Segoe Script",cursive;font-size:20px;color:#1d4f9c;opacity:.75;line-height:1;margin-top:-4px}
+  .foot{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px 6px;font-size:10px}
+  .foot .cell{border:0;min-height:0;padding:0}
+
+  /* ---------- interaktive tilstander ---------- */
+  .paper [data-f]{position:relative;border-radius:2px;transition:background .12s}
+  body.mode-detail .paper [data-f]{cursor:pointer}
+  body.mode-detail .paper [data-f]:hover{background:rgba(212,85,46,.16);box-shadow:inset 0 0 0 1.5px var(--monje)}
+  body.mode-detail .paper [data-f].sel{background:rgba(212,85,46,.22);box-shadow:inset 0 0 0 2px var(--monje)}
+
+  .paper [data-area]{position:relative}
+  body.mode-areas .paper [data-area]{cursor:pointer}
+  body.mode-areas .paper [data-area]::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:var(--ac);opacity:.14;box-shadow:inset 0 0 0 2px var(--ac);transition:opacity .12s;
+  }
+  body.mode-areas .paper [data-area]:hover::after{opacity:.30}
+  body.mode-areas .paper [data-area].sel::after{opacity:.38;box-shadow:inset 0 0 0 3px var(--ac)}
+  body.mode-areas .paper [data-area]::before{
+    content:attr(data-n);position:absolute;z-index:3;left:-3px;top:-3px;
+    width:24px;height:24px;border-radius:50%;background:var(--ac);color:#111;
+    font:700 13px/24px Arial,sans-serif;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.4);pointer-events:none;
+    left:auto;right:-3px;
+  }
+  body.mode-areas .paper [data-area="5"]::before{left:-3px;right:auto}
+  body.mode-areas .paper [data-area="4"]::before{top:auto;bottom:-3px}
+  body.mode-areas .paper [data-area="9"]::before{left:-3px;right:auto}
+  body.mode-areas .paper .ht .line:first-child{padding-left:28px}
+  body.mode-areas .paper .foot::before{display:none}
+  .paper [data-area="1"]{--ac:var(--a1)}  .paper [data-area="2"]{--ac:var(--a2)}
+  .paper [data-area="3"]{--ac:var(--a3)}  .paper [data-area="4"]{--ac:var(--a4)}
+  .paper [data-area="5"]{--ac:var(--a5)}  .paper [data-area="6"]{--ac:var(--a6)}
+  .paper [data-area="7"]{--ac:var(--a7)}  .paper [data-area="8"]{--ac:var(--a8)}
+  .paper [data-area="9"]{--ac:var(--a9)}  .paper [data-area="10"]{--ac:var(--a10)}
+  .paper [data-area="11"]{--ac:var(--a11)}
+
+  /* ---------- forklaringspanel ---------- */
+  .panel{background:var(--steel-800);border:1px solid var(--line);border-radius:6px;position:sticky;top:66px;max-height:calc(100vh - 86px);display:flex;flex-direction:column;overflow:hidden}
+  .panel h2{
+    font-family:var(--cond);font-weight:600;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--paper-dim);padding:12px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px
+  }
+  .panel h2 .dot{width:12px;height:12px;border-radius:50%;background:var(--monje);display:none}
+  .panel h2 .close{margin-left:auto;display:none;background:none;border:1px solid var(--line);border-radius:4px;color:var(--paper-dim);font-family:var(--mono);font-size:.8rem;padding:2px 9px;cursor:pointer}
+  .pbody{padding:14px 16px 18px;overflow:auto;font-size:.9rem;line-height:1.6}
+  .pbody h3{font-family:var(--cond);font-weight:700;font-size:1.15rem;letter-spacing:.02em;color:var(--chalk);line-height:1.2}
+  .pbody .en{font-family:var(--mono);font-size:.72rem;color:var(--paper-dim);margin:2px 0 12px;letter-spacing:.03em}
+  .pbody p{margin-bottom:10px}
+  .pbody p:last-child{margin-bottom:0}
+  .pbody ul{margin:0 0 10px 18px}
+  .pbody li{margin-bottom:4px}
+  .pbody code,.pbody .val{font-family:var(--mono);font-size:.82rem;color:var(--chalk);background:var(--steel-900);padding:1px 5px;border-radius:3px}
+  .pbody .here{border:1px solid var(--monje-dim);border-left:3px solid var(--monje);border-radius:4px;padding:10px 12px;margin-bottom:14px;background:rgba(212,85,46,.06)}
+  .pbody .here .k{font-family:var(--cond);font-weight:600;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--monje);margin-bottom:4px}
+  .pbody .here .big{font-family:var(--mono);font-size:1rem;font-weight:600;color:var(--chalk);margin-bottom:6px;word-break:break-word}
+  .pbody .sub{font-family:var(--cond);font-weight:600;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim);margin:14px 0 6px;padding-top:10px;border-top:1px dashed var(--line)}
+  .pbody .sub:first-child{border-top:0;padding-top:0;margin-top:0}
+  .pbody .std{display:inline-block;font-family:var(--mono);font-size:.72rem;color:var(--ok);border:1px solid var(--line);border-radius:3px;padding:0 6px;margin:2px 4px 2px 0}
+  .pbody .intro{color:var(--paper-dim);font-size:.85rem}
+  .pbody .intro b{color:var(--chalk);font-weight:500}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--steel-900);border:1px solid var(--line);border-radius:4px;padding:4px 9px 4px 5px;font-size:.78rem;color:var(--paper);cursor:pointer}
+  .chip i{width:18px;height:18px;border-radius:50%;background:var(--ac);color:#111;font:700 11px/18px Arial,sans-serif;text-align:center;font-style:normal}
+  .chip:hover,.chip.on{border-color:var(--ac);color:var(--chalk)}
+  .fnav{display:flex;gap:8px;margin-top:14px;padding-top:10px;border-top:1px solid var(--line)}
+  .fnav button{flex:1;background:var(--steel-900);border:1px solid var(--line);border-radius:4px;color:var(--paper-dim);font-family:var(--mono);font-size:.75rem;padding:7px 8px;cursor:pointer}
+  .fnav button:hover{border-color:var(--monje);color:var(--monje)}
+  .fnav .pos{flex:0 0 auto;align-self:center;font-family:var(--mono);font-size:.7rem;color:var(--paper-dim);padding:0 4px}
+  .calc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0 6px}
+  .calc label{font-family:var(--mono);font-size:.65rem;color:var(--paper-dim);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:3px}
+  .calc input{width:100%;background:var(--steel-900);border:1px solid var(--line);border-radius:4px;color:var(--chalk);font-family:var(--mono);font-size:.9rem;padding:6px 8px}
+  .calc input:focus{outline:2px solid var(--monje);outline-offset:1px}
+  .calcOut{font-family:var(--mono);font-size:.85rem;color:var(--chalk);padding:8px 10px;background:var(--steel-900);border-radius:4px;border:1px solid var(--line)}
+  .calcOut b{color:var(--monje);font-size:1.05rem}
+  .calcOut.bad b{color:var(--warn)}
+
+  /* mobil: panel som bunnark */
+  @media(max-width:1000px){
+    .panel{position:fixed;left:0;right:0;bottom:0;top:auto;max-height:62vh;border-radius:10px 10px 0 0;z-index:30;transform:translateY(calc(100% - 46px));transition:transform .2s}
+    .panel.open{transform:none}
+    .panel h2 .close{display:inline-block}
+    .panel h2{cursor:pointer}
+  }
+</style>
+</head>
+<body class="mode-plain">
+
+<header>
+  <h1>WPS-<span>leser</span></h1>
+  <div class="sub">Lær å lese en sveiseprosedyre · eksempel WPS 80-31 (136, S420, NORSOK M-101)</div>
+  <a class="back" href="./">← Verktøykassen</a>
+</header>
+
+<div class="modebar">
+  <span class="lbl">Visning</span>
+  <div class="seg" role="tablist">
+    <button type="button" data-mode="plain" class="on">Bare WPS</button>
+    <button type="button" data-mode="areas">Områder</button>
+    <button type="button" data-mode="detail">Detaljert</button>
+  </div>
+  <div class="modehint" id="modehint"><b>Bare WPS:</b> Slik ser prosedyren ut i produksjonen. Bytt visning for å få forklaringer.</div>
+</div>
+
+<div class="wrap">
+<div class="paperWrap" id="paperWrap">
+<div class="paperScale" id="paperScale">
+<div class="paper" id="paper">
+
+  <!-- ===== HODE ===== -->
+  <div class="head">
+    <div class="logo" data-f="prodlogo">
+      <div class="mark"><i></i><i></i><i></i><i></i></div>
+      <div class="name"><b>Aker</b>Solutions</div>
+    </div>
+    <div class="title" data-f="doctitle">WELDING PROCEDURE<br>SPECIFICATION (WPS)</div>
+    <div class="meta" data-area="1" data-n="1">
+      <div data-f="wpsno"><span class="l" style="font-weight:700">WPS No.:</span><span class="v" style="font-size:13px">80-31</span></div>
+      <div class="split">
+        <span data-f="ref"><span class="l">Ref.:</span><span class="v"></span></span>
+        <span data-f="sour"><span class="l">Sour service:</span><span class="v"></span></span>
+      </div>
+      <div class="split">
+        <span data-f="date"><span class="l">Date:</span><span class="v">22.01.19</span></span>
+        <span data-f="rev"><span class="l">Rev:</span><span class="v">3</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SPESIFIKASJONER / STANDARDER ===== -->
+  <div class="spec" data-area="2" data-n="2">
+    <div class="row">
+      <div class="cell" data-f="prodby"><span class="l">Prod. by:</span><span class="v">Kværner AS</span></div>
+      <div class="cell" data-f="client"><span class="l">Client:</span><span class="v">Equinor</span></div>
+      <div class="cell" data-f="refstand"><span class="l">Ref. stand:</span><span class="v">EN ISO 15609-1</span></div>
+    </div>
+    <div class="row">
+      <div class="cell" data-f="project"><span class="l">Project:</span><span class="v" style="font-size:10.5px">Johan Castberg</span></div>
+      <div class="cell" data-f="location"><span class="l">Location:</span><span class="v" style="font-size:10.5px">Stord sites</span></div>
+      <div class="cell" style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+        <span data-f="refspec" style="display:flex;gap:6px;align-items:center"><span class="l">Ref. spec.:</span><span class="v" style="font-size:9.5px">NORSOK M-101</span></span>
+        <span data-f="exambody" style="display:flex;gap:6px;align-items:center"><span class="l">Exam. body:</span><span class="v"></span></span>
+      </div>
+    </div>
+    <div class="row wpqr" data-f="wpqr">
+      <div class="cell"><span class="l">Ref. WPQR:</span></div>
+      <div class="cell"><span class="v" style="font-size:10px">80-065</span></div>
+      <div class="cell"><span class="v" style="font-size:10px">80-066</span></div>
+      <div class="cell"><span class="v" style="font-size:10px">80-064</span></div>
+      <div class="cell"><span class="v" style="font-size:10px">80-069</span></div>
+      <div class="cell"><span class="v" style="font-size:10px">80-235</span></div>
+      <div class="cell"><span class="v" style="font-size:10px">VS160F02-100A</span></div>
+    </div>
+  </div>
+
+  <!-- ===== SVEISEMETODE OG GASS ===== -->
+  <div class="proc" data-area="3" data-n="3">
+    <div class="labels">
+      <div class="l" data-f="process">Welding process</div>
+      <div class="l" data-f="gas">Shielding gas type</div>
+      <div class="l" data-f="weaving">Weaving (yes/no)</div>
+    </div>
+    <div class="gcol">
+      <div class="idx" data-f="gasidx">1</div>
+      <div class="c" data-f="process"><span class="v">136</span></div>
+      <div class="c" data-f="gas"><span class="v">M21 (Ar+18-22%CO2)</span></div>
+      <div class="c" data-f="weaving"><span class="v">Yes</span><span class="l" style="margin-left:14px">max:</span><span class="v">17</span><span class="u">mm</span></div>
+    </div>
+    <div class="gcol">
+      <div class="idx" data-f="gasidx">2</div>
+      <div class="c" data-f="process2"></div>
+      <div class="c" data-f="process2"></div>
+      <div class="c" data-f="process2"><span class="l" style="margin-left:auto">max:</span><span class="u" style="margin-left:26px">mm</span></div>
+    </div>
+    <div class="gcol">
+      <div class="idx" data-f="gasidx">3</div>
+      <div class="c" data-f="process2"></div>
+      <div class="c" data-f="process2"></div>
+      <div class="c" data-f="process2"><span class="l" style="margin-left:auto">max:</span><span class="u" style="margin-left:26px">mm</span></div>
+    </div>
+  </div>
+
+  <!-- ===== GENERELLE OPPLYSNINGER + TEGNING ===== -->
+  <div class="mid">
+    <div class="gen" data-area="4" data-n="4">
+      <div class="row" data-f="purging"><div class="cell l">Purging gas type</div><div class="cell vv"><span class="v">n/a</span><span class="u">l/min</span></div></div>
+      <div class="row" data-f="positions"><div class="cell l">Welding positions</div><div class="cell"><span class="v">PA, PB &nbsp;PC, PD &nbsp;PE, PF &nbsp;H-L045</span></div></div>
+      <div class="row" data-f="jointtype"><div class="cell l">Joint type</div><div class="cell"><span class="v">BW, T-BW, FW</span></div></div>
+      <div class="row" data-f="jointprep"><div class="cell l">Joint preparation</div><div class="cell"><span class="v">Grinding / Sliping</span></div></div>
+      <div class="row" data-f="cleanbefore"><div class="cell l">Cleaning before welding</div><div class="cell"><span class="v">Wire brush / stålbørste</span></div></div>
+      <div class="row" data-f="cleanafter"><div class="cell l">Cleaning after welding</div><div class="cell"><span class="v">Wire brush/stålbørste</span></div></div>
+      <div class="row" data-f="backing"><div class="cell l">Backing</div><div class="cell"><span class="v">n/a</span></div></div>
+      <div class="row" data-f="singledouble"><div class="cell l">Single/Double</div><div class="cell"><span class="v">bs</span></div></div>
+      <div class="row" data-f="backgouging"><div class="cell l">Back gouging</div><div class="cell"><span class="v">Arc air / kolstift</span></div></div>
+      <div class="row" data-f="fluxdes"><div class="cell l">Flux designation</div><div class="cell"><span class="v">n/a</span></div></div>
+      <div class="row" data-f="fluxhand"><div class="cell l">Flux handling</div><div class="cell"><span class="v">n/a</span></div></div>
+      <div class="row" data-f="tungsten"><div class="cell l">Tungsten electrode</div><div class="cell vv"><span class="v">n/a</span><span class="u">mm</span></div></div>
+      <div class="row" data-f="torchangle"><div class="cell l">Torch angle</div><div class="cell"><span class="v">n/a</span><span class="u" style="margin-left:10px">°</span></div></div>
+      <div class="row" data-f="standoff"><div class="cell l">Stand off distance</div><div class="cell vv"><span class="v">15-20</span><span class="u">mm</span></div></div>
+      <div class="row" data-f="nozzle"><div class="cell l">Nozzle diameter(s)</div><div class="cell vv"><span class="v">14-19 mm</span><span class="u">mm</span></div></div>
+      <div class="row" data-f="tackproc"><div class="cell l">Tack welding proc.</div><div class="cell vv"><span class="v">02-W-COZ012E</span><span class="l" style="margin-right:40px">Rev:</span></div></div>
+    </div>
+
+    <div class="draw" data-area="5" data-n="5">
+      <div class="ex" data-f="examples">
+        <div class="cap">EXAMPLES / EKSEMPLER:</div>
+        <svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#000" stroke-width="1.3">
+          <!-- øverst: dobbelsidig buttsveis (X-fuge) med to plater I og II -->
+          <rect x="20" y="20" width="235" height="60" stroke-width="1"/>
+          <text x="40" y="55" font-size="12" font-family="Times New Roman" fill="#000" stroke="none">I</text>
+          <text x="98" y="55" font-size="12" font-family="Times New Roman" fill="#000" stroke="none">II</text>
+          <text x="200" y="55" font-size="12" font-family="Times New Roman" fill="#000" stroke="none">I</text>
+          <!-- venstre X-fuge -->
+          <path d="M60 20 L74 48 L60 80 M88 20 L74 48 L88 80"/>
+          <path d="M60 20 Q74 34 88 20 M60 80 Q74 66 88 80" stroke-width="1"/>
+          <path d="M64 30 Q74 42 84 30 M64 70 Q74 58 84 70" stroke-width=".7"/>
+          <!-- høyre X-fuge -->
+          <path d="M150 20 L164 48 L150 80 M178 20 L164 48 L178 80"/>
+          <path d="M150 20 Q164 34 178 20 M150 80 Q164 66 178 80" stroke-width="1"/>
+          <path d="M154 30 Q164 42 174 30 M154 70 Q164 58 174 70" stroke-width=".7"/>
+          <!-- nederst: T-forbindelser: full gjennomsveis (T-BW) og kilsveis (FW) -->
+          <path d="M20 200 H280" stroke-width="1.6"/>
+          <text x="22" y="112" font-size="12" font-family="Times New Roman" fill="#000" stroke="none">I</text>
+          <text x="112" y="112" font-size="12" font-family="Times New Roman" fill="#000" stroke="none">I</text>
+          <text x="232" y="112" font-size="12" font-family="Times New Roman" fill="#000" stroke="none">I</text>
+          <text x="140" y="217" font-size="12" font-family="Times New Roman" fill="#000" stroke="none">II</text>
+          <!-- steg 1: K-fuge (dobbelsidig T-BW) -->
+          <path d="M60 100 V200 M84 100 V200" stroke-width="1"/>
+          <path d="M40 200 Q60 180 60 160 M104 200 Q84 180 84 160" stroke-width="1"/>
+          <path d="M60 160 L40 200 M84 160 L104 200" stroke-width="1"/>
+          <path d="M48 190 Q60 178 62 168 M96 190 Q84 178 82 168" stroke-width=".7"/>
+          <!-- steg 2: ensidig fuge (T-BW ss) -->
+          <path d="M150 100 V200 M174 100 V200" stroke-width="1"/>
+          <path d="M174 150 L204 200" stroke-width="1"/>
+          <path d="M174 200 Q190 176 204 200" stroke-width="1"/>
+          <path d="M178 192 Q188 180 198 192" stroke-width=".7"/>
+          <path d="M150 200 Q135 190 140 200" stroke-width="1"/>
+          <!-- steg 3: kilsveis begge sider (FW) -->
+          <path d="M250 100 V200 M270 100 V200" stroke-width="1"/>
+          <path d="M250 175 Q240 190 226 200 M270 175 Q280 190 294 200" stroke-width="1"/>
+          <path d="M250 182 Q244 192 236 200 M270 182 Q276 192 284 200" stroke-width=".7"/>
+        </svg>
+      </div>
+      <div>
+        <table class="tbl" data-f="preheattable">
+          <caption>Preheating / Forvarming</caption>
+          <tr><td>t = 3-20 mm</td><td>20 °C</td></tr>
+          <tr><td>t= 21 - 50 mm</td><td>30 °C</td></tr>
+          <tr><td>t&gt; 50 mm</td><td>51 °C</td></tr>
+          <tr><td>Rep.</td><td>+ 50 °C</td></tr>
+        </table>
+        <table class="tbl" data-f="gastable" style="margin-top:26px">
+          <caption>Gas nozzle/<br>Gasshylse: &nbsp;&nbsp;&nbsp;&nbsp;l / min:</caption>
+          <tr><td>19 mm</td><td>18-25</td></tr>
+          <tr><td>16 mm</td><td>14-20</td></tr>
+          <tr><td>14 mm</td><td>12-17</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GRUNNMATERIALE ===== -->
+  <div class="pm" data-area="6" data-n="6">
+    <div class="top">
+      <div class="cell sec" data-f="pmtitle">Identification of parent metal</div>
+      <div class="cell l" data-f="cemax">I: &nbsp;CE max:</div>
+      <div class="cell l" data-f="cemax">C max:</div>
+      <div class="cell l" data-f="cemax">PCM max:</div>
+      <div class="cell l" data-f="cemax">II: &nbsp;CE max:</div>
+      <div class="cell l" data-f="cemax">C max:</div>
+      <div class="cell l" data-f="cemax">PCM max:</div>
+    </div>
+    <div class="grid">
+      <div class="cell hd" data-f="pm_part">Part</div>
+      <div class="cell hd" data-f="pm_name">Name/Grade</div>
+      <div class="cell hd" data-f="pm_std">Standard</div>
+      <div class="cell hd" data-f="pm_group">Group</div>
+      <div class="cell hd" data-f="pm_deliv">Delivery cond.</div>
+      <div class="cell hd" data-f="pm_thk">Thickness range<span class="u">[mm]</span></div>
+      <div class="cell hd" data-f="pm_dia">Diameter<span class="u">[mm]</span></div>
+
+      <div class="cell" data-f="pm_part"><span class="v">I</span></div>
+      <div class="cell" data-f="pm_name"><span class="v" style="font-size:10.5px">S420G2+M/lower grades</span></div>
+      <div class="cell" data-f="pm_std"><span class="v">EN10225</span></div>
+      <div class="cell" data-f="pm_group"><span class="v">2 / 1</span></div>
+      <div class="cell" data-f="pm_deliv"><span class="v" style="font-size:10.5px">TMCP / Normalized</span></div>
+      <div class="cell" data-f="pm_thk"><span class="v">3,00 &nbsp;- 60,00</span></div>
+      <div class="cell" data-f="pm_dia"><span class="v">500 &nbsp;- 9999</span></div>
+
+      <div class="cell" data-f="pm_part"><span class="v">II</span></div>
+      <div class="cell" data-f="pm_name"><span class="v" style="font-size:10.5px">S420G2+M/lower grades</span></div>
+      <div class="cell" data-f="pm_std"><span class="v">EN10225</span></div>
+      <div class="cell" data-f="pm_group"><span class="v">2 / 1</span></div>
+      <div class="cell" data-f="pm_deliv"><span class="v" style="font-size:10.5px">TMCP / Normalized</span></div>
+      <div class="cell" data-f="pm_thk"><span class="v">3,00 &nbsp;- 60,00</span></div>
+      <div class="cell" data-f="pm_dia"><span class="v">500 &nbsp;- 9999</span></div>
+    </div>
+  </div>
+
+  <!-- ===== TILSETTMATERIALE ===== -->
+  <div class="fm" data-area="7" data-n="7">
+    <div class="row"><div class="cell sec" data-f="fmtitle" style="border-right:0">Identification of filler metal</div></div>
+    <div class="grid">
+      <div class="cell hd" data-f="fm_index">Index</div>
+      <div class="cell hd" data-f="fm_trade">Trade name</div>
+      <div class="cell hd" data-f="fm_class">Classification</div>
+      <div class="cell hd" data-f="fm_group">Group</div>
+      <div class="cell hd" data-f="fm_handling">Filler handling</div>
+
+      <div class="cell" data-f="fm_index"><span class="v">1</span></div>
+      <div class="cell" data-f="fm_trade"><span class="v">Nittetsu SF-3AM</span></div>
+      <div class="cell" data-f="fm_class"><span class="v">AWS A5.29: E81T1-G</span></div>
+      <div class="cell" data-f="fm_group"><span class="v">FM1</span></div>
+      <div class="cell" data-f="fm_handling"><span class="v">02-W-COZ012E</span></div>
+
+      <div class="cell" data-f="fm_index"><span class="v">2</span></div>
+      <div class="cell" data-f="fm_empty"></div><div class="cell" data-f="fm_empty"></div><div class="cell" data-f="fm_empty"></div><div class="cell" data-f="fm_empty"></div>
+      <div class="cell" data-f="fm_index"><span class="v">3</span></div>
+      <div class="cell" data-f="fm_empty"></div><div class="cell" data-f="fm_empty"></div><div class="cell" data-f="fm_empty"></div><div class="cell" data-f="fm_empty"></div>
+    </div>
+  </div>
+
+  <!-- ===== SVEISEPARAMETRE ===== -->
+  <div class="wp" data-area="8" data-n="8">
+    <div class="top">
+      <div class="cell sec" data-f="wptitle" style="border-right:0">Welding Parameters</div>
+      <div class="cell" data-f="equipment" style="border-right:0"><span class="l">Equipment:</span><span class="v" style="margin-left:30px">n/a</span></div>
+      <div class="cell" style="border-right:0"></div>
+    </div>
+    <div class="grid">
+      <div class="cell hd" data-f="p_pass">Pass no.</div>
+      <div class="cell hd" data-f="p_index">Index</div>
+      <div class="cell hd" data-f="p_dia">Dia.<span class="u">[mm]</span></div>
+      <div class="cell hd" data-f="p_process">Welding process</div>
+      <div class="cell hd" data-f="p_wfs">Wire feed speed<span class="u">[m/min]</span></div>
+      <div class="cell hd" data-f="p_current">Current<span class="u">[A]</span></div>
+      <div class="cell hd" data-f="p_voltage">Voltage<span class="u">[V]</span></div>
+      <div class="cell hd" data-f="p_polarity">Current / Polarity</div>
+      <div class="cell hd" data-f="p_speed">Welding speed<span class="u">[mm/min]</span></div>
+      <div class="cell hd" data-f="p_rol">Run Out Length<span class="u">[mm]</span></div>
+      <div class="cell hd" data-f="p_gas">Gas<span class="u">[l/min]</span></div>
+      <div class="cell hd" data-f="p_heat">Heat input<span class="u">[kJ/mm]</span></div>
+
+      <div class="cell" data-f="p_pass"><span class="v">1-n</span></div>
+      <div class="cell c" data-f="p_index"><span class="v">1</span></div>
+      <div class="cell" data-f="p_dia"><span class="v">1,20</span></div>
+      <div class="cell" data-f="p_process"><span class="v">136</span></div>
+      <div class="cell" data-f="p_wfs"><span class="v">6 &nbsp;- 6</span></div>
+      <div class="cell" data-f="p_current"><span class="v">160 - 290</span></div>
+      <div class="cell" data-f="p_voltage"><span class="v">20,0-25,0</span></div>
+      <div class="cell" data-f="p_polarity"><span class="v">DC+</span></div>
+      <div class="cell" data-f="p_speed"><span class="v">252 &nbsp;- 648</span></div>
+      <div class="cell" data-f="p_rol"></div>
+      <div class="cell" data-f="p_gas"></div>
+      <div class="cell" data-f="p_heat"><span class="v">0,5 &nbsp;- 2,3</span></div>
+
+      <div class="cell" data-f="p_pass"><span class="v">Cap</span></div>
+      <div class="cell c" data-f="p_index"><span class="v">1</span></div>
+      <div class="cell" data-f="p_dia"><span class="v">1,20</span></div>
+      <div class="cell" data-f="p_process"><span class="v">136</span></div>
+      <div class="cell" data-f="p_wfs"><span class="v">6 &nbsp;- 6</span></div>
+      <div class="cell" data-f="p_current"><span class="v">150 - 280</span></div>
+      <div class="cell" data-f="p_voltage"><span class="v">20,0-25,0</span></div>
+      <div class="cell" data-f="p_polarity"><span class="v">DC+</span></div>
+      <div class="cell" data-f="p_speed"><span class="v">252 &nbsp;- 648</span></div>
+      <div class="cell" data-f="p_rol"></div>
+      <div class="cell" data-f="p_gas"></div>
+      <div class="cell" data-f="p_heat"><span class="v">0,5 &nbsp;- 2,0</span></div>
+
+      <!-- tomme rader -->
+      <div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div><div class="cell dash" data-f="p_empty">-</div><div class="cell dash" data-f="p_empty">-</div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div>
+      <div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div><div class="cell dash" data-f="p_empty">-</div><div class="cell dash" data-f="p_empty">-</div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div>
+      <div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div><div class="cell dash" data-f="p_empty">-</div><div class="cell dash" data-f="p_empty">-</div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div>
+      <div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div><div class="cell dash" data-f="p_empty">-</div><div class="cell dash" data-f="p_empty">-</div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div><div class="cell" data-f="p_empty"></div><div class="cell" data-f="p_empty"></div><div class="cell dash" data-f="p_empty">-</div>
+    </div>
+  </div>
+
+  <!-- ===== VARMEBEHANDLING ===== -->
+  <div class="ht" data-area="9" data-n="9">
+    <div class="line"><span class="sec" data-f="httitle">Heat treatment</span><span class="sp"></span><span class="kv" data-f="ht_method"><span class="l">Method:</span><span class="v" style="margin-left:24px">Heat.torch/ Varmebend</span></span></div>
+    <div class="line">
+      <span class="kv" data-f="preheat"><span class="l">Preheat min:</span><span class="v" style="margin:0 16px">20</span><span class="u">°C</span></span>
+      <span class="kv" data-f="interpass"><span class="l">Interpass temp. max:</span><span class="v" style="margin:0 16px">250</span><span class="u">°C</span></span>
+      <span class="kv" data-f="htproc"><span class="l">Heat treatment proc.:</span><span class="v" style="margin-left:12px">n/a</span></span>
+      <span class="sp"></span>
+      <span class="kv" data-f="tempcontrol"><span class="l">Temp. control:</span><span class="v" style="margin-left:12px">Temperature crayon</span></span>
+    </div>
+    <div class="line">
+      <span class="kv" data-f="pwht"><span class="l">PWHT min:</span><span class="u" style="margin-left:40px">°C</span><span class="l" style="margin-left:10px">max:</span><span class="u" style="margin-left:40px">°C</span></span>
+      <span class="kv" data-f="soaking"><span class="l">Soaking:</span><span class="u" style="margin-left:40px">min/mm</span><span class="u" style="margin-left:40px">min</span></span>
+      <span class="kv" data-f="heatingrate"><span class="l">Heating rate:</span><span class="u" style="margin-left:36px">°C/h</span></span>
+      <span class="kv" data-f="coolingrate"><span class="l">Cooling rate:</span><span class="u" style="margin-left:36px">°C/h</span></span>
+    </div>
+  </div>
+
+  <!-- ===== MERKNADER + SIGNATUR ===== -->
+  <div class="rem">
+    <div class="txt" data-area="10" data-n="10">
+      <span class="l">Remarks:</span><span class="v" data-f="remarks">Additional Information in Prod. Handbook, 02-W-COZ012E.</span>
+      <span></span><span></span>
+      <span></span><span class="v" data-f="rootopening">Root opening / Rotåpning: 0-6 mm.</span>
+      <span></span><span class="v" data-f="rootface">Root face / Rotkantmål: 0-4 mm.</span>
+      <span></span><span class="v" data-f="grooveangle">Groove angle / Fugevinkel: 35-65°.</span>
+    </div>
+    <div class="sig" data-area="11" data-n="11">
+      <div data-f="addinfo"><span class="l">Additional info enclosed (Yes/No):</span> <span class="v">2</span></div>
+      <div data-f="datesign"><div class="l">Date/Signature:</div><div class="who"><span class="v">22.01.19</span><span class="v">FRB</span></div><div class="script">Frode Bunes</div><div class="v">Frode Bunes</div></div>
+      <div data-f="approved"><div class="l">Approved:</div><div class="who"><span class="v">22.01.19</span><span class="v">FRB</span></div><div class="v">Frode Bunes</div></div>
+    </div>
+  </div>
+
+  <div class="foot" data-area="1" data-n="1" style="--ac:var(--a1)">
+    <div class="cell" data-f="indexno"><span class="l" style="font-size:10px">Index no.</span><span class="v" style="font-size:10px;margin-left:20px">309468</span></div>
+    <div class="cell c" data-f="page"><span class="l" style="font-size:10px">Page</span><span class="v" style="font-size:10px;margin:0 22px">1</span><span class="l" style="font-size:10px">of</span><span class="v" style="font-size:10px;margin-left:22px">2</span></div>
+    <div class="cell r" data-f="weldeye"><span class="l" style="font-size:10px">Produced by WeldEye®</span></div>
+  </div>
+
+</div><!-- /paper -->
+</div>
+</div>
+
+<!-- ===== FORKLARINGSPANEL ===== -->
+<aside class="panel" id="panel">
+  <h2 id="ptitle"><span class="dot" id="pdot"></span><span id="ptitleTxt">Forklaring</span><button type="button" class="close" id="pclose">Lukk</button></h2>
+  <div class="pbody" id="pbody"></div>
+</aside>
+</div>
+
+<script>
+/* ============================================================
+   INNHOLD – områder
+   Basert på Stord Academys læremiddel «Produksjonskurs sveisefaget»,
+   avsnittet «Innholdet i en WPS» (11 innholdsområder), tilpasset WPS 80-31.
+   ============================================================ */
+const AREAS = {
+ 1:{t:'Identifikasjon',en:'WPS No. / Date / Rev / Index no.',
+  d:`<p>Dette feltet gir prosedyren sin identitet: <b>WPS-nummer</b>, <b>dato</b> og <b>revisjonsnummer</b>. Nederst på arket finner du også <b>Index no.</b> (databasenummeret i WeldEye) og sidetall.</p>
+     <p>Det er alltid WPS-nummeret og revisjonen du blir spurt om – på arbeidsordren, på sveiseloggen og av sveisekontrolløren. Sjekk at revisjonen du har i hånda er den gjeldende. En gammel revisjon på arbeidsplassen er en klassisk avviksårsak.</p>
+     <p>I vår WPS: <code>80-31</code>, rev. <code>3</code>, datert <code>22.01.19</code>.</p>`},
+ 2:{t:'Spesifikasjoner og standarder',en:'Prod. by / Client / Project / Ref. stand. / Ref. spec. / Ref. WPQR',
+  d:`<p>Her står det hvem prosedyren gjelder for og hva den bygger på: produsent, kunde, prosjekt og sted, hvilken <b>standard</b> WPS-en er laget etter (EN ISO 15609-1), hvilken <b>spesifikasjon</b> kunden krever (NORSOK M-101) og – viktigst – hvilke <b>WPQR</b>-er som dokumenterer at prosedyren gir en godkjent sveis.</p>
+     <p>En WPS uten referanse til en WPQR er bare et forslag (en pWPS). Det er WPQR-ene som gjør at du kan stole på tallene lenger nede på arket.</p>`},
+ 3:{t:'Sveisemetode og gass',en:'Welding process / Shielding gas type / Weaving',
+  d:`<p>Hvilken <b>sveisemetode</b> (prosessnummer etter ISO 4063) som skal brukes, hvilken <b>dekkgass</b> som hører til, og om det er tillatt å <b>pendle</b> (weaving) – og i så fall hvor bredt.</p>
+     <p>Kolonnene 1, 2 og 3 gjør det mulig å ha flere metoder i samme WPS, for eksempel TIG i rot og MAG i fyll. Nummeret (indeksen) kobler metoden til riktig tilsettmateriale og riktige parametere lenger ned. I 80-31 er det bare én metode: <code>136</code> med gass <code>M21</code>.</p>`},
+ 4:{t:'Fugebehandling og generelle opplysninger',en:'Purging gas … Tack welding proc.',
+  d:`<p>Kolonnen med generelle opplysninger om hvordan sveisen skal legges opp: tillatte <b>sveisestillinger</b>, <b>fugetyper</b>, hvordan fugen skal <b>tildannes og rengjøres</b>, om det brukes <b>rotstøtte</b>, om det sveises fra én eller to sider, hvordan det <b>fures</b> fra baksiden, og en del metodeavhengige felt (flussmiddel, wolframelektrode, brennervinkel, stick-out, gasshylse).</p>
+     <p>Mange felt står som <code>n/a</code> (not applicable – ikke aktuelt) fordi de hører til andre metoder. Det er helt normalt. Lær deg likevel hva feltene betyr – neste WPS kan være TIG eller pulverbue.</p>`},
+ 5:{t:'Tegning / eksempler',en:'Examples / Preheating / Gas nozzle',
+  d:`<p>Tegningsfeltet viser hvilke <b>sveiseforbindelser</b> prosedyren dekker. På 80-31 ser du dobbeltsidig buttsveis i X-fuge, T-forbindelse med full gjennomsveis (K-fuge og halv V-fuge) og kilsveis på begge sider. Romertallene I og II viser hvilken av delene i materialtabellen som er hvilken.</p>
+     <p>På mange WPS-er er det her du finner fugeskissen med mål og toleranser. På 80-31 står i stedet målene under «Remarks», og feltet er brukt til to praktiske tabeller: <b>forvarming</b> etter godstykkelse og <b>gassmengde</b> etter gasshylsediameter. Disse to tabellene bruker du hver dag.</p>`},
+ 6:{t:'Grunnmateriale',en:'Identification of parent metal',
+  d:`<p>Hvilke <b>materialer</b> prosedyren gjelder for, og innenfor hvilket <b>dimensjonsområde</b>: stålkvalitet, materialstandard, materialgruppe (ISO/TR 15608), leveringstilstand, godstykkelse og rørdiameter.</p>
+     <p>Part I og II er de to delene som sveises sammen. Ofte er de like (som her), men en WPS kan også dekke sveising mellom to ulike materialer. Ligger materialet ditt utenfor det som står her – feil kvalitet, for tykt, for tynt – er WPS-en ugyldig for jobben.</p>`},
+ 7:{t:'Tilsettmateriale',en:'Identification of filler metal',
+  d:`<p>Hvilken <b>tråd/elektrode</b> som skal brukes: handelsnavn fra leverandøren, klassifisering etter standard (AWS eller EN ISO), tilsettgruppe (FM1–FM6 etter ISO 9606-1) og referanse til hvordan tilsettet skal <b>håndteres og lagres</b>.</p>
+     <p>Indeksnummeret (1, 2, 3) kobler tilsettet til metoden øverst og til parameterlinjene nedenfor. Står handelsnavnet oppgitt, er det <em>det</em> produktet som er kvalifisert – du kan ikke bytte til en annen leverandør uten at sveiseansvarlig har godkjent det.</p>`},
+ 8:{t:'Sveiseparametre',en:'Welding parameters',
+  d:`<p>Hjertet i WPS-en. For hver streng (rot, fyll, dekk) står hvilket <b>tilsett</b> og hvilken <b>diameter</b>, og hvilke <b>vinduer</b> du skal holde deg innenfor: trådhastighet, strøm, spenning, polaritet, sveisehastighet og varmetilførsel.</p>
+     <p>Tallene er ikke anbefalinger – de er grensene som WPQR-en er kvalifisert innenfor. Går du utenfor, er ikke sveisen dokumentert lenger. Læremiddelet sier det rett ut: <em>«Det er meget viktig at de data som er gitt her følges nøye!»</em></p>`},
+ 9:{t:'Varmebehandling',en:'Heat treatment',
+  d:`<p>Krav til <b>forvarming</b>, maksimal <b>mellomstrengstemperatur</b> (interpass), eventuell <b>varmebehandling etter sveising</b> (PWHT) og hvordan temperaturen skal <b>måles og kontrolleres</b>.</p>
+     <p>For 80-31 er kravene enkle – forvarm etter tabellen i tegningsfeltet, hold under 250 °C mellom strengene, ingen PWHT. Men på tykt gods, høyfast stål eller sour service kan dette feltet være det som avgjør om sveisen sprekker eller ikke.</p>`},
+ 10:{t:'Tilleggsopplysninger',en:'Remarks',
+  d:`<p>Merknadsfeltet brukes til det som ikke passer inn andre steder eller trenger mer forklaring. På 80-31 er det her <b>fugegeometrien</b> står: rotåpning, rotkant og fugevinkel – altså det du skal måle med fugemalen før du starter.</p>
+     <p>I tillegg vises det til produksjonshåndboka <code>02-W-COZ012E</code>, som er «lillebroren» til WPS-en og inneholder detaljer om hefting, tilsetthåndtering, sveiseteknikk og mer.</p>`},
+ 11:{t:'Signering og godkjenning',en:'Date/Signature / Approved',
+  d:`<p>Hvem som har <b>skrevet</b> prosedyren og hvem som har <b>godkjent</b> den, med dato. Her er det sveiseingeniør Frode Bunes (FRB) i Kværner som har gjort begge deler. På andre prosjekter kan det være krav om at også kunde eller tredjepart (for eksempel DNV) signerer.</p>
+     <p>Uten signatur og godkjenning er dokumentet ikke gyldig – akkurat som et sveisesertifikat uten påtegning.</p>`},
+};
+
+/* ============================================================
+   INNHOLD – felt (detaljert visning)
+   t = norsk tittel, en = engelsk feltnavn, val = verdien i 80-31
+   here = hva verdien betyr her, alt = andre alternativer, info = verdt å vite
+   ============================================================ */
+const F = {};
+</script>
+<script>
+/* ---------- HODE ---------- */
+F.prodlogo={t:'Produsentens logo',en:'Company logo',
+ here:`<p>Logoen viser hvem som eier prosedyren. Denne WPS-en er laget i Kværner-tida (se «Prod. by»), men brukes videre i Aker Solutions etter sammenslåingen i 2020. Dokumentet er fortsatt gyldig så lenge WPQR-ene det bygger på er gyldige.</p>`,
+ info:`<p>En WPS er bedriftens eiendom. Andre bedrifter kan ikke bruke den uten at de selv har kvalifisert prosedyren (eller fått den overført etter reglene i ISO 15614-1).</p>`};
+F.doctitle={t:'Dokumenttype',en:'Welding Procedure Specification (WPS)',
+ here:`<p>Tittelen forteller at dette er en <b>WPS</b> – en godkjent sveiseprosedyre som du som sveiser skal jobbe etter. Ikke en pWPS (forslag) og ikke en WPQR (kvalifiseringsrapport).</p>`,
+ alt:`<ul><li><b>pWPS</b> – Preliminary WPS. Ser identisk ut, men mangler WPQR-referanse. Brukes bare til å sveise opp prøvestykket.</li><li><b>WPQR</b> – Welding Procedure Qualification Record. Registrerte verdier + prøveresultater.</li><li><b>WI</b> – Welding Instruction. Forenklet utgave for verkstedet.</li></ul>`,
+ info:`<p>Får du en pWPS i hånda i produksjon, skal du reagere. Den er ikke godkjent for produksjonssveising.</p>`};
+F.wpsno={t:'WPS-nummer',en:'WPS No.',val:'80-31',
+ here:`<p>Prosedyrens unike nummer. Nummerserien er bedriftens egen: hos Kværner/Aker på Stord er «80-» serien for konstruksjonsstål i denne prosjekttypen, og «31» er løpenummeret.</p><p>Dette nummeret skal stå på arbeidsordren/sveiseplanen og føres i sveiseloggen for hver sveis du gjør.</p>`,
+ alt:`<p>Andre bedrifter bruker andre systemer: løpenummer (WPS 0123), kombinasjon av metode og materiale (136-S355-BW-01), eller prosjektnummer + løpenummer.</p>`,
+ info:`<p>Sjekk alltid at nummeret på WPS-en du har, stemmer med det som er angitt på tegning/arbeidsordre. To WPS-er kan se nesten like ut, men ha ulike grenser.</p>`};
+F.ref={t:'Referanse',en:'Ref.',val:'',
+ here:`<p>Tomt her. Feltet brukes til en intern referanse – for eksempel en kundes WPS-nummer, et sveiseplan-nummer eller et dokumentnummer i kundens system.</p>`,
+ alt:`<p>Kan inneholde kundens dokumentnummer, en referanse til en sveiseplan (weld map) eller til en tidligere WPS som denne erstatter.</p>`};
+F.sour={t:'Sur tjeneste (H₂S)',en:'Sour service',val:'',
+ here:`<p>Tomt – prosedyren er <b>ikke</b> kvalifisert for sour service. Johan Castberg-strukturen som denne WPS-en er laget for, er konstruksjonsstål uten krav til H₂S-bestandighet.</p>`,
+ alt:`<p>Står det <code>Yes</code>, gjelder prosedyren for utstyr som skal tåle hydrogensulfid (H₂S) i olje/gass. Da er det strenge krav til <b>hardhet</b> i sveis og varmepåvirket sone (typisk maks 250 HV10 / 22 HRC etter NACE MR0175 / ISO 15156) og som regel lavere varmetilførsel og strengere kontroll av forvarming.</p>`,
+ info:`<p>Sour service-sveising er en egen kvalifisering. En vanlig WPS kan aldri brukes på sour service-utstyr, selv om metode og materiale ser like ut.</p>`};
+F.date={t:'Dato',en:'Date',val:'22.01.19',
+ here:`<p>Datoen prosedyren (denne revisjonen) ble utstedt: 22. januar 2019. Den er altså laget til Johan Castberg-prosjektet, men brukes fortsatt fordi innholdet er generelt.</p>`,
+ info:`<p>En WPS har ingen utløpsdato i seg selv. Den er gyldig så lenge WPQR-ene bak den er gyldige og ingen standard eller kundekrav har endret seg slik at den må revideres.</p>`};
+F.rev={t:'Revisjon',en:'Rev',val:'3',
+ here:`<p>Dette er tredje utgave av WPS 80-31. Hver gang noe endres – nytt tilsett, justerte parametergrenser, ny WPQR – får prosedyren nytt revisjonsnummer.</p>`,
+ info:`<p>Bruk aldri en utdatert revisjon. Ligger det en rev. 2 på sveisebua og rev. 3 i systemet, er det rev. 3 som gjelder – og sveiser gjort etter rev. 2 kan bli underkjent. Spør sveisekoordinator hvis du er i tvil.</p>`};
+
+/* ---------- SPESIFIKASJONER ---------- */
+F.prodby={t:'Produsert av',en:'Prod. by',val:'Kværner AS',
+ here:`<p>Bedriften som har laget og eier prosedyren. Kværner AS ble slått sammen med Aker Solutions i 2020, og prosedyren lever videre der.</p>`,
+ info:`<p>Feltet betyr «manufacturer» i standardens språk – det er produsenten som er ansvarlig for at prosedyren er kvalifisert (ISO 15614-1) og brukes riktig.</p>`};
+F.client={t:'Kunde',en:'Client',val:'Equinor',
+ here:`<p>Kunden prosedyren er laget for. Equinor er operatør på Johan Castberg. Kunden stiller ofte egne krav (via NORSOK, egne spesifikasjoner) som ligger «oppå» standardene, og kan kreve å godkjenne WPS-en.</p>`,
+ alt:`<p>Kan være tomt på generelle bedriftsprosedyrer, eller inneholde andre operatører/kontraktører (Aker BP, Vår Energi, Shell …).</p>`};
+F.refstand={t:'Referansestandard',en:'Ref. stand',val:'EN ISO 15609-1',
+ here:`<p>Standarden som bestemmer <b>hva en WPS skal inneholde</b> for buesveising. Det er derfor alle WPS-er, uansett bedrift, har de samme opplysningene – bare i litt ulikt oppsett.</p>`,
+ alt:`<ul><li><b>ISO 15609-2</b> gassveising, <b>-3</b> elektronstråle, <b>-4</b> laser, <b>-5</b> motstandssveising.</li><li><b>ASME IX</b> – amerikansk system (WPS/PQR). Brukes på trykkutstyr for amerikanske kunder. Egen logikk med «essential variables».</li><li><b>AWS D1.1</b> – amerikansk stålkonstruksjonsstandard med egne WPS-krav.</li></ul>`,
+ info:`<p>Selve <em>kvalifiseringen</em> (WPQR) følger søsterstandarden <span class="std">EN ISO 15614-1</span>. 15609 sier hva som skal stå på arket, 15614 sier hvordan man beviser at det virker.</p>`};
+F.project={t:'Prosjekt',en:'Project',val:'Johan Castberg',
+ here:`<p>Prosjektet prosedyren ble laget for: Johan Castberg-feltet i Barentshavet, der Stord bygde deler av produksjonsskipet (FPSO). Prosedyren er generell nok til at den brukes videre på andre jobber.</p>`};
+F.location={t:'Sted',en:'Location',val:'Stord sites',
+ here:`<p>Hvor prosedyren gjelder. «Stord sites» dekker verftet på Stord (Eldøyane m.m.). Samme bedrift kan ha ulike WPS-er for ulike lokasjoner, for eksempel fordi utstyret er forskjellig.</p>`};
+F.refspec={t:'Referansespesifikasjon',en:'Ref. spec.',val:'NORSOK M-101',
+ here:`<p><b>NORSOK M-101</b> «Structural steel fabrication» er den norske offshore-standarden for fabrikasjon av stålkonstruksjoner. Den stiller krav utover ISO-standardene: til sveisekontroll, akseptkriterier, kvalifisering, forvarming, sveisernes sertifikater m.m.</p>`,
+ alt:`<ul><li><b>NORSOK M-601</b> – rørsystemer (piping). Den du møter på rørspooler.</li><li><b>NORSOK M-120 / M-121</b> – materialdatablad for stål og aluminium.</li><li><b>DNV-OS-C401</b> – DNVs fabrikasjonsstandard for offshore-enheter.</li><li><b>EN 1090-2</b> – landbaserte stålkonstruksjoner (utførelsesklasse EXC1–4).</li><li><b>ASME B31.3</b> – prosessrør, amerikansk.</li></ul>`,
+ info:`<p>Spesifikasjonen bestemmer ofte <b>hvor strengt</b> sveisen din blir kontrollert. M-101 deler sveiser i inspeksjonskategorier (A–E) med ulik mengde NDT.</p>`};
+F.exambody={t:'Kontrollorgan',en:'Exam. body',val:'',
+ here:`<p>Tomt – ingen tredjepart har vært med på å godkjenne prosedyren. Det er vanlig for konstruksjonsstål der bedriften selv har kompetanse (IWE) og kunden aksepterer det.</p>`,
+ alt:`<p>På trykkutstyr, klasset utstyr (skip, rigger) og for enkelte kunder må et uavhengig organ overvære kvalifiseringen og signere WPQR/WPS. Typiske navn: <b>DNV</b>, <b>Bureau Veritas</b>, <b>Lloyd's Register</b>, <b>Kiwa</b>, <b>TÜV</b>.</p>`};
+F.wpqr={t:'Referanse til WPQR',en:'Ref. WPQR',val:'80-065 · 80-066 · 80-064 · 80-069 · 80-235 · VS160F02-100A',
+ here:`<p>Seks kvalifiseringsrapporter (WPQR) som til sammen dekker alt denne WPS-en lover: tykkelsesområdet 3–60 mm, alle stillingene, buttsveis, T-buttsveis og kilsveis, sveising fra begge sider. Én enkelt prøvesveis dekker aldri så mye – derfor flere WPQR-er.</p><p>Den siste, <code>VS160F02-100A</code>, har et annet nummerformat og er trolig en eldre eller overtatt kvalifisering.</p>`,
+ alt:`<p>Enkle WPS-er refererer til én WPQR. Amerikansk system (ASME IX) kaller det <b>PQR</b>. Eldre norske dokumenter bruker <b>WPAR</b> (Welding Procedure Approval Record) – samme sak.</p>`,
+ info:`<p>Hva en WPQR dekker («range of qualification») er regulert i <span class="std">EN ISO 15614-1</span>: en prøve i tykkelse t dekker typisk 0,5t–2t, en stilling dekker visse andre stillinger, materialgruppe 2 dekker gruppe 1 osv. Sveiseingeniøren setter sammen WPS-en innenfor summen av disse områdene.</p><p>Uten WPQR-referanse er dokumentet bare en <b>pWPS</b>.</p>`};
+
+/* ---------- METODE / GASS ---------- */
+F.gasidx={t:'Indeks (metode 1, 2, 3)',en:'Index',
+ here:`<p>Kolonnene 1, 2 og 3 gjør at én WPS kan beskrive inntil tre metoder eller tilsett. Indeksnummeret går igjen i tilsettabellen og i «Index»-kolonnen i parametertabellen, slik at alt henger sammen.</p><p>I 80-31 er bare indeks 1 i bruk.</p>`,
+ alt:`<p>Typisk kombinasjon: indeks 1 = 141 (TIG) i rot, indeks 2 = 136 i fyll og dekk. Eller indeks 1 = 111 med elektrode Ø2,5 og indeks 2 = samme elektrode Ø3,2.</p>`};
+F.process={t:'Sveisemetode',en:'Welding process',val:'136',
+ here:`<p><b>136 = MAG-sveising med rørtråd (flux cored) og aktiv dekkgass.</b> Tråden er et rør fylt med pulver (rutil eller basisk) som gir slagg, legeringselementer og stabil bue. Dekkgassen (her M21) beskytter smeltebadet.</p><p>136 er arbeidshesten på Stord for konstruksjonsstål: høy avsmelting, sveiser i alle stillinger, tåler litt vind bedre enn massivtråd.</p>`,
+ alt:`<p>Metodenummer etter <span class="std">EN ISO 4063</span>:</p><ul>
+ <li><b>111</b> – manuell buesveising med dekket elektrode (MMA / «pinne»)</li>
+ <li><b>114</b> – rørtråd uten dekkgass (selvbeskyttende)</li>
+ <li><b>121</b> – pulverbuesveising (SAW), mekanisert</li>
+ <li><b>131</b> – MIG, massivtråd med inert gass (aluminium)</li>
+ <li><b>135</b> – MAG, massivtråd med aktiv gass</li>
+ <li><b>136</b> – MAG, rørtråd med flussmiddel (denne)</li>
+ <li><b>138</b> – MAG, metallpulverfylt rørtråd (metal cored)</li>
+ <li><b>141</b> – TIG med massiv tilsettstav</li>
+ <li><b>15</b> – plasmasveising</li></ul>`,
+ info:`<p>Metodenummeret er en <b>viktig variabel</b> både for prosedyren og for sertifikatet ditt. Er du sertifisert i 135, er du <em>ikke</em> automatisk godkjent for 136 – sjekk sertifikatet.</p><p>Rutil rørtråd (T1) sveises med <b>drag-/pull-teknikk</b>, 10–20° trekkende vinkel, i alle stillinger. Nedoversveising (PG) er forbudt i produksjonshåndboka.</p>`};
+F.gas={t:'Dekkgass',en:'Shielding gas type',val:'M21 (Ar+18-22%CO2)',
+ here:`<p><b>M21</b> er gassgruppen etter EN ISO 14175: argon med 15–25 % CO₂. Her er den snevret inn til 18–22 % CO₂ – den vanlige «blandgassen» på verftet (f.eks. 80/20 eller 82/18).</p><p>CO₂-andelen gir bedre innbrenning og varmere bue; argon gir mindre sprut og finere overflate. 18–22 % er et godt kompromiss for rørtråd.</p>`,
+ alt:`<p>Gassgrupper etter <span class="std">EN ISO 14175</span>:</p><ul>
+ <li><b>I1</b> – 100 % argon (MIG aluminium, TIG)</li>
+ <li><b>I3</b> – argon + helium</li>
+ <li><b>M12</b> – Ar + 0,5–5 % CO₂ (rustfritt, massivtråd)</li>
+ <li><b>M13</b> – Ar + 0,5–3 % O₂</li>
+ <li><b>M20</b> – Ar + 5–15 % CO₂</li>
+ <li><b>M21</b> – Ar + 15–25 % CO₂ (denne)</li>
+ <li><b>M24</b> – Ar + CO₂ + O₂ (trekomponent)</li>
+ <li><b>C1</b> – 100 % CO₂. Billig, dyp innbrenning, mer sprut. Mange rørtråder er kvalifisert for både M21 og C1.</li></ul>`,
+ info:`<p>Gassen er en viktig variabel: bytte fra M21 til C1 krever normalt ny kvalifisering, fordi CO₂ gir annen legering i sveisen (mer avbrenning av Mn og Si).</p><p>Gassmengde i l/min står ikke her, men i tabellen «Gas nozzle / Gasshylse» i tegningsfeltet – den er avhengig av gasshylsens diameter.</p>`};
+F.weaving={t:'Pendling',en:'Weaving (yes/no) · max',val:'Yes, max 17 mm',
+ here:`<p>Pendling er tillatt, men strengen skal ikke være bredere enn <b>17 mm</b>. Bredere pendling gir så lav sveisehastighet at varmetilførselen kan gå over grensen (2,3 kJ/mm), og risikoen for <b>bindefeil i fugeveggen</b> øker.</p>`,
+ alt:`<p><code>No</code> betyr strengsveising (stringer beads) hele veien. Noen WPS-er oppgir maks pendlebredde som «3 × tråddiameter» eller «maks 2 × elektrodediameter» for 111.</p>`,
+ info:`<p>Produksjonshåndboka (Welder Training): pendling skal bare brukes i <b>PF</b> (vertikalt opp) og <b>PE</b> (under opp). I PA og PC skal du bruke strengsveising. Sjekk maks bredde på WPS-en – det er en av de vanligste tingene kontrolløren måler.</p>`};
+F.process2={t:'Metode 2 og 3 (ikke i bruk)',en:'Index 2 / 3',val:'',
+ here:`<p>Tomme kolonner – WPS 80-31 bruker bare én metode. Feltene er der fordi skjemaet (WeldEye) er likt for alle prosedyrer.</p>`,
+ alt:`<p>Ville vært fylt ut på f.eks. en rørprosedyre med TIG-rot (141, gass I1) og MAG-fyll (136, gass M21).</p>`};
+
+/* ---------- GENERELLE OPPLYSNINGER ---------- */
+F.purging={t:'Rotgass / motholdsgass',en:'Purging gas type',val:'n/a',
+ here:`<p>Ikke aktuelt. Rotgass brukes for å beskytte <em>baksiden</em> av sveisen mot oksidasjon, og er ikke nødvendig på konstruksjonsstål som sveises fra begge sider og fures.</p>`,
+ alt:`<p>På rustfritt, duplex, nikkellegeringer og titan er rotgass et <b>krav</b> ved ensidig sveising: typisk <b>argon</b>, eventuelt nitrogen eller formiergass (N₂ + H₂). Mengde i l/min og krav til restoksygen (f.eks. &lt; 50 ppm) står da her.</p>`,
+ info:`<p>Læremiddelet om motholdsgass kaller «tut og kjør»-metoden – skumgummi i enden og gass i tilfeldig mengde – et forsømt område. Uten skikkelig rotgass får du «sukker» (oksidert, porøs rot) på rustfritt.</p>`};
+F.positions={t:'Sveisestillinger',en:'Welding positions',val:'PA, PB, PC, PD, PE, PF, H-L045',
+ here:`<p>Prosedyren dekker praktisk talt alle stillinger:</p><ul>
+ <li><b>PA</b> – horisontal (flat), buttsveis liggende / kilsveis i renne</li>
+ <li><b>PB</b> – horisontal-vertikal kilsveis (stående kilsveis)</li>
+ <li><b>PC</b> – horisontal buttsveis på vertikal vegg</li>
+ <li><b>PD</b> – kilsveis under opp (horisontal-overhead)</li>
+ <li><b>PE</b> – buttsveis under opp (overhead)</li>
+ <li><b>PF</b> – vertikalt <b>oppover</b></li>
+ <li><b>H-L045</b> – rør fast med aksen 45°, sveist oppover</li></ul>
+ <p>Merk at <b>PG</b> (vertikalt nedover) <em>ikke</em> er med. Nedoversveising er forbudt med rørtråd i produksjonshåndboka – slagget renner foran badet og gir slagginneslutninger.</p>`,
+ alt:`<p>Etter <span class="std">EN ISO 6947</span> finnes i tillegg <b>PG</b> (vertikalt ned), <b>PH</b> (rør fast horisontal akse, oppover), <b>PJ</b> (samme, nedover) og <b>J-L045</b> (45° nedover). Rørprosedyrer oppgir gjerne PH eller H-L045; en WPS for bare liggende sveis oppgir bare PA/PB.</p>`,
+ info:`<p>Stilling er en viktig variabel på <b>sertifikatet</b> ditt også. WPS-en kan tillate PE, men har du ikke PE (eller en stilling som dekker den) på sertifikatet, får du ikke sveise det.</p>`};
+F.jointtype={t:'Fugetype / forbindelsestype',en:'Joint type',val:'BW, T-BW, FW',
+ here:`<ul><li><b>BW</b> – Butt Weld, buttsveis (plate mot plate i samme plan)</li>
+ <li><b>T-BW</b> – T-forbindelse med <b>full gjennomsveising</b> (fuget T-forbindelse, «T-butt»)</li>
+ <li><b>FW</b> – Fillet Weld, kilsveis (ingen fuge, sveis i hjørnet)</li></ul>
+ <p>Tegningsfeltet viser eksempler på alle tre.</p>`,
+ alt:`<p>Andre betegnelser du kan møte: <b>PP</b> (partial penetration, delvis gjennomsveist), <b>BW pipe</b> / <b>T</b> for rør, <b>branch</b> (avstikker/rør-i-rør), <b>corner joint</b> (hjørneforbindelse), <b>edge</b>, <b>lap</b> (overlapp).</p>`,
+ info:`<p>Etter ISO 15614-1 dekker en kvalifisert buttsveis også kilsveis (men ikke omvendt) på samme materiale og tykkelse. Derfor er FW ofte med i «gratis» på en buttsveis-WPS.</p>`};
+F.jointprep={t:'Fugetildanning',en:'Joint preparation',val:'Grinding / Sliping',
+ here:`<p>Fugen skal tildannes ved <b>sliping</b> – eller etterbehandles med sliping etter termisk skjæring. Hensikten er en ren, metallisk blank fugeflate uten glødeskall, oksid eller riller fra brenneren.</p>`,
+ alt:`<ul><li><b>Machining</b> – maskinering (dreiing, fresing). Vanlig på rør og tykt gods.</li><li><b>Thermal cutting</b> – gass-/plasmaskjæring, som regel «+ grinding».</li><li><b>Plasma / laser / waterjet</b></li><li><b>Arc air gouging + grinding</b> – kullbuemeisling etterfulgt av sliping.</li></ul>`,
+ info:`<p>Fugegeometrien (vinkel, rotåpning, rotkant) står ikke her, men under <b>Remarks</b> på 80-31. Mål den med fugemal <em>før</em> du hefter. For trang fuge er den vanligste årsaken til bindefeil.</p>`};
+F.cleanbefore={t:'Rengjøring før sveising',en:'Cleaning before welding',val:'Wire brush / stålbørste',
+ here:`<p>Fuge og område rundt skal børstes rene med <b>stålbørste</b> før sveising: fjern rust, glødeskall, maling, fett og fukt. Skitt i fugen gir porer og slagginneslutninger.</p>`,
+ alt:`<p><b>Grinding</b> (sliping), <b>degreasing</b> (avfetting med løsemiddel – viktig på aluminium og rustfritt), <b>needle gun</b>, <b>blasting</b>. På rustfritt: <em>rustfri</em> børste, aldri en som har vært brukt på karbonstål.</p>`,
+ info:`<p>Produksjonshåndboka: sjekk at fugeflatene og ca. 20 mm på hver side er fri for rust, glødeskall, olje osv. Primer skal normalt fjernes med mindre den er sveisbar («weldable primer») og kvalifisert.</p>`};
+F.cleanafter={t:'Rengjøring etter sveising / mellom strengene',en:'Cleaning after welding',val:'Wire brush/stålbørste',
+ here:`<p>Slagg og silikatøyer skal fjernes med stålbørste (og slagghammer) etter hver streng og etter ferdig sveis. Rørtråd 136 gir slagg som <em>må</em> bort før neste streng – ellers får du slagginneslutninger.</p>`,
+ alt:`<p><b>Grinding</b> – sliping mellom strengene, f.eks. for å åpne opp et for konvekst lag eller fjerne stopp/start-krater. <b>Chipping</b> – slagghammer. På aluminium: rustfri børste.</p>`,
+ info:`<p>Welder Training: slip alltid bort startkratere og «cutting stone»-profil (for smal, dyp sliping) – feil sliping gir bindefeil i neste lag.</p>`};
+F.backing={t:'Rotstøtte / mothold',en:'Backing',val:'n/a',
+ here:`<p>Ingen rotstøtte. Prosedyren sveises fra begge sider (bs) med furing, så roten smeltes bort og sveises på nytt fra baksiden.</p>`,
+ alt:`<ul><li><b>Ceramic backing</b> – keramisk rotstøtte, vanlig ved ensidig sveising av plater med rørtråd. Gir jevn rot uten furing.</li><li><b>Steel backing / mb</b> – stålstripe (material backing) som blir en del av konstruksjonen.</li><li><b>Gas backing / gb</b> – rotgass (se «Purging gas»).</li><li><b>Flux backing / fb</b> – pulver (SAW).</li><li><b>nb</b> – no backing, ensidig uten mothold – den vanskeligste rotsveisen.</li></ul>`,
+ info:`<p>«ss nb» (single side, no backing) i sertifikatet ditt er den mest verdifulle varianten – den dekker også sveising med mothold. Motsatt gjelder ikke.</p>`};
+F.singledouble={t:'Ensidig / tosidig',en:'Single/Double',val:'bs',
+ here:`<p><b>bs = both sides</b> – sveisen legges fra begge sider. Først sveises den ene siden, deretter fures roten ut fra baksiden (se «Back gouging») og siden to sveises.</p>`,
+ alt:`<p><b>ss = single side</b> – ensidig sveis. Da må roten enten sveises mot rotstøtte (mb/fb) eller som ren rotstreng uten mothold (nb). Ensidig sveising er standard på rør.</p>`,
+ info:`<p>Forkortelsene er de samme som på sveisesertifikatet (ISO 9606-1): ss, bs, nb, mb, gb, fb.</p>`};
+F.backgouging={t:'Furing fra baksiden',en:'Back gouging',val:'Arc air / kolstift',
+ here:`<p>Roten skal fures ut med <b>kullbuemeisling</b> (arc air gouging): en kullelektrode («kolstift») smelter metallet mens trykkluft blåser det bort. Deretter slipes furen ren før side to sveises.</p>`,
+ alt:`<ul><li><b>Grinding</b> – bare sliping. Vanlig på tynt gods.</li><li><b>Plasma gouging</b> – renere enn kullbue, mindre karbonoppkulling.</li><li><b>n/a</b> – ingen furing (ensidig sveis eller full gjennomsveis uten furing).</li></ul>`,
+ info:`<p>Welder Training, «Problem No. 1»: feil furingsprofil – <b>for smal og dyp</b> – er en hovedårsak til bindefeil og slagg. Furen skal ha ca. 45° åpning slik at brenneren kommer til. Slip alltid bort det karbonrike laget etter kullbuemeisling.</p>`};
+F.fluxdes={t:'Flussmiddel – betegnelse',en:'Flux designation',val:'n/a',
+ here:`<p>Ikke aktuelt for 136 (flussmiddelet ligger inne i tråden).</p>`,
+ alt:`<p>Brukes for <b>121 pulverbue (SAW)</b>: pulverets klassifisering etter EN ISO 14174, f.eks. <code>S A FB 1 65 DC H5</code>, og handelsnavn (OK Flux 10.62 e.l.). Pulver og tråd må være kvalifisert som <em>par</em>.</p>`};
+F.fluxhand={t:'Flussmiddel – håndtering',en:'Flux handling',val:'n/a',
+ here:`<p>Ikke aktuelt for 136.</p>`,
+ alt:`<p>For SAW: krav til tørking (f.eks. 300–350 °C i 2 timer), oppbevaring i varmeskap, resirkulering av ubrukt pulver. Fuktig pulver = hydrogen = sprekker.</p>`};
+F.tungsten={t:'Wolframelektrode',en:'Tungsten electrode',val:'n/a',
+ here:`<p>Ikke aktuelt – gjelder bare TIG (141).</p>`,
+ alt:`<p>På en TIG-WPS står type og diameter: <b>WL15</b> (1,5 % lantan, gull), <b>WC20</b> (2 % cerium, grå), <b>WT20</b> (2 % thorium, rød – radioaktiv, på vei ut), <b>WP</b> (ren wolfram, grønn, for AC/aluminium). Diameter typisk 1,6 / 2,4 / 3,2 mm.</p>`};
+F.torchangle={t:'Brennervinkel',en:'Torch angle',val:'n/a',
+ here:`<p>Ikke spesifisert i WPS-en, men produksjonshåndboka er tydelig: <b>trekkende (pull/drag) vinkel 10–20°</b> er obligatorisk for rørtråd i alle forbindelser. Skyvende teknikk gir slagg foran badet og bindefeil.</p>`,
+ alt:`<p>Noen WPS-er angir vinkelen i grader, f.eks. «70–90° i sveiseretningen» eller «45° mot stegplaten» for kilsveis. På TIG-prosedyrer for aluminium står ofte «push».</p>`,
+ info:`<p>Welder Training «Problem No. 4»: feil brennervinkel er en av de fem vanligste årsakene til underkjente sveiser. Kilsveis: hold brenneren ca. 45° mellom platene, litt mer mot den tykke delen.</p>`};
+F.standoff={t:'Stick-out / kontaktrøravstand',en:'Stand off distance',val:'15–20 mm',
+ here:`<p>Avstanden fra kontaktrøret til arbeidsstykket skal være <b>15–20 mm</b>. Lengre stick-out gir mer motstand i tråden → <b>lavere strøm</b> ved samme trådhastighet → dårligere innbrenning og risiko for bindefeil. Kortere gir høyere strøm og mer sprut/varme på kontaktrøret.</p>`,
+ alt:`<p>Massivtråd 135: typisk 10–15 mm. Rørtråd 136: 15–25 mm avhengig av tråd. Metal cored 138: 15–20 mm. Selvbeskyttende 114: ofte 25–40 mm.</p>`,
+ info:`<p>Welder Training «Problem No. 3»: for lang stick-out = mindre innbrenning = bindefeil. Maks 20 mm. Trådhastighet og spenning er forhåndsinnstilt på maskinen – det er <em>strømmen</em> som endrer seg når du endrer stick-out. Derfor kan du ikke stole på at «maskinen står riktig».</p>`};
+F.nozzle={t:'Gasshylse – diameter',en:'Nozzle diameter(s)',val:'14–19 mm',
+ here:`<p>Gasshylsen (gasskoppen) skal være 14, 16 eller 19 mm i innvendig diameter. Diameteren bestemmer hvor mye gass du trenger – se tabellen i tegningsfeltet: 14 mm → 12–17 l/min, 16 mm → 14–20, 19 mm → 18–25.</p>`,
+ alt:`<p>TIG oppgir gasshylse i «størrelse» (nr. 5, 6, 7, 8 …) eller mm, og ofte gasslinse (gas lens). Små hylser til trange fuger, store til rustfritt og titan.</p>`,
+ info:`<p>Welder Training: rens gasshylsen for sprut jevnlig – tett hylse gir turbulent gass og porer. Sjekk gassmengden ved brenneren med flowmeter, ikke bare på regulatoren.</p>`};
+F.tackproc={t:'Hefteprosedyre',en:'Tack welding proc.',val:'02-W-COZ012E',
+ here:`<p>Hefting skal gjøres etter produksjonshåndboka <b>02-W-COZ012E</b>. Der står bl.a. minimum heftelengde, avstand, at hefter skal legges i fugen med samme tilsett og forvarming som sveisen, og at sprukne hefter skal slipes bort.</p>`,
+ alt:`<p>Andre bedrifter har egen «tack welding WPS» eller skriver kravene rett inn: «Min. 50 mm lengde, samme WPS, feathered ends».</p>`,
+ info:`<p>Hefter blir en del av sveisen. Heft med feil tilsett eller uten forvarming er en vanlig sprekkårsak på tykt gods.</p>`};
+
+/* ---------- TEGNING ---------- */
+F.examples={t:'Eksempler på forbindelser',en:'Examples / Eksempler',
+ here:`<p>Skissen viser hva prosedyren dekker: øverst <b>buttsveis i X-fuge</b> (BW, sveist fra begge sider – legg merke til strengene på begge sider), nederst tre T-forbindelser: <b>K-fuge</b> med full gjennomsveising fra begge sider (T-BW), <b>halv V-fuge</b> ensidig (T-BW) og ren <b>kilsveis</b> på begge sider (FW).</p><p>Romertallene <b>I</b> og <b>II</b> viser hvilken del i materialtabellen som er hvilken. Her er begge samme stål.</p>`,
+ alt:`<p>På mange WPS-er er dette feltet en fullstendig fugeskisse med mål (vinkel, rotåpning, rotkant), strengrekkefølge (1, 2, 3 …) og lagtykkelse. På rør-WPS-er ser du ofte V-fuge 60° ± 5° med rotkant 1–2 mm og rotåpning 2–4 mm.</p>`,
+ info:`<p>Strengrekkefølgen er viktig: Welder Training anbefaler å legge hot pass (2. streng) som <b>to</b> strenger der det er plass – det reduserer bindefeil i overgangen rot/fyll.</p>`};
+F.preheattable={t:'Forvarmingstabell',en:'Preheating / Forvarming',val:'3–20 mm: 20 °C · 21–50 mm: 30 °C · >50 mm: 51 °C · Rep.: +50 °C',
+ here:`<p>Minimum arbeidstemperatur avhengig av <b>godstykkelse</b>. For tynne plater holder det med romtemperatur (20 °C – i praksis: ikke sveis på kaldt eller fuktig stål). Over 50 mm skal det forvarmes til minst 51 °C.</p><p><b>Rep. +50 °C</b>: ved reparasjonssveising skal forvarmen økes med 50 °C. Reparasjoner sveises i innspent, tykt gods med høy restspenning – derfor strengere krav.</p>`,
+ alt:`<p>På høyfast stål (S460–S690), tykt gods eller høyt karbonekvivalent kan tabellen kreve 100–150 °C. Sour service og duplex har egne krav (duplex: ofte <em>maks</em> temperatur, ikke min).</p>`,
+ info:`<p>Forvarming reduserer avkjølingshastigheten og driver ut hydrogen → mindre risiko for <b>hydrogensprekker</b> (kaldsprekker). Beregnes etter <span class="std">EN 1011-2</span> ut fra CE, tykkelse, varmetilførsel og hydrogeninnhold. Målt 75 mm fra fugen, eller 4 × t, på motsatt side av varmen.</p>`};
+F.gastable={t:'Gassmengde etter gasshylse',en:'Gas nozzle / Gasshylse · l/min',val:'19 mm: 18–25 · 16 mm: 14–20 · 14 mm: 12–17 l/min',
+ here:`<p>Gassmengden i liter per minutt skal tilpasses gasshylsens diameter. Større hylse → mer gass for å fylle den. Dette er tallene du stiller inn på flowmeteret.</p>`,
+ alt:`<p>Mange WPS-er skriver bare én gassmengde i parametertabellen (f.eks. 15–20 l/min). TIG: 6–12 l/min. Rotgass: ofte 5–10 l/min etter forspyling.</p>`,
+ info:`<p>For <em>lite</em> gass gir porer. For <em>mye</em> gass gir turbulens som drar inn luft – og også porer. Trekk (åpne porter, vifter) blåser bort gassen: skjerm av. Sjekk mengden ved brenneren, ikke bare på flasken.</p>`};
+
+/* ---------- GRUNNMATERIALE ---------- */
+F.pmtitle={t:'Grunnmateriale',en:'Identification of parent metal',
+ here:`<p>Tabellen sier hvilke materialer og dimensjoner WPS 80-31 er gyldig for. Trykk på kolonneoverskriftene for å få forklart hver enkelt.</p>`,
+ info:`<p>Materialet er en viktig variabel. Ligger platen din utenfor (annen gruppe, for tykk), gjelder ikke WPS-en – uansett hvor lik jobben ser ut.</p>`};
+F.cemax={t:'Karbonekvivalent og karboninnhold',en:'CE max / C max / PCM max',val:'',
+ here:`<p>Tomt på 80-31 – prosedyren begrenser materialet gjennom stålkvalitet og standard i stedet.</p>`,
+ alt:`<p>Når feltet er fylt ut, setter det en <b>øvre grense</b> for hvor «sveisevanskelig» stålet kan være:</p><ul>
+ <li><b>CE</b> (IIW): CE = C + Mn/6 + (Cr+Mo+V)/5 + (Ni+Cu)/15. Typisk maks 0,43 for S355.</li>
+ <li><b>C max</b>: maks karboninnhold, f.eks. 0,14 %.</li>
+ <li><b>Pcm</b>: Ito-Bessyo-formelen, brukt for lavkarbon TMCP-stål: Pcm = C + Si/30 + (Mn+Cu+Cr)/20 + Ni/60 + Mo/15 + V/10 + 5B.</li></ul>`,
+ info:`<p>Høyere CE → høyere herdbarhet → større risiko for hydrogensprekker → mer forvarming. Verdiene finner du på materialsertifikatet (3.1-sertifikat).</p>`};
+F.pm_part={t:'Del I / II',en:'Part',val:'I og II',
+ here:`<p>De to delene som sveises sammen. Se tegningsfeltet: I og II viser hvilken plate som er hvilken. På 80-31 er begge samme materiale – prosedyren dekker sveising av S420 mot S420 (eller lavere kvaliteter mot hverandre).</p>`,
+ alt:`<p>Ulike materialer i I og II = <b>dissimilar</b>-sveis, f.eks. S355 mot duplex, eller karbonstål mot rustfritt med tilsett 309. Da er tilsettvalget kritisk.</p>`};
+F.pm_name={t:'Stålkvalitet',en:'Name/Grade',val:'S420G2+M / lower grades',
+ here:`<p><b>S420G2+M</b> er offshore-konstruksjonsstål etter EN 10225: <b>S</b> = structural steel, <b>420</b> = minimum flytegrense 420 MPa, <b>G2</b> = offshore-kvalitet med krav til slagseighet ved −40 °C (G-gradene har garantert seighet), <b>+M</b> = termomekanisk valset (TMCP).</p><p>«<b>lower grades</b>» betyr at prosedyren også dekker svakere stål i samme familie: S355G-grader, S355J2, S275 osv. En prosedyre kvalifisert på et høyere stål dekker de lavere.</p>`,
+ alt:`<p>Andre stål du møter: <b>S355J2+N</b> (EN 10025-2, standard konstruksjonsstål), <b>S355G10+M</b>, <b>S460</b>, <b>P355NL2</b> (trykkbeholderstål), <b>X65</b> (API 5L rørledning), <b>316L</b> (rustfritt), <b>22Cr duplex</b> (UNS S31803), <b>6Mo</b>.</p>`,
+ info:`<p>Kvaliteten står stemplet på platen og på materialsertifikatet. Sporbarhet (heat number) skal følge materialet gjennom hele fabrikasjonen.</p>`};
+F.pm_std={t:'Materialstandard',en:'Standard',val:'EN 10225',
+ here:`<p><b>EN 10225</b> «Weldable structural steels for fixed offshore structures» – standarden for sveisbare konstruksjonsstål til faste offshore-installasjoner. Stiller strengere krav til seighet, renhet og sveisbarhet (CE) enn vanlig EN 10025.</p>`,
+ alt:`<ul><li><b>EN 10025-2/-3/-4</b> – vanlige konstruksjonsstål (S235–S460)</li><li><b>EN 10028</b> – trykkbeholderstål</li><li><b>EN 10210 / 10219</b> – hulprofiler</li><li><b>API 5L</b> – rørledningsrør (X52, X65)</li><li><b>ASTM A106 / A333</b> – amerikanske rørstandarder</li><li><b>NORSOK M-120 MDS</b> – materialdatablad, ofte oppgitt i tillegg (f.eks. Y30)</li></ul>`};
+F.pm_group={t:'Materialgruppe',en:'Group',val:'2 / 1',
+ here:`<p>Materialgruppe etter <b>ISO/TR 15608</b>. S420G2+M er <b>gruppe 2</b> (termomekanisk valsede finkornstål med flytegrense > 360 MPa, undergruppe 2.1 for ≤ 460 MPa). «/ 1» betyr at prosedyren også dekker <b>gruppe 1</b> (stål med flytegrense ≤ 460 MPa, f.eks. S355J2 – undergruppe 1.2).</p>`,
+ alt:`<p>De vanligste gruppene:</p><ul>
+ <li><b>1</b> – ulegerte/lavlegerte stål ≤ 460 MPa (1.1 ≤ 275, 1.2 ≤ 360, 1.3 normaliserte finkorn, 1.4 værbestandige)</li>
+ <li><b>2</b> – TMCP-stål > 360 MPa (2.1 ≤ 460, 2.2 > 460)</li>
+ <li><b>3</b> – seigherdede stål > 360 MPa (S690)</li>
+ <li><b>4–6</b> – Cr-Mo varmfaste stål</li>
+ <li><b>7</b> – ferrittiske/martensittiske rustfrie</li>
+ <li><b>8</b> – austenittiske rustfrie (316L)</li>
+ <li><b>10</b> – duplex</li>
+ <li><b>11</b> – høykarbonstål</li>
+ <li><b>21–26</b> – aluminium (ISO 9606-2)</li></ul>`,
+ info:`<p>Gruppene styrer <b>dekningsområdet</b> både for WPQR og sertifikat: en prøve i gruppe 2 dekker gruppe 1, men ikke omvendt. Er du sertifisert i gruppe 1.1, er du ikke godkjent for rustfritt (gruppe 8).</p>`};
+F.pm_deliv={t:'Leveringstilstand',en:'Delivery cond.',val:'TMCP / Normalized',
+ here:`<p>Hvordan stålet er behandlet på valseverket. <b>TMCP</b> (thermomechanically controlled processed, +M) – kontrollert valsing og avkjøling som gir finkornet, sterkt stål med <em>lavt</em> karboninnhold – lett å sveise. <b>Normalized</b> (+N) – varmebehandlet til jevnt finkorn. Prosedyren dekker begge.</p>`,
+ alt:`<p><b>+AR</b> (as rolled), <b>+QT</b> (quenched and tempered – seigherdet, S690), <b>+A</b> (annealed), <b>solution annealed</b> (rustfritt).</p>`,
+ info:`<p>TMCP-stål tåler <em>ikke</em> høy varmetilførsel eller varmretting over ca. 600 °C uten å miste styrke – derfor er maks heat input og interpass viktig på 80-31.</p>`};
+F.pm_thk={t:'Tykkelsesområde',en:'Thickness range [mm]',val:'3,00 – 60,00 mm',
+ here:`<p>Prosedyren gjelder for gods fra <b>3 til 60 mm</b>. Så bredt område er mulig fordi flere WPQR-er er slått sammen (se «Ref. WPQR»). Gods over 60 mm krever en annen WPS.</p>`,
+ alt:`<p>En enkelt WPQR sveist i t = 20 mm dekker etter ISO 15614-1 typisk 10–40 mm for flerlagssveis (0,5t–2t). Kilsveis-tykkelse oppgis noen ganger separat («throat a = 3–12 mm»).</p>`,
+ info:`<p>Sjekk tykkelsen på <em>begge</em> delene. Ved ulik tykkelse er det den tynneste og tykkeste som må ligge innenfor området.</p>`};
+F.pm_dia={t:'Diameterområde',en:'Diameter [mm]',val:'500 – 9999 mm',
+ here:`<p>Gjelder rør/sylindere med utvendig diameter fra <b>500 mm og oppover</b> – i praksis «alt som er plate». Etter ISO 15614-1 regnes rør med D > 500 mm som plate, så en plateprosedyre (som 80-31) dekker også store rørdiametere. «9999» betyr bare «uendelig».</p>`,
+ alt:`<p>Rør-WPS-er oppgir f.eks. «D ≥ 25 mm» eller «60,3–508 mm». En WPQR sveist på rør D dekker typisk ≥ 0,5 D.</p>`,
+ info:`<p>Under 500 mm diameter må du ha en rør-WPS – geometrien (krumning, stillingsskifte rundt røret) gjør sveisen annerledes.</p>`};
+
+/* ---------- TILSETT ---------- */
+F.fmtitle={t:'Tilsettmateriale',en:'Identification of filler metal',
+ here:`<p>Tabellen sier hvilken tråd som skal brukes. Trykk på kolonnene for forklaring. Bare indeks 1 er i bruk på 80-31.</p>`};
+F.fm_index={t:'Tilsett-indeks',en:'Index',val:'1',
+ here:`<p>Nummeret som kobler tilsettet til metoden øverst (indeks 1 = 136 / M21) og til linjene i parametertabellen («Index»-kolonnen). Alt med indeks 1 hører sammen.</p>`,
+ alt:`<p>Indeks 2 og 3 brukes for ekstra tilsett – f.eks. annen diameter av samme tråd, eller TIG-stav for roten.</p>`};
+F.fm_trade={t:'Handelsnavn',en:'Trade name',val:'Nittetsu SF-3AM',
+ here:`<p>Produsentens produktnavn: <b>Nittetsu SF-3AM</b>, en rutil rørtråd fra Nippon Steel Welding, kjent for lite sprut, lett slaggløsning og gode seighetsverdier ned til −40 °C. Det er <em>denne</em> tråden som er kvalifisert.</p>`,
+ alt:`<p>Tilsvarende tråder fra andre leverandører: ESAB Dual Shield 7100 Ultra / OK Tubrod 15.14, Lincoln Outershield 71E-H, Elga Elgacore, Kobelco DW-A55E. Men: <b>bytte krever godkjenning</b> – står handelsnavnet i WPS-en, er det en viktig variabel.</p>`,
+ info:`<p>Læremiddelet: «Dersom tilsettnavnet ikke er en viktig parameter, refereres standard og klasse alene. Da kan du velge tilsett fra ulike leverandører så lenge de tilhører samme standard og klasse.» På 80-31 står navnet – så det er låst.</p>`};
+F.fm_class={t:'Klassifisering',en:'Classification',val:'AWS A5.29: E81T1-G',
+ here:`<p>Amerikansk klassifisering av lavlegert rørtråd. Les den slik:</p><ul>
+ <li><b>E</b> – elektrode</li>
+ <li><b>8</b> – minimum strekkfasthet 80 ksi ≈ 550 MPa</li>
+ <li><b>1</b> – alle stillinger (0 = bare flat/horisontal)</li>
+ <li><b>T</b> – tubular, rørtråd</li>
+ <li><b>1</b> – rutil slaggtype, gassbeskyttet, DC+, flerlags</li>
+ <li><b>G</b> – «general»: kjemisk sammensetning avtalt mellom leverandør og kjøper (typisk Ni-legert for seighet)</li></ul>`,
+ alt:`<p>Europeisk klassifisering etter <span class="std">EN ISO 17632-A</span> ser slik ut: <code>T 46 4 1Ni P M21 1 H5</code> – T rørtråd, 46 = flytegrense 460 MPa, 4 = slagseighet 47 J ved −40 °C, 1Ni = legering, P = rutil hurtigstørknende, M21 = gass, 1 = alle stillinger, H5 = maks 5 ml hydrogen/100 g.</p><p>Massivtråd 135: <code>EN ISO 14341-A: G 42 4 M21 3Si1</code> / <code>AWS A5.18: ER70S-6</code>. Elektrode 111: <code>EN ISO 2560-A: E 42 4 B 42 H5</code> / <code>AWS A5.1: E7018</code>.</p>`,
+ info:`<p>Tilsettet må minst matche grunnmaterialet i styrke («matching»). 550 MPa strekkfasthet passer til S420 (strekkfasthet ca. 500–660 MPa). Hydrogenklasse (H5/H10) er viktig for sprekkrisiko på tykt gods.</p>`};
+F.fm_group={t:'Tilsettgruppe',en:'Group',val:'FM1',
+ here:`<p><b>FM1</b> – tilsett for ulegert stål og finkornstål. Gruppene FM1–FM6 kommer fra <span class="std">EN ISO 9606-1</span> og er viktige variabler på sveisesertifikatet: sertifikat med FM1 dekker FM1 (og FM2 dekker FM1 og FM3 osv. etter tabellen i standarden).</p>`,
+ alt:`<ul><li><b>FM1</b> – ulegert og finkornstål</li><li><b>FM2</b> – høyfaste stål</li><li><b>FM3</b> – varmfaste stål, Cr &lt; 3,75 %</li><li><b>FM4</b> – varmfaste stål, Cr 3,75–12 %</li><li><b>FM5</b> – rustfrie og varmebestandige stål</li><li><b>FM6</b> – nikkel og nikkellegeringer</li></ul>`,
+ info:`<p>Etter ISO 9606-1 er tilsettgruppen viktigere enn grunnmaterialgruppen for sertifikatets dekningsområde. Eksempel fra læremiddelet: sertifikat med rustfri elektrode (FM5) dekker ikke MAG med FM1-tråd – tilleggsprøve trengs.</p>`};
+F.fm_handling={t:'Tilsetthåndtering',en:'Filler handling',val:'02-W-COZ012E',
+ here:`<p>Tråden skal lagres og håndteres etter produksjonshåndboka 02-W-COZ012E: tørr lagring i originalemballasje, spoler som står åpne på maskinen over lengre tid skal byttes/tørkes, unngå fukt, kondens og skitt på tråden.</p>`,
+ alt:`<p>For basiske elektroder (111, E7018): «Tørkes 350 °C i 2 timer, oppbevares i varmeskap 120–150 °C, maks 4 timer i kogger». For rustfri TIG-stav: «Rene hansker, unngå merking med blyant».</p>`,
+ info:`<p>Fuktig tilsett = hydrogen i sveisen = kaldsprekker. Rutil rørtråd er mindre følsom enn basisk elektrode, men en spole som har stått ute i regn skal kasseres.</p>`};
+F.fm_empty={t:'Tilsett 2 og 3 (ikke i bruk)',en:'Index 2 / 3',val:'',
+ here:`<p>Tomme linjer – bare ett tilsett er i bruk på 80-31.</p>`};
+
+/* ---------- PARAMETRE ---------- */
+F.wptitle={t:'Sveiseparametre',en:'Welding parameters',
+ here:`<p>Tabellen med tallene du skal holde deg innenfor. Én linje per strengtype. Trykk på kolonneoverskriftene for forklaring av hver parameter.</p>`,
+ info:`<p>Verdiene er <b>grenser fra WPQR</b>, ikke anbefalinger. Innenfor vinduet velger du selv – utenfor er sveisen udokumentert. Læremiddelet: «Det er meget viktig at de data som er gitt her følges nøye!»</p>`};
+F.equipment={t:'Utstyr',en:'Equipment',val:'n/a',
+ here:`<p>Ikke spesifisert – prosedyren er ikke bundet til én bestemt strømkilde. Alle MAG-maskiner på verftet som kan levere parametrene kan brukes.</p>`,
+ alt:`<p>Kan angi maskintype (Fronius TPS 400i, Kemppi X8), pulsprogram/synergilinje, eller for mekanisert sveising: traktor/orbitalutstyr med programnummer.</p>`};
+F.p_pass={t:'Strengnummer',en:'Pass no.',val:'1-n · Cap',
+ here:`<p><b>1-n</b> = alle strenger fra rot (1) til nest siste (n): rot, hot pass og fyll har samme parametervindu. <b>Cap</b> = dekkstreng(ene), øverste lag, med litt lavere maks strøm og varmetilførsel (280 A / 2,0 kJ/mm) for å få pen overflate og unngå for høy dekk.</p>`,
+ alt:`<p>Andre WPS-er deler opp: <b>1</b> (root), <b>2</b> (hot pass), <b>3-n</b> (fill), <b>Cap</b> – hver med egne tall. Rørprosedyre: rot med TIG (indeks 1), resten med 136 (indeks 2).</p>`,
+ info:`<p>Welder Training: la sveisen ligge 1–2 mm under overflaten før dekken, så dekken ikke blir for høy (akseptkriteriene har maks overhøyde).</p>`};
+F.p_index={t:'Indeks',en:'Index',val:'1',
+ here:`<p>Viser til tilsett nr. 1 (Nittetsu SF-3AM) og metode nr. 1 (136 / M21). Alle strengene sveises med samme tråd og gass.</p>`};
+F.p_dia={t:'Tråddiameter',en:'Dia. [mm]',val:'1,20 mm',
+ here:`<p>Rørtråd Ø1,2 mm – den vanligste dimensjonen for 136 i alle stillinger. Gir nok avsmelting i PA og er fortsatt kontrollerbar i PF og PE.</p>`,
+ alt:`<p>Rørtråd finnes i 1,0 / 1,2 / 1,4 / 1,6 mm. Massivtråd 0,8–1,2. Elektroder 2,5 / 3,2 / 4,0 / 5,0 mm. TIG-stav 1,6 / 2,0 / 2,4 / 3,2 mm.</p>`,
+ info:`<p>Diameteren bestemmer sammen med trådhastigheten hvor mye strøm du får. Samme m/min på 1,6 mm tråd gir mye høyere strøm enn på 1,2.</p>`};
+F.p_process={t:'Metode (per streng)',en:'Welding process',val:'136',
+ here:`<p>Alle strenger sveises med 136. Kolonnen gjentas her fordi ulike strenger kan ha ulik metode.</p>`};
+F.p_wfs={t:'Trådhastighet',en:'Wire feed speed [m/min]',val:'6 – 6 m/min',
+ here:`<p>Trådmatingen er oppgitt som <b>6 m/min</b> – samme tall for min og maks, altså en fast innstilling (sannsynligvis det som ble brukt under kvalifiseringen, uten at det er definert som viktig variabel). I praksis er det strøm og spenning du styrer etter; trådhastigheten er det som gir strømmen.</p>`,
+ alt:`<p>Vanlig område for 1,2 mm rørtråd: 5–12 m/min. Mange WPS-er lar feltet stå tomt og styrer på strøm alene.</p>`,
+ info:`<p>På en MAG-maskin stiller du inn trådhastighet og spenning – strømmen «kommer» som et resultat av trådhastighet, diameter og stick-out. Derfor: les av <em>strømmen</em> mens du sveiser og sjekk at den ligger i vinduet.</p>`};
+F.p_current={t:'Sveisestrøm',en:'Current [A]',val:'160 – 290 A (fyll) · 150 – 280 A (dekk)',
+ here:`<p>Strømvinduet. 160–290 A for rot og fyll, 150–280 A for dekk. Innenfor dette velger du etter stilling: høyt i PA (250–290), lavere i PF og PE (160–200), og i roten der det er åpning.</p>`,
+ alt:`<p>111 Ø3,2: 90–140 A. 141 rot på rør: 70–110 A. 135 Ø1,0: 120–220 A. Puls-MAG oppgir gjerne middelstrøm.</p>`,
+ info:`<p>Strøm = innbrenning. For lav strøm → bindefeil og slagg. For høy → gjennombrenning, undercut, for høy varmetilførsel. Welder Training, «Wrong parameter settings»: for høy spenning / myk bue gir mindre innbrenning; for lav spenning gir sprut og dårlig fukting.</p>`};
+F.p_voltage={t:'Buespenning',en:'Voltage [V]',val:'20,0 – 25,0 V',
+ here:`<p>Spenningen styrer buelengden og hvor bred/flat strengen blir. 20–25 V er typisk for rutil rørtråd i sprøytebue/overgang. Lav ende i PF/PE (kortere bue, mer kontroll), høy ende i PA.</p>`,
+ alt:`<p>Massivtråd kortbue 16–20 V, sprøytebue 26–32 V. 111: 20–28 V (avhenger av buelengde, ikke innstilling). TIG: 10–14 V.</p>`,
+ info:`<p>Spenning og strøm må passe sammen. Mål spenningen på maskinen med bue tent – lange kabler gir spenningsfall, så displayet kan lyve. Enkelte kontrollører måler med tang og voltmeter ved brenneren.</p>`};
+F.p_polarity={t:'Strømtype og polaritet',en:'Current / Polarity',val:'DC+',
+ here:`<p><b>Likestrøm, elektroden (tråden) positiv</b> – standard for MAG med rutil rørtråd. Gir stabil bue og god innbrenning: mest varme utvikles på pluss-siden, altså i tråden.</p>`,
+ alt:`<ul><li><b>DC−</b> – tråd negativ. Brukes på enkelte selvbeskyttende rørtråder (114) og basiske elektroder. Mer avsmelting, mindre innbrenning.</li><li><b>AC</b> – vekselstrøm. TIG på aluminium (renseeffekt), enkelte elektroder.</li><li><b>DC− (TIG)</b> – TIG på stål sveises alltid med elektroden negativ.</li><li><b>Pulsed</b> – pulsstrøm, oppgis ofte med middelverdi.</li></ul>`,
+ info:`<p>Feil polaritet på rørtråd gir ustabil bue, mye sprut og porer. Sjekk at pluss-kabelen er koblet til trådmateren – det er ikke alltid slik etter at noen har sveist pinne på samme maskin.</p>`};
+F.p_speed={t:'Sveisehastighet',en:'Welding speed [mm/min]',val:'252 – 648 mm/min',
+ here:`<p>Hvor fort du beveger brenneren langs fugen. 252–648 mm/min tilsvarer 25–65 cm per minutt. Hastigheten avgjør sammen med strøm og spenning varmetilførselen og lagtykkelsen.</p>`,
+ alt:`<p>111 manuelt: 80–200 mm/min. TIG rot: 40–100 mm/min. Mekanisert SAW: 400–800 mm/min.</p>`,
+ info:`<p>Welder Training «Problem No. 6»: for lav hastighet = for tykke lag (over 3,5 mm i PC / 4 mm ellers) = bindefeil og slagg. For høy hastighet, særlig i roten, gir dårlig innbrenning. En praktisk kontroll: mål 100 mm på fugen og ta tiden.</p>`};
+F.p_rol={t:'Run-out length',en:'Run Out Length [mm]',val:'',
+ here:`<p>Tomt – gjelder ikke for tråd. Run-out length er lengden sveis du får ut av <em>én elektrode</em> ved 111-sveising, og er en indirekte måte å kontrollere varmetilførsel på uten stoppeklokke.</p>`,
+ alt:`<p>På en 111-WPS: «Ø3,2 mm: ROL 90–225 mm» – bruker du en elektrode på kortere strekk enn 90 mm, har du gått for sakte og fått for høy varmetilførsel.</p>`};
+F.p_gas={t:'Gassmengde (parametertabell)',en:'Gas [l/min]',val:'',
+ here:`<p>Tomt her – gassmengden er i stedet gitt i tabellen «Gas nozzle / Gasshylse» i tegningsfeltet, fordi den avhenger av hvilken gasshylse du bruker (12–25 l/min).</p>`,
+ alt:`<p>De fleste WPS-er skriver ett tall per linje her, f.eks. 15–20 l/min.</p>`};
+F.p_heat={t:'Varmetilførsel',en:'Heat input [kJ/mm]',val:'0,5 – 2,3 kJ/mm (fyll) · 0,5 – 2,0 kJ/mm (dekk)',
+ here:`<p>Hvor mye energi som legges i sveisen per millimeter. Beregnes slik (EN 1011-1):</p><p style="text-align:center"><code>Q = k × U × I × 60 / (v × 1000)</code></p><p>der k = 0,8 for MAG (virkningsgrad), U i volt, I i ampere, v i mm/min. Svaret i kJ/mm.</p><p>Vinduet 0,5–2,3 kJ/mm er bredt fordi flere WPQR-er er kombinert. For lav → for rask avkjøling, hardhet, sprekker. For høy → grov struktur, lav seighet, og TMCP-stålet mister styrke.</p>`,
+ alt:`<p>Typiske krav: S355 uten begrensning opp til ca. 3,5 kJ/mm; høyfast stål og TMCP: maks 1,5–2,5; duplex: 0,5–1,5 (både min og maks er viktige); sour service: ofte maks 1,5. Amerikansk system bruker kJ/in.</p>`,
+ info:`<p>Prøv selv med tall fra WPS-en. Legg merke til hvordan lavere hastighet drar varmetilførselen opp fort.</p>`,
+ extra:`<div class="calc">
+   <div><label>Spenning U [V]</label><input type="number" id="hiU" value="23" step="0.5"></div>
+   <div><label>Strøm I [A]</label><input type="number" id="hiI" value="250" step="5"></div>
+   <div><label>Hastighet v [mm/min]</label><input type="number" id="hiV" value="350" step="10"></div>
+ </div><div class="calcOut" id="hiOut"></div>`,
+ init:()=>{
+   const upd=()=>{
+     const U=+$('hiU').value,I=+$('hiI').value,v=+$('hiV').value;
+     const q=v>0?0.8*U*I*60/(v*1000):0;
+     const ok=q>=0.5&&q<=2.3;
+     const o=$('hiOut'); o.className='calcOut'+(ok?'':' bad');
+     o.innerHTML=`Q = 0,8 × ${U} V × ${I} A × 60 / (${v} × 1000) = <b>${q.toFixed(2).replace('.',',')} kJ/mm</b> ${ok?'– innenfor 0,5–2,3':'– UTENFOR vinduet 0,5–2,3'}`;
+   };
+   ['hiU','hiI','hiV'].forEach(id=>$(id).addEventListener('input',upd)); upd();
+ }};
+F.p_empty={t:'Tomme parameterlinjer',en:'',val:'',
+ here:`<p>Skjemaet har plass til flere strenglinjer. På 80-31 trengs bare to (1-n og Cap). Strekene betyr «ikke i bruk».</p>`};
+
+/* ---------- VARMEBEHANDLING ---------- */
+F.httitle={t:'Varmebehandling',en:'Heat treatment',
+ here:`<p>Blokken samler alt om temperatur: forvarming, mellomstrengstemperatur, eventuell etterbehandling (PWHT) og hvordan det måles. Trykk på hvert felt.</p>`};
+F.ht_method={t:'Oppvarmingsmetode',en:'Method',val:'Heat torch / Varmebend',
+ here:`<p>Forvarming skal gjøres med <b>gassbrenner (varmebend)</b> – en bred flamme som varmer et større område. Enkelt, tilgjengelig overalt på verftet, men krever at du måler temperaturen skikkelig, for flammen gir ujevn varme.</p>`,
+ alt:`<ul><li><b>Electric resistance</b> – elektriske varmematter/elementer rundt sveisen. Jevn, styrbar, brukes ved høy forvarme og PWHT.</li><li><b>Induction</b> – induksjonsvarming, rask og jevn, vanlig på rørledninger.</li><li><b>Furnace</b> – ovn (PWHT av hele komponenten).</li></ul>`,
+ info:`<p>Med varmebend: varm fra motsatt side av der du måler hvis mulig, og vent så temperaturen får «sette seg» gjennom tykkelsen (ca. 2 min per 25 mm) før du måler.</p>`};
+F.preheat={t:'Forvarming, minimum',en:'Preheat min',val:'20 °C',
+ here:`<p>Minimum arbeidstemperatur er 20 °C – altså romtemperatur for tynt gods. Men <b>se tabellen i tegningsfeltet</b>: over 20 mm gjelder 30 °C, over 50 mm 51 °C, og ved reparasjon +50 °C. Tabellen overstyrer det generelle tallet.</p><p>I praksis: stålet skal være tørt og ikke kaldt. Om vinteren på Stord betyr det at du må varme selv på tynne plater.</p>`,
+ alt:`<p>Ingen forvarme (rustfritt, aluminium – der er det ofte <em>maks</em>-temperatur), 75–150 °C for tykt/høyfast stål, 200–250 °C for Cr-Mo-stål.</p>`,
+ info:`<p>Forvarme måles i en avstand på minst 75 mm (eller 4 × t) fra fugen, på siden <em>motsatt</em> varmen, umiddelbart før sveising. Hensikt: langsommere avkjøling, hydrogen slipper ut, mindre sprekkrisiko.</p>`};
+F.interpass={t:'Mellomstrengstemperatur, maks',en:'Interpass temp. max',val:'250 °C',
+ here:`<p>Før du legger neste streng skal temperaturen i sveiseområdet være <b>under 250 °C</b>. Blir det varmere, mister TMCP-stålet styrke og seigheten i sveisen faller. På tykke, lange sveiser er dette sjelden et problem – på små deler og korte, hyppige strenger må du vente eller veksle mellom flere sveiser.</p>`,
+ alt:`<p>Duplex: maks 150 °C (kritisk!). Rustfritt austenittisk: maks 150–175 °C. Aluminium: maks 100–120 °C. Høyfast QT-stål: maks 200–250 °C.</p>`,
+ info:`<p>Måles i fugen/på sveisen der neste streng skal legges. Interpass er en viktig variabel i WPQR (maks registrert + reglene i ISO 15614-1).</p>`};
+F.htproc={t:'Varmebehandlingsprosedyre',en:'Heat treatment proc.',val:'n/a',
+ here:`<p>Ingen egen prosedyre – det er ikke krav om varmebehandling etter sveising for denne WPS-en.</p>`,
+ alt:`<p>Ved PWHT vises det til en egen prosedyre med ovnsprogram, termoelementplassering, registrering (skriver) og akseptkriterier.</p>`};
+F.tempcontrol={t:'Temperaturkontroll',en:'Temp. control',val:'Temperature crayon',
+ here:`<p>Temperaturen skal kontrolleres med <b>temperaturkritt</b> (Tempilstik e.l.) – et kritt som smelter ved en bestemt temperatur. Stryk på stålet: smelter streken, er temperaturen nådd. Enkelt og robust, men gir bare «over/under», ikke et tall.</p>`,
+ alt:`<ul><li><b>Contact thermometer</b> – kontakttermometer/termoelement. Gir eksakt verdi.</li><li><b>IR pyrometer</b> – berøringsfritt, men upålitelig på blankt stål (emissivitet) og lest av feil sted.</li><li><b>Thermocouple + recorder</b> – ved PWHT og høy forvarme, med kontinuerlig registrering.</li></ul>`,
+ info:`<p>Bruk kritt med riktig verdi (f.eks. 50 °C for minimum, 250 °C for interpass). Ikke stryk i selve fugen – krittet forurenser sveisen.</p>`};
+F.pwht={t:'Varmebehandling etter sveising',en:'PWHT min / max',val:'',
+ here:`<p>Tomt – <b>ingen PWHT</b> (Post Weld Heat Treatment). Konstruksjonsstål i disse tykkelsene trenger normalt ikke avspenningsgløding.</p>`,
+ alt:`<p>PWHT er aktuelt på trykkbeholdere, tykt gods (ofte > 35–50 mm etter regelverk), Cr-Mo-stål og sour service. Typisk: <code>580–620 °C</code> for karbonstål. Hensikt: redusere restspenninger, senke hardhet, drive ut hydrogen.</p>`,
+ info:`<p>PWHT endrer materialegenskapene og må være med i kvalifiseringen: en WPQR sveist <em>uten</em> PWHT dekker ikke sveising <em>med</em> PWHT, og omvendt.</p>`};
+F.soaking={t:'Holdetid',en:'Soaking',val:'',
+ here:`<p>Tomt – ingen PWHT. Holdetiden er hvor lenge komponenten skal holdes på PWHT-temperaturen, oppgitt som min per mm godstykkelse og/eller minimum antall minutter.</p>`,
+ alt:`<p>Typisk: 2–2,5 min/mm, minimum 30–60 min. 40 mm gods → ca. 100 min.</p>`};
+F.heatingrate={t:'Oppvarmingshastighet',en:'Heating rate',val:'',
+ here:`<p>Tomt – ingen PWHT. Ved PWHT begrenses hvor raskt temperaturen får stige over ca. 300–400 °C for å unngå spenninger og deformasjon.</p>`,
+ alt:`<p>Typisk maks 5500/t °C/h (t = tykkelse i mm), begrenset til 55–220 °C/h.</p>`};
+F.coolingrate={t:'Avkjølingshastighet',en:'Cooling rate',val:'',
+ here:`<p>Tomt – ingen PWHT. Ved PWHT styres også avkjølingen ned til ca. 300–400 °C, deretter fritt i stille luft.</p>`,
+ alt:`<p>Samme størrelsesorden som oppvarmingshastigheten, ofte maks 55–280 °C/h.</p>`};
+
+/* ---------- MERKNADER ---------- */
+F.remarks={t:'Henvisning til produksjonshåndbok',en:'Remarks',val:'Additional Information in Prod. Handbook, 02-W-COZ012E.',
+ here:`<p>WPS-en er kortfattet – detaljene om <b>hvordan</b> du skal sveise (teknikk, hefting, tilsetthåndtering, brennervinkel, lagtykkelse, furing, feil og årsaker) står i produksjonshåndboka <b>02-W-COZ012E</b>. Den er en del av kravene, ikke bare et tips.</p>`,
+ alt:`<p>Andre bedrifter legger slik info i en sveiseinstruks (WI), i «Notes» på tegningen, eller rett i WPS-en.</p>`,
+ info:`<p>Innholdet i «Welder Training»-presentasjonen fra Stord Academy bygger på denne håndboka: de sju «problem joints», sjekklister før/under/etter sveising og gasskontroll.</p>`};
+F.rootopening={t:'Rotåpning',en:'Root opening / Rotåpning',val:'0–6 mm',
+ here:`<p>Avstanden mellom delene i bunnen av fugen skal være <b>0–6 mm</b>. Ved tosidig sveising med furing kan åpningen være 0 (roten fures bort uansett). Større åpning gir lettere innbrenning i roten, men krever mer tilsett og mer varme.</p>`,
+ alt:`<p>Ensidig rotsveis TIG på rør: 2–4 mm. Keramisk rotstøtte: 4–8 mm. Kilsveis: maks 2 mm spalte uten tiltak (større spalte → øk a-målet).</p>`,
+ info:`<p>Welder Training «Problem No. 5»: rotåpningen bør normalt være <b>min 4, maks 7 mm</b> for å sikre innbrenning i roten på de vanskelige forbindelsene. Bruk mal – mål, ikke gjett.</p>`};
+F.rootface={t:'Rotkant',en:'Root face / Rotkantmål',val:'0–4 mm',
+ here:`<p>Den rette, ufasede kanten nederst i fugen skal være <b>0–4 mm</b>. Rotkanten hindrer gjennombrenning; for stor rotkant gir manglende innbrenning i roten.</p>`,
+ alt:`<p>TIG rot på rør: 1–2 mm. Ensidig 136 mot keramikk: 0–1 mm. Tykt gods K-fuge: 2–3 mm.</p>`};
+F.grooveangle={t:'Fugevinkel',en:'Groove angle / Fugevinkel',val:'35–65°',
+ here:`<p>Total åpningsvinkel i fugen skal være <b>35–65°</b>. Bred toleranse fordi WPS-en dekker både V- og X-fuger og K-fuger. Smal vinkel sparer tilsett og tid, men øker faren for bindefeil i fugeveggen – særlig med rørtråd og slagg.</p>`,
+ alt:`<p>Standard V-fuge på rør: 60° ± 5° (30° per side). Smal fuge mekanisert: 5–15°. K-fuge: 45–50° på hver side.</p>`,
+ info:`<p>Welder Training «Problem No. 5»: sørg for at vinkelen er stor nok – mål med fugemal. Trang fuge + for tykke lag = bindefeil. Fugevinkelen er en «ikke-viktig» variabel innenfor rimelige grenser i ISO 15614-1, men den kontrolleres likevel.</p>`};
+F.addinfo={t:'Vedlagt tilleggsinformasjon',en:'Additional info enclosed (Yes/No)',val:'2',
+ here:`<p>Skjemaet spør om det er vedlegg. Verdien «2» viser til at WPS-en har et ekstra ark – side 2 av 2, «Welding Parameters sheet 1 of 1», som på 80-31 er tomt (plass til flere strenglinjer). Se «Page 1 of 2» nederst.</p>`,
+ alt:`<p>Vanligvis <code>Yes</code>/<code>No</code>. Vedlegg kan være fugeskisser, strengrekkefølge-tegning eller en side 2 med flere parameterlinjer.</p>`};
+
+/* ---------- SIGNATUR ---------- */
+F.datesign={t:'Utarbeidet av',en:'Date/Signature',val:'22.01.19 · FRB · Frode Bunes',
+ here:`<p>Prosedyren er skrevet av <b>Frode Bunes</b> (initialer FRB), sveiseingeniør i Kværner, 22. januar 2019. Den som utarbeider en WPS skal ha sveiseteknisk kompetanse – normalt IWE/IWT (International Welding Engineer/Technologist) etter <span class="std">EN ISO 14731</span>.</p>`,
+ info:`<p>Sveisekoordinatoren har ansvaret for at prosedyren er riktig satt sammen innenfor WPQR-enes dekningsområder. Har du spørsmål om WPS-en, er det denne rollen (eller sveiseansvarlig på avdelingen) du skal gå til.</p>`};
+F.approved={t:'Godkjent av',en:'Approved',val:'22.01.19 · FRB · Frode Bunes',
+ here:`<p>Godkjent av samme person samme dag. I mindre organisasjoner, eller der én person er ansvarlig sveisekoordinator, er dette vanlig. Godkjenningen bekrefter at WPS-en er gyldig for produksjon.</p>`,
+ alt:`<p>Ofte to ulike personer (utarbeidet av sveiseingeniør, godkjent av sveiseleder/QA). På klasset utstyr og enkelte kontrakter i tillegg: kundens representant og/eller tredjepart (DNV) med stempel.</p>`,
+ info:`<p>Uten godkjenningssignatur er dokumentet en pWPS – ikke gyldig for produksjon.</p>`};
+
+/* ---------- BUNN ---------- */
+F.indexno={t:'Indeksnummer (database)',en:'Index no.',val:'309468',
+ here:`<p>Løpenummeret dokumentet har i sveisedatabasen (WeldEye). Brukes ved sporing og oppslag – ikke det samme som WPS-nummeret.</p>`};
+F.page={t:'Sidetall',en:'Page 1 of 2',val:'1 of 2',
+ here:`<p>WPS-en har to sider. Side 2 er et parameterark (fortsettelse av tabellen) som er tomt på 80-31. Sjekk alltid at du har alle sidene – på lange rørprosedyrer kan side 2 inneholde rot- og dekkparametrene.</p>`};
+F.weldeye={t:'Programvare',en:'Produced by WeldEye®',
+ here:`<p>WPS-en er generert fra <b>WeldEye</b> (Kemppi), et system for sveisedokumentasjon som holder orden på WPQR-er, WPS-er, sveisersertifikater og dekningsområder. Derfor ser alle WPS-er fra Stord like ut.</p>`,
+ alt:`<p>Andre systemer: Weldnote, ProWrite, WPSAmerica, eller rett og slett Excel/Word-maler.</p>`};
+
+</script>
+<script>
+/* ============================================================
+   LOGIKK
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const HINTS = {
+  plain:'<b>Bare WPS:</b> Slik ser prosedyren ut i produksjonen. Bytt visning for å få forklaringer.',
+  areas:'<b>Områder:</b> WPS-en er delt i 11 innholdsområder. Trykk på et område i arket – eller på en brikke i panelet – for å lese hva det inneholder.',
+  detail:'<b>Detaljert:</b> Trykk på en hvilken som helst linje eller rute i WPS-en. Du får først forklart det som står i 80-31, deretter andre alternativer og relevant info.'
+};
+let mode='plain', curArea=null, curField=null;
+const FIELD_ORDER = [];   // rekkefølge for neste/forrige
+
+function setMode(m){
+  mode=m;
+  document.body.className='mode-'+m;
+  document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  $('modehint').innerHTML=HINTS[m];
+  clearSel();
+  if(m==='plain') showIntro();
+  else if(m==='areas') showAreaIndex();
+  else showFieldIndex();
+  try{localStorage.setItem('wpsleser-mode',m)}catch(e){}
+}
+function clearSel(){
+  document.querySelectorAll('.paper .sel').forEach(e=>e.classList.remove('sel'));
+  curArea=null;curField=null;
+}
+function openPanel(){ $('panel').classList.add('open'); }
+function setTitle(txt,color){
+  $('ptitleTxt').textContent=txt;
+  const d=$('pdot'); if(color){d.style.background=color;d.style.display='inline-block'} else d.style.display='none';
+}
+
+function showIntro(){
+  setTitle('Forklaring');
+  $('pbody').innerHTML=`
+    <h3>Hva er en WPS?</h3>
+    <div class="en">Welding Procedure Specification · sveiseprosedyrespesifikasjon</div>
+    <p>En WPS – eller bare «sveiseprosedyren» i dagligtale – er dokumentet som beskriver <b>hvordan en sveis skal utføres</b>. Den gir de betingelsene som må oppfylles for at sveisen skal få de mekaniske og metallurgiske egenskapene som er forutsatt.</p>
+    <p>Prosedyren forteller om <b>forarbeidet</b> (fuge, rengjøring, forvarming), om <b>selve sveisingen</b> (metode, tilsett, parametre, stillinger) og om <b>etterarbeidet</b> (rengjøring, varmebehandling).</p>
+    <p class="intro">Arket til venstre er WPS 80-31 – en mye brukt prosedyre for MAG-sveising med rørtråd (136) i konstruksjonsstål på Stord. Velg <b>Områder</b> for å se de 11 innholdsområdene, eller <b>Detaljert</b> for å få forklart hver enkelt linje.</p>
+    <div class="sub">Dokumentfamilien</div>
+    <ul>
+      <li><b>pWPS</b> – foreløpig WPS. Et forslag fra sveiseansvarlig, uten referanse til WPQR.</li>
+      <li><b>WPQR</b> – Welding Procedure Qualification Record. Registrering av verdiene som ble brukt da pWPS-en ble sveist opp, med resultat fra destruktiv og ikke-destruktiv prøving. Beviset for at prosedyren virker.</li>
+      <li><b>WPS</b> – den godkjente prosedyren sveiseren jobber etter. Refererer alltid tilbake til én eller flere WPQR.</li>
+      <li><b>WPT</b> – produksjonstest. Som en WPQR, men sveist i produksjon, og refererer til en WPS.</li>
+      <li><b>WI</b> – sveiseinstruks. En forenklet WPS for bruk der WPS-en er for omfattende.</li>
+    </ul>
+    <div class="sub">Standarder du møter</div>
+    <p><span class="std">EN ISO 15609-1</span> innhold i en WPS (buesveising)<br>
+    <span class="std">EN ISO 15614-1</span> kvalifisering av prosedyre (WPQR)<br>
+    <span class="std">EN ISO 9606-1</span> sertifisering av sveisere (stål)<br>
+    <span class="std">EN ISO 4063</span> metodenummer<br>
+    <span class="std">EN ISO 6947</span> sveisestillinger<br>
+    <span class="std">EN ISO 14175</span> dekkgasser<br>
+    <span class="std">ISO/TR 15608</span> materialgrupper<br>
+    <span class="std">NORSOK M-101</span> stålkonstruksjoner offshore</p>`;
+}
+
+function areaChips(sel){
+  return `<div class="chips">${Object.keys(AREAS).map(n=>`<span class="chip ${sel==n?'on':''}" data-area-chip="${n}" style="--ac:var(--a${n})"><i>${n}</i>${AREAS[n].t}</span>`).join('')}</div>`;
+}
+function showAreaIndex(){
+  setTitle('Områder i WPS-en');
+  $('pbody').innerHTML=`
+    <h3>11 innholdsområder</h3>
+    <div class="en">Trykk på et område i arket eller på en brikke under</div>
+    <p class="intro">Alle WPS-er som følger EN ISO 15609-1 inneholder de samme typene informasjon, selv om oppsettet varierer fra bedrift til bedrift. Lærer du deg områdene, kan du lese enhver WPS.</p>
+    ${areaChips(null)}`;
+}
+function showArea(n){
+  clearSel(); curArea=n;
+  document.querySelectorAll(`.paper [data-area="${n}"]`).forEach(e=>e.classList.add('sel'));
+  const a=AREAS[n];
+  setTitle('Område '+n, getComputedStyle(document.documentElement).getPropertyValue('--a'+n));
+  $('pbody').innerHTML=`<h3>${n}. ${a.t}</h3><div class="en">${a.en}</div>${a.d}${areaChips(n)}`;
+  openPanel();
+  $('pbody').scrollTop=0;
+}
+
+function showFieldIndex(){
+  setTitle('Detaljert');
+  $('pbody').innerHTML=`
+    <h3>Linje for linje</h3>
+    <div class="en">Trykk på en rute i WPS-en</div>
+    <p class="intro">Hver linje og rute i arket kan trykkes på. Forklaringen er delt i tre: <b>I WPS 80-31</b> – hva som faktisk står her og hva det betyr for deg som sveiser. <b>Andre alternativer</b> – hva som ellers kan stå i feltet på andre prosedyrer. <b>Verdt å vite</b> – standarder, tommelfingerregler og typiske feil.</p>
+    <p class="intro">Bruk <b>Forrige / Neste</b> nederst i panelet for å gå gjennom hele WPS-en i leserekkefølge.</p>`;
+}
+function showField(key){
+  const f=F[key]; if(!f) return;
+  clearSel(); curField=key;
+  document.querySelectorAll(`.paper [data-f="${key}"]`).forEach(e=>e.classList.add('sel'));
+  const i=FIELD_ORDER.indexOf(key);
+  setTitle('Felt '+(i+1)+' av '+FIELD_ORDER.length, 'var(--monje)');
+  const valBlock = f.val!==undefined
+    ? `<div class="here"><div class="k">I WPS 80-31</div><div class="big">${f.val===''?'<span style="color:var(--paper-dim);font-weight:400">— tomt —</span>':f.val}</div>${f.here||''}</div>`
+    : `<div class="here"><div class="k">I WPS 80-31</div>${f.here||''}</div>`;
+  $('pbody').innerHTML=`
+    <h3>${f.t}</h3><div class="en">${f.en||''}</div>
+    ${valBlock}
+    ${f.alt?`<div class="sub">Andre alternativer</div>${f.alt}`:''}
+    ${f.info?`<div class="sub">Verdt å vite</div>${f.info}`:''}
+    ${f.extra?f.extra:''}
+    <div class="fnav">
+      <button type="button" id="fPrev">← Forrige</button>
+      <span class="pos">${i+1}/${FIELD_ORDER.length}</span>
+      <button type="button" id="fNext">Neste →</button>
+    </div>`;
+  $('fPrev').onclick=()=>showField(FIELD_ORDER[(i-1+FIELD_ORDER.length)%FIELD_ORDER.length]);
+  $('fNext').onclick=()=>showField(FIELD_ORDER[(i+1)%FIELD_ORDER.length]);
+  if(f.init) f.init();
+  openPanel();
+  $('pbody').scrollTop=0;
+  // scroll feltet inn i syne på desktop
+  const el=document.querySelector(`.paper [data-f="${key}"]`);
+  if(el && window.innerWidth>1000){ const r=el.getBoundingClientRect(); if(r.top<80||r.bottom>window.innerHeight) el.scrollIntoView({block:'center',behavior:'smooth'}); }
+}
+
+/* klikk i arket */
+$('paper').addEventListener('click',e=>{
+  if(mode==='detail'){
+    const el=e.target.closest('[data-f]'); if(el){ showField(el.dataset.f); }
+  }else if(mode==='areas'){
+    const el=e.target.closest('[data-area]'); if(el){ showArea(el.dataset.area); }
+  }
+});
+/* brikker i panelet */
+$('pbody').addEventListener('click',e=>{
+  const c=e.target.closest('[data-area-chip]'); if(c){ showArea(c.dataset.areaChip); return; }
+  const f=e.target.closest('[data-goto]'); if(f){ setMode('detail'); showField(f.dataset.goto); }
+});
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+$('pclose').addEventListener('click',e=>{e.stopPropagation();$('panel').classList.remove('open')});
+$('ptitle').addEventListener('click',()=>{ if(window.innerWidth<=1000) $('panel').classList.toggle('open'); });
+document.addEventListener('keydown',e=>{
+  if(mode!=='detail'||!curField) return;
+  if(e.key==='ArrowRight'){ $('fNext')&&$('fNext').click(); }
+  if(e.key==='ArrowLeft'){ $('fPrev')&&$('fPrev').click(); }
+});
+
+/* skalering av arket til tilgjengelig bredde */
+function fit(){
+  const w=$('paperWrap').clientWidth, pw=900;
+  const s=Math.max(0.62,Math.min(1,w/pw));   // aldri mindre enn 62 % – heller sidescroll på mobil
+  $('paperScale').style.transform=`scale(${s})`;
+  $('paperScale').style.width=(pw*s)+'px';
+  $('paperScale').style.height=($('paper').offsetHeight*s)+'px';
+  $('paperWrap').style.height='';
+}
+window.addEventListener('resize',fit);
+
+/* oppstart */
+window.addEventListener('load',()=>{
+  // bygg feltrekkefølge ut fra dokumentet
+  document.querySelectorAll('.paper [data-f]').forEach(el=>{ const k=el.dataset.f; if(F[k] && !FIELD_ORDER.includes(k)) FIELD_ORDER.push(k); });
+  // fjern data-f fra elementer uten innhold, så de ikke ser klikkbare ut
+  document.querySelectorAll('.paper [data-f]').forEach(el=>{ if(!F[el.dataset.f]) el.removeAttribute('data-f'); });
+  fit(); setTimeout(fit,400);
+  let m='plain'; try{m=localStorage.getItem('wpsleser-mode')||'plain'}catch(e){}
+  setMode(['plain','areas','detail'].includes(m)?m:'plain');
+});
+</script>
+</body>
+</html>

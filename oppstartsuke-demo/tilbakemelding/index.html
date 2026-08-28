@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tilbakemelding – Oppstartsuke 2026</title>
+<style>
+  :root{
+    --navy:#141c2b; --navy-2:#1d2842; --orange:#e8842c; --blue:#3b74d9;
+    --page:#f4f5f7; --surface:#ffffff; --ink:#1a2030; --ink-2:#4a5262; --muted:#8a91a0;
+    --grid:#e3e6ea; --baseline:#c9cdd5; --border:rgba(20,28,43,.08); --chip:#eef0f3;
+    --good:#1baf7a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--page);color:var(--ink);line-height:1.55}
+  .hero{background:var(--navy);color:#fff;padding:28px 22px 24px;text-align:center}
+  .hero .merke{font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#aeb6c6;margin-bottom:8px}
+  .hero h1{font-family:Georgia,"Times New Roman",serif;font-size:1.6rem;margin-bottom:8px}
+  .hero p{font-size:.94rem;color:#c6cddb;max-width:520px;margin:0 auto}
+  .anonym{display:inline-block;margin-top:14px;background:var(--orange);color:#fff;border-radius:4px;padding:5px 16px;font-size:.85rem;font-weight:700}
+  main{max-width:620px;margin:0 auto;padding:20px 16px 40px}
+  .sek{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 22px;margin-bottom:16px;box-shadow:0 1px 3px rgba(20,28,43,.05)}
+  .sek h2{font-family:Georgia,"Times New Roman",serif;font-size:1.05rem;margin-bottom:4px;border-left:4px solid var(--orange);padding-left:12px}
+  .sek .hjelp{font-size:.85rem;color:var(--muted);margin:0 0 14px 16px}
+  .valg{display:flex;gap:8px}
+  .valg button{flex:1;font:inherit;font-size:1.1rem;font-weight:700;color:var(--ink-2);background:var(--surface);
+    border:2px solid var(--grid);border-radius:9px;padding:14px 4px;cursor:pointer;transition:.12s}
+  .valg button:hover{border-color:var(--baseline)}
+  .valg button.valgt{background:var(--blue);border-color:var(--blue);color:#fff}
+  .endepkt{display:flex;justify-content:space-between;font-size:.76rem;color:var(--muted);margin-top:7px}
+  .valg.bred button{font-size:.78rem;font-weight:600;line-height:1.25;padding:11px 5px;min-height:64px}
+  .valg.bred button.valgt{background:var(--good);border-color:var(--good)}
+  textarea{width:100%;font:inherit;font-size:.94rem;color:var(--ink);background:var(--surface);
+    border:2px solid var(--grid);border-radius:9px;padding:11px 13px;min-height:120px;resize:vertical}
+  textarea:focus{outline:none;border-color:var(--blue)}
+  .teller{font-size:.76rem;color:var(--muted);text-align:right;margin-top:5px}
+  .send{width:100%;font:inherit;font-size:1rem;font-weight:700;color:#fff;background:var(--orange);
+    border:none;border-radius:10px;padding:16px;cursor:pointer}
+  .send:disabled{opacity:.55;cursor:default}
+  .feil{background:#fdecec;border-left:3px solid #d03b3b;border-radius:0 6px 6px 0;padding:10px 13px;font-size:.88rem;color:#8a2020;margin-bottom:12px;display:none}
+  .takk{text-align:center;padding:44px 22px}
+  .takk .hake{font-size:3rem;line-height:1;margin-bottom:12px}
+  .takk h2{font-family:Georgia,"Times New Roman",serif;font-size:1.4rem;margin-bottom:8px;border:none;padding:0}
+  .takk p{font-size:.95rem;color:var(--ink-2)}
+  footer{background:var(--navy);color:#aeb6c6;text-align:center;font-size:.78rem;padding:22px 20px;line-height:1.8}
+  footer strong{color:#fff}
+  footer a{color:#d9dee8}
+</style>
+</head>
+<body>
+<div style="background:#141c2b;color:#fff;text-align:center;font-size:.8rem;font-weight:700;padding:6px 12px">DEMO – svaret lagres ikke</div>
+<div class="hero">
+  <div class="merke">Verftet AS · Yard Academy</div>
+  <h1>Hvordan gikk oppstarten?</h1>
+  <p>Tre raske spørsmål og et fritekstfelt. Svarene brukes til å gjøre oppstartsukene bedre for neste kull.</p>
+  <div class="anonym">Helt anonymt · tar under ett minutt</div>
+</div>
+<main id="main">
+  <div class="feil" id="feil"></div>
+
+  <div class="sek">
+    <h2>1. Informasjon i forkant av oppstart</h2>
+    <p class="hjelp">Fikk du vite det du trengte før første dag?</p>
+    <div class="valg" data-felt="info_forkant">
+      <button type="button" data-v="1">1</button><button type="button" data-v="2">2</button>
+      <button type="button" data-v="3">3</button><button type="button" data-v="4">4</button>
+      <button type="button" data-v="5">5</button>
+    </div>
+    <div class="endepkt"><span>1 = svært dårlig</span><span>5 = svært bra</span></div>
+  </div>
+
+  <div class="sek">
+    <h2>2. Informasjon underveis i første uke</h2>
+    <p class="hjelp">Visste du hva som skjedde, hvor du skulle og når?</p>
+    <div class="valg" data-felt="info_underveis">
+      <button type="button" data-v="1">1</button><button type="button" data-v="2">2</button>
+      <button type="button" data-v="3">3</button><button type="button" data-v="4">4</button>
+      <button type="button" data-v="5">5</button>
+    </div>
+    <div class="endepkt"><span>1 = svært dårlig</span><span>5 = svært bra</span></div>
+  </div>
+
+  <div class="sek">
+    <h2>3. Passelig med luft i programmet?</h2>
+    <p class="hjelp">Her er midten best.</p>
+    <div class="valg bred" data-felt="luft">
+      <button type="button" data-v="1">Alt for<br>trangt</button>
+      <button type="button" data-v="2">Litt for<br>trangt</button>
+      <button type="button" data-v="3">Passelig</button>
+      <button type="button" data-v="4">Litt mye<br>dødtid</button>
+      <button type="button" data-v="5">Alt for mye<br>dødtid</button>
+    </div>
+  </div>
+
+  <div class="sek">
+    <h2>Kommentar</h2>
+    <p class="hjelp">Hva var bra, og hva bør vi gjøre annerledes? Valgfritt.</p>
+    <textarea id="kommentar" maxlength="1500" placeholder="Skriv gjerne noen ord …"></textarea>
+    <div class="teller"><span id="teller">0</span>/1500</div>
+  </div>
+
+  <button class="send" id="send">Send inn svaret mitt</button>
+</main>
+<footer><strong>Yard Academy</strong> – Kompetansesenter for verftet<br>
+Svarene lagres uten navn, uten innlogging og uten noe som kan spores tilbake til deg.</footer>
+
+<script>
+const svar={info_forkant:null,info_underveis:null,luft:null};
+document.querySelectorAll(".valg").forEach(g=>{
+  g.addEventListener("click",e=>{
+    const b=e.target.closest("button");if(!b)return;
+    g.querySelectorAll("button").forEach(x=>x.classList.toggle("valgt",x===b));
+    svar[g.dataset.felt]=Number(b.dataset.v);
+  });
+});
+const komm=document.getElementById("kommentar");
+komm.addEventListener("input",()=>{document.getElementById("teller").textContent=komm.value.length;});
+
+function visFeil(t){
+  const f=document.getElementById("feil");
+  f.textContent=t;f.style.display="block";
+  f.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("send").addEventListener("click",async()=>{
+  document.getElementById("feil").style.display="none";
+  const tekst=komm.value.trim();
+  if(svar.info_forkant===null&&svar.info_underveis===null&&svar.luft===null&&!tekst){
+    visFeil("Du må svare på minst ett spørsmål eller skrive en kommentar før du sender.");return;
+  }
+  const knapp=document.getElementById("send");
+  knapp.disabled=true;knapp.textContent="Sender …";
+  try{
+    await new Promise(r=>setTimeout(r,500)); /* demo: later som innsending */
+    document.getElementById("main").innerHTML=
+      '<div class="sek takk"><div class="hake">✓</div><h2>Takk for svaret!</h2>'+
+      '<p>Tilbakemeldingen er registrert anonymt. Den hjelper oss å gjøre oppstartsukene bedre for neste kull.</p></div>';
+    window.scrollTo({top:0,behavior:"smooth"});
+  }catch(e){
+    console.error(e);
+    knapp.disabled=false;knapp.textContent="Send inn svaret mitt";
+    visFeil("Fikk ikke sendt svaret. Sjekk at du har nett, og prøv igjen.");
+  }
+});
+</script>
+</body>
+</html>

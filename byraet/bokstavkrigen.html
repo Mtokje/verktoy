@@ -1,0 +1,330 @@
+<!DOCTYPE html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bokstavkrigen</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;600&display=swap">
+<style>
+  :root{
+    --bg:#0E1A2B; --bg2:#13223A; --ink:#FFF3D6; --ink-dim:rgba(255,243,214,.55);
+    --amber:#FFB627; --amber-deep:#E8641F;
+  }
+  html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;}
+  body{font-family:"Barlow","Helvetica Neue",Arial,sans-serif;color:var(--ink);}
+  #stage{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 60%,var(--bg2) 0%,var(--bg) 70%);}
+  canvas{display:block;}
+  .eyebrow{position:fixed;top:18px;left:22px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);pointer-events:none;}
+  .hint{position:fixed;top:18px;right:22px;text-align:right;font-size:13px;letter-spacing:.06em;color:var(--ink-dim);pointer-events:none;transition:opacity .4s;}
+  #tag{position:fixed;left:0;right:0;top:calc(50% + 15vmin);text-align:center;font-family:"Anton","Impact",sans-serif;font-size:clamp(18px,3.2vmin,34px);letter-spacing:.04em;color:var(--amber);opacity:0;transform:translateY(8px);transition:opacity .6s,transform .6s;pointer-events:none;text-wrap:balance;}
+  #tag.on{opacity:1;transform:none;}
+  #fight{position:fixed;inset:0;display:grid;place-items:center;font-family:"Anton","Impact",sans-serif;font-size:clamp(60px,18vmin,220px);color:var(--amber);letter-spacing:.06em;opacity:0;pointer-events:none;text-shadow:0 0 40px rgba(255,182,39,.45);}
+  button.replay{position:fixed;left:50%;bottom:52px;transform:translateX(-50%);font:600 14px/1 "Barlow",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--bg);background:var(--amber);border:0;border-radius:999px;padding:14px 26px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .4s;}
+  button.replay.on{opacity:1;pointer-events:auto;}
+  button.replay:focus-visible{outline:3px solid var(--ink);outline-offset:3px;}
+  @media (prefers-reduced-motion:reduce){ #tag,button.replay{transition:none;} }
+</style>
+</head><body>
+
+<div id="stage"><canvas id="c"></canvas></div>
+<div class="eyebrow">Byrået · Bokstavkrigen · demo</div>
+<div id="fight">FIGHT!</div>
+<div id="tag">Vi slåss for merkevaren din.</div>
+<button class="replay" id="replay">Omkamp</button>
+<div class="hint" id="hint">Klikk hvor som helst for lyd</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<script>
+(function(){
+  const {Engine, Bodies, Body, Composite} = Matter;
+  const WORD = "BYRÅET";
+  const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+  const tagEl = document.getElementById('tag'), fightEl = document.getElementById('fight');
+  const replayBtn = document.getElementById('replay'), hintEl = document.getElementById('hint');
+  const INK = '#FFF3D6', AMBER = '#FFB627', DEEP = '#E8641F', BG = '#0E1A2B';
+
+  let W, H, DPR, fs, s, glyphs = [], engine, floorY, phase, pt, fighters = [], particles = [], shake = 0, ac, lastT = 0;
+  let winner = null, reformFrom = [];
+  const rnd = (a,b)=>a+Math.random()*(b-a);
+  const ease = t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+
+  function font(size){ return `400 ${size}px "Anton","Impact","Arial Black",sans-serif`; }
+
+  function layout(){
+    fs = 200; ctx.font = font(fs);
+    const spacing = 0.06*fs;
+    let total = 0; const ws = [];
+    for(const ch of WORD){ const w = ctx.measureText(ch).width; ws.push(w); total += w + spacing; }
+    total -= spacing;
+    const scale = Math.min((W*0.78)/total, (H*0.36)/fs);
+    fs = Math.floor(fs*scale); s = fs/160; ctx.font = font(fs);
+    const sp = 0.06*fs; let x = W/2 - (total*scale)/2;
+    glyphs = [];
+    for(let i=0;i<WORD.length;i++){
+      const w = ws[i]*scale;
+      glyphs.push({ch:WORD[i], x:x+w/2, y:H/2, w, gh:fs*0.82});
+      x += w + sp;
+    }
+    floorY = Math.min(H*0.74, H/2 + fs*0.9);
+  }
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio||1, 2); W = innerWidth; H = innerHeight;
+    canvas.width = W*DPR; canvas.height = H*DPR; canvas.style.width = W+'px'; canvas.style.height = H+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    layout(); reset();
+  }
+
+  function setPhase(p){ phase = p; pt = 0; }
+
+  function reset(){
+    if(engine) Composite.clear(engine.world, false);
+    engine = Engine.create(); engine.gravity.y = 1.6;
+    fighters = []; particles = []; winner = null; shake = 0;
+    tagEl.classList.remove('on'); replayBtn.classList.remove('on'); fightEl.style.opacity = 0;
+    setPhase('logo');
+  }
+
+  function spawnFighters(){
+    const legLen = fs*0.34;
+    const walls = [
+      Bodies.rectangle(W/2, floorY+40, W*3, 80, {isStatic:true, friction:0.9}),
+      Bodies.rectangle(-30, H/2, 60, H*4, {isStatic:true}),
+      Bodies.rectangle(W+30, H/2, 60, H*4, {isStatic:true})
+    ];
+    Composite.add(engine.world, walls);
+    glyphs.forEach((g,i)=>{
+      const bh = g.gh + legLen, bw = g.w*0.86;
+      const body = Bodies.rectangle(g.x, g.y + legLen/2, bw, bh, {friction:0.5, frictionAir:0.03, restitution:0.15, density:0.004, chamfer:{radius:6}});
+      const inertia = body.inertia; Body.setInertia(body, Infinity);
+      Body.setVelocity(body, {x:(i - (glyphs.length-1)/2)*rnd(2,5)*s, y:rnd(-14,-8)*s});
+      Composite.add(engine.world, body);
+      fighters.push({g, body, bw, bh, legLen, inertia, hp:5, alive:true, target:null, cooldown:rnd(0.6,1.5), punch:0,
+        facing: i < glyphs.length/2 ? 1 : -1, legPhase:rnd(0,6), speed:rnd(2.6,4.2)*s, limb:0, deadT:0, alpha:1, jumpT:rnd(1,3), hitFlash:0});
+    });
+  }
+
+  function hitSound(){
+    if(!ac) return; const t = ac.currentTime;
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type='square'; o.frequency.setValueAtTime(170,t); o.frequency.exponentialRampToValueAtTime(45,t+.11);
+    g.gain.setValueAtTime(.22,t); g.gain.exponentialRampToValueAtTime(.001,t+.16);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t+.17);
+  }
+
+  function burst(x,y,n,col){
+    for(let i=0;i<n;i++) particles.push({x,y,vx:rnd(-9,9)*s,vy:rnd(-11,3)*s,life:rnd(.35,.8),t:0,sz:rnd(3,8)*s,col});
+  }
+
+  function grounded(f){ return f.body.position.y + f.bh/2 > floorY - 6*s; }
+
+  function updateFight(dt){
+    const alive = fighters.filter(f=>f.alive);
+    for(const f of fighters){
+      const b = f.body;
+      f.hitFlash = Math.max(0, f.hitFlash - dt*4);
+      if(!f.alive){
+        f.deadT += dt;
+        if(f.deadT > 2.2){ f.alpha = Math.max(0, f.alpha - dt*1.5); if(f.alpha===0 && !f.removed){ f.removed=true; Composite.remove(engine.world,b); } }
+        continue;
+      }
+      Body.setAngle(b,0); Body.setAngularVelocity(b,0);
+      if(!f.target || !f.target.alive){
+        let best=null, bd=1e9;
+        for(const o of alive){ if(o===f) continue; const d=Math.abs(o.body.position.x-b.position.x); if(d<bd){bd=d;best=o;} }
+        f.target = best;
+      }
+      if(!f.target) continue;
+      const tx = f.target.body.position.x, dx = tx - b.position.x;
+      f.facing = dx>0?1:-1;
+      const reach = f.bw/2 + f.target.bw/2 + fs*0.28;
+      const moving = Math.abs(dx) > reach;
+      if(moving){
+        Body.setVelocity(b, {x: b.velocity.x + (f.facing*f.speed - b.velocity.x)*0.15, y: b.velocity.y});
+        f.legPhase += dt*12;
+      } else {
+        Body.setVelocity(b, {x: b.velocity.x*0.8, y:b.velocity.y});
+      }
+      f.jumpT -= dt;
+      if(f.jumpT<0 && grounded(f)){ Body.setVelocity(b,{x:b.velocity.x, y:-rnd(9,13)*s}); f.jumpT = rnd(1.5,4); }
+      f.cooldown -= dt;
+      if(f.punch>0){
+        const prev = f.punch; f.punch = Math.max(0, f.punch - dt*4.5);
+        if(prev>0.62 && f.punch<=0.62 && f.target && f.target.alive && Math.abs(f.target.body.position.x - b.position.x) < reach*1.15){
+          const t = f.target, tb = t.body;
+          t.hp -= 1; t.hitFlash = 1;
+          Body.setVelocity(tb, {x: f.facing*rnd(9,14)*s, y: -rnd(5,9)*s});
+          Body.setVelocity(b, {x: -f.facing*3*s, y: b.velocity.y});
+          burst(tb.position.x - f.facing*t.bw/2, tb.position.y - t.legLen/2, 14, AMBER);
+          shake = 10*s; hitSound();
+          if(t.hp<=0){
+            t.alive=false; Body.setInertia(tb, t.inertia); Body.setAngularVelocity(tb, f.facing*rnd(.25,.5));
+            Body.setVelocity(tb, {x: f.facing*rnd(14,20)*s, y: -rnd(12,16)*s});
+            burst(tb.position.x, tb.position.y, 30, INK); shake = 18*s;
+          }
+        }
+      } else if(!moving && f.cooldown<=0){ f.punch = 1; f.cooldown = rnd(0.55,1.3); }
+    }
+    const still = fighters.filter(f=>f.alive);
+    if(still.length<=1 && phase==='fight'){ winner = still[0]||null; setPhase('victory'); }
+  }
+
+  function drawFighter(f){
+    const b = f.body, p = b.position;
+    ctx.save(); ctx.globalAlpha = f.alpha; ctx.translate(p.x, p.y); ctx.rotate(b.angle);
+    const L = f.limb, hw = f.bw/2, hh = f.bh/2, leg = f.legLen, gh = f.g.gh;
+    const gy = -leg/2;                // glyph centre
+    const hipY = gy + gh/2 - 4*s;     // hips
+    ctx.strokeStyle = INK; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.lineWidth = 7*s;
+    const face = f.facing;
+    // legs
+    if(L>0){
+      const swing = f.alive ? Math.sin(f.legPhase)*leg*0.45 : 0;
+      for(const side of [-1,1]){
+        const hx = side*hw*0.45, sw = swing*side, footY = hipY + leg*L;
+        ctx.beginPath(); ctx.moveTo(hx, hipY);
+        ctx.quadraticCurveTo(hx + sw*0.6, hipY + leg*L*0.55, hx + sw, footY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(hx+sw-6*s*face, footY); ctx.lineTo(hx+sw+10*s*face, footY); ctx.stroke();
+      }
+    }
+    // arms
+    if(L>0){
+      const shY = gy - gh*0.18, armL = fs*0.36*L;
+      const pp = Math.sin(f.punch*Math.PI);
+      // back arm (guard)
+      ctx.beginPath(); ctx.moveTo(-face*hw*0.9, shY);
+      ctx.quadraticCurveTo(-face*(hw+armL*0.5), shY + armL*0.35, -face*(hw+armL*0.15), shY - armL*0.25); ctx.stroke();
+      // front arm
+      const fx = face*(hw + armL*0.25 + pp*armL*1.1), fy = f.alive ? shY - armL*0.3 + pp*armL*0.1 : shY + armL*0.6;
+      ctx.beginPath(); ctx.moveTo(face*hw*0.9, shY);
+      ctx.quadraticCurveTo(face*(hw+armL*0.55), shY + armL*0.4*(1-pp), fx, fy); ctx.stroke();
+      ctx.fillStyle = f.punch>0 ? AMBER : INK; ctx.beginPath(); ctx.arc(fx, fy, 7*s, 0, 7); ctx.fill();
+      if(f.winner){ // arms up
+        ctx.beginPath(); ctx.moveTo(hw*0.9, shY); ctx.lineTo(hw+armL*0.5, shY-armL*0.9); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-hw*0.9, shY); ctx.lineTo(-hw-armL*0.5, shY-armL*0.9); ctx.stroke();
+      }
+    }
+    // glyph
+    ctx.font = font(fs); ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle = f.hitFlash>0 ? (f.hitFlash>0.5?AMBER:DEEP) : INK;
+    ctx.fillText(f.g.ch, 0, gy + fs*0.02);
+    // eyes
+    if(L>0){
+      const ex = fs*0.09, ey = gy - gh*0.12, r = 4.5*s*L;
+      const R = 7*s*L;
+      for(const cx of [-ex,ex]){
+        ctx.fillStyle = INK; ctx.strokeStyle = BG; ctx.lineWidth = 2.5*s;
+        ctx.beginPath(); ctx.arc(cx, ey, R, 0, 7); ctx.fill(); ctx.stroke();
+        if(f.alive){
+          ctx.fillStyle = BG; ctx.beginPath(); ctx.arc(cx+face*2.5*s, ey+0.5*s, R*0.45, 0, 7); ctx.fill();
+        } else {
+          ctx.strokeStyle = BG; ctx.lineWidth = 2.5*s; const q = R*0.55;
+          ctx.beginPath(); ctx.moveTo(cx-q,ey-q); ctx.lineTo(cx+q,ey+q); ctx.moveTo(cx+q,ey-q); ctx.lineTo(cx-q,ey+q); ctx.stroke();
+        }
+      }
+      if(f.alive){ // angry brows
+        ctx.strokeStyle = INK; ctx.lineWidth = 3.5*s; ctx.lineCap='round';
+        const by = ey - R - 4*s, tilt = 4*s*L;
+        ctx.beginPath(); ctx.moveTo(-ex-R, by - tilt); ctx.lineTo(-ex+R*0.6, by + tilt); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ex-R*0.6, by + tilt); ctx.lineTo(ex+R, by - tilt); ctx.stroke();
+      }
+    }
+    // hp
+    if(f.alive && L>0 && phase==='fight'){
+      const top = gy - gh/2 - 16*s;
+      for(let i=0;i<5;i++){ ctx.fillStyle = i<f.hp ? AMBER : 'rgba(255,243,214,.18)'; ctx.fillRect(-5*8*s/2 + i*8*s, top, 5*s, 5*s); }
+    }
+    ctx.restore();
+  }
+
+  function drawLogo(alpha){
+    ctx.save(); ctx.globalAlpha = alpha; ctx.font = font(fs); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle = INK;
+    for(const g of glyphs) ctx.fillText(g.ch, g.x, g.y + fs*0.02);
+    ctx.restore();
+  }
+
+  function drawFloor(){
+    ctx.strokeStyle = 'rgba(255,243,214,.22)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, floorY); ctx.lineTo(W, floorY); ctx.stroke();
+  }
+
+  function frame(t){
+    requestAnimationFrame(frame);
+    const dt = Math.min(0.05, (t - lastT)/1000 || 0.016); lastT = t; pt += dt;
+    ctx.clearRect(0,0,W,H);
+    ctx.save();
+    if(shake>0){ ctx.translate(rnd(-shake,shake), rnd(-shake,shake)); shake = Math.max(0, shake - dt*60*s); }
+
+    if(phase==='logo'){
+      drawLogo(Math.min(1, pt/0.6));
+      if(pt>1.8) setPhase('shake');
+    }
+    else if(phase==='shake'){
+      const a = Math.min(1, pt/0.8)*6*s;
+      ctx.save(); ctx.translate(rnd(-a,a), rnd(-a,a)); drawLogo(1); ctx.restore();
+      if(pt>0.85){ spawnFighters(); setPhase('split'); }
+    }
+    else if(phase==='split' || phase==='fight' || phase==='victory'){
+      Engine.update(engine, 1000/60);
+      drawFloor();
+      if(phase==='split'){
+        const L = ease(Math.max(0, Math.min(1, (pt-0.5)/0.7)));
+        for(const f of fighters){ f.limb = L; Body.setAngle(f.body,0); Body.setAngularVelocity(f.body,0); }
+        if(pt>1.5){ setPhase('fight'); fightEl.style.opacity=1; fightEl.style.transform='scale(1)'; }
+      }
+      if(phase==='fight'){
+        if(pt<0.9){ fightEl.style.opacity = 1 - pt/0.9; fightEl.style.transform = `scale(${1+pt*0.6})`; } else fightEl.style.opacity = 0;
+        updateFight(dt);
+      }
+      if(phase==='victory'){
+        for(const f of fighters){ if(!f.alive){ f.deadT+=dt; if(f.deadT>2.2){ f.alpha=Math.max(0,f.alpha-dt*1.5); if(f.alpha===0&&!f.removed){f.removed=true;Composite.remove(engine.world,f.body);} } } }
+        if(winner){
+          const b = winner.body; winner.winner = true; winner.punch = 0; Body.setAngle(b,0); Body.setAngularVelocity(b,0);
+          Body.setVelocity(b, {x:(W/2 - b.position.x)*0.06, y:b.velocity.y});
+          winner.jumpT -= dt; if(winner.jumpT<0 && grounded(winner)){ Body.setVelocity(b,{x:b.velocity.x,y:-11*s}); winner.jumpT=0.7; burst(b.position.x, floorY, 8, AMBER); }
+          winner.legPhase += dt*10;
+        }
+        if(pt>2.6){
+          reformFrom = fighters.map(f=>({f, x:f.body.position.x, y:f.body.position.y - f.legLen/2, a:f.body.angle, alpha:f.alpha, off: f.alive?0:H*0.6}));
+          setPhase('reform');
+        }
+      }
+      for(const f of fighters) if(!f.removed) drawFighter(f);
+    }
+    else if(phase==='reform'){
+      const k = ease(Math.min(1, pt/1.5));
+      ctx.font = font(fs); ctx.textAlign='center'; ctx.textBaseline='middle';
+      for(const r of reformFrom){
+        const f = r.f, g = f.g;
+        const sx = r.alpha>0 ? r.x : g.x, sy = r.alpha>0 ? r.y : H + fs;
+        const x = sx + (g.x - sx)*k, y = sy + (g.y - sy)*k, a = r.a*(1-k);
+        ctx.save(); ctx.translate(x,y); ctx.rotate(a); ctx.globalAlpha = Math.max(r.alpha, k);
+        ctx.fillStyle = INK; ctx.fillText(g.ch, 0, fs*0.02);
+        if(k<1 && f.alive){ // shrinking limbs on the winner
+          const L = 1-k; f.limb = L;
+        }
+        ctx.restore();
+      }
+      if(pt>1.7){ tagEl.classList.add('on'); replayBtn.classList.add('on'); }
+      if(pt>1.7 && phase!=='done') phase='done';
+    }
+    else if(phase==='done'){ drawLogo(1); }
+
+    // particles
+    for(let i=particles.length-1;i>=0;i--){
+      const p = particles[i]; p.t += dt; if(p.t>p.life){ particles.splice(i,1); continue; }
+      p.vy += 40*s*dt; p.x += p.vx*dt*60/2; p.y += p.vy*dt*60/2;
+      ctx.globalAlpha = 1 - p.t/p.life; ctx.fillStyle = p.col; ctx.fillRect(p.x, p.y, p.sz, p.sz);
+    }
+    ctx.globalAlpha = 1; ctx.restore();
+  }
+
+  function replay(){ reset(); setPhase('shake'); }
+  replayBtn.addEventListener('click', e=>{ e.stopPropagation(); replay(); });
+  window.addEventListener('pointerdown', ()=>{
+    if(!ac){ try{ ac = new (window.AudioContext||window.webkitAudioContext)(); hintEl.style.opacity=0; }catch(e){} }
+    if(phase==='done') replay();
+  });
+  window.addEventListener('keydown', e=>{ if(e.key===' '||e.key==='Enter'){ if(phase==='done') replay(); } });
+  let rt; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt = setTimeout(resize, 150); });
+
+  (document.fonts ? document.fonts.load(font(40)).then(()=>document.fonts.ready) : Promise.resolve()).then(()=>{ resize(); requestAnimationFrame(frame); });
+})();
+</script>
+</body></html>

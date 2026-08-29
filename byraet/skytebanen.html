@@ -1,0 +1,299 @@
+<!DOCTYPE html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Skytebanen</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;600&family=Barlow+Condensed:wght@600&display=swap">
+<style>
+  :root{ --bg:#0E1A2B; --bg2:#152641; --ink:#FFF3D6; --dim:rgba(255,243,214,.55); --amber:#FFB627; --deep:#E8641F; --line:rgba(255,243,214,.12); }
+  html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;}
+  [hidden]{display:none!important;}
+  body{font-family:"Barlow","Helvetica Neue",Arial,sans-serif;color:var(--ink);cursor:none;user-select:none;-webkit-user-select:none;}
+  #c{display:block;position:fixed;inset:0;}
+  .eyebrow{position:fixed;top:16px;left:20px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);pointer-events:none;}
+  #hud{position:fixed;top:14px;right:20px;display:flex;gap:26px;align-items:baseline;pointer-events:none;font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:600;}
+  #hud div{display:flex;flex-direction:column;align-items:flex-end;}
+  #hud b{font:400 34px/1 "Anton","Impact",sans-serif;letter-spacing:.03em;font-variant-numeric:tabular-nums;}
+  #hud span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);}
+  #hud b.hot{color:var(--amber);}
+  #hud b.low{color:var(--deep);}
+  .overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(14,26,43,.78);backdrop-filter:blur(3px);transition:opacity .35s;cursor:default;}
+  .overlay[hidden]{display:none;}
+  .card{width:min(92vw,560px);background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:30px 34px 28px;box-shadow:0 30px 80px rgba(0,0,0,.5);}
+  h1{margin:0 0 4px;font:400 clamp(44px,8vmin,76px)/1 "Anton","Impact",sans-serif;letter-spacing:.04em;color:var(--amber);}
+  h2{margin:0 0 8px;font:400 34px/1 "Anton","Impact",sans-serif;letter-spacing:.04em;}
+  .sub{margin:0 0 18px;color:var(--dim);font-size:14px;letter-spacing:.04em;}
+  .rules{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:0 0 20px;}
+  .rules b{font-family:"Anton",sans-serif;font-weight:400;color:var(--amber);letter-spacing:.04em;font-variant-numeric:tabular-nums;text-align:right;}
+  button.b{font:600 14px "Barlow",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--bg);background:var(--amber);border:0;border-radius:999px;padding:14px 28px;cursor:pointer;}
+  button.b.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  button.b:focus-visible,input:focus-visible{outline:3px solid var(--ink);outline-offset:3px;}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .board{margin:18px 0 0;padding:14px 0 0;border-top:1px solid var(--line);}
+  .board h3{margin:0 0 8px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;}
+  .board h3 em{font-style:normal;color:var(--amber);opacity:.9;}
+  .board ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:3px 22px;font-size:14px;}
+  .board li{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed rgba(255,243,214,.08);font-variant-numeric:tabular-nums;}
+  .board li i{font-style:normal;color:var(--dim);width:18px;}
+  .board li span{flex:1;letter-spacing:.06em;}
+  .board li.me{color:var(--amber);}
+  .board li b{font-weight:600;}
+  .big{font:400 clamp(60px,14vmin,120px)/1 "Anton","Impact",sans-serif;color:var(--amber);letter-spacing:.04em;margin:6px 0 2px;font-variant-numeric:tabular-nums;}
+  input.name{font:400 26px "Anton","Impact",sans-serif;letter-spacing:.12em;text-transform:uppercase;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 14px;width:200px;}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);pointer-events:none;}
+  @media (max-width:560px){ .board ol{grid-template-columns:1fr;} .card{padding:22px 20px;} #hud{gap:16px;} #hud b{font-size:26px;} }
+  @media (prefers-reduced-motion:reduce){ .overlay{transition:none;} }
+</style>
+</head><body>
+
+<canvas id="c"></canvas>
+<div class="eyebrow">Byrået · Skytebanen · demo</div>
+<div id="hud"><div><b id="hScore">0</b><span>Poeng</span></div><div><b id="hCombo">×1</b><span>Kombo</span></div><div><b id="hTime">45</b><span>Sek</span></div></div>
+
+<div class="overlay" id="start">
+  <div class="card">
+    <h1>SKYTEBANEN</h1>
+    <p class="sub">Bokstavene henger i kjetting. Siktet ditt er urolig. Du har 45 sekunder.</p>
+    <div class="rules">
+      <b>100</b><div>Treff en bokstav. Hvert treff på rad øker komboen, opptil ×5.</div>
+      <b>+50</b><div>Innertier – treff midt i bokstaven.</div>
+      <b>300</b><div>Skyt av kjettingen så bokstaven faller.</div>
+      <b>0</b><div>Bom nullstiller komboen. Bokstaver på gulvet gir bare 40.</div>
+    </div>
+    <div class="row"><button class="b" id="play">Start</button><span class="sub" style="margin:0">Klikk eller trykk for å skyte · lyd slås på ved første klikk</span></div>
+    <div class="board"><h3>High score <em id="boardMode"></em></h3><ol id="board1"></ol></div>
+  </div>
+</div>
+
+<div class="overlay" id="over" hidden>
+  <div class="card">
+    <h2>Tiden er ute</h2>
+    <div class="big" id="finalScore">0</div>
+    <p class="sub" id="finalMsg"></p>
+    <div class="row" id="nameRow"><input class="name" id="name" maxlength="12" placeholder="NAVN" autocomplete="off"><button class="b" id="save">Lagre</button></div>
+    <div class="row" id="againRow" hidden><button class="b" id="again">Spill igjen</button><button class="b ghost" id="menu">Til start</button></div>
+    <div class="board"><h3>High score <em id="boardMode2"></em></h3><ol id="board2"></ol></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<script>
+(function(){
+  const {Engine, Bodies, Body, Composite, Constraint} = Matter;
+  const WORD = "BYRÅET", GAME_LEN = 45;
+  const INK='#FFF3D6', AMBER='#FFB627', DEEP='#E8641F', BG='#0E1A2B';
+  const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+  const $ = id => document.getElementById(id);
+  const rnd=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const font = px => `400 ${px}px "Anton","Impact","Arial Black",sans-serif`;
+
+  /* ---------- high score storage ---------- */
+  let scores = [], shared = false, art = null, myLast = null;
+  const KEY = 'skytebanen.scores';
+  function loadLocal(){ try{ const j = JSON.parse(localStorage.getItem(KEY)||'[]'); if(Array.isArray(j)) scores = j; }catch(e){} }
+  function merge(list){ const all = scores.concat(list||[]); const seen = new Set(); scores = all.filter(e=>e&&typeof e.s==='number'&&typeof e.n==='string').filter(e=>{ const k=e.n+'|'+e.s+'|'+e.d; if(seen.has(k)) return false; seen.add(k); return true; }).sort((a,b)=>b.s-a.s).slice(0,10); }
+  function renderBoard(){
+    const html = scores.length ? scores.map((e,i)=>`<li class="${myLast&&e.n===myLast.n&&e.s===myLast.s&&e.d===myLast.d?'me':''}"><i>${i+1}</i><span>${esc(e.n)}</span><b>${e.s}</b></li>`).join('') : '<li><span style="color:var(--dim)">Ingen har skutt ennå – bli først.</span></li>';
+    $('board1').innerHTML = html; $('board2').innerHTML = html;
+    const mode = shared ? 'felles liste' : 'denne enheten'; $('boardMode').textContent = mode; $('boardMode2').textContent = mode;
+  }
+  function esc(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  async function saveScores(){
+    try{ localStorage.setItem(KEY, JSON.stringify(scores)); }catch(e){}
+    if(!art) return;
+    try{ await art.publish({'data/scores.json': JSON.stringify(scores)}); shared = true; toast('Lagret på felles liste'); }
+    catch(e){ const code = e && e.code; if(code==='conflict'){ /* view reloads; pending entry re-applied after reload */ } else { shared = false; toast(code==='not_writer'||code==='not_granted' ? 'Skrivebeskyttet visning – lagret lokalt' : 'Lagret lokalt'); } }
+    renderBoard();
+  }
+  loadLocal(); renderBoard();
+  (async()=>{
+    try{ if(window.claude && typeof claude.use==='function'){ art = await claude.use('artifact'); } }catch(e){ art = null; }
+    try{ const r = await fetch('data/scores.json', {cache:'no-store'}); if(r.ok){ const j = await r.json(); if(Array.isArray(j)){ merge(j); shared = true; } } }catch(e){}
+    // an entry that was pending when a conflict reload happened
+    try{ const p = JSON.parse(sessionStorage.getItem('skytebanen.pending')||'null'); if(p){ sessionStorage.removeItem('skytebanen.pending'); merge([p]); myLast = p; if(art) await saveScores(); } }catch(e){}
+    renderBoard();
+  })();
+  let toastT; function toast(m){ $('toast').textContent = m; clearTimeout(toastT); toastT = setTimeout(()=>$('toast').textContent='', 2600); }
+
+  /* ---------- audio ---------- */
+  let AC=null;
+  function audio(){ if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC&&AC.state==='suspended') AC.resume(); }
+  function noiseBuf(len){ const b = AC.createBuffer(1, AC.sampleRate*len, AC.sampleRate), d = b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; return b; }
+  function sShot(){ if(!AC) return; const t=AC.currentTime; const s=AC.createBufferSource(); s.buffer=noiseBuf(0.25); const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(3000,t); f.frequency.exponentialRampToValueAtTime(200,t+0.2); const g=AC.createGain(); g.gain.setValueAtTime(0.5,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.22); s.connect(f).connect(g).connect(AC.destination); s.start(t); }
+  function sHit(p=1){ if(!AC) return; const t=AC.currentTime; for(const [fr,dl] of [[880*p,0],[1320*p,0.01],[2210*p,0.02]]){ const o=AC.createOscillator(), g=AC.createGain(); o.type='triangle'; o.frequency.value=fr; g.gain.setValueAtTime(0.0001,t+dl); g.gain.exponentialRampToValueAtTime(0.18,t+dl+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+dl+0.5); o.connect(g).connect(AC.destination); o.start(t+dl); o.stop(t+dl+0.55); } }
+  function sClang(){ if(!AC) return; const t=AC.currentTime; const s=AC.createBufferSource(); s.buffer=noiseBuf(0.6); const f=AC.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2600; f.Q.value=9; const g=AC.createGain(); g.gain.setValueAtTime(0.6,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.6); s.connect(f).connect(g).connect(AC.destination); s.start(t); sHit(0.55); }
+  function sTick(){ if(!AC) return; const t=AC.currentTime; const o=AC.createOscillator(), g=AC.createGain(); o.type='square'; o.frequency.value=1200; g.gain.setValueAtTime(0.08,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.08); o.connect(g).connect(AC.destination); o.start(t); o.stop(t+0.09); }
+
+  /* ---------- world ---------- */
+  let W,H,DPR, fs, railY, engine, letters=[], floor, particles=[], holes=[], shake=0, wave=1;
+  let state='menu', score=0, combo=1, timeLeft=GAME_LEN, lastTick=-1, shots=0, hits=0, best=0;
+  const mouse = {x:0,y:0, has:false}; let drift = {x:0,y:0}, kick={x:0,y:0}, noiseT = Math.random()*100;
+  const reticle = {x:0,y:0};
+
+  function resize(){
+    DPR = Math.min(devicePixelRatio||1, 2); W=innerWidth; H=innerHeight;
+    canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+    fs = Math.floor(Math.min(W*0.11, H*0.2)); railY = H*0.16;
+    if(!mouse.has){ mouse.x=W/2; mouse.y=H/2; }
+    rebuildWorld();
+  }
+  function rebuildWorld(){
+    engine = Engine.create(); engine.gravity.y = 1.3;
+    floor = Bodies.rectangle(W/2, H-18, W*3, 40, {isStatic:true, friction:0.8});
+    Composite.add(engine.world, [floor, Bodies.rectangle(-20,H/2,40,H*3,{isStatic:true}), Bodies.rectangle(W+20,H/2,40,H*3,{isStatic:true})]);
+    letters = []; hangLetters();
+  }
+  function hangLetters(){
+    ctx.font = font(fs);
+    const ws = [...WORD].map(ch=>ctx.measureText(ch).width);
+    const gap = fs*0.55; const total = ws.reduce((a,b)=>a+b,0) + gap*(WORD.length-1);
+    let x = W/2 - total/2;
+    [...WORD].forEach((ch,i)=>{
+      const w = ws[i], h = fs*0.8, chainL = fs*(0.9 + (i%2)*0.35) + rnd(-10,10);
+      const px = x + w/2, py = railY + chainL + h/2;
+      const body = Bodies.rectangle(px, py, w*0.9, h, {density:0.002, frictionAir:0.012, restitution:0.3, friction:0.6});
+      Body.setAngularVelocity(body, rnd(-0.05,0.05));
+      const anchor = {x:px, y:railY};
+      const con = Constraint.create({pointA:anchor, bodyB:body, pointB:{x:0,y:-h/2+6}, length:chainL-6, stiffness:0.9, damping:0.02});
+      Composite.add(engine.world, [body, con]);
+      letters.push({ch, body, con, anchor, w, h, hanging:true, flash:0, alive:true, dropT:0});
+      x += w + gap;
+    });
+    for(const L of letters) Body.applyForce(L.body, L.body.position, {x:rnd(-0.02,0.02)*fs/100, y:0});
+  }
+
+  /* ---------- game flow ---------- */
+  function startGame(){
+    audio(); score=0; combo=1; timeLeft=GAME_LEN; shots=0; hits=0; wave=1; lastTick=-1; holes=[]; particles=[];
+    rebuildWorld(); state='play'; $('start').hidden = true; $('over').hidden = true; updateHud(); toast('');
+  }
+  function endGame(){
+    state='over'; $('finalScore').textContent = score;
+    const acc = shots ? Math.round(hits/shots*100) : 0;
+    const qualifies = scores.length < 10 || score > scores[scores.length-1].s;
+    $('finalMsg').textContent = `${hits} treff av ${shots} skudd (${acc} %) · bølge ${wave}` + (qualifies && score>0 ? ' · Du er inne på lista!' : '');
+    $('nameRow').hidden = !(qualifies && score>0); $('againRow').hidden = !$('nameRow').hidden;
+    try{ $('name').value = localStorage.getItem('skytebanen.name')||''; }catch(e){}
+    $('over').hidden = false; if(!$('nameRow').hidden) setTimeout(()=>$('name').focus(), 50);
+  }
+  async function saveName(){
+    const n = ($('name').value||'').trim().toUpperCase().slice(0,12) || 'ANONYM';
+    try{ localStorage.setItem('skytebanen.name', n); }catch(e){}
+    const entry = {n, s:score, d:new Date().toISOString().slice(0,10)}; myLast = entry;
+    merge([entry]); $('nameRow').hidden = true; $('againRow').hidden = false; renderBoard();
+    try{ sessionStorage.setItem('skytebanen.pending', JSON.stringify(entry)); }catch(e){}
+    await saveScores();
+    try{ sessionStorage.removeItem('skytebanen.pending'); }catch(e){}
+  }
+  $('play').onclick = startGame; $('again').onclick = startGame; $('save').onclick = saveName;
+  $('name').addEventListener('keydown', e=>{ if(e.key==='Enter') saveName(); });
+  $('menu').onclick = ()=>{ state='menu'; $('over').hidden = true; $('start').hidden = false; renderBoard(); };
+  function updateHud(){ $('hScore').textContent = score; const c=$('hCombo'); c.textContent='×'+combo; c.classList.toggle('hot', combo>=3); const t=$('hTime'); t.textContent = Math.ceil(timeLeft); t.classList.toggle('low', timeLeft<=5.5); }
+
+  /* ---------- input ---------- */
+  window.addEventListener('pointermove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; mouse.has=true; }, {passive:true});
+  window.addEventListener('pointerdown', e=>{
+    if(e.target.closest && e.target.closest('.overlay')) { audio(); return; }
+    audio(); mouse.x=e.clientX; mouse.y=e.clientY; mouse.has=true;
+    if(state==='play') shoot(reticle.x, reticle.y);
+  });
+  window.addEventListener('keydown', e=>{ if(e.key===' ' && state==='play'){ e.preventDefault(); shoot(reticle.x, reticle.y); } });
+  window.addEventListener('contextmenu', e=>e.preventDefault());
+
+  function distSeg(px,py, ax,ay, bx,by){ const dx=bx-ax, dy=by-ay; const t = clamp(((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy||1),0,1); return Math.hypot(px-(ax+dx*t), py-(ay+dy*t)); }
+  function shoot(x,y){
+    shots++; sShot(); shake = 6; kick = {x:rnd(-1,1)*18, y:-22};
+    holes.push({x,y,t:0});
+    burst(x,y,6,INK,2);
+    let hit = null, hitKind = null;
+    // chain first (thin target, generous radius)
+    for(const L of letters){ if(!L.hanging) continue; const p = L.body.position, a = Matter.Vector.add(p, Matter.Vector.rotate(L.con.pointB, L.body.angle));
+      if(distSeg(x,y, L.anchor.x,L.anchor.y, a.x,a.y) < Math.max(13, fs*0.09) && y < a.y - 4){ hit=L; hitKind='chain'; break; } }
+    if(!hit){ for(const L of letters){ if(Matter.Vertices.contains(L.body.vertices, {x,y})){ hit=L; hitKind=L.hanging?'letter':'floor'; break; } } }
+    if(!hit){ combo = 1; updateHud(); return; }
+    hits++;
+    const b = hit.body;
+    if(hitKind==='chain'){
+      Composite.remove(engine.world, hit.con); hit.hanging=false; hit.dropT=0;
+      Body.setAngularVelocity(b, rnd(-0.2,0.2)); Body.applyForce(b, {x,y}, {x:rnd(-0.01,0.01)*b.mass, y:0.004*b.mass});
+      addScore(300*combo, x, y, 'KJETTING!'); combo = Math.min(5, combo+1); sClang(); burst(x,y,26,AMBER,5); shake=14;
+      if(letters.every(L=>!L.hanging)) nextWave();
+    } else {
+      const d = Math.hypot(x-b.position.x, y-b.position.y); const center = d < fs*0.14;
+      const base = hitKind==='floor' ? 40 : 100; const bonus = (hitKind==='letter' && center) ? 50 : 0;
+      addScore(base*combo + bonus, x, y, bonus ? 'INNERTIER' : (combo>=3 ? '×'+combo : ''));
+      if(hitKind==='letter') combo = Math.min(5, combo+1);
+      Body.applyForce(b, {x,y}, {x:(x<b.position.x?-1:1)*0.012*b.mass, y:-0.008*b.mass}); Body.setAngularVelocity(b, b.angularVelocity + (x<b.position.x?-1:1)*0.15);
+      hit.flash = 1; sHit(hitKind==='floor'?0.7:1); burst(x,y,16,AMBER,4);
+    }
+    updateHud();
+  }
+  const floats = [];
+  function addScore(n, x, y, label){ score += n; floats.push({x,y,t:0,txt:'+'+n, label}); }
+  function nextWave(){ wave++; setTimeout(()=>{ if(state!=='play') return; for(const L of letters){ Composite.remove(engine.world, L.body); } letters=[]; hangLetters(); floats.push({x:W/2,y:H*0.45,t:0,txt:'BØLGE '+wave,label:'siktet blir mer urolig'}); }, 700); }
+  function burst(x,y,n,col,sp){ for(let i=0;i<n;i++) particles.push({x,y,vx:rnd(-sp,sp)*2,vy:rnd(-sp*2.2,sp),t:0,life:rnd(.3,.7),sz:rnd(2,5),col}); }
+
+  /* ---------- drift noise ---------- */
+  function n1(t){ return Math.sin(t*1.7)*0.5 + Math.sin(t*3.1+1.3)*0.3 + Math.sin(t*7.3+0.4)*0.15 + Math.sin(t*0.9+2)*0.4; }
+
+  /* ---------- render ---------- */
+  let lastT = 0;
+  function frame(t){
+    requestAnimationFrame(frame);
+    const dt = Math.min(0.05, (t-lastT)/1000 || 0.016); lastT = t;
+    if(state==='play'){
+      timeLeft -= dt; if(timeLeft<=0){ timeLeft=0; updateHud(); endGame(); }
+      const s = Math.ceil(timeLeft); if(s!==lastTick){ lastTick=s; if(s<=5 && s>0) sTick(); updateHud(); }
+      // wind gusts on hanging letters
+      for(const L of letters){ if(L.hanging && Math.random()<0.03) Body.applyForce(L.body, L.body.position, {x:rnd(-1,1)*0.004*L.body.mass*(1+wave*0.3), y:0}); L.flash=Math.max(0,L.flash-dt*3); if(!L.hanging) L.dropT+=dt; }
+    }
+    Engine.update(engine, 1000/60);
+    // reticle: mouse + wandering drift + recoil kick
+    noiseT += dt*(1 + wave*0.15);
+    const amp = (state==='play' ? 28 + wave*14 + (GAME_LEN-timeLeft)*0.5 : 12) * Math.min(1, W/900+0.4);
+    drift.x = n1(noiseT)*amp; drift.y = n1(noiseT*1.13+5)*amp*0.8;
+    kick.x *= Math.pow(0.02, dt); kick.y *= Math.pow(0.02, dt);
+    reticle.x = clamp(mouse.x + drift.x + kick.x, 0, W); reticle.y = clamp(mouse.y + drift.y + kick.y, 0, H);
+
+    ctx.save(); ctx.clearRect(0,0,W,H);
+    if(shake>0){ ctx.translate(rnd(-shake,shake), rnd(-shake,shake)); shake = Math.max(0, shake - dt*70); }
+    // backdrop: rail + floor line
+    const g = ctx.createRadialGradient(W/2,H*0.5,10, W/2,H*0.5, Math.max(W,H)*0.8); g.addColorStop(0,'#16294a'); g.addColorStop(1,'#0B1524'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(255,243,214,.35)'; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(W*0.06,railY); ctx.lineTo(W*0.94,railY); ctx.stroke();
+    ctx.strokeStyle='rgba(255,243,214,.15)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,H-38); ctx.lineTo(W,H-38); ctx.stroke();
+    // bullet holes on backdrop
+    for(let i=holes.length-1;i>=0;i--){ const h=holes[i]; h.t+=dt; if(h.t>6){ holes.splice(i,1); continue; } ctx.globalAlpha=Math.min(1,(6-h.t)); ctx.fillStyle='#070d18'; ctx.beginPath(); ctx.arc(h.x,h.y,4,0,7); ctx.fill(); ctx.strokeStyle='rgba(255,243,214,.25)'; ctx.lineWidth=1; ctx.stroke(); }
+    ctx.globalAlpha=1;
+    // chains + letters
+    ctx.font = font(fs); ctx.textAlign='center'; ctx.textBaseline='middle';
+    for(const L of letters){
+      const b = L.body, p = b.position;
+      if(L.hanging){
+        const a = Matter.Vector.add(p, Matter.Vector.rotate(L.con.pointB, b.angle));
+        ctx.strokeStyle='rgba(255,243,214,.8)'; ctx.lineWidth=3; ctx.setLineDash([7,5]); ctx.beginPath(); ctx.moveTo(L.anchor.x,L.anchor.y); ctx.lineTo(a.x,a.y); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(L.anchor.x, L.anchor.y, 5, 0, 7); ctx.fill();
+      }
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(b.angle);
+      ctx.fillStyle = L.flash>0 ? (L.flash>0.5?AMBER:DEEP) : (L.hanging ? INK : 'rgba(255,243,214,.55)');
+      ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=18; ctx.shadowOffsetY=8;
+      ctx.fillText(L.ch, 0, fs*0.02); ctx.restore();
+    }
+    // particles
+    for(let i=particles.length-1;i>=0;i--){ const q=particles[i]; q.t+=dt; if(q.t>q.life){ particles.splice(i,1); continue; } q.vy+=30*dt; q.x+=q.vx*dt*60/2; q.y+=q.vy*dt*60/2; ctx.globalAlpha=1-q.t/q.life; ctx.fillStyle=q.col; ctx.fillRect(q.x,q.y,q.sz,q.sz); }
+    ctx.globalAlpha=1;
+    // floating scores
+    for(let i=floats.length-1;i>=0;i--){ const f=floats[i]; f.t+=dt; if(f.t>1.1){ floats.splice(i,1); continue; } const a=1-f.t/1.1; ctx.globalAlpha=a; ctx.fillStyle=AMBER; ctx.font=font(Math.max(22,fs*0.32)); ctx.fillText(f.txt, f.x, f.y-40-f.t*60); if(f.label){ ctx.fillStyle=INK; ctx.font='600 13px "Barlow",sans-serif'; ctx.fillText(f.label, f.x, f.y-14-f.t*60); } }
+    ctx.globalAlpha=1;
+    ctx.restore();
+    // reticle (not shaken)
+    if(state!=='over'){
+      const r = 22, x=reticle.x, y=reticle.y;
+      ctx.strokeStyle = AMBER; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.stroke();
+      ctx.beginPath(); for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ ctx.moveTo(x+dx*(r-8), y+dy*(r-8)); ctx.lineTo(x+dx*(r+8), y+dy*(r+8)); } ctx.stroke();
+      ctx.fillStyle = AMBER; ctx.beginPath(); ctx.arc(x,y,2.2,0,7); ctx.fill();
+      if(mouse.has){ ctx.strokeStyle='rgba(255,182,39,.25)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(mouse.x,mouse.y,4,0,7); ctx.stroke(); }
+    }
+  }
+  let rt; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ resize(); if(state==='play'){ /* keep score; letters re-hung */ } }, 150); });
+  (document.fonts ? document.fonts.load(font(40)).then(()=>document.fonts.ready) : Promise.resolve()).then(()=>{ resize(); requestAnimationFrame(frame); });
+})();
+</script>
+</body></html>

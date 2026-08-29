@@ -1,0 +1,775 @@
+<!DOCTYPE html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Skiltet</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap">
+<style>
+  :root{
+    --panel:#17130f; --panel2:#221c16; --line:rgba(255,236,210,.10); --ink:#F1E7D6; --dim:rgba(241,231,214,.55);
+    --brass:#C8A15A; --brass2:#E4C27A; --track:#3a2f24;
+  }
+  html,body{margin:0;height:100%;background:#0d0b09;overflow:hidden;}
+  body{font-family:"Barlow","Helvetica Neue",Arial,sans-serif;color:var(--ink);font-size:13px;}
+  #view{position:fixed;inset:0;}
+  canvas{display:block;outline:none;}
+  #panel{position:fixed;top:0;right:0;bottom:0;width:300px;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;transform:translateX(0);transition:transform .35s cubic-bezier(.2,.8,.2,1);box-shadow:-20px 0 40px rgba(0,0,0,.35);}
+  #panel.hidden{transform:translateX(100%);}
+  #panel header{padding:18px 18px 12px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+  #panel header h1{margin:0;font:600 22px/1 "Barlow Condensed","Barlow",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--brass2);}
+  #panel header span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);}
+  #scroll{overflow-y:auto;flex:1;padding:6px 0 24px;scrollbar-width:thin;scrollbar-color:var(--track) transparent;}
+  details{border-bottom:1px solid var(--line);}
+  summary{cursor:pointer;list-style:none;padding:12px 18px;font:600 12px/1 "Barlow",sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);display:flex;justify-content:space-between;align-items:center;user-select:none;}
+  summary::-webkit-details-marker{display:none;}
+  summary::after{content:"+";font-size:16px;color:var(--dim);transition:transform .2s;}
+  details[open] summary::after{content:"–";}
+  .body{padding:2px 18px 14px;display:flex;flex-direction:column;gap:10px;}
+  .row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;}
+  .row label{color:var(--ink);font-weight:500;}
+  .row output{font-variant-numeric:tabular-nums;color:var(--dim);font-size:12px;min-width:44px;text-align:right;}
+  .row input[type=range]{grid-column:1/-1;width:100%;margin:2px 0 0;accent-color:var(--brass);height:18px;}
+  .row select,.row input[type=text]{grid-column:1/-1;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:7px 9px;font:inherit;}
+  .row input[type=text]{text-transform:uppercase;letter-spacing:.08em;}
+  .row select:focus-visible,.row input:focus-visible,button:focus-visible{outline:2px solid var(--brass2);outline-offset:2px;}
+  .toggle{display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+  .toggle input{appearance:none;width:36px;height:20px;border-radius:999px;background:var(--track);position:relative;cursor:pointer;transition:background .2s;margin:0;}
+  .toggle input::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--ink);transition:transform .2s;}
+  .toggle input:checked{background:var(--brass);}
+  .toggle input:checked::after{transform:translateX(16px);}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;}
+  button.b{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:7px 13px;font:500 12px "Barlow",sans-serif;cursor:pointer;letter-spacing:.04em;}
+  button.b:hover{border-color:var(--brass);color:var(--brass2);}
+  button.b.primary{background:var(--brass);color:#1a130a;border-color:var(--brass);font-weight:600;}
+  #toggle{position:fixed;top:14px;right:14px;z-index:5;background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:9px 14px;font:600 12px "Barlow",sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:right .35s cubic-bezier(.2,.8,.2,1);}
+  #toggle.open{right:314px;}
+  .eyebrow{position:fixed;top:18px;left:20px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(241,231,214,.6);pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.6);}
+  #load{position:fixed;inset:0;display:grid;place-items:center;background:#0d0b09;color:var(--dim);font-size:12px;letter-spacing:.2em;text-transform:uppercase;z-index:9;transition:opacity .6s;}
+  #load.off{opacity:0;pointer-events:none;}
+  @media (max-width:640px){ #panel{width:min(300px,86vw);} #toggle.open{right:calc(min(300px,86vw) + 14px);} }
+  @media (prefers-reduced-motion:reduce){ #panel,#toggle{transition:none;} }
+</style>
+</head><body>
+
+<div id="view"></div>
+<div class="eyebrow">Byrået · Skiltet · demo</div>
+<button id="toggle" class="open" aria-controls="panel">Innstillinger</button>
+<aside id="panel" aria-label="Innstillinger">
+  <header><h1>Skiltet</h1><span>smijern · kjetting · mur</span></header>
+  <div id="scroll"></div>
+</aside>
+<div id="load">Smir skiltet …</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script id="glyphs" type="application/json">{"serif":{"A":[720,"M763 0L763 -82L747 -84C694 -94 686 -113 648 -193L452 -681L297 -681L99 -206C60 -113 38 -91 -18 -84L-34 -82L-34 0L275 0L275 -82L259 -84C212 -90 185 -97 185 -126C185 -134 189 -143 194 -156L226 -242L441 -242L471 -157C477 -139 480 -127 481 -116C481 -96 466 -87 423 -84L398 -82L398 0M408 -327L258 -327L334 -522"],"B":[720,"M693 -200C693 -281 648 -340 567 -366C627 -395 663 -449 663 -510C663 -648 543 -681 400 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L420 0C520 0 693 -11 693 -200M493 -495C493 -441 445 -410 363 -410L283 -410L283 -534C283 -566 283 -586 365 -586C446 -586 493 -552 493 -495M511 -210C511 -134 458 -89 370 -89C290 -89 283 -110 283 -140L283 -318L366 -318C468 -318 511 -286 511 -210"],"C":[740,"M724 -199L640 -237C624 -209 551 -79 419 -79C342 -79 227 -136 227 -342C227 -508 295 -612 403 -612C452 -612 499 -588 545 -541C569 -515 583 -494 628 -416L705 -445L621 -681L552 -681L544 -658C496 -681 436 -694 377 -694C120 -694 35 -489 35 -341C35 -135 185 13 394 13C545 13 676 -71 724 -199"],"D":[780,"M748 -338C748 -625 554 -681 338 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L361 0C671 0 748 -169 748 -338M556 -345C556 -190 475 -90 350 -90C283 -90 283 -109 283 -162L283 -538C283 -580 298 -591 355 -591C480 -591 556 -498 556 -345"],"E":[720,"M724 -236L654 -269C567 -144 480 -90 366 -90C283 -90 283 -102 283 -203L283 -321L311 -321C369 -321 401 -312 414 -211L492 -211L492 -522L414 -522C412 -416 385 -413 312 -413L283 -413L283 -498C283 -568 283 -591 389 -591C477 -591 561 -538 628 -441L696 -475L597 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L614 0"],"F":[680,"M686 -476L591 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L378 0L378 -82L351 -84C287 -90 283 -115 283 -168L283 -309L306 -309C372 -309 404 -309 414 -192L488 -192L488 -516L414 -516C404 -413 385 -407 312 -407L283 -407L283 -501C283 -566 283 -586 367 -586C471 -586 539 -547 617 -441"],"G":[780,"M773 -268L773 -350L448 -350L448 -268C507 -267 536 -246 536 -203C536 -140 472 -84 400 -84C298 -84 227 -184 227 -327C227 -489 293 -597 392 -597C447 -597 503 -571 546 -527C569 -504 586 -479 615 -427L687 -452L626 -681L562 -681L547 -652C506 -676 431 -694 373 -694C175 -694 35 -547 35 -340C35 -145 154 13 356 13C457 13 517 -18 562 -49L585 9L694 9L694 -182C694 -260 712 -260 773 -268"],"H":[820,"M800 0L800 -82L780 -84C724 -90 712 -104 712 -168L712 -513C712 -577 724 -591 780 -597L800 -599L800 -681L449 -681L449 -599L469 -597C525 -591 537 -577 537 -513L537 -415L283 -415L283 -513C283 -577 295 -591 351 -597L371 -599L371 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L371 0L371 -82L351 -84C295 -90 283 -104 283 -168L283 -318L537 -318L537 -168C537 -104 525 -90 469 -84L449 -82L449 0"],"I":[400,"M379 0L379 -82L355 -84C291 -89 287 -114 287 -168L287 -513C287 -562 289 -591 355 -597L379 -599L379 -681L20 -681L20 -599L44 -597C108 -592 112 -567 112 -513L112 -168C112 -119 110 -90 44 -84L20 -82L20 0"],"J":[640,"M622 -599L622 -681L271 -681L271 -599L291 -597C347 -591 359 -577 359 -513L359 -231C359 -187 359 -89 237 -89C183 -89 130 -116 130 -145C130 -150 133 -155 139 -162C159 -185 166 -202 166 -227C166 -271 133 -303 89 -303C30 -303 -12 -256 -12 -189C-12 -71 98 13 255 13C497 13 534 -110 534 -241L534 -513C534 -577 546 -591 602 -597"],"K":[800,"M796 0L796 -82C721 -93 705 -106 636 -214L490 -443L531 -481C619 -563 670 -587 755 -599L755 -681L417 -681L417 -599L434 -599C444 -599 484 -598 484 -579C484 -570 480 -565 451 -538L283 -378L283 -513C283 -579 290 -588 351 -597L364 -599L364 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L364 0L364 -82L351 -84C290 -93 283 -102 283 -168L283 -262L365 -333L468 -163C468 -163 496 -125 496 -110C496 -93 489 -90 435 -84L417 -82L417 0"],"L":[640,"M668 -238L599 -275C531 -154 443 -90 344 -90C283 -90 283 -102 283 -181L283 -513C283 -577 295 -591 351 -597L371 -599L371 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L564 0"],"M":[940,"M924 0L924 -82L904 -84C848 -90 836 -104 836 -168L836 -513C836 -577 848 -591 904 -597L924 -599L924 -681L611 -681L469 -255L331 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L294 0L294 -82L274 -84C218 -90 206 -104 206 -168L206 -522L378 0L486 0L661 -515L661 -168C661 -104 649 -90 593 -84L573 -82L573 0"],"N":[740,"M724 -599L724 -681L455 -681L455 -599L475 -597C531 -591 543 -577 543 -513L543 -288L315 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L289 0L289 -82L269 -84C213 -90 201 -104 201 -168L201 -526L512 0L636 0L636 -513C636 -577 648 -591 704 -597"],"O":[800,"M769 -346C769 -558 611 -694 405 -694C191 -694 35 -542 35 -334C35 -119 198 13 392 13C606 13 769 -142 769 -346M577 -344C577 -192 506 -89 400 -89C262 -89 227 -240 227 -338C227 -489 300 -592 406 -592C513 -592 577 -500 577 -344"],"P":[660,"M658 -478C658 -643 538 -681 379 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L371 0L371 -82L351 -84C295 -90 283 -104 283 -168L283 -276L378 -276C561 -276 658 -346 658 -478M466 -480C466 -407 412 -365 316 -365C307 -365 299 -365 283 -367L283 -516C283 -563 283 -589 351 -589C419 -589 466 -545 466 -480"],"Q":[800,"M775 -5C775 -54 756 -93 708 -142C746 -196 769 -274 769 -350C769 -549 615 -694 406 -694C191 -694 35 -543 35 -335C35 -136 187 13 391 13C465 13 524 -3 591 -40C606 -23 613 -4 613 15C613 86 508 139 366 139C312 139 265 130 239 114C224 106 216 95 213 78C207 51 205 46 193 31C178 13 156 3 133 3C93 3 60 35 60 73C60 157 211 226 394 226C611 226 775 127 775 -5M577 -355C577 -308 571 -261 559 -224C509 -237 481 -241 453 -241C359 -241 291 -189 291 -142C291 -138 291 -135 292 -131C250 -179 227 -253 227 -339C227 -432 263 -592 406 -592C509 -592 577 -498 577 -355M490 -115C467 -99 437 -89 410 -89C382 -89 364 -98 364 -113C364 -128 384 -138 413 -138C441 -138 465 -131 490 -115"],"R":[780,"M783 0L783 -82C730 -82 712 -99 665 -151L539 -314C643 -338 706 -407 706 -499C706 -645 576 -681 409 -681L20 -681L20 -599L40 -597C96 -591 108 -577 108 -513L108 -168C108 -104 96 -90 40 -84L20 -82L20 0L371 0L371 -82L351 -84C295 -90 283 -104 283 -168L283 -293L335 -293L551 0M502 -489C502 -449 481 -388 354 -388L283 -388L283 -544C283 -566 283 -588 360 -588C418 -588 502 -580 502 -489"],"S":[660,"M639 -227C639 -387 486 -415 423 -427L332 -446C301 -451 195 -472 195 -527C195 -568 241 -597 305 -597C402 -597 452 -550 524 -451L596 -478L530 -681L470 -681L458 -649C418 -676 356 -694 298 -694C148 -694 40 -603 40 -476C40 -313 193 -293 289 -269L388 -244C463 -225 484 -210 484 -173C484 -121 432 -84 358 -84C245 -84 161 -150 96 -269L21 -244L104 11L163 11L177 -38C219 -7 288 13 356 13C519 13 639 -89 639 -227"],"T":[700,"M703 -474L622 -681L71 -681L-4 -474L71 -445C106 -530 176 -590 243 -590C258 -590 260 -587 260 -552L260 -168C260 -125 260 -87 192 -84L162 -82L162 0L533 0L533 -82L503 -84C436 -87 435 -123 435 -168L435 -555C435 -588 437 -590 455 -590C539 -590 597 -500 630 -445"],"U":[740,"M724 -599L724 -681L450 -681L450 -599L470 -597C526 -591 538 -577 538 -513L538 -246C538 -190 535 -92 404 -92C302 -92 278 -160 278 -249L278 -513C278 -577 290 -591 346 -597L366 -599L366 -681L15 -681L15 -599L35 -597C91 -591 103 -577 103 -513L103 -230C103 -162 103 13 371 13C609 13 636 -119 636 -251L636 -513C636 -577 648 -591 704 -597"],"V":[720,"M730 -599L730 -681L447 -681L447 -599L464 -597C505 -592 526 -587 526 -561C525 -553 524 -542 520 -529L398 -181L269 -532C264 -545 261 -555 261 -563C261 -585 282 -590 333 -597L348 -599L348 -681L-20 -681L-20 -599L-6 -597C59 -588 69 -580 93 -518L291 0L427 0L618 -501C649 -571 666 -590 718 -597"],"W":[940,"M963 -599L963 -681L662 -681L662 -599L675 -597C721 -597 749 -583 749 -549C749 -544 749 -539 748 -534L651 -206L559 -537C556 -548 555 -557 555 -564C555 -585 567 -592 600 -596L624 -599L624 -681L312 -681L312 -599C348 -598 360 -587 376 -544L409 -453L331 -213L244 -540C241 -551 239 -561 239 -569C239 -587 249 -597 281 -599L281 -681L-20 -681L-20 -599C27 -597 45 -577 64 -517L228 0L357 0L456 -311L549 0L680 0L836 -480C867 -575 880 -588 947 -597"],"X":[780,"M770 0L770 -82L745 -84C697 -91 674 -111 607 -189L472 -365L570 -489C623 -557 675 -589 746 -599L746 -681L433 -681L433 -599L449 -599C485 -599 497 -591 497 -577C497 -569 493 -560 488 -549L415 -446L341 -551C333 -562 329 -571 329 -578C329 -593 350 -597 392 -599L392 -681L20 -681L20 -599C85 -593 97 -582 158 -500L276 -343L124 -156C90 -114 44 -85 1 -82L1 0L311 0L311 -82L286 -84C249 -87 233 -95 233 -111C233 -119 238 -131 248 -146L334 -270L434 -129C441 -118 446 -111 446 -105C446 -94 431 -87 399 -84L379 -82L379 0"],"Y":[700,"M718 -599L718 -681L412 -681L412 -599C466 -598 486 -593 486 -577C486 -565 475 -547 458 -519L380 -390L298 -539C289 -555 282 -568 282 -577C282 -591 300 -598 360 -599L360 -681L-20 -681L-20 -599C40 -593 68 -570 115 -495L255 -276L255 -168C255 -120 253 -89 187 -84L159 -82L159 0L526 0L526 -82L498 -84C433 -89 430 -117 430 -168L430 -288L559 -488C611 -569 649 -595 718 -599"],"Z":[640,"M635 -234L561 -258C542 -207 522 -177 489 -149C444 -109 374 -87 298 -87C274 -87 257 -89 227 -94L605 -617L588 -681L105 -681L6 -463L75 -434C129 -539 215 -594 327 -594C341 -594 354 -593 387 -590L6 -65L22 0L546 0"],"Æ":[1140,"M1149 -248L1079 -274C981 -141 904 -94 783 -94C713 -94 697 -106 697 -161L697 -313C713 -314 721 -314 729 -314C801 -314 825 -284 828 -193L907 -193L907 -533L828 -533C825 -440 804 -413 728 -413L697 -413L697 -520C697 -583 710 -597 769 -597C901 -597 968 -562 1049 -452L1119 -488L1020 -681L522 -681L145 -193C89 -128 56 -104 -19 -85L-34 -82L-34 0L312 0L312 -82L297 -82C251 -82 224 -94 224 -116C224 -126 228 -137 238 -150L312 -248L531 -248L531 -168C531 -104 519 -90 463 -84L443 -82L443 0L1039 0M531 -333L373 -333L531 -533"],"Ø":[800,"M771 -347C771 -531 661 -611 591 -654L657 -779L573 -779L521 -678C485 -688 439 -694 395 -694C189 -694 35 -543 35 -341C35 -209 100 -89 198 -36L125 110L212 110L268 -7C309 6 359 13 416 13C620 13 771 -140 771 -347M472 -580L265 -159C234 -204 217 -266 217 -337C217 -462 273 -597 406 -597C430 -597 448 -592 472 -580M589 -347C589 -186 517 -84 404 -84C372 -84 347 -90 320 -105L533 -536C570 -492 589 -427 589 -347"],"Å":[720,"M763 0L763 -82L747 -84C694 -94 686 -113 648 -193L452 -681L297 -681L99 -206C60 -113 38 -91 -18 -84L-34 -82L-34 0L275 0L275 -82L259 -84C212 -90 185 -97 185 -126C185 -134 189 -143 194 -156L226 -242L441 -242L471 -157C477 -139 480 -127 481 -116C481 -96 466 -87 423 -84L398 -82L398 0M408 -327L258 -327L334 -522M480 -840C480 -898 434 -944 376 -944C320 -944 273 -898 273 -842C273 -786 320 -740 377 -740C433 -740 480 -786 480 -840M412 -842C412 -822 396 -805 376 -805C357 -805 341 -822 341 -843C341 -863 357 -879 376 -879C396 -879 412 -862 412 -842"],"&":[800,"M772 -4L772 -86C748 -84 736 -84 725 -84C658 -84 615 -107 577 -162C603 -193 630 -254 647 -319C658 -381 680 -397 758 -404L758 -482L495 -482L495 -404C538 -397 550 -387 550 -361C550 -331 542 -302 518 -246C497 -282 443 -346 392 -398C457 -436 494 -492 494 -549C494 -633 419 -694 313 -694C195 -694 113 -626 113 -528C113 -480 133 -435 170 -398C48 -352 21 -253 21 -195C21 -74 127 13 276 13C352 13 423 -11 479 -56C529 -12 576 3 665 3C712 3 736 2 772 -4M374 -550C374 -535 367 -493 320 -462C286 -502 275 -525 275 -553C275 -580 298 -602 326 -602C353 -602 374 -580 374 -550M415 -124C376 -100 342 -89 306 -89C238 -89 195 -140 195 -219C195 -270 209 -307 237 -331C274 -302 322 -249 363 -193C384 -163 399 -142 404 -136"],"-":[360,"M340 -318L67 -318L20 -210L295 -210"],".":[340,"M257 -78C257 -128 217 -168 167 -168C117 -168 76 -128 76 -79C76 -28 116 13 166 13C216 13 257 -28 257 -78"]," ":[340,""]},"sans":{"A":[737,"M541 0L499 -124L237 -124L195 0L16 0L270 -702L468 -702L722 0L541 0M282 -256L455 -256L368 -513L282 -256"],"B":[659,"M487 -360Q548 -347 585 -300Q622 -252 622 -191L622 -191Q622 -103 561 -52Q499 0 389 0L389 0L62 0L62 -702L378 -702Q485 -702 546 -653Q606 -604 606 -520L606 -520Q606 -458 574 -417Q541 -376 487 -360L487 -360M233 -565L233 -418L345 -418Q387 -418 410 -437Q432 -455 432 -491L432 -491Q432 -527 410 -546Q387 -565 345 -565L345 -565L233 -565M359 -138Q402 -138 426 -158Q449 -177 449 -214L449 -214Q449 -251 425 -272Q400 -293 357 -293L357 -293L233 -293L233 -138L359 -138"],"C":[762,"M33 -352Q33 -456 78 -538Q123 -619 204 -665Q284 -710 386 -710L386 -710Q511 -710 600 -644Q689 -578 719 -464L719 -464L531 -464Q510 -508 472 -531Q433 -554 384 -554L384 -554Q305 -554 256 -499Q207 -444 207 -352L207 -352Q207 -260 256 -205Q305 -150 384 -150L384 -150Q433 -150 472 -173Q510 -196 531 -240L531 -240L719 -240Q689 -126 600 -61Q511 5 386 5L386 5Q284 5 204 -41Q123 -86 78 -167Q33 -248 33 -352L33 -352"],"D":[727,"M325 -702Q436 -702 519 -658Q602 -614 648 -535Q693 -455 693 -351L693 -351Q693 -248 648 -168Q602 -88 519 -44Q435 0 325 0L325 0L62 0L62 -702L325 -702M314 -148Q411 -148 465 -201Q519 -254 519 -351L519 -351Q519 -448 465 -502Q411 -556 314 -556L314 -556L233 -556L233 -148L314 -148"],"E":[541,"M492 -565L233 -565L233 -423L462 -423L462 -291L233 -291L233 -137L492 -137L492 0L62 0L62 -702L492 -702L492 -565"],"F":[547,"M62 -702L519 -702L519 -565L233 -565L233 -417L447 -417L447 -284L233 -284L233 0L62 0L62 -702"],"G":[762,"M717 -480L528 -480Q509 -515 474 -534Q438 -552 390 -552L390 -552Q307 -552 257 -498Q207 -443 207 -352L207 -352Q207 -255 260 -201Q312 -146 404 -146L404 -146Q467 -146 511 -178Q554 -210 574 -270L574 -270L357 -270L357 -396L729 -396L729 -237Q710 -173 665 -118Q619 -63 549 -29Q479 5 391 5L391 5Q287 5 206 -41Q124 -86 79 -167Q33 -248 33 -352L33 -352Q33 -456 79 -538Q124 -619 205 -665Q286 -710 390 -710L390 -710Q516 -710 603 -649Q689 -588 717 -480L717 -480"],"H":[731,"M499 -702L670 -702L670 0L499 0L499 -289L233 -289L233 0L62 0L62 -702L233 -702L233 -427L499 -427L499 -702"],"I":[295,"M62 -702L233 -702L233 0L62 0L62 -702"],"J":[578,"M331 -702L502 -702L502 -224Q502 -113 440 -53Q377 7 271 7L271 7Q160 7 93 -56Q26 -119 26 -235L26 -235L196 -235Q196 -191 214 -169Q232 -146 266 -146L266 -146Q297 -146 314 -166Q331 -186 331 -224L331 -224L331 -702"],"K":[697,"M678 0L469 0L233 -310L233 0L62 0L62 -702L233 -702L233 -394L467 -702L668 -702L396 -358L678 0"],"L":[477,"M233 -702L233 -132L457 -132L457 0L62 0L62 -702L233 -702"],"M":[918,"M656 -702L857 -702L857 0L686 0L686 -421L529 0L391 0L233 -422L233 0L62 0L62 -702L264 -702L461 -216L656 -702"],"N":[752,"M690 -702L690 0L519 0L233 -433L233 0L62 0L62 -702L233 -702L519 -267L519 -702L690 -702"],"O":[786,"M394 7Q295 7 213 -39Q130 -85 82 -168Q33 -250 33 -353L33 -353Q33 -456 82 -538Q130 -620 213 -666Q295 -712 394 -712L394 -712Q493 -712 576 -666Q658 -620 706 -538Q753 -456 753 -353L753 -353Q753 -250 705 -168Q657 -85 575 -39Q493 7 394 7L394 7M394 -149Q478 -149 529 -205Q579 -261 579 -353L579 -353Q579 -446 529 -502Q478 -557 394 -557L394 -557Q309 -557 259 -502Q208 -447 208 -353L208 -353Q208 -260 259 -205Q309 -149 394 -149L394 -149"],"P":[624,"M597 -476Q597 -415 569 -365Q541 -314 483 -283Q425 -252 339 -252L339 -252L233 -252L233 0L62 0L62 -702L339 -702Q423 -702 481 -673Q539 -644 568 -593Q597 -542 597 -476L597 -476M326 -388Q375 -388 399 -411Q423 -434 423 -476L423 -476Q423 -518 399 -541Q375 -564 326 -564L326 -564L233 -564L233 -388L326 -388"],"Q":[788,"M769 120L562 120L472 -1Q432 7 394 7L394 7Q295 7 213 -39Q130 -85 82 -168Q33 -250 33 -353L33 -353Q33 -456 82 -538Q130 -620 213 -666Q295 -712 394 -712L394 -712Q493 -712 576 -666Q658 -620 706 -538Q753 -456 753 -353L753 -353Q753 -263 717 -189Q680 -114 615 -65L615 -65L769 120M208 -353Q208 -260 259 -205Q309 -149 394 -149L394 -149Q478 -149 529 -205Q579 -261 579 -353L579 -353Q579 -446 529 -502Q478 -557 394 -557L394 -557Q309 -557 259 -502Q208 -447 208 -353L208 -353"],"R":[652,"M613 0L420 0L274 -265L233 -265L233 0L62 0L62 -702L349 -702Q432 -702 491 -673Q549 -644 578 -594Q607 -543 607 -481L607 -481Q607 -411 568 -356Q528 -301 451 -278L451 -278L613 0M233 -560L233 -386L339 -386Q386 -386 410 -409Q433 -432 433 -474L433 -474Q433 -514 410 -537Q386 -560 339 -560L339 -560L233 -560"],"S":[615,"M316 7Q239 7 178 -18Q117 -43 81 -92Q44 -141 42 -210L42 -210L224 -210Q228 -171 251 -151Q274 -130 311 -130L311 -130Q349 -130 371 -148Q393 -165 393 -196L393 -196Q393 -222 376 -239Q358 -256 333 -267Q307 -278 260 -292L260 -292Q192 -313 149 -334Q106 -355 75 -396Q44 -437 44 -503L44 -503Q44 -601 115 -657Q186 -712 300 -712L300 -712Q416 -712 487 -657Q558 -601 563 -502L563 -502L378 -502Q376 -536 353 -556Q330 -575 294 -575L294 -575Q263 -575 244 -559Q225 -542 225 -511L225 -511Q225 -477 257 -458Q289 -439 357 -417L357 -417Q425 -394 468 -373Q510 -352 541 -312Q572 -272 572 -209L572 -209Q572 -149 542 -100Q511 -51 453 -22Q395 7 316 7L316 7"],"T":[591,"M24 -702L567 -702L567 -565L381 -565L381 0L210 0L210 -565L24 -565L24 -702"],"U":[705,"M59 -702L230 -702L230 -282Q230 -219 261 -185Q292 -151 352 -151L352 -151Q412 -151 444 -185Q476 -219 476 -282L476 -282L476 -702L647 -702L647 -283Q647 -189 607 -124Q567 -59 500 -26Q432 7 349 7L349 7Q266 7 201 -26Q135 -58 97 -124Q59 -189 59 -283L59 -283L59 -702"],"V":[730,"M540 -702L721 -702L472 0L258 0L9 -702L191 -702L365 -172L540 -702"],"W":[1052,"M844 -702L1028 -702L845 0L638 0L526 -462L410 0L203 0L25 -702L208 -702L309 -191L434 -702L622 -702L742 -191L844 -702"],"X":[715,"M691 0L492 0L349 -215L223 0L29 0L254 -357L24 -702L223 -702L364 -490L488 -702L682 -702L459 -348L691 0"],"Y":[671,"M472 -702L664 -702L421 -232L421 0L250 0L250 -232L7 -702L201 -702L337 -408L472 -702"],"Z":[596,"M546 -572L244 -140L546 -140L546 0L50 0L50 -130L350 -562L50 -562L50 -702L546 -702L546 -572"],"Æ":[955,"M906 -567L653 -567L653 -423L876 -423L876 -293L653 -293L653 -135L906 -135L906 0L482 0L482 -118L251 -118L191 0L6 0L365 -702L906 -702L906 -567M317 -248L482 -248L482 -575L317 -248"],"Ø":[786,"M764 -704L664 -594Q706 -547 729 -486Q752 -424 752 -353L752 -353Q752 -250 704 -168Q656 -85 574 -39Q492 7 393 7L393 7Q333 7 279 -10Q224 -27 179 -60L179 -60L126 -1L22 -1L122 -111Q79 -158 56 -220Q32 -282 32 -353L32 -353Q32 -456 81 -538Q129 -620 212 -666Q294 -712 393 -712L393 -712Q513 -712 607 -646L607 -646L660 -704L764 -704M207 -353Q207 -286 235 -236L235 -236L499 -527Q453 -557 393 -557L393 -557Q308 -557 258 -502Q207 -447 207 -353L207 -353M578 -353Q578 -420 551 -469L551 -469L287 -179Q333 -149 393 -149L393 -149Q477 -149 528 -205Q578 -261 578 -353L578 -353"],"Å":[737,"M541 0L499 -124L237 -124L195 0L16 0L270 -702L468 -702L722 0L541 0M282 -256L455 -256L368 -513L282 -256M492 -866Q492 -811 457 -778Q421 -745 369 -745L369 -745Q317 -745 282 -778Q247 -811 247 -866L247 -866Q247 -921 282 -954Q317 -987 369 -987L369 -987Q421 -987 457 -954Q492 -921 492 -866L492 -866M417 -866Q417 -888 404 -902Q390 -915 369 -915L369 -915Q349 -915 336 -902Q322 -888 322 -866L322 -866Q322 -845 336 -831Q349 -817 369 -817L369 -817Q390 -817 404 -831Q417 -845 417 -866L417 -866"],"&":[798,"M798 0L599 0L534 -63Q437 11 302 11L302 11Q221 11 161 -16Q101 -42 69 -91Q36 -139 36 -204L36 -204Q36 -270 72 -324Q107 -377 178 -411L178 -411Q152 -443 141 -473Q130 -502 130 -537L130 -537Q130 -587 156 -628Q182 -669 232 -693Q281 -716 349 -716L349 -716Q418 -716 466 -691Q514 -666 538 -624Q562 -582 560 -532L560 -532L399 -532Q400 -559 386 -574Q371 -588 347 -588L347 -588Q323 -588 307 -574Q291 -560 291 -538L291 -538Q291 -517 305 -494Q318 -471 347 -441L347 -441L518 -274Q520 -279 524 -286Q527 -293 531 -302L531 -302L568 -365L739 -365L691 -278Q664 -219 629 -166L629 -166L798 0M310 -127Q377 -127 429 -165L429 -165L273 -316Q201 -279 201 -216L201 -216Q201 -178 231 -153Q260 -127 310 -127L310 -127"],"-":[580,"M52 -422L492 -422L492 -280L52 -280L52 -422"],".":[282,"M142 8Q97 8 69 -19Q40 -45 40 -84L40 -84Q40 -124 69 -151Q97 -178 142 -178L142 -178Q186 -178 215 -151Q243 -124 243 -84L243 -84Q243 -45 215 -19Q186 8 142 8L142 8"]," ":[212,""]}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const GLYPHS = JSON.parse(document.getElementById('glyphs').textContent);
+
+/* ---------------- state + UI ---------------- */
+const S = {
+  time: 15.5, sunPower: 1.0, kelvin: 5200, azimuth: -38, exposure: 1.0, fog: 0.25, lamp: false, lampPower: 1.0,
+  wind: 4, windDir: 20, gust: 0.5, rain: false,
+  text: 'BYRÅET', font: 'serif', material: 'iron', style: 'frame', letterH: 0.26, chain: 0.55, chainT: 1.0, tracking: 0.06,
+  wallHue: 0.55, wallRough: 0.6, brickScale: 1.0, wear: 0.5,
+  autoRotate: false, sound: false, rats: true,
+};
+const DEF = JSON.parse(JSON.stringify(S));
+
+const UI = [
+  { title:'Lys', open:true, items:[
+    { k:'time', l:'Tid på døgnet', min:0, max:24, step:0.1, f:v=>`${String(Math.floor(v)).padStart(2,'0')}:${String(Math.round((v%1)*60)).padStart(2,'0')}` },
+    { k:'sunPower', l:'Sol-/månestyrke', min:0, max:2, step:0.01, f:v=>v.toFixed(2) },
+    { k:'kelvin', l:'Fargetemperatur', min:2000, max:10000, step:50, f:v=>`${v} K` },
+    { k:'azimuth', l:'Lysretning', min:-180, max:180, step:1, f:v=>`${v}°` },
+    { k:'exposure', l:'Eksponering', min:0.3, max:2.2, step:0.01, f:v=>v.toFixed(2) },
+    { k:'fog', l:'Dis / tåke', min:0, max:1, step:0.01, f:v=>Math.round(v*100)+' %' },
+    { k:'lamp', l:'Vegglykt', type:'toggle' },
+    { k:'lampPower', l:'Lyktstyrke', min:0, max:2, step:0.01, f:v=>v.toFixed(2) },
+  ]},
+  { title:'Vær', open:true, items:[
+    { k:'wind', l:'Vindstyrke', min:0, max:16, step:0.1, f:v=>`${v.toFixed(1)} m/s` },
+    { k:'windDir', l:'Vindretning', min:-180, max:180, step:1, f:v=>`${v}°` },
+    { k:'gust', l:'Kast / turbulens', min:0, max:1, step:0.01, f:v=>Math.round(v*100)+' %' },
+    { k:'rain', l:'Regn', type:'toggle' },
+    { k:'sound', l:'Lyd (vind og knirk)', type:'toggle' },
+  ]},
+  { title:'Skilt', open:true, items:[
+    { k:'text', l:'Tekst', type:'text' },
+    { k:'font', l:'Skrift', type:'select', opts:[['serif','Antikva (klassisk)'],['sans','Grotesk (moderne)']] },
+    { k:'style', l:'Utforming', type:'select', opts:[['frame','Åpen ramme'],['plate','Bokstaver på plate'],['bare','Bare bokstaver']] },
+    { k:'material', l:'Materiale', type:'select', opts:[['iron','Svart smijern'],['rust','Rustent jern'],['brass','Messing'],['copper','Kobber'],['white','Hvitlakkert']] },
+    { k:'letterH', l:'Bokstavhøyde', min:0.12, max:0.5, step:0.005, f:v=>`${Math.round(v*100)} cm` },
+    { k:'tracking', l:'Bokstavavstand', min:0, max:0.2, step:0.005, f:v=>v.toFixed(3) },
+    { k:'chain', l:'Kjedelengde', min:0.15, max:1.4, step:0.01, f:v=>`${Math.round(v*100)} cm` },
+    { k:'chainT', l:'Kjedetykkelse', min:0.5, max:2.2, step:0.01, f:v=>v.toFixed(2)+'×' },
+  ]},
+  { title:'Vegg', open:false, items:[
+    { k:'wallHue', l:'Fargetone (grå → gul → rød)', min:0, max:1, step:0.01, f:v=>Math.round(v*100)+' %' },
+    { k:'wallRough', l:'Grovhet', min:0, max:1, step:0.01, f:v=>Math.round(v*100)+' %' },
+    { k:'brickScale', l:'Steinstørrelse', min:0.6, max:1.6, step:0.01, f:v=>v.toFixed(2)+'×' },
+    { k:'wear', l:'Slitasje / skitt', min:0, max:1, step:0.01, f:v=>Math.round(v*100)+' %' },
+  ]},
+  { title:'Kamera', open:false, items:[
+    { k:'autoRotate', l:'Sakte rundt', type:'toggle' },
+    { type:'buttons', btns:[['Gate','cam:street'],['Nært','cam:close'],['Nedenfra','cam:below'],['Fra siden','cam:side']] },
+  ]},
+  { title:'Scene', open:false, items:[
+    { k:'rats', l:'Rotter', type:'toggle' },
+    { type:'buttons', btns:[['Gyllen time','preset:golden'],['Blå time','preset:blue'],['Natt med lykt','preset:night'],['Grå regndag','preset:rain'],['Tilfeldig','preset:random'],['Nullstill','preset:reset']] },
+  ]},
+];
+
+const scroll = document.getElementById('scroll');
+const inputs = {};
+function buildUI(){
+  for(const sec of UI){
+    const d = document.createElement('details'); d.open = sec.open;
+    d.innerHTML = `<summary>${sec.title}</summary><div class="body"></div>`;
+    const body = d.querySelector('.body');
+    for(const it of sec.items){
+      if(it.type==='buttons'){
+        const w = document.createElement('div'); w.className='btns';
+        for(const [lab,act] of it.btns){ const b=document.createElement('button'); b.className='b'+(act==='preset:reset'?'':''); b.textContent=lab; b.onclick=()=>action(act); w.appendChild(b); }
+        body.appendChild(w); continue;
+      }
+      const row = document.createElement('div');
+      if(it.type==='toggle'){
+        row.className='row'; row.innerHTML = `<label class="toggle" style="grid-column:1/-1"><span>${it.l}</span><input type="checkbox"></label>`;
+        const inp = row.querySelector('input'); inp.checked = S[it.k]; inp.oninput = ()=>{ S[it.k]=inp.checked; onChange(it.k); };
+        inputs[it.k] = inp;
+      } else if(it.type==='select'){
+        row.className='row'; row.innerHTML = `<label>${it.l}</label><span></span><select>${it.opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('')}</select>`;
+        const inp = row.querySelector('select'); inp.value = S[it.k]; inp.oninput=()=>{ S[it.k]=inp.value; onChange(it.k); };
+        inputs[it.k] = inp;
+      } else if(it.type==='text'){
+        row.className='row'; row.innerHTML = `<label>${it.l}</label><span></span><input type="text" maxlength="14" spellcheck="false">`;
+        const inp = row.querySelector('input'); inp.value = S[it.k];
+        inp.oninput=()=>{ S[it.k]=inp.value.toUpperCase().replace(/[^A-ZÆØÅ&\-. ]/g,''); onChange(it.k); };
+        inputs[it.k] = inp;
+      } else {
+        row.className='row'; row.innerHTML = `<label>${it.l}</label><output></output><input type="range" min="${it.min}" max="${it.max}" step="${it.step}">`;
+        const inp = row.querySelector('input'), out = row.querySelector('output');
+        inp.value = S[it.k]; out.value = it.f(S[it.k]);
+        inp.oninput=()=>{ S[it.k]=parseFloat(inp.value); out.value=it.f(S[it.k]); onChange(it.k); };
+        inputs[it.k] = inp; inp._fmt = it.f; inp._out = out;
+      }
+      body.appendChild(row);
+    }
+    scroll.appendChild(d);
+  }
+}
+function syncUI(){
+  for(const k in inputs){ const inp = inputs[k]; if(inp.type==='checkbox') inp.checked=S[k]; else { inp.value=S[k]; if(inp._out) inp._out.value=inp._fmt(S[k]); } }
+}
+buildUI();
+const panel = document.getElementById('panel'), tbtn = document.getElementById('toggle');
+tbtn.onclick = ()=>{ panel.classList.toggle('hidden'); tbtn.classList.toggle('open', !panel.classList.contains('hidden')); };
+if(innerWidth < 900){ panel.classList.add('hidden'); tbtn.classList.remove('open'); }
+
+/* ---------------- helpers ---------------- */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), lerp=(a,b,t)=>a+(b-a)*t, rnd=(a,b)=>a+Math.random()*(b-a);
+function kelvinToRGB(k){ // Tanner Helland
+  const t=k/100; let r,g,b;
+  r = t<=66 ? 255 : 329.698727446*Math.pow(t-60,-0.1332047592);
+  g = t<=66 ? 99.4708025861*Math.log(t)-161.1195681661 : 288.1221695283*Math.pow(t-60,-0.0755148492);
+  b = t>=66 ? 255 : (t<=19 ? 0 : 138.5177312231*Math.log(t-10)-305.0447927307);
+  return new THREE.Color(clamp(r,0,255)/255, clamp(g,0,255)/255, clamp(b,0,255)/255);
+}
+// value noise
+function makeNoise(seed){ let s=seed; const r=()=>{ s=(s*16807)%2147483647; return (s-1)/2147483646; };
+  const N=256, p=new Float32Array(N*N); for(let i=0;i<N*N;i++) p[i]=r();
+  return (x,y)=>{ const xi=Math.floor(x)&255, yi=Math.floor(y)&255, xf=x-Math.floor(x), yf=y-Math.floor(y), u=xf*xf*(3-2*xf), v=yf*yf*(3-2*yf);
+    const a=p[yi*N+xi], b=p[yi*N+((xi+1)&255)], c=p[((yi+1)&255)*N+xi], d=p[((yi+1)&255)*N+((xi+1)&255)];
+    return lerp(lerp(a,b,u),lerp(c,d,u),v); }; }
+const noise = makeNoise(1337), noise2 = makeNoise(777);
+function fbm(x,y,o=4){ let v=0,a=.5,f=1; for(let i=0;i<o;i++){ v+=a*noise(x*f,y*f); a*=.5; f*=2.1; } return v; }
+
+/* ---------------- textures ---------------- */
+function brickTextures(){
+  const W=1024, H=1024, c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d');
+  const hmap = new Float32Array(W*H); const rough = new Uint8ClampedArray(W*H);
+  const img = g.createImageData(W,H); const d=img.data;
+  // palette by hue slider: 0 grey-beige, .5 warm yellow ochre, 1 red-orange
+  const hue = S.wallHue;
+  const base = hue<0.5 ? [lerp(138,196,hue*2), lerp(130,156,hue*2), lerp(118,88,hue*2)] : [lerp(196,172,(hue-.5)*2), lerp(156,92,(hue-.5)*2), lerp(88,58,(hue-.5)*2)];
+  const mortar = [128, 120, 106];
+  const bw = 118*S.brickScale, bh = 38*S.brickScale, gap = 7;
+  for(let y=0;y<H;y++){
+    const rowI = Math.floor(y/(bh+gap)); const off = (rowI%2)*(bw+gap)/2;
+    for(let x=0;x<W;x++){
+      const xx = (x+off)%(bw+gap), yy = y%(bh+gap);
+      const inBrick = xx>=gap && yy>=gap;
+      const bi = Math.floor((x+off)/(bw+gap)) + rowI*57;
+      const bn = noise2(bi*0.37, rowI*0.91); // per-brick variance
+      const grain = fbm(x*0.03, y*0.03, 3), fine = noise(x*0.5, y*0.5);
+      let r,gg,b,h;
+      if(inBrick){
+        // rounded, chipped edges
+        const ex = Math.min(xx-gap, bw-(xx-gap)), ey = Math.min(yy-gap, bh-(yy-gap));
+        const edge = clamp(Math.min(ex,ey)/4,0,1);
+        const chip = fbm(x*0.08+bi, y*0.08, 2) > 0.62 && edge<0.9 ? 0.5 : 1;
+        const burnt = bn>0.86 ? 0.55 : 1; const tone = (0.72 + bn*0.5)*burnt; const w = 1 - S.wear*0.5*Math.max(0, fbm(x*0.006,y*0.006,3)-0.35)*2;
+        const region = 0.9 + fbm(x*0.0025+7, y*0.0025+3, 2)*0.2;
+        r = base[0]*tone*w*region*(0.86+grain*0.28); gg = base[1]*tone*w*region*(0.86+grain*0.28)*(1-bn*0.1)*(burnt<1?0.85:1); b = base[2]*tone*w*region*(0.82+grain*0.36)*(1-bn*0.15)*(burnt<1?0.8:1);
+        const ao = 0.78 + edge*0.22; r*=ao; gg*=ao; b*=ao;
+        h = 0.55 + edge*0.35*chip + fine*0.08*S.wallRough + grain*0.1;
+        rough[y*W+x] = 170 + S.wallRough*60 + fine*20;
+      } else {
+        const mn = fbm(x*0.12, y*0.12, 3);
+        r = mortar[0]*(0.8+mn*0.4); gg = mortar[1]*(0.8+mn*0.4); b = mortar[2]*(0.8+mn*0.4);
+        h = 0.15 + mn*0.18; rough[y*W+x] = 235;
+      }
+      // dirt streaks + wear
+      const dirt = S.wear * Math.max(0, fbm(x*0.004, y*0.02, 3)-0.45) * 1.6;
+      r*=1-dirt*0.6; gg*=1-dirt*0.62; b*=1-dirt*0.66;
+      const i=(y*W+x)*4; d[i]=r; d[i+1]=gg; d[i+2]=b; d[i+3]=255; hmap[y*W+x]=h;
+    }
+  }
+  g.putImageData(img,0,0);
+  const color = new THREE.CanvasTexture(c); color.colorSpace = THREE.SRGBColorSpace;
+  // normal from height
+  const nc=document.createElement('canvas'); nc.width=W; nc.height=H; const ng=nc.getContext('2d'); const nimg=ng.createImageData(W,H); const nd=nimg.data;
+  const str = 3.5 + S.wallRough*4;
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+    const l=hmap[y*W+((x-1+W)%W)], rr=hmap[y*W+((x+1)%W)], u=hmap[((y-1+H)%H)*W+x], dn=hmap[((y+1)%H)*W+x];
+    const nx=(l-rr)*str, ny=(dn-u)*str; const len=Math.hypot(nx,ny,1); const i=(y*W+x)*4;
+    nd[i]=(nx/len*0.5+0.5)*255; nd[i+1]=(ny/len*0.5+0.5)*255; nd[i+2]=(1/len*0.5+0.5)*255; nd[i+3]=255;
+  }
+  ng.putImageData(nimg,0,0); const normal = new THREE.CanvasTexture(nc);
+  const rc=document.createElement('canvas'); rc.width=W; rc.height=H; const rg=rc.getContext('2d'); const rimg=rg.createImageData(W,H);
+  for(let i=0;i<W*H;i++){ rimg.data[i*4]=rough[i]; rimg.data[i*4+1]=rough[i]; rimg.data[i*4+2]=rough[i]; rimg.data[i*4+3]=255; }
+  rg.putImageData(rimg,0,0); const roughT = new THREE.CanvasTexture(rc);
+  for(const t of [color,normal,roughT]){ t.wrapS=t.wrapT=THREE.RepeatWrapping; t.anisotropy=8; }
+  return {color, normal, roughT};
+}
+function metalMaps(){
+  const W=512, c=document.createElement('canvas'); c.width=W; c.height=W; const g=c.getContext('2d'); const img=g.createImageData(W,W); const d=img.data;
+  for(let y=0;y<W;y++) for(let x=0;x<W;x++){ const n=fbm(x*0.05,y*0.05,4); const f=noise(x*0.9,y*0.9); const v=clamp(110+n*120+f*40,0,255); const i=(y*W+x)*4; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; }
+  g.putImageData(img,0,0); const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; return t;
+}
+function groundTextures(){
+  const W=1024, c=document.createElement('canvas'); c.width=W; c.height=W; const g=c.getContext('2d'); const img=g.createImageData(W,W); const d=img.data;
+  const hmap = new Float32Array(W*W);
+  const cs = 64; const N = W/cs;
+  // jittered stone centres + per-stone tint
+  const stones = [];
+  for(let j=0;j<N;j++) for(let i=0;i<N;i++){ const jx=(noise2(i*3.1+j*7.7, j*1.3)-0.5)*18, jy=(noise2(j*5.3, i*2.9+j)-0.5)*14; const rw = cs*(0.42+noise2(i*1.7,j*9.1)*0.08), rh = cs*(0.40+noise2(i*8.3,j*2.2)*0.08);
+    const tint = noise2(i*0.9+j*0.3, j*1.7+i*0.1); stones.push({cx:i*cs+cs/2+jx, cy:j*cs+cs/2+jy, rw, rh, tint, rot:(noise2(i*4,j*6)-0.5)*0.5}); }
+  for(let y=0;y<W;y++) for(let x=0;x<W;x++){
+    // find nearest stone among 3x3 neighbourhood (toroidal)
+    const gi = Math.floor(x/cs), gj = Math.floor(y/cs); let best=null, bd=1e9;
+    for(let dj=-1;dj<=1;dj++) for(let di=-1;di<=1;di++){ const ii=(gi+di+N)%N, jj=(gj+dj+N)%N; const s=stones[jj*N+ii];
+      let dx=x-s.cx, dy=y-s.cy; if(dx>W/2) dx-=W; if(dx<-W/2) dx+=W; if(dy>W/2) dy-=W; if(dy<-W/2) dy+=W;
+      const rx = dx*Math.cos(s.rot)-dy*Math.sin(s.rot), ry = dx*Math.sin(s.rot)+dy*Math.cos(s.rot);
+      const dd = Math.pow(Math.abs(rx)/s.rw, 3.2) + Math.pow(Math.abs(ry)/s.rh, 3.2); if(dd<bd){ bd=dd; best=s; } }
+    const inside = bd < 1; const grain = fbm(x*0.06, y*0.06, 3), fine = noise(x*0.8, y*0.8);
+    let r,gg,b,h;
+    if(inside){
+      const dome = Math.pow(Math.max(0, 1-bd), 0.4);              // rounded top
+      const base = 62 + best.tint*58; const cool = best.tint>0.7 ? 1.04 : 0.97;
+      r = base*(0.85+grain*0.3); gg = base*(0.85+grain*0.3)*0.96*cool; b = base*(0.85+grain*0.3)*0.9*cool*(best.tint>0.7?1.08:1);
+      const ao = 0.72 + dome*0.28; r*=ao; gg*=ao; b*=ao;
+      h = 0.25 + dome*0.7 + fine*0.05;
+    } else { const mn = fbm(x*0.15, y*0.15, 3); r = 48*(0.7+mn*0.6); gg = 45*(0.7+mn*0.6); b = 40*(0.7+mn*0.6); h = 0.08 + mn*0.15; }
+    const i=(y*W+x)*4; d[i]=r; d[i+1]=gg; d[i+2]=b; d[i+3]=255; hmap[y*W+x]=h;
+  }
+  g.putImageData(img,0,0);
+  const color = new THREE.CanvasTexture(c); color.colorSpace=THREE.SRGBColorSpace;
+  const nc=document.createElement('canvas'); nc.width=W; nc.height=W; const ng=nc.getContext('2d'); const nimg=ng.createImageData(W,W); const nd=nimg.data; const str=3.2;
+  for(let y=0;y<W;y++) for(let x=0;x<W;x++){
+    const l=hmap[y*W+((x-1+W)%W)], rr=hmap[y*W+((x+1)%W)], u=hmap[((y-1+W)%W)*W+x], dn=hmap[((y+1)%W)*W+x];
+    const nx=(l-rr)*str, ny=(dn-u)*str; const len=Math.hypot(nx,ny,1); const i=(y*W+x)*4;
+    nd[i]=(nx/len*0.5+0.5)*255; nd[i+1]=(ny/len*0.5+0.5)*255; nd[i+2]=(1/len*0.5+0.5)*255; nd[i+3]=255;
+  }
+  ng.putImageData(nimg,0,0); const normal = new THREE.CanvasTexture(nc);
+  for(const tx of [color,normal]){ tx.wrapS=tx.wrapT=THREE.RepeatWrapping; tx.repeat.set(48,48); tx.anisotropy=16; }
+  return {color, normal};
+}
+
+/* ---------------- scene ---------------- */
+const view = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+view.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.05, 200);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.06; controls.maxPolarAngle = Math.PI*0.52; controls.minDistance = 0.8; controls.maxDistance = 12;
+controls.minAzimuthAngle = -1.35; controls.maxAzimuthAngle = 1.35; let rotDir = 1; const upAxis = new THREE.Vector3(0,1,0);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+let envRT = null, envTimer = null;
+
+// sky dome
+const skyUniforms = { top:{value:new THREE.Color()}, horizon:{value:new THREE.Color()}, sunDir:{value:new THREE.Vector3(0,1,0)}, sunCol:{value:new THREE.Color()}, sunSize:{value:0.02}, night:{value:0} };
+const sky = new THREE.Mesh(new THREE.SphereGeometry(90, 32, 16), new THREE.ShaderMaterial({
+  uniforms: skyUniforms, side: THREE.BackSide, depthWrite:false,
+  vertexShader:`varying vec3 vW; void main(){ vW = (modelMatrix*vec4(position,1.)).xyz; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+  fragmentShader:`uniform vec3 top,horizon,sunDir,sunCol; uniform float sunSize,night; varying vec3 vW;
+    float hash(vec3 p){ return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453); }
+    void main(){ vec3 d = normalize(vW); float h = clamp(d.y,0.,1.);
+      vec3 col = mix(horizon, top, pow(h,0.55));
+      float sd = max(dot(d, sunDir),0.); col += sunCol * (pow(sd, 900.)*3. + pow(sd, 12.)*0.25 + pow(sd,3.)*0.06);
+      // stars
+      vec3 cell = floor(d*220.); float st = step(0.9975, hash(cell)) * night * h; col += vec3(st*0.9);
+      gl_FragColor = vec4(col,1.); }`
+}));
+scene.add(sky);
+// reflections come from the same sky (+ a dark ground) so metal mirrors the actual time of day
+const envScene = new THREE.Scene(); envScene.add(new THREE.Mesh(sky.geometry, sky.material));
+const envGround = new THREE.Mesh(new THREE.PlaneGeometry(300,300), new THREE.MeshBasicMaterial({color:0x1a1613})); envGround.rotation.x=-Math.PI/2; envGround.position.y=-0.6; envScene.add(envGround);
+function updateEnv(){ const rt = pmrem.fromScene(envScene, 0.02); if(envRT) envRT.dispose(); envRT = rt; scene.environment = rt.texture; }
+
+const sun = new THREE.DirectionalLight(0xffffff, 3); sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.near=0.5; sun.shadow.camera.far=40;
+sun.shadow.camera.left=-5; sun.shadow.camera.right=5; sun.shadow.camera.top=5; sun.shadow.camera.bottom=-5; sun.shadow.bias=-0.0006; sun.shadow.normalBias=0.02; sun.shadow.radius=4;
+scene.add(sun); scene.add(sun.target);
+const hemi = new THREE.HemisphereLight(0xbfd4ff, 0x5a4a3a, 0.6); scene.add(hemi);
+scene.fog = new THREE.Fog(0x000000, 6, 40);
+
+// wall
+const wallMat = new THREE.MeshStandardMaterial({ roughness:1, metalness:0, envMapIntensity:0.3 });
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(14, 9), wallMat); wall.receiveShadow = true; wall.position.set(0, 4.5, 0); scene.add(wall);
+function rebuildWall(){
+  const {color, normal, roughT} = brickTextures();
+  const rep = 14/ (1024/ (118*S.brickScale+7) * 0.24); // ~24cm bricks
+  [color,normal,roughT].forEach(t=>t.repeat.set(rep, rep*9/14));
+  wallMat.map && wallMat.map.dispose(); wallMat.normalMap && wallMat.normalMap.dispose(); wallMat.roughnessMap && wallMat.roughnessMap.dispose();
+  wallMat.map = color; wallMat.normalMap = normal; wallMat.roughnessMap = roughT; wallMat.normalScale.set(1.2,1.2); wallMat.needsUpdate = true;
+}
+rebuildWall();
+// ledge / plinth for depth
+const plinth = new THREE.Mesh(new THREE.BoxGeometry(14, 0.9, 0.08), new THREE.MeshStandardMaterial({color:0x3a3633, roughness:0.95})); plinth.position.set(0,0.45,0.04); plinth.receiveShadow=true; plinth.castShadow=true; scene.add(plinth);
+// ground
+const gT = groundTextures();
+const groundMat = new THREE.MeshStandardMaterial({ map: gT.color, normalMap: gT.normal, normalScale: new THREE.Vector2(1.1,1.1), roughness:0.9, metalness:0.0, envMapIntensity:0.4 });
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(60,60), groundMat);
+ground.rotation.x = -Math.PI/2; ground.position.set(0,0,10); ground.receiveShadow = true; scene.add(ground);
+function setWet(on){ groundMat.roughness = on ? 0.32 : 0.9; groundMat.color.set(on ? 0x6f6a66 : 0xffffff); groundMat.envMapIntensity = on ? 1.0 : 0.4; }
+
+// materials for iron
+const metalRough = metalMaps();
+const MATS = {
+  iron:   ()=>new THREE.MeshStandardMaterial({color:0x14110f, metalness:0.85, roughness:0.62, roughnessMap:metalRough, envMapIntensity:1}),
+  rust:   ()=>new THREE.MeshStandardMaterial({color:0x6a3418, metalness:0.35, roughness:0.92, roughnessMap:metalRough, bumpMap:metalRough, bumpScale:0.004, envMapIntensity:0.6}),
+  brass:  ()=>new THREE.MeshStandardMaterial({color:0xb8934f, metalness:1, roughness:0.38, roughnessMap:metalRough, envMapIntensity:1.2}),
+  copper: ()=>new THREE.MeshStandardMaterial({color:0xa5583a, metalness:1, roughness:0.42, roughnessMap:metalRough, envMapIntensity:1.2}),
+  white:  ()=>new THREE.MeshStandardMaterial({color:0xe9e4d8, metalness:0.1, roughness:0.45, envMapIntensity:0.8}),
+};
+const ironMat = MATS.iron(); // beam + chain always black iron
+let signMat = MATS.iron();
+
+// beam + bracket
+const beamY = 3.1;
+const rig = new THREE.Group(); scene.add(rig);
+function box(w,h,d,mat,x,y,z){ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); m.position.set(x,y,z); m.castShadow=m.receiveShadow=true; return m; }
+let beamLen = 1.8;
+const beamGroup = new THREE.Group(); rig.add(beamGroup);
+function buildBeam(len){
+  beamGroup.clear(); beamLen = len;
+  const t = 0.05;
+  beamGroup.add(box(t, t, len, ironMat, 0, beamY, len/2));                 // main bar
+  beamGroup.add(box(0.22, 0.32, 0.02, ironMat, 0, beamY-0.02, 0.01));       // wall plate
+  for(const [dx,dy] of [[-0.075,0.11],[0.075,0.11],[-0.075,-0.13],[0.075,-0.13]]){ const b=new THREE.Mesh(new THREE.CylinderGeometry(0.014,0.014,0.03,12),ironMat); b.rotation.x=Math.PI/2; b.position.set(dx,beamY+dy,0.03); b.castShadow=true; beamGroup.add(b); }
+  // diagonal strut
+  const sLen = Math.hypot(len*0.62, 0.55); const strut = box(t*0.8, t*0.8, sLen, ironMat, 0, 0, 0);
+  strut.position.set(0, beamY - 0.275, len*0.31); strut.rotation.x = -Math.atan2(0.55, len*0.62); beamGroup.add(strut);
+  beamGroup.add(box(0.16, 0.2, 0.02, ironMat, 0, beamY-0.55, 0.01));
+  // end scroll
+  const scroll = new THREE.Mesh(new THREE.TorusGeometry(0.07, t*0.35, 10, 24, Math.PI*1.5), ironMat); scroll.rotation.y = Math.PI/2; scroll.position.set(0, beamY-0.07, len+0.02); scroll.castShadow=true; beamGroup.add(scroll);
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(t*0.6, 12, 12), ironMat); cap.position.set(0, beamY, len+0.02); beamGroup.add(cap);
+}
+
+// pendulum: everything hanging rotates about the beam axis at (0,beamY,z)
+const pend = new THREE.Group(); rig.add(pend);
+const signGroup = new THREE.Group(); pend.add(signGroup);
+let chainMeshes = [];
+let chainL = S.chain, signH = 0.4, signW = 1.2, hookZ = [0.4, 1.4], chainTop = 0.06;
+function placeSign(ph=0){
+  for(const cg of chainMeshes) cg.rotation.x = ph;
+  signGroup.position.set(0, -chainTop - chainL*Math.cos(ph) - 0.02 - signH/2, -chainL*Math.sin(ph));
+}
+
+function makeShapes(text, fontKey, letterH, tracking){
+  const font = GLYPHS[fontKey]; const scale = letterH/700; // cap height ≈ 700 units
+  const items = []; let x = 0;
+  for(const ch of text){
+    const gl = font[ch] || font[' ']; if(!gl){ continue; }
+    if(gl[1].length){
+      const sp = new THREE.ShapePath();
+      const re = /([MLQCZ])([^MLQCZ]*)/g; let m;
+      while((m = re.exec(gl[1]))){
+        const n = (m[2].match(/-?\d+/g)||[]).map(Number); const k = m[1];
+        if(k==='M') sp.moveTo(n[0], -n[1]); else if(k==='L') sp.lineTo(n[0], -n[1]);
+        else if(k==='Q') sp.quadraticCurveTo(n[0], -n[1], n[2], -n[3]);
+        else if(k==='C') sp.bezierCurveTo(n[0], -n[1], n[2], -n[3], n[4], -n[5]);
+      }
+      const shapes = sp.toShapes(true);
+      items.push({shapes, x});
+    }
+    x += gl[0] + tracking/scale;
+  }
+  const width = (x - tracking/scale)*scale;
+  return {items, scale, width};
+}
+
+function buildSign(){
+  signGroup.clear();
+  signMat.dispose(); signMat = MATS[S.material]();
+  const text = S.text.trim() || 'BYRÅET';
+  const {items, scale, width} = makeShapes(text, S.font, S.letterH, S.tracking);
+  const capH = S.letterH, pad = capH*0.42, bar = 0.028;
+  signW = Math.max(width + pad*2, 0.5); signH = capH + pad*2 + (S.style==='bare'?-pad*1.2:0);
+  const depth = 0.018;
+  const letters = new THREE.Group();
+  for(const it of items){
+    const geo = new THREE.ExtrudeGeometry(it.shapes, {depth: depth, bevelEnabled:true, bevelThickness:0.002, bevelSize:0.0015, bevelSegments:2, curveSegments:10});
+    const m = new THREE.Mesh(geo, signMat); m.scale.set(scale,scale,1); m.position.set(it.x*scale - width/2, -capH/2, -depth/2); m.castShadow=m.receiveShadow=true; letters.add(m);
+  }
+  signGroup.add(letters);
+  const ironOrSign = S.material==='white' ? signMat : signMat;
+  if(S.style==='frame'){
+    const fr = new THREE.Group();
+    fr.add(box(signW, bar, bar, ironOrSign, 0, signH/2, 0)); fr.add(box(signW, bar, bar, ironOrSign, 0, -signH/2, 0));
+    fr.add(box(bar, signH, bar, ironOrSign, -signW/2, 0, 0)); fr.add(box(bar, signH, bar, ironOrSign, signW/2, 0, 0));
+    // support rods behind letters
+    fr.add(box(signW-bar, bar*0.5, bar*0.5, ironOrSign, 0, capH*0.36, -depth*0.6)); fr.add(box(signW-bar, bar*0.5, bar*0.5, ironOrSign, 0, -capH*0.34, -depth*0.6));
+    // corner rings
+    for(const sx of [-1,1]) for(const sy of [-1,1]){ const r=new THREE.Mesh(new THREE.TorusGeometry(0.03,0.007,8,20), ironOrSign); r.position.set(sx*(signW/2-0.045), sy*(signH/2-0.045), 0); r.castShadow=true; fr.add(r); }
+    signGroup.add(fr);
+  } else if(S.style==='plate'){
+    const plateMat = MATS.iron(); plateMat.color.set(0x1a1714); plateMat.roughness=0.7;
+    const plate = box(signW, signH, 0.008, plateMat, 0, 0, -depth/2-0.004); signGroup.add(plate);
+    const rim = new THREE.Group();
+    rim.add(box(signW, bar*0.7, bar*0.7, signMat, 0, signH/2, 0)); rim.add(box(signW, bar*0.7, bar*0.7, signMat, 0, -signH/2, 0));
+    rim.add(box(bar*0.7, signH, bar*0.7, signMat, -signW/2, 0, 0)); rim.add(box(bar*0.7, signH, bar*0.7, signMat, signW/2, 0, 0)); signGroup.add(rim);
+    for(const sx of [-1,1]) for(const sy of [-1,1]){ const b=new THREE.Mesh(new THREE.SphereGeometry(0.012,10,10), signMat); b.position.set(sx*(signW/2-0.05), sy*(signH/2-0.05), 0.006); rim.add(b); }
+  } else { // bare letters: thin rods top+bottom
+    signGroup.add(box(signW, bar*0.6, bar*0.6, signMat, 0, capH*0.36, -depth*0.6)); signGroup.add(box(signW, bar*0.6, bar*0.6, signMat, 0, -capH*0.36, -depth*0.6));
+  }
+  // top hanging eyes
+  for(const sx of [-1,1]){ const e=new THREE.Mesh(new THREE.TorusGeometry(0.02,0.006,8,16), ironMat); e.position.set(sx*(signW/2-0.06), signH/2+0.02, 0); e.castShadow=true; signGroup.add(e); }
+  // sign faces +z in local space; rotate so it faces +x (perpendicular to wall)
+  signGroup.rotation.y = Math.PI/2;
+  layoutHanging();
+}
+
+function layoutHanging(){
+  chainL = S.chain;
+  const zc = 0.42 + signW/2; hookZ = [zc - (signW/2-0.06), zc + (signW/2-0.06)];
+  const need = zc + signW/2 + 0.25; if(Math.abs(need-beamLen)>0.05 || beamGroup.children.length===0) buildBeam(Math.max(1.2, need));
+  pend.position.set(0, beamY, zc);
+  // chains: each hangs from its own eye bolt through the beam
+  for(const m of chainMeshes){ pend.remove(m); }
+  chainMeshes = [];
+  const linkR = 0.014*S.chainT, tube = 0.0038*S.chainT, pitch = linkR*2.6;
+  const n = Math.max(2, Math.round(chainL/pitch));
+  const geo = new THREE.TorusGeometry(linkR, tube, 8, 18); geo.scale(1, 1.5, 1);
+  for(const hz of hookZ){
+    const cg = new THREE.Group(); cg.position.set(0, 0, hz - pend.position.z); pend.add(cg); chainMeshes.push(cg);
+    const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.006,0.075,10), ironMat); bolt.position.y = -0.004; cg.add(bolt);
+    const nut = new THREE.Mesh(new THREE.CylinderGeometry(0.011,0.011,0.008,6), ironMat); nut.position.y = 0.03; cg.add(nut);
+    const eye = new THREE.Mesh(new THREE.TorusGeometry(0.018,0.005,8,16), ironMat); eye.rotation.y = Math.PI/2; eye.position.y = -0.05; eye.castShadow = true; cg.add(eye);
+    const im = new THREE.InstancedMesh(geo, ironMat, n+1); im.castShadow = true;
+    const M = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), sc = new THREE.Vector3(1,1,1);
+    for(let i=0;i<=n;i++){
+      p.set(0, -0.06 - linkR*0.9 - i*pitch, 0);
+      q.setFromEuler(new THREE.Euler(0, i%2 ? 0 : Math.PI/2, 0)); M.compose(p,q,sc); im.setMatrixAt(i, M);
+    }
+    im.instanceMatrix.needsUpdate = true; cg.add(im);
+  }
+  chainTop = 0.06; placeSign();
+  // shadow camera + control target follow the sign
+  const signWorldY = beamY - chainTop - chainL - signH/2;
+  controls.target.set(0.1, signWorldY, pend.position.z);
+  sun.target.position.set(0, signWorldY, pend.position.z);
+  lamp.target.position.set(0.15, signWorldY, pend.position.z);
+}
+
+// wall lamp above the beam
+const lamp = new THREE.SpotLight(0xffd7a0, 0, 8, Math.PI/3.2, 0.6, 1.4); lamp.castShadow = true; lamp.shadow.mapSize.set(1024,1024); lamp.shadow.bias=-0.0004;
+lamp.position.set(0.55, beamY+0.55, 0.3); scene.add(lamp); scene.add(lamp.target);
+const lampBody = new THREE.Group(); lampBody.position.set(0.55, beamY+0.62, 0.02); scene.add(lampBody);
+lampBody.add(box(0.05, 0.05, 0.36, ironMat, 0, 0, 0.18));
+const shade = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.11, 24, 1, true), new THREE.MeshStandardMaterial({color:0x1a1613, metalness:0.7, roughness:0.5, side:THREE.DoubleSide})); shade.position.set(0,-0.06,0.3); shade.castShadow=true; lampBody.add(shade);
+const bulbMat = new THREE.MeshStandardMaterial({color:0xffe6b8, emissive:0xffc272, emissiveIntensity:0, roughness:0.3});
+const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.035, 16, 16), bulbMat); bulb.position.set(0,-0.09,0.3); lampBody.add(bulb);
+const glow = new THREE.PointLight(0xffc272, 0, 3, 2); glow.position.set(0,-0.1,0.3); lampBody.add(glow);
+
+// rain
+const RAIN_N = 2500;
+const rainGeo = new THREE.BufferGeometry(); const rainPos = new Float32Array(RAIN_N*3*2);
+for(let i=0;i<RAIN_N;i++){ const x=rnd(-6,6), y=rnd(0,7), z=rnd(-0.5,8); rainPos.set([x,y,z, x,y-0.12,z], i*6); }
+rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos,3));
+const rain = new THREE.LineSegments(rainGeo, new THREE.LineBasicMaterial({color:0xcfd8e6, transparent:true, opacity:0.35})); rain.visible=false; scene.add(rain);
+
+buildSign();
+setCamera('street');
+updateEnv();
+
+/* ---------------- rats ---------------- */
+const furMat = new THREE.MeshStandardMaterial({color:0x4e453d, roughness:0.95, metalness:0});
+const furMat2 = new THREE.MeshStandardMaterial({color:0x6a5b4c, roughness:0.95, metalness:0});
+const pinkMat = new THREE.MeshStandardMaterial({color:0xb98a84, roughness:0.75});
+const eyeMat = new THREE.MeshStandardMaterial({color:0x0a0806, roughness:0.15, metalness:0.2});
+const whiskerMat = new THREE.LineBasicMaterial({color:0xd9d2c6, transparent:true, opacity:0.55});
+class Rat {
+  constructor(seed, mat){
+    this.seed = seed; this.g = new THREE.Group(); scene.add(this.g);
+    this.pose = new THREE.Group(); this.g.add(this.pose);        // pitches up when sitting
+    const sph = (rx,ry,rz,m,x,y,z)=>{ const s=new THREE.Mesh(new THREE.SphereGeometry(1,18,14), m); s.scale.set(rx,ry,rz); s.position.set(x,y,z); s.castShadow=true; return s; };
+    this.body = sph(0.042,0.036,0.085, mat, 0,0.038,0); this.pose.add(this.body);
+    this.head = new THREE.Group(); this.head.position.set(0,0.045,0.08); this.pose.add(this.head);
+    this.head.add(sph(0.03,0.026,0.042, mat, 0,0,0.01));
+    this.head.add(sph(0.012,0.01,0.02, mat, 0,-0.006,0.045));
+    this.nose = new THREE.Group(); this.nose.position.set(0,-0.006,0.063); this.nose.add(sph(0.006,0.005,0.006, pinkMat, 0,0,0)); this.head.add(this.nose);
+    for(const s of [-1,1]){ const e=sph(0.014,0.015,0.004, pinkMat, s*0.02,0.02,-0.005); e.rotation.y = s*0.5; this.head.add(e); }
+    this.eyes = [-1,1].map(s=>{ const e=sph(0.0055,0.0055,0.0055, eyeMat, s*0.016,0.008,0.035); this.head.add(e); return e; });
+    // whiskers
+    const wg = new THREE.BufferGeometry(); const wp=[]; for(const s of [-1,1]) for(const a of [-0.35,0,0.35]){ wp.push(s*0.008,-0.004,0.05, s*0.06, -0.004+a*0.02, 0.05+ a*0.03 ); }
+    wg.setAttribute('position', new THREE.Float32BufferAttribute(wp,3)); this.head.add(new THREE.LineSegments(wg, whiskerMat));
+    // legs
+    this.legs = [];
+    for(const [x,z] of [[-0.028,0.045],[0.028,0.045],[-0.03,-0.045],[0.03,-0.045]]){ const l=new THREE.Mesh(new THREE.CylinderGeometry(0.005,0.004,0.03,8), mat); l.position.set(x,0.015,z); l.castShadow=true; this.pose.add(l); this.legs.push(l); }
+    // tail: chain of segments
+    this.tail = []; let prev = this.pose;
+    for(let i=0;i<8;i++){ const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.0055-i*0.0005, 0.005-i*0.0005, 0.032, 7), pinkMat); seg.rotation.x = Math.PI/2; seg.position.set(0,0,-0.016);
+      const j = new THREE.Group(); j.position.set(0, i===0?0.03:0, i===0?-0.08:-0.032); j.add(seg); seg.castShadow=true; prev.add(j); this.tail.push(j); prev = j; }
+    this.state='wander'; this.t=0; this.speed=0.28; this.phase=Math.random()*10; this.target=new THREE.Vector3(); this.yaw=0;
+    this.g.position.set(rnd(-1.5,1.5), 0, rnd(0.6,3)); this.pickTarget(); this.blink=0; this.wink=0; this.sit=0; this.faceCam=false;
+  }
+  pickTarget(){ this.target.set(rnd(-2.6,2.6), 0, rnd(0.25,4.2)); }
+  update(dt, camPos){
+    this.t += dt; const p = this.g.position; const st = this.state;
+    let moving = false;
+    if(st==='wander' || st==='scurry'){
+      const d = this.target.clone().sub(p); d.y=0; const dist = d.length();
+      if(dist < 0.05){ this.next(); }
+      else { const sp = st==='scurry' ? 0.9 : this.speed; const want = Math.atan2(d.x, d.z);
+        this.yaw += Math.atan2(Math.sin(want-this.yaw), Math.cos(want-this.yaw))*Math.min(1, dt*6);
+        p.x += Math.sin(this.yaw)*sp*dt; p.z += Math.cos(this.yaw)*sp*dt; moving = true; }
+    } else if(st==='look'){
+      const d = camPos.clone().sub(p); const want = Math.atan2(d.x, d.z);
+      this.yaw += Math.atan2(Math.sin(want-this.yaw), Math.cos(want-this.yaw))*Math.min(1, dt*4);
+      this.sit = Math.min(1, this.sit + dt*2.5);
+      if(this.t > this.stateLen*0.45 && !this.winked){ this.winked=true; this.wink=0.32; }
+      if(this.t > this.stateLen) this.next();
+    } else if(st==='sniff'){
+      if(this.t > this.stateLen) this.next();
+    } else if(st==='groom'){
+      if(this.t > this.stateLen) this.next();
+    }
+    if(st!=='look') this.sit = Math.max(0, this.sit - dt*2.5);
+    // pose
+    const s = this.sit; this.pose.rotation.x = -1.05*s; this.pose.position.y = 0.055*s; this.pose.position.z = -0.03*s;
+    const walk = moving ? (st==='scurry'?22:13) : 0; this.phase += walk*dt;
+    const sw = moving ? 0.55 : 0;
+    this.legs.forEach((l,i)=>{ l.rotation.x = Math.sin(this.phase + (i%2?Math.PI:0) + (i>1?0.3:0))*sw; });
+    this.body.position.y = 0.038 + (moving ? Math.abs(Math.sin(this.phase))*0.004 : 0) + (st==='sniff' ? Math.sin(this.t*9)*0.001 : 0);
+    // head: sniff = quick nods + nose wiggle, groom = tilt, look = up toward camera
+    const nod = st==='sniff' ? Math.sin(this.t*11)*0.12 - 0.25 : (st==='groom' ? Math.sin(this.t*6)*0.25+0.3 : 0);
+    this.head.rotation.x = nod*(1-s) + (-0.35)*s; this.head.rotation.z = st==='groom' ? 0.5*Math.sin(this.t*2) : 0;
+    this.nose.scale.setScalar(1 + (st==='sniff'||st==='look' ? Math.abs(Math.sin(this.t*25))*0.35 : 0));
+    // tail: slow sway
+    this.tail.forEach((j,i)=>{ j.rotation.y = Math.sin(this.t*1.8 + i*0.7 + this.seed)*0.22*(1+moving); j.rotation.x = i===0 ? 0.35 : -0.05; });
+    // eyes: blink + wink
+    this.blink -= dt; if(this.blink < -rnd(2,5)) this.blink = 0.14;
+    this.wink = Math.max(0, this.wink - dt);
+    const bl = this.blink > 0 ? 0.12 : 1;
+    this.eyes[0].scale.y = 0.0055*Math.min(bl, this.wink>0 ? 0.1 : 1); this.eyes[1].scale.y = 0.0055*bl;
+    this.g.rotation.y = this.yaw;
+  }
+  next(){
+    this.t = 0; this.winked = false;
+    const r = Math.random();
+    if(this.state==='wander' || this.state==='scurry'){
+      if(r < 0.32){ this.state='sniff'; this.stateLen = rnd(1.2,2.6); }
+      else if(r < 0.52){ this.state='look'; this.stateLen = rnd(2.4,3.6); }
+      else if(r < 0.66){ this.state='groom'; this.stateLen = rnd(1.5,2.5); }
+      else { this.state = Math.random()<0.3 ? 'scurry' : 'wander'; this.pickTarget(); }
+    } else { this.state = Math.random()<0.3 ? 'scurry' : 'wander'; this.pickTarget(); }
+  }
+}
+const rats = [new Rat(1, furMat), new Rat(2, furMat2)];
+rats[1].speed = 0.34; rats[1].t = 1;
+for(const r of rats) r.g.visible = S.rats;
+
+
+/* ---------------- lighting model ---------------- */
+const tmpC = new THREE.Color();
+function applyLight(){
+  const t = S.time;
+  const elev = 0.62*Math.cos((t-13.5)/12*Math.PI) + 0.18; // sol opp ca. 06:20–20:40, maks ~53°
+  const az = THREE.MathUtils.degToRad(S.azimuth) + (t-12)/12*Math.PI*0.25;
+  const el = Math.max(elev, -1);
+  const dir = new THREE.Vector3(Math.sin(az)*Math.cos(Math.asin(clamp(el,-1,1))), el, Math.cos(az)*Math.cos(Math.asin(clamp(el,-1,1)))).normalize();
+  const isDay = el > 0.02, dusk = clamp((el+0.12)/0.24, 0, 1);       // 0 night → 1 day
+  const sunH = clamp(el, 0, 1);
+  // colour: Kelvin, warmer near horizon
+  const kel = isDay ? S.kelvin - (1-Math.pow(sunH,0.5))*1800 : 7500;
+  const sunCol = kelvinToRGB(clamp(kel,1800,12000));
+  const moonCol = new THREE.Color(0x9fb4d8);
+  sun.position.copy(dir.clone().multiplyScalar(18)).add(sun.target.position);
+  if(el<0){ sun.position.copy(dir.clone().multiplyScalar(-18)).add(sun.target.position); sun.position.y = Math.max(sun.position.y, 4); }
+  sun.color.copy(isDay ? sunCol : moonCol);
+  sun.intensity = isDay ? S.sunPower * (3.4*Math.pow(sunH,0.6)+0.3) : S.sunPower*0.25*(1-dusk);
+  sun.visible = sun.intensity > 0.01;
+  // sky
+  const dayTop = new THREE.Color(0x4f86c6), dayHor = new THREE.Color(0xc9dbe9);
+  const setTop = new THREE.Color(0x2f4b7c), setHor = new THREE.Color(0xf2a35c);
+  const nightTop = new THREE.Color(0x05070f), nightHor = new THREE.Color(0x141c2e);
+  const sunset = 1 - clamp(sunH/0.35, 0, 1);
+  const top = tmpC.copy(dayTop).lerp(setTop, sunset).lerp(nightTop, 1-dusk).clone();
+  const hor = tmpC.copy(dayHor).lerp(setHor, sunset*0.9).lerp(nightHor, 1-dusk).clone();
+  // warmth tint from kelvin on sky
+  const warm = (S.kelvin-5200)/4800; hor.offsetHSL(0, 0, 0).lerp(hor.clone().multiply(kelvinToRGB(S.kelvin)), Math.abs(warm)*0.5);
+  skyUniforms.top.value.copy(top); skyUniforms.horizon.value.copy(hor); skyUniforms.sunDir.value.copy(dir);
+  skyUniforms.sunCol.value.copy(sunCol).multiplyScalar(isDay ? 1 : 0.15); skyUniforms.night.value = 1-dusk;
+  hemi.color.copy(top).lerp(hor, 0.5); hemi.groundColor.set(0x6b5842).lerp(hor, 0.3);
+  hemi.intensity = lerp(0.1, 0.55, dusk) * S.sunPower;
+  scene.fog.color.copy(hor); scene.fog.near = lerp(12, 2.5, S.fog); scene.fog.far = lerp(60, 9, S.fog);
+  renderer.toneMappingExposure = S.exposure;
+  // env reflections dim at night
+  const envI = lerp(0.12, 0.8, dusk);
+  scene.traverse(o=>{ if(o.isMesh && o.material && o.material.isMeshStandardMaterial && o.material!==wallMat) o.material.envMapIntensity = envI * (o.material===signMat ? (S.material==='brass'||S.material==='copper'?1.2:1) : 1); });
+  // lamp
+  const on = S.lamp; lamp.intensity = on ? 40*S.lampPower : 0; glow.intensity = on ? 1.2*S.lampPower : 0; bulbMat.emissiveIntensity = on ? 3*S.lampPower : 0;
+  lamp.color.set(0xffd7a0); if(S.kelvin>7000) lamp.color.set(0xfff1d6);
+  clearTimeout(envTimer); envTimer = setTimeout(updateEnv, 60);
+}
+
+/* ---------------- physics ---------------- */
+const P = { th:0, thV:0, ph:0, phV:0, tw:0, twV:0, t:0 };
+let creakCool = 0;
+function windAt(t){
+  const g = S.gust;
+  const gust = 1 + g*(0.9*Math.sin(t*0.7)*Math.sin(t*0.23+1) + 0.6*Math.sin(t*2.9+0.5)*Math.sin(t*0.11) + (fbm(t*0.6, 3.7, 3)-0.5)*1.6);
+  return Math.max(0, S.wind*gust);
+}
+function stepPhysics(dt){
+  P.t += dt;
+  const w = windAt(P.t); const a = THREE.MathUtils.degToRad(S.windDir);
+  const wx = w*Math.cos(a), wz = w*Math.sin(a);           // wind vector: x along wall, z away from wall
+  const L = chainL + signH/2 + 0.05;                       // pivot → centre of mass
+  const area = signW*signH*(S.style==='plate'?1:0.55);
+  const mass = 3 + area*8;
+  // relative wind on the face (face normal ≈ x, rotated by th)
+  const faceV = wx - L*P.thV*Math.cos(P.th);
+  const Fx = 0.5*1.2*area*faceV*Math.abs(faceV)*1.1;
+  const Fz = 0.5*1.2*(signH*0.03 + signW*0.02)*wz*Math.abs(wz)*3;   // edge-on drag, small
+  const g = 9.81;
+  const thA = (-g*Math.sin(P.th) + Fx/mass*Math.cos(P.th))/L - 0.25*P.thV;
+  const phA = (-g*Math.sin(P.ph) + Fz/mass*Math.cos(P.ph))/L - 0.6*P.phV;
+  P.thV += thA*dt; P.th += P.thV*dt; P.phV += phA*dt; P.ph += P.phV*dt;
+  // twist: torque from off-centre gusts
+  const twA = -(35)*P.tw - 3.5*P.twV + (fbm(P.t*1.3, 9.1, 2)-0.5)*w*w*0.06/(1+area*3);
+  P.twV += twA*dt; P.tw += P.twV*dt;
+  pend.rotation.z = P.th; placeSign(P.ph); signGroup.rotation.y = Math.PI/2 + P.tw;
+  // creak when direction reverses with amplitude
+  creakCool -= dt;
+  if(S.sound && creakCool<=0 && Math.abs(P.th)>0.06 && Math.abs(P.thV)<0.08){ creak(Math.min(1, Math.abs(P.th)*4)); creakCool = 0.6 + Math.random()*0.8; }
+  return w;
+}
+
+/* ---------------- sound ---------------- */
+let AC=null, windGain=null, windFilter=null;
+function initAudio(){
+  if(AC) return; AC = new (window.AudioContext||window.webkitAudioContext)();
+  const len = AC.sampleRate*2, buf = AC.createBuffer(1, len, AC.sampleRate), d = buf.getChannelData(0);
+  let b0=0,b1=0,b2=0; for(let i=0;i<len;i++){ const w=Math.random()*2-1; b0=0.99765*b0+w*0.099; b1=0.963*b1+w*0.2965; b2=0.57*b2+w*1.0526; d[i]=(b0+b1+b2+w*0.1848)*0.11; }
+  const src = AC.createBufferSource(); src.buffer=buf; src.loop=true;
+  windFilter = AC.createBiquadFilter(); windFilter.type='lowpass'; windFilter.frequency.value=400; windFilter.Q.value=0.7;
+  windGain = AC.createGain(); windGain.gain.value=0;
+  src.connect(windFilter).connect(windGain).connect(AC.destination); src.start();
+}
+function creak(amt){
+  if(!AC) return; const t=AC.currentTime;
+  const o=AC.createOscillator(), g=AC.createGain(), f=AC.createBiquadFilter();
+  o.type='sawtooth'; const f0 = 180+Math.random()*220; o.frequency.setValueAtTime(f0,t); o.frequency.linearRampToValueAtTime(f0*(0.6+Math.random()*0.3), t+0.35);
+  f.type='bandpass'; f.frequency.value=f0*2.2; f.Q.value=6;
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.05*amt,t+0.05); g.gain.exponentialRampToValueAtTime(0.0001,t+0.4);
+  o.connect(f).connect(g).connect(AC.destination); o.start(t); o.stop(t+0.45);
+}
+function updateAudio(w){
+  if(!AC || !windGain) return;
+  const target = S.sound ? clamp(w/14,0,1)*0.9 : 0;
+  windGain.gain.setTargetAtTime(target*target*0.9+target*0.05, AC.currentTime, 0.25);
+  windFilter.frequency.setTargetAtTime(250 + w*90, AC.currentTime, 0.3);
+}
+
+/* ---------------- camera + actions ---------------- */
+function setCamera(which){
+  const y = beamY - chainTop - chainL - signH/2, z = pend.position.z;
+  const pos = { street:[3.6, 1.5, z+3.2], close:[1.35, y+0.12, z+0.55], below:[1.3, 0.75, z+0.15], side:[0.9, y+0.35, z+signW/2+2.2] }[which];
+  camera.position.set(...pos); controls.target.set(0.1, y, z); controls.update();
+}
+function action(a){
+  const [kind, v] = a.split(':');
+  if(kind==='cam'){ setCamera(v); return; }
+  const presets = {
+    golden:{ time:19.7, sunPower:1.2, kelvin:3600, azimuth:60, exposure:1.05, fog:0.2, lamp:false, wind:3, gust:0.5, rain:false },
+    blue:{ time:20.75, sunPower:0.9, kelvin:8000, azimuth:35, exposure:1.2, fog:0.35, lamp:true, lampPower:0.9, wind:2, rain:false },
+    night:{ time:23.5, sunPower:0.6, kelvin:5200, exposure:1.3, fog:0.45, lamp:true, lampPower:1.3, wind:5, gust:0.7, rain:false },
+    rain:{ time:13, sunPower:0.35, kelvin:7500, exposure:0.95, fog:0.7, lamp:false, wind:9, gust:0.8, rain:true },
+  };
+  if(kind==='preset'){
+    if(v==='reset'){ Object.assign(S, JSON.parse(JSON.stringify(DEF))); }
+    else if(v==='random'){
+      Object.assign(S, { time:rnd(5,24), sunPower:rnd(.4,1.6), kelvin:Math.round(rnd(2500,9000)/50)*50, azimuth:Math.round(rnd(-150,150)), exposure:rnd(.8,1.4), fog:rnd(0,.7), lamp:Math.random()<.5, lampPower:rnd(.5,1.5),
+        wind:rnd(0,12), windDir:Math.round(rnd(-180,180)), gust:rnd(.2,.9), rain:Math.random()<.25,
+        font:Math.random()<.5?'serif':'sans', style:['frame','plate','bare'][Math.floor(Math.random()*3)], material:['iron','rust','brass','copper','white'][Math.floor(Math.random()*5)],
+        letterH:rnd(.18,.36), chain:rnd(.25,1), chainT:rnd(.7,1.6), wallHue:Math.random(), wallRough:Math.random(), brickScale:rnd(.8,1.3), wear:Math.random() });
+    } else Object.assign(S, presets[v]);
+    syncUI(); rebuildWall(); buildSign(); applyLight(); rain.visible = S.rain; setWet(S.rain);
+  }
+}
+let wallTimer;
+function onChange(k){
+  if(['text','font','style','material','letterH','tracking','chain','chainT'].includes(k)){ if(k==='chain'||k==='chainT') layoutHanging(); else buildSign(); applyLight(); }
+  else if(['wallHue','wallRough','brickScale','wear'].includes(k)){ clearTimeout(wallTimer); wallTimer = setTimeout(rebuildWall, 120); }
+  else if(k==='rain'){ rain.visible = S.rain; setWet(S.rain); }
+  else if(k==='autoRotate'){ }
+  else if(k==='rats'){ for(const r of rats) r.g.visible = S.rats; }
+  else if(k==='sound'){ if(S.sound) initAudio(); }
+  else applyLight();
+}
+window.addEventListener('pointerdown', ()=>{ if(S.sound) initAudio(); if(AC && AC.state==='suspended') AC.resume(); }, {passive:true});
+
+/* ---------------- loop ---------------- */
+applyLight();
+window.addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+const clock = new THREE.Clock();
+function loop(){
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, clock.getDelta());
+  let w = 0; for(let i=0;i<3;i++) w = stepPhysics(dt/3);
+  updateAudio(w);
+  if(rain.visible){
+    const a = THREE.MathUtils.degToRad(S.windDir); const vx = w*0.12*Math.cos(a), vz = w*0.12*Math.sin(a);
+    const arr = rainGeo.attributes.position.array;
+    for(let i=0;i<RAIN_N;i++){ const o=i*6; arr[o+1]-= (7+w*0.3)*dt; arr[o]+=vx*dt; arr[o+2]+=vz*dt; if(arr[o+1]<0){ arr[o+1]=7; arr[o]=rnd(-6,6); arr[o+2]=rnd(-0.5,8); }
+      arr[o+3]=arr[o]-vx*0.02; arr[o+4]=arr[o+1]-0.12; arr[o+5]=arr[o+2]-vz*0.02; }
+    rainGeo.attributes.position.needsUpdate = true;
+  }
+  if(S.autoRotate){
+    const off = camera.position.clone().sub(controls.target); const az = Math.atan2(off.x, off.z);
+    if(az > 1.2) rotDir = -1; else if(az < -1.2) rotDir = 1;
+    off.applyAxisAngle(upAxis, rotDir*0.10*dt); camera.position.copy(controls.target).add(off);
+  }
+  for(const r of rats) if(r.g.visible) r.update(dt, camera.position);
+  controls.update();
+  renderer.render(scene, camera);
+}
+window.__act = action; window.__S = S; window.__sync = ()=>{ syncUI(); rebuildWall(); buildSign(); applyLight(); rain.visible=S.rain; };
+loop();
+document.getElementById('load').classList.add('off');
+</script>
+</body></html>

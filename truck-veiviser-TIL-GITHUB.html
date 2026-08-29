@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Truck-veiviser · Sertifisert sikkerhetsopplæring · Academy</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#f4f6f9; --panel:#ffffff; --ink:#1c2733; --muted:#5c6b7a;
+    --line:#dde4ec; --blue:#1660a8; --blue-soft:#e8f1fa;
+    --green:#1e7d43; --green-soft:#e5f4ea;
+    --amber:#a86a00; --amber-soft:#fdf2dc;
+    --red:#b3372e; --red-soft:#fbe9e7;
+    --locked:#eef1f5; --locked-ink:#98a4b1;
+    --navy:#0e2a43;
+    font-size:16px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Segoe UI", system-ui, -apple-system, Arial, sans-serif; background:var(--bg); color:var(--ink); padding-bottom:60px;}
+
+  header.top{background:var(--navy); color:#fff; padding:18px 28px 0;}
+  .toprow{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;}
+  header.top h1{font-size:1.2rem; font-weight:600;}
+  header.top p{color:#b8cadd; font-size:.85rem; margin-top:3px; max-width:760px;}
+  .filebtns{display:flex; gap:8px; flex-wrap:wrap;}
+  .filebtn{border:1.5px solid #3a5f85; background:#173a5c; color:#dbe8f5; border-radius:8px;
+           padding:8px 13px; font-size:.82rem; font-weight:600; cursor:pointer;}
+  .filebtn:hover{background:#1e4a75;}
+  .tabs{display:flex; gap:6px; padding:14px 0 0;}
+  .tab{border:none; cursor:pointer; padding:10px 18px; font-size:.92rem; font-weight:600;
+       border-radius:10px 10px 0 0; background:#173a5c; color:#a9c1d9;}
+  .tab.active{background:var(--bg); color:var(--ink);}
+
+  .membanner{background:var(--amber-soft); color:#6b4a09; font-size:.8rem; padding:7px 28px; border-bottom:1px solid #eadfc3;}
+
+  .layout{display:grid; grid-template-columns:250px minmax(0,1fr) 330px; gap:20px; padding:20px 28px; align-items:start;}
+  @media (max-width:1200px){ .layout{grid-template-columns:230px minmax(0,1fr);} .statuspanel{grid-column:1 / -1; position:static;} }
+  @media (max-width:820px){ .layout{grid-template-columns:1fr;} }
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin-bottom:14px;}
+  .card h2{font-size:.98rem; margin-bottom:4px;}
+  .card .hint{color:var(--muted); font-size:.83rem; margin-bottom:10px;}
+
+  .pill{display:inline-block; font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap;}
+  .pill.ok{background:var(--green-soft); color:var(--green);}
+  .pill.wait{background:var(--amber-soft); color:var(--amber);}
+  .pill.no{background:var(--red-soft); color:var(--red);}
+  .pill.off{background:var(--locked); color:var(--locked-ink);}
+  .pill.blue{background:var(--blue-soft); color:var(--blue);}
+
+  .chipbtn{border:1.5px solid var(--line); background:#fff; color:var(--ink); padding:7px 13px;
+           border-radius:8px; cursor:pointer; font-size:.86rem;}
+  .chipbtn:hover{border-color:var(--blue);}
+  .chipbtn.sel{background:var(--blue); border-color:var(--blue); color:#fff; font-weight:600;}
+  .radio-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+
+  label.chk{display:flex; align-items:flex-start; gap:9px; padding:6px 0; cursor:pointer; font-size:.88rem;}
+  label.chk input{width:17px; height:17px; margin-top:1px; accent-color:var(--blue); cursor:pointer; flex:none;}
+  label.chk.disabled{opacity:.45; cursor:not-allowed;}
+  label.chk.disabled input{cursor:not-allowed;}
+  .donedate{color:var(--muted); font-size:.75rem; font-weight:400;}
+
+  .orderbtn{border:none; border-radius:8px; padding:10px 16px; font-size:.9rem; font-weight:700; cursor:pointer;
+            background:var(--green); color:#fff;}
+  .orderbtn:disabled{background:var(--locked); color:var(--locked-ink); cursor:not-allowed;}
+  .orderbtn.done{background:var(--green-soft); color:var(--green); cursor:default;}
+
+  .warn{background:var(--amber-soft); border-left:4px solid var(--amber); color:#6b4a09;
+        padding:8px 12px; border-radius:6px; font-size:.83rem; margin-top:10px;}
+  .info{background:var(--blue-soft); border-left:4px solid var(--blue); color:#123f66;
+        padding:8px 12px; border-radius:6px; font-size:.83rem; margin-top:10px;}
+
+  /* ---------- deltakerliste ---------- */
+  .peoplecol .card{padding:14px;}
+  .addrow{display:flex; gap:6px; margin-bottom:12px;}
+  .addrow input{flex:1; min-width:0; border:1.5px solid var(--line); border-radius:8px; padding:8px 10px; font-size:.86rem;}
+  .addrow input:focus{outline:none; border-color:var(--blue);}
+  .addrow button{border:none; background:var(--blue); color:#fff; border-radius:8px; width:36px; font-size:1.1rem; font-weight:700; cursor:pointer; flex:none;}
+  .person{border:1.5px solid var(--line); border-radius:9px; padding:9px 10px; margin-bottom:7px; cursor:pointer; background:#fff;}
+  .person:hover{border-color:var(--blue);}
+  .person.sel{border-color:var(--blue); background:var(--blue-soft);}
+  .person .prow{display:flex; justify-content:space-between; align-items:center; gap:6px;}
+  .person .pname{font-weight:700; font-size:.88rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .person .del{border:none; background:none; color:var(--locked-ink); cursor:pointer; font-size:.85rem; flex:none;}
+  .person .del:hover{color:var(--red);}
+  .person .stage{font-size:.72rem; color:var(--muted); margin-top:3px;}
+  .pbar{height:5px; background:var(--locked); border-radius:99px; margin-top:6px; overflow:hidden;}
+  .pbar > div{height:100%; background:var(--green); border-radius:99px; transition:width .3s;}
+  .emptylist{color:var(--muted); font-size:.83rem; text-align:center; padding:10px 0;}
+
+  /* ---------- veiviser ---------- */
+  .stepnum{display:inline-flex; align-items:center; justify-content:center; width:23px; height:23px;
+           border-radius:50%; background:var(--navy); color:#fff; font-size:.78rem; font-weight:700; margin-right:8px; flex:none;}
+  .extgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:11px; margin-top:10px;}
+  .extbox{border:1.5px solid var(--line); border-radius:10px; padding:11px 13px;}
+  .extbox.sel{border-color:var(--blue); background:#fbfdff;}
+  .extbox.offbox{opacity:.55;}
+  .extbox h3{font-size:.93rem; display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .noperson{padding:50px 20px; text-align:center; color:var(--muted);}
+
+  /* ---------- statuspanel ---------- */
+  .statuspanel{position:sticky; top:14px;}
+  .statusrow{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:7px 0; border-bottom:1px dashed var(--line); font-size:.85rem;}
+  .statusrow:last-child{border-bottom:none;}
+  .kortpreview{border:2px solid var(--navy); border-radius:10px; padding:11px 13px; background:linear-gradient(135deg,#f7fafd,#e8f1fa); margin-top:8px;}
+  .kortpreview .kp-title{font-size:.68rem; letter-spacing:1px; color:var(--navy); font-weight:700; text-transform:uppercase;}
+  .kortpreview .kp-name{font-size:.93rem; font-weight:700; margin:3px 0 7px;}
+  .kortklasser{display:flex; flex-wrap:wrap; gap:5px;}
+  .kortklasse{background:var(--navy); color:#fff; font-weight:700; font-size:.78rem; padding:3px 8px; border-radius:6px;}
+  .kortklasse.pending{background:#fff; color:var(--navy); border:1.5px dashed var(--navy); opacity:.65;}
+  .histlist{max-height:260px; overflow-y:auto; font-size:.79rem;}
+  .histitem{display:flex; gap:8px; padding:5px 0; border-bottom:1px dashed var(--line);}
+  .histitem:last-child{border-bottom:none;}
+  .histdate{color:var(--muted); flex:none; font-variant-numeric:tabular-nums;}
+
+  /* ---------- oversikt ---------- */
+  .ovwrap{overflow-x:auto;}
+  table.ov{border-collapse:collapse; width:100%; font-size:.82rem; min-width:900px;}
+  table.ov th{background:var(--navy); color:#fff; text-align:left; padding:8px 10px; font-size:.75rem; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap;}
+  table.ov td{padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  table.ov tr:hover td{background:var(--blue-soft); cursor:pointer;}
+  table.ov .nm{font-weight:700; white-space:nowrap;}
+
+  footer.note{padding:0 28px; color:var(--muted); font-size:.76rem; max-width:960px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="toprow">
+    <div>
+      <h1>Truck-veiviser · Sertifisert sikkerhetsopplæring T1–T5 · C1 · T8</h1>
+      <p>T4 er grunnkurset (Modul 1.1 + Modul 2.2, 14 t). T1/T2/T3/T5 bygges på med 20 t fadderkjøring + bekreftelse fra Ansvarlig Instruktør. C1 og T8 krever i tillegg 1 dag klasseromsundervisning.</p>
+    </div>
+    <div class="filebtns">
+      <button class="filebtn" onclick="saveFile()">💾 Lagre til fil</button>
+      <button class="filebtn" onclick="document.getElementById('fileinput').click()">📂 Åpne fil</button>
+      <button class="filebtn" onclick="exportExcel()">⬇ Eksporter til Excel</button>
+      <input type="file" id="fileinput" accept=".json" style="display:none" onchange="loadFile(this)">
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-view="wizard">① Veiviser</button>
+    <button class="tab" data-view="overview">② Oversikt</button>
+  </div>
+</header>
+<div class="membanner">⚠ Data ligger kun i minnet mens siden er åpen. Bruk <strong>Lagre til fil</strong> før du lukker, og <strong>Åpne fil</strong> neste gang.</div>
+
+<!-- ============ VEIVISER ============ -->
+<div class="layout" id="view-wizard">
+
+  <aside class="peoplecol">
+    <div class="card">
+      <h2 style="margin-bottom:10px;">Deltakere</h2>
+      <div class="addrow">
+        <input type="text" id="newname" placeholder="Nytt navn…" onkeydown="if(event.key==='Enter')addPerson()">
+        <button onclick="addPerson()" title="Legg til">+</button>
+      </div>
+      <div id="peoplelist"></div>
+    </div>
+  </aside>
+
+  <main id="wizardmain"></main>
+
+  <aside class="statuspanel" id="statuspanel"></aside>
+</div>
+
+<!-- ============ OVERSIKT ============ -->
+<div style="padding:20px 28px; display:none;" id="view-overview">
+  <div class="card">
+    <h2>Oversikt – alle deltakere</h2>
+    <p class="hint">Klikk på en rad for å åpne deltakeren i veiviseren.</p>
+    <div class="ovwrap" id="ovtable"></div>
+  </div>
+</div>
+
+<footer class="note">
+  Regelgrunnlag: Forskrift om utførelse av arbeid (best.nr. 703) §§ 10-1 til 10-4 og Organisering, ledelse og medvirkning (best.nr. 701) §§ 8-1, 8-2, 9-1, 9-2.
+  T4 tatt hos annen virksomhet: Academy skal bekrefte kompetansekortet (T4) før kort med tilleggskompetanse bestilles – kortet skal alltid også vise T4.
+  For løftekapasitet over 10 000 kg: se opplæringsplan modul 3.2 og 4.2, kapittel 7. Husk i tillegg typeopplæring på det konkrete arbeidsutstyret.
+</footer>
+
+<script>
+/* =====================================================
+   KLASSER OG TILSTAND
+   ===================================================== */
+const CLS = {
+  T1:{name:"Lavtløftende plukktruck", classroom:false, atCourseOk:true},
+  T2:{name:"Skyvemast-/støttebenstruck", classroom:false, atCourseOk:true},
+  T3:{name:"Svinggaffel-/sidelaster", classroom:false, atCourseOk:true},
+  T5:{name:"Sidestablende truck", classroom:false, atCourseOk:true},
+  C1:{name:"Teleskoptruck", classroom:true, atCourseOk:false},
+  T8:{name:"Lastebilmontert truck", classroom:true, atCourseOk:false}
+};
+const CLASSES = Object.keys(CLS);
+
+let APP = { people: [], selectedId: null };
+let uid = 1;
+
+function today(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(d){ if(!d) return ""; const [y,m,dd]=d.split("-"); return `${dd}.${m}.${y}`; }
+
+function freshPerson(name){
+  return {
+    id: "p" + (uid++),
+    name, created: today(),
+    m11: "none", m11date: null,
+    t4: "none", t4date: null,
+    t4verified: false, t4verdate: null,
+    t4ordered: false, t4orddate: null,
+    aiPhoto: false, tpReg: false,
+    ext: Object.fromEntries(CLASSES.map(c => [c, {sel:false, atCourse:false, fadder:false, fadderdate:null, classroom:false, classroomdate:null, ai:false, aidate:null, ordered:false, orddate:null}])),
+    cards: [],   // {classes:[...], orddate, received, recdate, delivered, deldate}
+    log: []
+  };
+}
+function P(){ return APP.people.find(p => p.id === APP.selectedId) || null; }
+function logEvent(p, txt){ p.log.unshift({d: today(), txt}); }
+
+/* =====================================================
+   REGELMOTOR (per person)
+   ===================================================== */
+const R = {
+  m11ok: p => p.m11 === "has" || p.m11 === "combo",
+  hasT4: p => p.t4 === "academy" || p.t4 === "external",
+  t4Basis: p => p.t4 === "academy" || (p.t4 === "external" && p.t4verified),
+  atCourseUnordered: p => CLASSES.filter(c => p.ext[c].sel && p.ext[c].atCourse && !p.ext[c].ordered),
+  canOrderT4: p => p.t4 === "academy" && (!p.t4ordered || R.atCourseUnordered(p).length > 0),
+  needsClassroom: c => CLS[c].classroom,
+  clsReady: (p,c) => {
+    const e = p.ext[c];
+    return !e.atCourse && R.t4Basis(p) && e.sel && e.fadder && e.ai && (!CLS[c].classroom || e.classroom) && !e.ordered;
+  },
+  readyClasses: p => CLASSES.filter(c => R.clsReady(p,c)),
+  orderedClasses: p => CLASSES.filter(c => p.ext[c].ordered),
+  latestCard: p => p.cards.length ? p.cards[p.cards.length - 1] : null,
+  canKontroll: p => R.readyClasses(p).length > 0,
+  canKoordinator: p => p.aiPhoto,
+  canOrderExt: p => R.readyClasses(p).length > 0 && p.aiPhoto && p.tpReg,
+  clsStatus: (p,c) => {
+    const e = p.ext[c];
+    if (!e.sel)        return {txt:"Ikke valgt", cls:"off"};
+    if (e.ordered)     return {txt:"Kort bestilt " + fmtDate(e.orddate), cls:"ok"};
+    if (e.atCourse)    return {txt:"Gitt på T4-kurset – bestill kort", cls:"blue"};
+    if (!R.hasT4(p))   return {txt:"Mangler T4", cls:"no"};
+    if (!e.fadder)     return {txt:"Venter: fadderkjøring 20 t", cls:"wait"};
+    if (CLS[c].classroom && !e.classroom) return {txt:"Venter: klasserom 1 dag", cls:"wait"};
+    if (!e.ai)         return {txt:"Venter: bekreftelse fra AI", cls:"wait"};
+    if (!R.t4Basis(p)) return {txt:"Venter: verifisering av T4-kort", cls:"wait"};
+    if (!p.aiPhoto)    return {txt:"Klar – venter kontroll (Ansvarlig Instruktør)", cls:"wait"};
+    if (!p.tpReg)      return {txt:"Klar – venter Training Portal (koordinator)", cls:"wait"};
+    return {txt:"Klar – kan bestilles", cls:"ok"};
+  },
+  stage: p => {
+    const rdy = R.readyClasses(p);
+    if (rdy.length) return "Klar for bestilling: " + rdy.sort().join("+");
+    const inProg = CLASSES.filter(c => p.ext[c].sel && !p.ext[c].ordered && !p.ext[c].atCourse);
+    if (inProg.length && R.hasT4(p)) return "Utvidelse pågår: " + inProg.sort().join("+");
+    if (R.atCourseUnordered(p).length) return "Bestill kort: T4 + " + R.atCourseUnordered(p).sort().join("+");
+    const k = R.latestCard(p);
+    if (k){
+      const cls = k.classes.join("+");
+      if (k.delivered) return "Kort utlevert: " + cls;
+      if (k.received)  return "Kort mottatt – klar for utlevering: " + cls;
+      return "Kort bestilt – venter mottak: " + cls;
+    }
+    if (p.t4 === "academy") return "T4 fullført – bestill kort";
+    if (p.t4 === "external") return p.t4verified ? "T4 bekreftet (ekstern)" : "T4 ekstern – må bekreftes";
+    if (R.m11ok(p)) return "Klar for T4-kurs";
+    return "Ny – mangler Modul 1.1";
+  },
+  progress: p => {
+    let done = 0, total = 3; // m11, t4, kort/verifisering
+    if (R.m11ok(p)) done++;
+    if (R.hasT4(p)) done++;
+    if (p.t4 === "academy" ? p.t4ordered : (p.t4 === "external" && p.t4verified)) done++;
+    CLASSES.forEach(c => {
+      const e = p.ext[c];
+      if (!e.sel) return;
+      if (e.atCourse){ total += 1; if (e.ordered) done++; return; }
+      const steps = CLS[c].classroom ? 4 : 3; // fadder, (klasserom), ai, bestilt
+      total += steps;
+      if (e.fadder) done++;
+      if (CLS[c].classroom && e.classroom) done++;
+      if (e.ai) done++;
+      if (e.ordered) done++;
+    });
+    p.cards.forEach(k => { total += 2; if (k.received) done++; if (k.delivered) done++; });
+    return Math.round(100 * done / total);
+  }
+};
+
+/* =====================================================
+   HANDLINGER
+   ===================================================== */
+function clearExtProgress(p){
+  CLASSES.forEach(c => { const e = p.ext[c]; e.atCourse=false; e.fadder=false; e.fadderdate=null; e.classroom=false; e.classroomdate=null; e.ai=false; e.aidate=null; e.ordered=false; e.orddate=null; });
+  p.aiPhoto = false; p.tpReg = false;
+}
+function checkProcessReset(p){
+  if (!R.readyClasses(p).length && !R.orderedClasses(p).length){ p.aiPhoto=false; p.tpReg=false; }
+}
+function setM11(v){
+  const p = P(); if (!p) return;
+  p.m11 = v; p.m11date = (v==="none") ? null : today();
+  if (v !== "none") logEvent(p, "Modul 1.1: " + (v==="has" ? "fullført" : "tas i kombinasjon med T4"));
+  if (!R.m11ok(p) && p.t4 === "academy") clearT4(p);
+  render();
+}
+function setT4(v){
+  const p = P(); if (!p) return;
+  if (v === "academy" && !R.m11ok(p)){ p.m11 = "combo"; p.m11date = today(); }
+  p.t4 = v; p.t4date = (v==="none") ? null : today();
+  p.t4verified = false; p.t4verdate = null;
+  p.t4ordered = false; p.t4orddate = null;
+  if (v === "academy") logEvent(p, "T4-kurs fullført hos Academy (14 t)");
+  if (v === "external") logEvent(p, "T4 registrert – tatt hos annen bedrift");
+  if (v === "none") clearExtProgress(p);
+  render();
+}
+function clearT4(p){ p.t4="none"; p.t4date=null; p.t4verified=false; p.t4ordered=false; p.cards=[]; clearExtProgress(p); }
+function setVerified(chk){
+  const p = P(); if (!p) return;
+  p.t4verified = chk; p.t4verdate = chk ? today() : null;
+  if (chk) logEvent(p, "Academy har bekreftet T4-kort fra annen bedrift");
+  else clearExtProgress(p);
+  render();
+}
+function toggleClass(c){
+  const p = P(); if (!p) return;
+  const e = p.ext[c];
+  e.sel = !e.sel;
+  e.atCourse = false;
+  if (e.sel) logEvent(p, "Klasse " + c + " valgt for utvidelse (fadderkjøring)");
+  else { e.fadder=false; e.classroom=false; e.ai=false; e.ordered=false; e.fadderdate=e.classroomdate=e.aidate=e.orddate=null; }
+  checkProcessReset(p);
+  render();
+}
+function toggleAtCourse(c){
+  const p = P(); if (!p) return;
+  const e = p.ext[c];
+  if (e.atCourse){
+    e.atCourse = false; e.sel = false; e.ordered = false; e.orddate = null;
+  } else {
+    e.sel = true; e.atCourse = true;
+    e.fadder=false; e.classroom=false; e.ai=false; e.ordered=false;
+    e.fadderdate=e.classroomdate=e.aidate=e.orddate=null;
+    logEvent(p, "Klasse " + c + " gitt på T4-kurset hos Academy (ingen fadderkjøring nødvendig)");
+  }
+  checkProcessReset(p);
+  render();
+}
+function setExtFlag(c, field, chk){
+  const p = P(); if (!p) return;
+  const e = p.ext[c];
+  e[field] = chk;
+  e[field + "date"] = chk ? today() : null;
+  if (chk){
+    const lbl = {fadder:"Fadderkjøring 20 t gjennomført", classroom:"Klasseromsundervisning 1 dag gjennomført", ai:"Bekreftet av Ansvarlig Instruktør"}[field];
+    logEvent(p, c + ": " + lbl);
+  }
+  if (field==="fadder" && !chk){ e.ai=false; e.aidate=null; e.ordered=false; }
+  if (field==="classroom" && !chk){ e.ordered=false; }
+  if (field==="ai" && !chk){ e.ordered=false; }
+  checkProcessReset(p);
+  render();
+}
+function setAiPhoto(chk){
+  const p = P(); if (!p) return;
+  p.aiPhoto = chk;
+  if (!chk) p.tpReg = false;
+  else logEvent(p, "Ansvarlig Instruktør: kompetansebevis kontrollert, bilde sendt koordinator");
+  render();
+}
+function setTpReg(chk){
+  const p = P(); if (!p) return;
+  p.tpReg = chk;
+  if (chk) logEvent(p, "Koordinator: registrert i Training Portal (tillegg + ev. T4)");
+  render();
+}
+function addCard(p, classes){
+  p.cards.push({classes, orddate: today(), received:false, recdate:null, delivered:false, deldate:null});
+}
+function orderT4(){
+  const p = P(); if (!p || !R.canOrderT4(p)) return;
+  const atc = R.atCourseUnordered(p);
+  atc.forEach(c => { p.ext[c].ordered = true; p.ext[c].orddate = today(); });
+  p.t4ordered = true; p.t4orddate = p.t4orddate || today();
+  const classes = ["T4"].concat(R.orderedClasses(p).sort());
+  addCard(p, classes);
+  logEvent(p, "Kompetansebevis bestilt: " + classes.join(" + "));
+  render();
+}
+function orderExt(){
+  const p = P(); if (!p || !R.canOrderExt(p)) return;
+  const cls = R.readyClasses(p);
+  cls.forEach(c => { p.ext[c].ordered = true; p.ext[c].orddate = today(); });
+  const classes = ["T4"].concat(R.orderedClasses(p).sort());
+  addCard(p, classes);
+  logEvent(p, "Kompetansebevis bestilt: " + classes.join(" + "));
+  render();
+}
+function setCardFlag(idx, field, chk){
+  const p = P(); if (!p || !p.cards[idx]) return;
+  const k = p.cards[idx];
+  k[field] = chk;
+  k[field === "received" ? "recdate" : "deldate"] = chk ? today() : null;
+  if (field === "received" && !chk){ k.delivered = false; k.deldate = null; }
+  if (chk) logEvent(p, (field === "received" ? "Kort mottatt: " : "Kort utlevert til deltaker: ") + k.classes.join(" + "));
+  render();
+}
+
+/* =====================================================
+   DELTAKERE
+   ===================================================== */
+function addPerson(){
+  const inp = document.getElementById("newname");
+  const name = inp.value.trim();
+  if (!name) return;
+  const p = freshPerson(name);
+  logEvent(p, "Deltaker opprettet");
+  APP.people.push(p);
+  APP.selectedId = p.id;
+  inp.value = "";
+  render();
+}
+function selectPerson(id){ APP.selectedId = id; showView("wizard"); render(); }
+function deletePerson(ev, id){
+  ev.stopPropagation();
+  const p = APP.people.find(x => x.id === id);
+  if (!confirm("Slette " + (p ? p.name : "deltaker") + "? Dette kan ikke angres (med mindre du har lagret til fil).")) return;
+  APP.people = APP.people.filter(x => x.id !== id);
+  if (APP.selectedId === id) APP.selectedId = APP.people.length ? APP.people[0].id : null;
+  render();
+}
+
+/* =====================================================
+   FANER
+   ===================================================== */
+function showView(v){
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === v));
+  document.getElementById("view-wizard").style.display = v === "wizard" ? "grid" : "none";
+  document.getElementById("view-overview").style.display = v === "overview" ? "block" : "none";
+}
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => { showView(t.dataset.view); render(); }));
+
+/* =====================================================
+   RENDER: DELTAKERLISTE
+   ===================================================== */
+function renderPeople(){
+  const el = document.getElementById("peoplelist");
+  if (!APP.people.length){ el.innerHTML = `<div class="emptylist">Ingen deltakere ennå.<br>Legg til et navn over.</div>`; return; }
+  el.innerHTML = APP.people.map(p => `
+    <div class="person ${p.id===APP.selectedId ? "sel":""}" onclick="selectPerson('${p.id}')">
+      <div class="prow">
+        <span class="pname">${esc(p.name)}</span>
+        <button class="del" title="Slett" onclick="deletePerson(event,'${p.id}')">✕</button>
+      </div>
+      <div class="stage">${R.stage(p)}</div>
+      <div class="pbar"><div style="width:${R.progress(p)}%"></div></div>
+    </div>`).join("");
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* =====================================================
+   RENDER: VEIVISER
+   ===================================================== */
+function chip(label, sel, onclick){
+  return `<button class="chipbtn ${sel ? "sel" : ""}" onclick="${onclick}">${label}</button>`;
+}
+function dd(date){ return date ? ` <span class="donedate">(${fmtDate(date)})</span>` : ""; }
+
+function renderWizard(){
+  const main = document.getElementById("wizardmain");
+  const p = P();
+  if (!p){
+    main.innerHTML = `<div class="card noperson"><h2>Velg eller opprett en deltaker</h2><p style="margin-top:8px;">Legg til et navn i listen til venstre for å starte veiviseren.</p></div>`;
+    return;
+  }
+  const ready = R.readyClasses(p), ordered = R.orderedClasses(p);
+
+  // steg 2 ekstra
+  let t4extra = "";
+  if (p.t4 === "none"){
+    t4extra = R.m11ok(p)
+      ? `<div class="info">✔ Forkunnskap OK – ${esc(p.name)} kan meldes på T4-kurs (14 t).</div>`
+      : `<div class="warn">Modul 1.1 mangler. Velg «Tas i kombinasjon med T4-kurset» i steg 1, eller gjennomfør Modul 1.1 først.</div>`;
+  } else if (p.t4 === "external"){
+    t4extra = `
+      <label class="chk" style="margin-top:8px;">
+        <input type="checkbox" ${p.t4verified ? "checked":""} onchange="setVerified(this.checked)">
+        <span><strong>Academy har bekreftet kompetansekortet (T4)</strong>${dd(p.t4verdate)}<br>
+        <small style="color:var(--muted)">Obligatorisk før kort med tilleggskompetanse bestilles. Kortet skal også vise T4.</small></span>
+      </label>
+      ${p.t4verified ? "" : `<div class="warn">T4 fra annen bedrift må bekreftes av Academy før tilleggskompetanse kan bestilles.</div>`}`;
+  }
+
+  // steg 3
+  let t4card = "";
+  if (p.t4 === "academy"){
+    const atc = R.atCourseUnordered(p);
+    if (R.canOrderT4(p)){
+      const lbl = "T4" + (atc.length ? " + " + atc.sort().join(" + ") : "");
+      t4card = `<button class="orderbtn" onclick="orderT4()">Bestill kompetansebevis: ${lbl}</button>
+        <div class="info">${p.t4ordered
+          ? "Nye klasser gitt på T4-kurset – bestill oppdatert kort som viser " + lbl + "."
+          : "T4 er fullført hos Academy – kortet kan bestilles nå." + (atc.length ? " Klassene " + atc.sort().join(", ") + " ble gitt på kurset og kommer med på samme kort." : "")}</div>`;
+    } else {
+      t4card = `<button class="orderbtn done" disabled>✔ Kompetansebevis bestilt ${fmtDate(p.t4orddate)}</button>`;
+    }
+  } else if (p.t4 === "external"){
+    t4card = `<div class="info">Har allerede T4-kort fra annen bedrift – skal <strong>ikke</strong> bestilles på nytt. Ved utvidelse bestilles nytt kort som viser T4 + tillegg.</div>`;
+  } else {
+    t4card = `<button class="orderbtn" disabled>Bestill kompetansebevis (T4)</button>
+              <div class="warn">Kan ikke bestilles ennå – T4 er ikke fullført.</div>`;
+  }
+
+  // steg 4
+  const grid = CLASSES.map(c => {
+    const e = p.ext[c], st = R.clsStatus(p,c);
+    const dis = !R.hasT4(p);
+    const atCourseChip = (p.t4 === "academy" && CLS[c].atCourseOk)
+      ? chip(e.atCourse ? "✔ Gitt på T4-kurset" : "Gitt på T4-kurset", e.atCourse, `toggleAtCourse('${c}')`)
+      : "";
+    return `<div class="extbox ${e.sel ? "sel":""} ${dis && !e.sel ? "offbox":""}">
+      <h3>${c} <span class="pill ${st.cls}">${st.txt}</span></h3>
+      <small style="color:var(--muted); display:block; margin:2px 0 6px;">${CLS[c].name}${CLS[c].classroom ? " · krever 1 dag klasserom" : ""}</small>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      ${chip(e.sel && !e.atCourse ? "Valgt – klikk for å fjerne" : "Via fadderkjøring", e.sel && !e.atCourse, `toggleClass('${c}')`)}
+      ${atCourseChip}
+      </div>
+      ${e.atCourse ? `<div class="info" style="margin-top:8px;">Gitt samtidig med T4-kurset hos Stord Academy – ingen fadderkjøring eller oppkjøring nødvendig. Bestilles sammen med T4-kortet (steg 3).</div>` : ""}
+      ${e.sel && !e.atCourse ? `
+        <label class="chk ${R.hasT4(p) ? "" : "disabled"}">
+          <input type="checkbox" ${e.fadder ? "checked":""} ${R.hasT4(p) ? "" : "disabled"}
+            onchange="setExtFlag('${c}','fadder',this.checked)">
+          <span>20 t bedriftsopplæring (fadderkjøring) gjennomført${dd(e.fadderdate)}</span>
+        </label>
+        ${CLS[c].classroom ? `
+        <label class="chk ${R.hasT4(p) ? "" : "disabled"}">
+          <input type="checkbox" ${e.classroom ? "checked":""} ${R.hasT4(p) ? "" : "disabled"}
+            onchange="setExtFlag('${c}','classroom',this.checked)">
+          <span>Klasseromsundervisning 1 dag gjennomført${dd(e.classroomdate)}</span>
+        </label>` : ""}
+        <label class="chk ${e.fadder ? "" : "disabled"}">
+          <input type="checkbox" ${e.ai ? "checked":""} ${e.fadder ? "" : "disabled"}
+            onchange="setExtFlag('${c}','ai',this.checked)">
+          <span>Bedriftsopplæring + oppkjøring bekreftet av Ansvarlig Instruktør${dd(e.aidate)}</span>
+        </label>` : ""}
+    </div>`;
+  }).join("");
+
+  // steg 5
+  const procLocked = !R.canKontroll(p) && !ordered.length;
+  const proc = `
+    <label class="chk ${R.canKontroll(p) || p.aiPhoto ? "" : "disabled"}">
+      <input type="checkbox" ${p.aiPhoto ? "checked":""} ${R.canKontroll(p) || p.aiPhoto ? "" : "disabled"}
+        onchange="setAiPhoto(this.checked)">
+      <span><strong>Ansvarlig Instruktør:</strong> Kompetansebevis kontrollert – bilde tatt og sendt til koordinator</span>
+    </label>
+    <label class="chk ${p.aiPhoto ? "" : "disabled"}">
+      <input type="checkbox" ${p.tpReg ? "checked":""} ${p.aiPhoto ? "" : "disabled"}
+        onchange="setTpReg(this.checked)">
+      <span><strong>Koordinator:</strong> Tilleggskompetanse registrert i Training Portal – og T4-kurs lagt inn dersom det ikke lå der fra før</span>
+    </label>
+    ${procLocked ? `<div class="info">Låst inntil minst én klasse er komplett (fadderkjøring${CLASSES.some(c=>p.ext[c].sel && CLS[c].classroom) ? ", klasserom" : ""} + AI-bekreftelse)${p.t4==="external" && !p.t4verified ? " – og T4-kortet fra annen bedrift er bekreftet av Academy" : ""}.</div>` : ""}`;
+
+  let orderHtml = "";
+  if (ready.length){
+    orderHtml = R.canOrderExt(p)
+      ? `<button class="orderbtn" style="margin-top:12px;" onclick="orderExt()">Bestill kompetansebevis: T4 + ${ready.concat(ordered).sort().join(" + ")}</button>`
+      : `<button class="orderbtn" style="margin-top:12px;" disabled>Bestill kompetansebevis: T4 + ${ready.concat(ordered).sort().join(" + ")}</button>
+         <div class="warn">Sperret: ${!p.aiPhoto ? "Ansvarlig Instruktør må kontrollere kompetansebevis og sende bilde til koordinator." : "Koordinator må registrere i Training Portal først."}</div>`;
+  } else if (ordered.length){
+    orderHtml = `<button class="orderbtn done" style="margin-top:12px;" disabled>✔ Kort bestilt: T4 + ${ordered.sort().join(" + ")}</button>`;
+  }
+  const anySel = CLASSES.some(c => p.ext[c].sel);
+  if (anySel && p.t4==="external" && !p.t4verified){
+    orderHtml += `<div class="warn">Bestilling er sperret: Academy må først bekrefte T4-kortet fra annen bedrift (steg 2).</div>`;
+  }
+
+  main.innerHTML = `
+    <div class="card" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <div><h2 style="font-size:1.1rem;">${esc(p.name)}</h2>
+      <small style="color:var(--muted)">Opprettet ${fmtDate(p.created)} · ${R.stage(p)}</small></div>
+      <span class="pill blue" style="font-size:.8rem;">${R.progress(p)} % fullført</span>
+    </div>
+
+    <div class="card">
+      <h2><span class="stepnum">1</span>Modul 1.1 – Arbeidsmiljø, ansvar og konsekvenser (8 t)${dd(p.m11date)}</h2>
+      <p class="hint">Felles teori. Tas ofte i kombinasjon med T4-kurset.</p>
+      <div class="radio-row">
+        ${chip("Ikke tatt", p.m11==="none", "setM11('none')")}
+        ${chip("Fullført tidligere", p.m11==="has", "setM11('has')")}
+        ${chip("Tas i kombinasjon med T4-kurset", p.m11==="combo", "setM11('combo')")}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="stepnum">2</span>T4 – Grunnkurs truck (Modul 2.2, 14 t)${dd(p.t4date)}</h2>
+      <p class="hint">Kurs hos Academy, eller allerede tatt hos annen bedrift.</p>
+      <div class="radio-row">
+        ${chip("Ikke tatt", p.t4==="none", "setT4('none')")}
+        ${chip("Fullført hos Academy (14 t)", p.t4==="academy", "setT4('academy')")}
+        ${chip("Tatt hos annen bedrift", p.t4==="external", "setT4('external')")}
+      </div>
+      ${t4extra}
+    </div>
+
+    <div class="card">
+      <h2><span class="stepnum">3</span>Kompetansebevis T4</h2>
+      <p class="hint">Bestilles så snart deltakeren har fullført T4 hos Academy.</p>
+      ${t4card}
+    </div>
+
+    <div class="card">
+      <h2><span class="stepnum">4</span>Utvidelse: T1 · T2 · T3 · T5 · C1 · T8</h2>
+      <p class="hint">Krever T4 + 20 t fadderkjøring per klasse + bekreftelse fra Ansvarlig Instruktør. C1 og T8 krever i tillegg 1 dag klasseromsundervisning.</p>
+      <div class="extgrid">${grid}</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="stepnum">5</span>Bestilling av tilleggskompetanse (Ansvarlig Instruktør → koordinator)</h2>
+      <p class="hint">Gjelder klasser tatt via fadderkjøring. Ansvarlig Instruktør kontrollerer kompetansebeviset, tar bilde og sender til koordinator. Koordinator registrerer i Training Portal (tillegg + ev. T4) før kompetansekortene bestilles. Klasser gitt på T4-kurset bestilles direkte i steg 3.</p>
+      ${proc}
+      ${orderHtml}
+    </div>
+
+    <div class="card">
+      <h2><span class="stepnum">6</span>Kortmottak og utlevering</h2>
+      <p class="hint">Følg hvert bestilte kort fra bestilling til deltakeren har fått det i hånden.</p>
+      ${p.cards.length ? p.cards.map((k,i) => `
+        <div class="extbox" style="margin-bottom:9px; ${k.delivered ? "border-color:var(--green); background:var(--green-soft);" : ""}">
+          <h3 style="margin-bottom:4px;">Kort ${i+1}: ${k.classes.join(" + ")}
+            <span class="pill ${k.delivered ? "ok" : k.received ? "wait" : "blue"}">${k.delivered ? "Utlevert " + fmtDate(k.deldate) : k.received ? "Mottatt – klar for utlevering" : "Bestilt – venter mottak"}</span></h3>
+          <small style="color:var(--muted);">Bestilt ${fmtDate(k.orddate)}</small>
+          <label class="chk">
+            <input type="checkbox" ${k.received ? "checked":""} onchange="setCardFlag(${i},'received',this.checked)">
+            <span>Kort mottatt fra leverandør${dd(k.recdate)}</span>
+          </label>
+          <label class="chk ${k.received ? "" : "disabled"}">
+            <input type="checkbox" ${k.delivered ? "checked":""} ${k.received ? "" : "disabled"} onchange="setCardFlag(${i},'delivered',this.checked)">
+            <span>Kort utlevert til deltaker${dd(k.deldate)}</span>
+          </label>
+        </div>`).join("")
+      : `<div class="info">Ingen kort bestilt ennå.</div>`}
+    </div>`;
+}
+
+/* =====================================================
+   RENDER: STATUSPANEL
+   ===================================================== */
+function renderStatus(){
+  const el = document.getElementById("statuspanel");
+  const p = P();
+  if (!p){ el.innerHTML = ""; return; }
+  const rows = [];
+  rows.push(`<div class="statusrow"><span>Kan ta T4-kurs?</span>${
+    R.hasT4(p) ? `<span class="pill ok">T4 på plass</span>` : R.m11ok(p) ? `<span class="pill ok">Ja</span>` : `<span class="pill no">Nei – mangler Modul 1.1</span>`}</div>`);
+  rows.push(`<div class="statusrow"><span>Kompetansebevis T4</span>${
+    p.t4==="academy" ? (p.t4ordered ? `<span class="pill ok">Bestilt ${fmtDate(p.t4orddate)}</span>` : `<span class="pill wait">Kan bestilles nå</span>`)
+    : p.t4==="external" ? (p.t4verified ? `<span class="pill ok">Bekreftet (ekstern)</span>` : `<span class="pill wait">Må bekreftes av Academy</span>`)
+    : `<span class="pill no">Krever fullført T4</span>`}</div>`);
+  rows.push(`<div class="statusrow"><span>Kan starte fadderkjøring?</span>${
+    R.hasT4(p) ? `<span class="pill ok">Ja</span>` : `<span class="pill no">Nei – krever T4</span>`}</div>`);
+  CLASSES.forEach(c => {
+    const st = R.clsStatus(p,c);
+    rows.push(`<div class="statusrow"><span><strong>${c}</strong> · ${CLS[c].name}</span><span class="pill ${st.cls}">${st.txt}</span></div>`);
+  });
+  const anyExtActive = R.readyClasses(p).length || R.orderedClasses(p).length || p.aiPhoto;
+  rows.push(`<div class="statusrow"><span>Ansv. Instruktør: kort sjekket + bilde sendt</span>${
+    p.aiPhoto ? `<span class="pill ok">Utført</span>` : anyExtActive ? `<span class="pill wait">Venter</span>` : `<span class="pill off">–</span>`}</div>`);
+  rows.push(`<div class="statusrow"><span>Koordinator: Training Portal + bestilling</span>${
+    p.tpReg ? `<span class="pill ok">Registrert</span>` : p.aiPhoto ? `<span class="pill wait">Venter</span>` : `<span class="pill off">–</span>`}</div>`);
+  const lk = R.latestCard(p);
+  rows.push(`<div class="statusrow"><span>Siste kort (${lk ? lk.classes.join("+") : "–"})</span>${
+    !lk ? `<span class="pill off">Ikke bestilt</span>`
+    : lk.delivered ? `<span class="pill ok">Utlevert ${fmtDate(lk.deldate)}</span>`
+    : lk.received ? `<span class="pill wait">Mottatt – utlever</span>`
+    : `<span class="pill blue">Bestilt – venter mottak</span>`}</div>`);
+
+  const kc = [];
+  if (R.hasT4(p)) kc.push(`<span class="kortklasse">T4</span>`);
+  CLASSES.forEach(c => {
+    if (p.ext[c].ordered) kc.push(`<span class="kortklasse">${c}</span>`);
+    else if (R.clsReady(p,c) || (p.ext[c].sel && p.ext[c].atCourse)) kc.push(`<span class="kortklasse pending">${c}</span>`);
+  });
+
+  const hist = p.log.length
+    ? p.log.map(h => `<div class="histitem"><span class="histdate">${fmtDate(h.d)}</span><span>${esc(h.txt)}</span></div>`).join("")
+    : `<div style="color:var(--muted); font-size:.8rem;">Ingen hendelser ennå.</div>`;
+
+  el.innerHTML = `
+    <div class="card"><h2>Status · ${esc(p.name)}</h2>${rows.join("")}</div>
+    <div class="card"><h2>Kompetansebevis</h2>
+      <p class="hint">Slik vil kortet se ut. Stiplet = venter på bestilling.</p>
+      <div class="kortpreview">
+        <div class="kp-title">Kompetansebevis · Truck</div>
+        <div class="kp-name">${esc(p.name)}</div>
+        <div class="kortklasser">${kc.length ? kc.join("") : `<span style="color:var(--muted); font-size:.8rem;">Ingen klasser ennå</span>`}</div>
+      </div>
+    </div>
+    <div class="card"><h2>Historikk</h2><div class="histlist">${hist}</div></div>`;
+}
+
+/* =====================================================
+   RENDER: OVERSIKT
+   ===================================================== */
+function renderOverview(){
+  const el = document.getElementById("ovtable");
+  if (!APP.people.length){ el.innerHTML = `<div class="emptylist">Ingen deltakere ennå.</div>`; return; }
+  const head = `<tr><th>Navn</th><th>Modul 1.1</th><th>T4</th><th>T4-kort</th>${CLASSES.map(c=>`<th>${c}</th>`).join("")}<th>Siste kort</th><th>Fremdrift</th></tr>`;
+  const body = APP.people.map(p => {
+    const m11 = R.m11ok(p) ? `<span class="pill ok">${p.m11==="combo" ? "Komb. m/T4" : "Fullført"}</span>` : `<span class="pill no">Mangler</span>`;
+    const t4 = p.t4==="academy" ? `<span class="pill ok">Academy ${fmtDate(p.t4date)}</span>`
+      : p.t4==="external" ? (p.t4verified ? `<span class="pill ok">Ekstern · bekreftet</span>` : `<span class="pill wait">Ekstern · ubekreftet</span>`)
+      : `<span class="pill off">–</span>`;
+    const kort = p.t4==="academy" ? (p.t4ordered ? `<span class="pill ok">Bestilt</span>` : `<span class="pill wait">Kan bestilles</span>`)
+      : p.t4==="external" ? `<span class="pill blue">Har eget kort</span>` : `<span class="pill off">–</span>`;
+    const cls = CLASSES.map(c => { const st = R.clsStatus(p,c); return `<td><span class="pill ${st.cls}">${st.txt}</span></td>`; }).join("");
+    const lk = R.latestCard(p);
+    const kstat = !lk ? `<span class="pill off">–</span>`
+      : lk.delivered ? `<span class="pill ok">Utlevert ${fmtDate(lk.deldate)}</span>`
+      : lk.received ? `<span class="pill wait">Mottatt</span>`
+      : `<span class="pill blue">Bestilt ${fmtDate(lk.orddate)}</span>`;
+    return `<tr onclick="selectPerson('${p.id}')"><td class="nm">${esc(p.name)}</td><td>${m11}</td><td>${t4}</td><td>${kort}</td>${cls}<td>${kstat}</td>
+      <td><div class="pbar" style="min-width:70px;"><div style="width:${R.progress(p)}%"></div></div><small style="color:var(--muted)">${R.progress(p)} %</small></td></tr>`;
+  }).join("");
+  el.innerHTML = `<table class="ov">${head}${body}</table>`;
+}
+
+/* =====================================================
+   LAGRING / EKSPORT
+   ===================================================== */
+function saveFile(){
+  const blob = new Blob([JSON.stringify({version:2, saved:new Date().toISOString(), uid, app:APP}, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "truck-veiviser-" + today() + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function loadFile(input){
+  const f = input.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try{
+      const data = JSON.parse(rd.result);
+      if (!data.app || !Array.isArray(data.app.people)) throw new Error("Ugyldig format");
+      // sikre at nye klasser finnes på gamle personer
+      data.app.people.forEach(p => {
+        if (!Array.isArray(p.cards)) p.cards = [];
+        CLASSES.forEach(c => {
+          if (!p.ext[c]) p.ext[c] = {sel:false, atCourse:false, fadder:false, fadderdate:null, classroom:false, classroomdate:null, ai:false, aidate:null, ordered:false, orddate:null};
+          if (p.ext[c].classroom === undefined){ p.ext[c].classroom = false; p.ext[c].classroomdate = null; }
+          if (p.ext[c].atCourse === undefined) p.ext[c].atCourse = false;
+        });
+        // eldre filer: bestilte kort uten kortobjekt → opprett ett
+        if (!p.cards.length && (p.t4ordered || CLASSES.some(c => p.ext[c].ordered))){
+          const cls = ["T4"].concat(CLASSES.filter(c => p.ext[c].ordered).sort());
+          if (p.t4ordered || cls.length > 1) p.cards.push({classes: cls, orddate: p.t4orddate || today(), received:false, recdate:null, delivered:false, deldate:null});
+        }
+      });
+      APP = data.app;
+      uid = data.uid || (APP.people.length + 1);
+      if (!APP.people.find(p => p.id === APP.selectedId)) APP.selectedId = APP.people.length ? APP.people[0].id : null;
+      render();
+      alert("Åpnet fil med " + APP.people.length + " deltaker(e).");
+    } catch(e){ alert("Kunne ikke lese filen: " + e.message); }
+  };
+  rd.readAsText(f);
+  input.value = "";
+}
+function overviewRows(){
+  // felles datagrunnlag for Excel/CSV
+  const head = ["Navn","Status","Fremdrift %","Modul 1.1","T4","T4/kort bestilt",
+    ...CLASSES.map(c => [c+" vei", c+" fadderkjøring", ...(CLS[c].classroom ? [c+" klasserom"] : []), c+" AI-bekreftet", c+" kort bestilt"]).flat(),
+    "Siste kort","Kort bestilt","Kort mottatt","Kort utlevert"];
+  const rows = APP.people.map(p => {
+    const lk = R.latestCard(p);
+    return [p.name, R.stage(p), R.progress(p),
+      R.m11ok(p) ? (p.m11==="combo" ? "Komb. m/T4 " : "Fullført ") + (p.m11date||"") : "nei",
+      p.t4==="academy" ? "Academy " + (p.t4date||"") : p.t4==="external" ? "Ekstern" + (p.t4verified ? " (bekreftet)" : " (ubekreftet)") : "nei",
+      p.t4ordered ? (p.t4orddate||"ja") : "nei",
+      ...CLASSES.map(c => { const e=p.ext[c]; return [
+        !e.sel ? "-" : e.atCourse ? "Gitt på T4-kurs" : "Fadderkjøring",
+        e.atCourse ? "ikke nødvendig" : (e.fadder ? (e.fadderdate||"ja") : "nei"),
+        ...(CLS[c].classroom ? [e.classroom ? (e.classroomdate||"ja") : "nei"] : []),
+        e.atCourse ? "ikke nødvendig" : (e.ai ? (e.aidate||"ja") : "nei"),
+        e.ordered ? (e.orddate||"ja") : "nei"]; }).flat(),
+      lk ? lk.classes.join("+") : "-",
+      lk ? lk.orddate : "-",
+      lk && lk.received ? lk.recdate : "nei",
+      lk && lk.delivered ? lk.deldate : "nei"];
+  });
+  return {head, rows};
+}
+function exportExcel(){
+  const {head, rows} = overviewRows();
+  if (typeof XLSX === "undefined"){ exportCSV(); return; }  // frakoblet: fall tilbake til CSV
+  const wb = XLSX.utils.book_new();
+  const ws1 = XLSX.utils.aoa_to_sheet([head, ...rows]);
+  ws1["!cols"] = head.map((h,i) => ({wch: Math.max(h.length + 2, i===1 ? 34 : 12)}));
+  XLSX.utils.book_append_sheet(wb, ws1, "Oversikt");
+  const histRows = [["Navn","Dato","Hendelse"]];
+  APP.people.forEach(p => [...p.log].reverse().forEach(h => histRows.push([p.name, h.d, h.txt])));
+  const ws2 = XLSX.utils.aoa_to_sheet(histRows);
+  ws2["!cols"] = [{wch:22},{wch:12},{wch:70}];
+  XLSX.utils.book_append_sheet(wb, ws2, "Historikk");
+  const kortRows = [["Navn","Kort","Bestilt","Mottatt","Utlevert"]];
+  APP.people.forEach(p => p.cards.forEach(k => kortRows.push([p.name, k.classes.join(" + "), k.orddate, k.received ? k.recdate : "nei", k.delivered ? k.deldate : "nei"])));
+  const ws3 = XLSX.utils.aoa_to_sheet(kortRows);
+  ws3["!cols"] = [{wch:22},{wch:26},{wch:12},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws3, "Kort");
+  XLSX.writeFile(wb, "truck-oversikt-" + today() + ".xlsx");
+}
+function exportCSV(){
+  const {head, rows} = overviewRows();
+  const lines = [head.join(";")].concat(rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(";")));
+  const blob = new Blob(["﻿" + lines.join("\r\n")], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "truck-oversikt-" + today() + ".csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* =====================================================
+   HOVEDRENDER
+   ===================================================== */
+function render(){ renderPeople(); renderWizard(); renderStatus(); renderOverview(); }
+render();
+</script>
+</body>
+</html>

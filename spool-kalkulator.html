@@ -90,6 +90,8 @@
   #view3d canvas{display:block}
   .hidden{display:none !important}
   .dragtip{position:absolute;right:10px;bottom:8px;font-family:var(--mono);font-size:.65rem;color:var(--paper-dim);pointer-events:none}
+  .isoreset{position:absolute;left:10px;top:8px;z-index:2;background:var(--steel-800);border:1px solid var(--line);color:var(--paper);font-family:var(--cond);font-weight:600;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:6px 11px;border-radius:4px;cursor:pointer}
+  .isoreset:hover{border-color:var(--monje);color:var(--chalk)}
   #listView{background:var(--steel-800)}
   .listwrap{position:absolute;inset:0;overflow:auto;padding:16px 20px}
   table.cut{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.8rem}
@@ -363,7 +365,7 @@
       </div>
       <div class="vizbody">
         <div id="isoView"></div>
-        <div id="view3d" class="hidden"><span class="dragtip">dra for å rotere · rull for zoom</span></div>
+        <div id="view3d" class="hidden"><button class="isoreset" id="resetView" type="button">↺ ISO-vinkel</button><span class="dragtip">dra for å rotere · rull for zoom</span></div>
         <div id="listView" class="hidden"><div class="listwrap"><table class="cut" id="cutTable"></table></div></div>
       </div>
     </div>
@@ -784,7 +786,7 @@ function render(){
    ISO-TEGNING (SVG, ekte isometrisk projeksjon)
    ============================================================ */
 const COS30 = Math.cos(Math.PI/6), SIN30 = 0.5;
-function isoP(x,y,z=0){ return [ (x - y)*COS30, -((x + y)*SIN30 - z) ]; }
+function isoP(x,y,z=0){ return [ (x - y)*COS30, -((x + y)*SIN30 + z) ]; }
 
 function drawIso(s,c){
   const v1 = s.ang*Math.PI/180;
@@ -996,10 +998,12 @@ function init3D(){
   MAT.bend   = new THREE.MeshPhongMaterial({color:0xd4552e, shininess:40});
   MAT.flange = new THREE.MeshPhongMaterial({color:0x5a6875, shininess:70});
 
-  // manuell orbit
-  let drag=false,px=0,py=0, rx=-0.45, ry=0.7, dist=1;
+  // manuell orbit – starter i samme vinkel som ISO-tegningen (45° asimut, 35,3° elevasjon)
+  const ISO_RX = 0.6155, ISO_RY = Math.PI/4;
+  let drag=false,px=0,py=0, rx=ISO_RX, ry=ISO_RY, dist=1;
   const el = renderer.domElement;
   const apply=()=>{ if(group){ group.rotation.x=rx; group.rotation.y=ry; } };
+  window._resetView = ()=>{ rx=ISO_RX; ry=ISO_RY; apply(); };
   el.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;el.setPointerCapture(e.pointerId);});
   el.addEventListener('pointermove',e=>{ if(!drag)return;
     ry += (e.clientX-px)*0.008; rx += (e.clientY-py)*0.008;
@@ -1342,6 +1346,10 @@ function showTab(which){
 $('tabIso').addEventListener('click',()=>showTab('iso'));
 $('tab3d').addEventListener('click',()=>showTab('t3d'));
 $('tabList').addEventListener('click',()=>showTab('list'));
+$('resetView').addEventListener('click',()=>{
+  if (window._resetView) window._resetView();
+  render();                                  // nullstiller også kameraavstanden
+});
 
 $('printBtn').addEventListener('click', ()=>{ showTab('iso'); window.print(); });
 $('pToggle').addEventListener('click', ()=>{

@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Byrået Kalkyle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --steel-900:#171e26; --steel-800:#1f2833; --steel-700:#2a3542; --steel-600:#33404e; --steel-500:#4a5866;
+    --line:#38434f; --paper:#e8ebee; --paper-dim:#9aa6b1; --chalk:#f4f6f8;
+    --monje:#d4552e; --monje-dim:#8a3a22;
+    --ok:#5fae7d; --warn:#e0a63c; --bad:#e0685f;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+    --cond:'IBM Plex Sans Condensed','Arial Narrow',sans-serif;
+    --sans:'IBM Plex Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--steel-900);color:var(--paper);font-family:var(--sans);font-size:15px;line-height:1.5}
+  a{color:inherit}
+  button{font:inherit}
+
+  header{border-bottom:1px solid var(--line);padding:18px 24px 14px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+  header h1{font-family:var(--cond);font-weight:700;font-size:1.45rem;letter-spacing:.02em;text-transform:uppercase}
+  header h1 span{color:var(--monje)}
+  header .sub{font-family:var(--mono);font-size:.72rem;color:var(--paper-dim);letter-spacing:.04em}
+  .hdrbtns{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .hdrbtns button{background:var(--steel-800);border:1px solid var(--line);color:var(--paper);font-family:var(--cond);font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border-radius:4px;cursor:pointer}
+  .hdrbtns button:hover{border-color:var(--monje);color:var(--chalk)}
+  .hdrbtns button.on{background:var(--monje);border-color:var(--monje);color:#fff}
+  .hdrbtns button:focus-visible,.seg button:focus-visible,.mods button:focus-visible{outline:2px solid var(--chalk);outline-offset:-2px}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 24px 60px;display:grid;grid-template-columns:320px 1fr;gap:22px}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+  .hidden{display:none !important}
+
+  .panel,.card{background:var(--steel-800);border:1px solid var(--line);border-radius:6px}
+  .panel h2,.card h2{font-family:var(--cond);font-weight:600;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim);padding:12px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .panel h2 .r,.card h2 .r{margin-left:auto;font-family:var(--mono);font-size:.65rem;letter-spacing:.04em;text-transform:none}
+
+  .mods{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:12px 16px 14px}
+  .mods button{background:var(--steel-900);border:1px solid var(--line);color:var(--paper-dim);font-family:var(--cond);font-weight:600;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;padding:9px 6px;border-radius:4px;cursor:pointer}
+  .mods button:hover{border-color:var(--monje);color:var(--chalk)}
+  .mods button.on{background:var(--monje);border-color:var(--monje);color:#fff}
+
+  .fields{padding:14px 16px 18px;display:grid;gap:13px}
+  .field label{display:block;font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;color:var(--paper-dim);text-transform:uppercase;margin-bottom:5px}
+  .field select,.field input,.field textarea{width:100%;background:var(--steel-900);border:1px solid var(--line);border-radius:4px;color:var(--chalk);font-family:var(--mono);font-size:.95rem;padding:8px 10px}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--monje);outline-offset:1px}
+  .field .hint{font-size:.7rem;color:var(--paper-dim);margin-top:4px;font-family:var(--sans)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .seg button{flex:1;background:var(--steel-900);border:0;color:var(--paper-dim);font-family:var(--mono);font-size:.8rem;padding:8px 4px;cursor:pointer}
+  .seg button.on{background:var(--monje);color:#fff;font-weight:600}
+  .fsec{font-family:var(--cond);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--monje);border-bottom:1px solid var(--monje-dim);padding-bottom:4px;margin-top:4px}
+
+  .right{display:grid;gap:22px;align-content:start}
+
+  /* resultat */
+  .res{display:grid;grid-template-columns:1.4fr 1fr;gap:0}
+  @media(max-width:640px){.res{grid-template-columns:1fr}}
+  .res > div{padding:18px 20px}
+  .res .main{border-right:1px solid var(--line)}
+  @media(max-width:640px){.res .main{border-right:0;border-bottom:1px solid var(--line)}}
+  .k{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--paper-dim)}
+  .big{font-family:var(--cond);font-weight:700;font-size:2.6rem;line-height:1.1;color:var(--chalk);font-variant-numeric:tabular-nums;margin:4px 0 2px}
+  .big small{font-size:1rem;color:var(--paper-dim);font-weight:500;margin-left:6px}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin-top:12px;font-size:.85rem}
+  .kv dt{color:var(--paper-dim)}
+  .kv dd{font-family:var(--mono);color:var(--chalk);text-align:right;font-variant-numeric:tabular-nums}
+  .status{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:6px 10px;border-radius:4px;font-family:var(--cond);font-weight:600;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;border:1px solid}
+  .status::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+  .status.ok{color:var(--ok);border-color:var(--ok)}
+  .status.warn{color:var(--warn);border-color:var(--warn)}
+  .status.bad{color:var(--bad);border-color:var(--bad)}
+  .intern{background:var(--steel-900)}
+  .intern .k{color:var(--monje)}
+
+  /* tabell */
+  .tblwrap{overflow-x:auto;padding:8px 12px 14px}
+  table.cut{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.8rem;min-width:520px}
+  table.cut th{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;color:var(--paper-dim);text-align:left;padding:8px 8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.cut td{padding:7px 8px;border-bottom:1px dashed var(--line);color:var(--chalk);font-variant-numeric:tabular-nums}
+  table.cut td.r,table.cut th.r{text-align:right}
+  table.cut td.dim{color:var(--paper-dim)}
+  table.cut tr.zero td{color:var(--steel-500)}
+  table.cut tr.sum td{color:var(--chalk);font-weight:600;border-bottom:0;padding-top:12px;border-top:1px solid var(--line)}
+  table.cut td.neg{color:var(--ok)}
+
+  /* sammendrag */
+  .sum-body{padding:12px 16px 16px;display:grid;gap:10px}
+  .sum-body textarea{min-height:230px;resize:vertical;font-size:.8rem;line-height:1.55}
+  .btns{display:flex;gap:8px;flex-wrap:wrap}
+  .btns button,.pb-tools button,.addrow{background:var(--steel-900);border:1px solid var(--line);color:var(--paper);font-family:var(--cond);font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border-radius:4px;cursor:pointer}
+  .btns button:hover,.pb-tools button:hover,.addrow:hover{border-color:var(--monje);color:var(--chalk)}
+  .btns button.primary{background:var(--monje);border-color:var(--monje);color:#fff}
+  .toast{font-family:var(--mono);font-size:.7rem;color:var(--ok);align-self:center}
+
+  /* prisbok */
+  .pbwrap{max-width:1180px;margin:0 auto;padding:20px 24px 60px;display:grid;gap:22px}
+  .pb-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .pb-tools .note{font-size:.8rem;color:var(--paper-dim);margin-left:auto;max-width:56ch}
+  .pbgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:22px;align-items:start}
+  .pbgrid .card.wide{grid-column:1 / -1}
+  table.pb{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.78rem}
+  table.pb th{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:.66rem;color:var(--paper-dim);text-align:left;padding:8px 6px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.pb td{padding:4px 6px;border-bottom:1px dashed var(--line);color:var(--chalk);vertical-align:middle;font-variant-numeric:tabular-nums}
+  table.pb td.r,table.pb th.r{text-align:right}
+  table.pb td.calc{color:var(--paper-dim);text-align:right;white-space:nowrap}
+  table.pb td.calc.key{color:var(--chalk);font-weight:600}
+  table.pb input,table.pb select{width:100%;min-width:64px;background:var(--steel-900);border:1px solid var(--line);border-radius:3px;color:var(--chalk);font-family:var(--mono);font-size:.8rem;padding:5px 7px}
+  table.pb input.num{text-align:right}
+  table.pb input.wide{min-width:180px}
+  table.pb input:focus,table.pb select:focus{outline:2px solid var(--monje);outline-offset:0}
+  table.pb td.x button{background:none;border:0;color:var(--paper-dim);cursor:pointer;font-size:1rem;line-height:1;padding:2px 6px}
+  table.pb td.x button:hover{color:var(--bad)}
+  .addrow{margin:10px 12px 12px;padding:6px 12px;font-size:.7rem}
+  .pbnote{padding:10px 16px 12px;font-size:.78rem;color:var(--paper-dim);line-height:1.55;border-top:1px solid var(--line)}
+  .pbnote b{color:var(--paper)}
+
+  /* sticky pris på mobil */
+  .stick{display:none;position:sticky;top:0;z-index:5;background:var(--steel-800);border-bottom:1px solid var(--line);padding:8px 24px;font-family:var(--mono);font-size:.8rem;align-items:center;gap:12px}
+  .stick b{font-family:var(--cond);font-size:1.15rem;color:var(--chalk)}
+  @media(max-width:900px){.stick{display:flex}}
+
+  /* modal */
+  .qback{position:fixed;inset:0;background:rgba(10,14,18,.72);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .qback.show{display:flex}
+  .qmodal{background:var(--steel-800);border:1px solid var(--line);border-radius:8px;max-width:600px;width:100%;max-height:82vh;overflow:auto}
+  .qhead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);font-family:var(--cond);font-weight:700;font-size:1rem;color:var(--monje);text-transform:uppercase;letter-spacing:.05em}
+  .qhead button{background:none;border:0;color:var(--paper-dim);font-size:1.4rem;cursor:pointer;line-height:1}
+  .qhead button:hover{color:var(--chalk)}
+  .qbody{padding:14px 18px 18px;font-size:.9rem;color:var(--paper);line-height:1.65;display:grid;gap:10px}
+  .qbody b{color:var(--chalk)}
+  .qbody .st{font-family:var(--cond);color:var(--monje);text-transform:uppercase;letter-spacing:.1em;font-size:.72rem;margin-top:6px}
+  @media(prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Byrået <span>Kalkyle</span></h1>
+  <div class="sub" id="hdrSub">Prisbok oppdatert – · alle priser eks. mva</div>
+  <div class="hdrbtns">
+    <button id="btnKalk" class="on">Kalkyle</button>
+    <button id="btnPris">Prisbok</button>
+    <button id="btnHelp">?</button>
+  </div>
+</header>
+
+<div class="stick" id="stick"><span class="k">Pris eks. mva</span><b id="stickPris">–</b><span id="stickStatus"></span></div>
+
+<!-- ================= KALKYLE ================= -->
+<div class="wrap" id="viewKalk">
+  <div>
+    <div class="panel">
+      <h2>Modul</h2>
+      <div class="mods" id="mods"></div>
+    </div>
+    <div class="panel" style="margin-top:22px">
+      <h2>Inndata <span class="r" id="modSub"></span></h2>
+      <div class="fields" id="fields"></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="card">
+      <h2>Resultat <span class="r" id="resSub"></span></h2>
+      <div class="res">
+        <div class="main">
+          <div class="k">Pris eks. mva</div>
+          <div class="big" id="rPris">–</div>
+          <dl class="kv">
+            <dt>Avrundet tilbudspris</dt><dd id="rRund">–</dd>
+            <dt id="rPerLabel">Pris per enhet</dt><dd id="rPer">–</dd>
+            <dt>Pris inkl. mva</dt><dd id="rInkl">–</dd>
+            <dt>Timer arbeid</dt><dd id="rTimer">–</dd>
+          </dl>
+        </div>
+        <div class="intern">
+          <div class="k">Internt – ikke til kunden</div>
+          <dl class="kv" style="margin-top:8px">
+            <dt>Selvkost inkl. faste</dt><dd id="rKost">–</dd>
+            <dt>Dekningsbidrag</dt><dd id="rDB">–</dd>
+            <dt>DB %</dt><dd id="rDBP">–</dd>
+            <dt>Resultat etter faste</dt><dd id="rRes">–</dd>
+          </dl>
+          <div class="status ok" id="rStatus">OK</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Beregning <span class="r">kostnad = selvkost · pris = til kunde</span></h2>
+      <div class="tblwrap"><table class="cut" id="tbl"></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Sammendrag til tilbud <span class="r">lim inn i Claude</span></h2>
+      <div class="sum-body">
+        <div class="field"><textarea id="sumTxt" readonly></textarea></div>
+        <div class="btns">
+          <button class="primary" id="btnCopy">Kopier sammendrag</button>
+          <button id="btnReset">Nullstill inndata</button>
+          <span class="toast" id="toast"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PRISBOK ================= -->
+<div class="pbwrap hidden" id="viewPris">
+  <div class="pb-tools">
+    <button id="pbExport">Last ned prisbok (JSON)</button>
+    <button id="pbImport">Hent inn prisbok</button>
+    <input type="file" id="pbFile" accept="application/json" class="hidden">
+    <button id="pbReset">Tilbakestill til forslag</button>
+    <span class="note">Endringer lagres automatisk i denne nettleseren. Last ned prisboken for å ta vare på den eller dele den med andre.</span>
+  </div>
+  <div class="pbgrid" id="pbgrid"></div>
+</div>
+
+<!-- ================= HJELP ================= -->
+<div class="qback" id="help">
+  <div class="qmodal">
+    <div class="qhead">Slik brukes kalkylen <button id="helpClose" aria-label="Lukk">×</button></div>
+    <div class="qbody">
+      <div class="st">Lage et tilbud</div>
+      <div>Velg modul, fyll inn feltene til venstre. Prisen oppdateres mens du skriver. <b>Pris eks. mva</b> er prisen i tilbudet; <b>Avrundet tilbudspris</b> er rundet opp til nærmeste 10 kr (under 1 000 kr) eller 50 kr.</div>
+      <div><b>Internt</b>-feltet viser selvkost og dekningsbidrag og skal aldri ut til kunden. Status varsler når dekningsbidraget er under grensen i prisboken, eller når jobben ikke dekker sin andel av faste kostnader.</div>
+      <div><b>Kopier sammendrag</b> gir deg forutsetninger, pris og linjer som kan limes rett inn i Claude for å få skrevet tilbudsteksten.</div>
+      <div class="st">Prisboken</div>
+      <div>Alle timepriser, påslag, soner, faktorer og materialer ligger under <b>Prisbok</b>. Faste kostnader fordeles på fakturerbare timer og legges automatisk inn i timeprisene. Endrer du ett tall der, endres alle modulene.</div>
+      <div>Tallene som ligger inne er <b>forslag</b> fra september 2026 – erstatt dem med Byråets egne. Sett ny dato i prisboken hver gang du endrer noe. Prisboken lagres i nettleseren du bruker; last den ned som fil for sikkerhet og for å dele med kolleger.</div>
+      <div class="st">Slik er prisen bygd opp</div>
+      <div>Materiale: innkjøp × (1 + svinn) × (1 + påslag). Arbeid: lønn inkl. sosiale kostnader per fakturerbar time + overhead per time, × (1 + fortjeneste). Maskin og eksterne tjenester: kostnad × (1 + påslag). Summen løftes til minstepris hvis den er lavere.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   PRISBOK – forslag (samme tall som Byrået Kalkyle.xlsx)
+   ============================================================ */
+const DEFAULT_PB = {
+  dato: "2026-09-03",
+  regler: { mva:0.25, minstepris:750, dbMin:0.35, dbMinProfil:0.25, paaslagEkst:0.15, paaslagFrakt:0.10, paaslagMaskin:0.50, riggKost:150, riggPris:250, fortjeneste:0.15 },
+  faste: {
+    poster: [
+      ["Husleie og felleskostnader lokaler",1200000],["Strøm og oppvarming",250000],["Forsikringer",150000],
+      ["IT, programvare og lisenser",300000],["Kjøretøy – leasing og drift",400000],["Maskiner – avskrivning/leasing",600000],
+      ["Service og vedlikehold maskiner",150000],["Regnskap, revisjon og rådgivning",200000],["Markedsføring",150000],
+      ["Ledelse/administrasjon – lønn som ikke faktureres",1800000],["Telefon, kontorhold og diverse",150000]
+    ].map(([navn,kr])=>({navn,kr})),
+    ansatte:12, timer:1695, andel:0.65, sos:0.35, omsetning:21100000
+  },
+  roller: [
+    { id:"prod",  navn:"Produksjon (verksted, print, folie)", lonn:520000, fortj:null, pris:null },
+    { id:"mont",  navn:"Montering (ute hos kunde)",           lonn:540000, fortj:null, pris:null },
+    { id:"des",   navn:"Design / grafisk",                    lonn:580000, fortj:null, pris:null },
+    { id:"laser", navn:"Laseroperatør",                       lonn:520000, fortj:null, pris:null }
+  ],
+  maskin: [
+    { id:"laser",   navn:"Laser (drift, avskrivning, linse)", kost:250, enhet:"kr/time" },
+    { id:"printer", navn:"Storformatprinter (blekk, slitasje)", kost:55, enhet:"kr/m²" },
+    { id:"fres",    navn:"Fres / CNC / skjæreplotter", kost:200, enhet:"kr/time" }
+  ],
+  soner: [
+    { navn:"Ingen reise", kost:0, pris:0 },
+    { navn:"Sone 1 – Stord / Fitjar", kost:200, pris:350 },
+    { navn:"Sone 2 – Bømlo / Tysnes / Kvinnherad", kost:900, pris:1400 },
+    { navn:"Sone 3 – Haugesund / Bergen", kost:1800, pris:2800 },
+    { navn:"Sone 4 – Etter avtale", kost:0, pris:0 }
+  ],
+  lift: { kost:2500, pris:3200 },
+  rabatt: [ {fra:1,pct:0},{fra:10,pct:0.10},{fra:25,pct:0.15},{fra:50,pct:0.20},{fra:100,pct:0.25} ],
+  grad: [ {navn:"Kun tekst",min:1.5},{navn:"Tekst og logo",min:3},{navn:"Detaljert / fylt",min:6} ],
+  kutt: 1.5,
+  biler: [
+    {navn:"Personbil",m2:22,mont:16,demont:8},
+    {navn:"Liten varebil (Caddy, Berlingo)",m2:20,mont:12,demont:6},
+    {navn:"Mellomstor varebil (Transporter, Vito)",m2:28,mont:16,demont:8},
+    {navn:"Stor varebil (Sprinter, Crafter)",m2:40,mont:24,demont:12},
+    {navn:"Lastebil / skap",m2:60,mont:30,demont:15},
+    {navn:"Tilhenger",m2:12,mont:6,demont:3}
+  ],
+  dekning: [ {navn:"Logo og tekst",andel:0.10,design:1},{navn:"Delvis dekor",andel:0.35,design:3},{navn:"Halv foliering",andel:0.60,design:5},{navn:"Hel foliering",andel:1.0,design:8} ],
+  trykk: [
+    {navn:"Broderi",oppstart:600,stk:35},{navn:"Transfer / DTF",oppstart:150,stk:25},{navn:"Silketrykk (1 farge)",oppstart:450,stk:12},
+    {navn:"DTG (digitalt tekstiltrykk)",oppstart:0,stk:45},{navn:"Lasergravering på artikkel",oppstart:200,stk:20}
+  ],
+  paaslagTrykk:0.50, paaslagArt:0.40,
+  materialer: [
+    ["Plater","Ingen plate","m²",0,0,0],
+    ["Plater","Aluminium 2 mm","m²",450,0.15,0.60],
+    ["Plater","Aluminiumskompositt 3 mm (Dibond)","m²",380,0.15,0.60],
+    ["Plater","Akryl 3 mm klar","m²",420,0.20,0.60],
+    ["Plater","Akryl 5 mm opal","m²",650,0.20,0.60],
+    ["Plater","PVC-skum 5 mm (Forex)","m²",220,0.15,0.60],
+    ["Plater","Skumplate 5 mm (Kapa)","m²",120,0.15,0.60],
+    ["Plater","Rustfritt stål 1,5 mm","m²",1400,0.10,0.50],
+    ["Laser","Laserlaminat 1,6 mm (to-lags)","m²",900,0.25,0.70],
+    ["Laser","Laserlaminat 3,2 mm (to-lags)","m²",1300,0.25,0.70],
+    ["Laser","Eloksert aluminium 0,5 mm","m²",700,0.20,0.70],
+    ["Laser","Akryl 3 mm (laser)","m²",420,0.25,0.60],
+    ["Laser","Rustfritt stål (merking)","m²",1400,0.10,0.50],
+    ["Folie","Ingen dekor","m²",0,0,0],
+    ["Folie","Printfolie monomer (2–3 år)","m²",60,0.20,0.80],
+    ["Folie","Printfolie polymer (5–7 år)","m²",95,0.20,0.80],
+    ["Folie","Printfolie cast (8–10 år, bil)","m²",160,0.25,0.80],
+    ["Folie","Skjærefolie (farget vinyl)","m²",110,0.30,0.80],
+    ["Folie","Frostet glassfolie","m²",180,0.20,0.70],
+    ["Folie","Solfilm","m²",250,0.20,0.60],
+    ["Folie","Cover Styl' interiørfolie","m²",320,0.20,0.60],
+    ["Laminat","Laminat polymer","m²",70,0.20,0.80],
+    ["Laminat","Laminat cast","m²",120,0.25,0.80],
+    ["Print","Banner PVC 510 g","m²",45,0.10,0.80],
+    ["Print","Mesh-banner","m²",55,0.10,0.80],
+    ["Print","Plakatpapir 200 g","m²",25,0.10,1.00],
+    ["Print","Fototapet (non-woven)","m²",90,0.15,0.80],
+    ["Print","Backlit-film","m²",110,0.15,0.80],
+    ["Print","Lerret (canvas)","m²",130,0.15,0.80],
+    ["Print","Printfolie polymer (til plate)","m²",95,0.20,0.80],
+    ["Tilbehør","Maljer","stk",3,0,3.00],
+    ["Tilbehør","Sømmer / kantforsterkning","lm",8,0,1.50],
+    ["Tilbehør","Festemiddel per skilt (tape/skruer)","stk",15,0,1.00],
+    ["Tilbehør","Avstandsholdere (sett à 4)","sett",120,0,0.60],
+    ["Tilbehør","LED-modul med driver","lm",350,0.05,0.50]
+  ].map(([kat,navn,enhet,kjop,svinn,paaslag])=>({kat,navn,enhet,kjop,svinn,paaslag}))
+};
+const KAT = ["Plater","Laser","Folie","Laminat","Print","Tilbehør"];
+const LS_KEY = "byraet-kalkyle-prisbok-v1";
+
+let PB = loadPB();
+function loadPB(){
+  try{ const s = localStorage.getItem(LS_KEY); if(s){ const o = JSON.parse(s); if(o && o.materialer) return o; } }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_PB));
+}
+function savePB(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(PB)); }catch(e){} }
+
+/* ============================================================
+   AVLEDEDE TALL
+   ============================================================ */
+function derived(){
+  const f = PB.faste;
+  const sumFaste = f.poster.reduce((a,p)=>a+(+p.kr||0),0);
+  const faktPer = (+f.timer||0)*(+f.andel||0);
+  const faktTot = faktPer*(+f.ansatte||0);
+  const overhead = faktTot>0 ? sumFaste/faktTot : 0;
+  const roller = {};
+  PB.roller.forEach(r=>{
+    const lonnskost = faktPer>0 ? (+r.lonn||0)*(1+(+f.sos||0))/faktPer : 0;
+    const selvkost = lonnskost+overhead;
+    const fortj = (r.fortj===null||r.fortj===""||r.fortj===undefined) ? PB.regler.fortjeneste : +r.fortj;
+    const beregnet = selvkost*(1+fortj);
+    const pris = (r.pris===null||r.pris===""||r.pris===undefined) ? Math.round(beregnet/10)*10 : +r.pris;
+    roller[r.id] = { lonnskost, overhead, selvkost, fortj, beregnet, pris };
+  });
+  const maskin = {};
+  PB.maskin.forEach(m=>{ maskin[m.id] = { kost:+m.kost||0, pris:(+m.kost||0)*(1+PB.regler.paaslagMaskin) }; });
+  const mat = {};
+  PB.materialer.forEach(m=>{ const k=(+m.kjop||0)*(1+(+m.svinn||0)); mat[m.navn] = { kost:k, pris:k*(1+(+m.paaslag||0)), enhet:m.enhet, kat:m.kat }; });
+  return { sumFaste, faktPer, faktTot, overhead, roller, maskin, mat };
+}
+function matList(...kats){ return PB.materialer.filter(m=>kats.includes(m.kat)).map(m=>m.navn); }
+function rabattPct(antall){ let p=0; PB.rabatt.forEach(r=>{ if(antall>=+r.fra) p=+r.pct; }); return p; }
+function sone(navn){ return PB.soner.find(s=>s.navn===navn)||{kost:0,pris:0}; }
+function find(list,navn){ return list.find(x=>x.navn===navn)||list[0]; }
+
+/* ============================================================
+   MODULER – felt og beregning (speiler arbeidsboken)
+   ============================================================ */
+const F = {
+  text:(k,l,d,h)=>({k,l,t:"text",d,h}),
+  num:(k,l,d,h,step)=>({k,l,t:"num",d,h,step:step||"any"}),
+  sel:(k,l,d,opts,h)=>({k,l,t:"sel",d,opts,h}),
+  bool:(k,l,d,h)=>({k,l,t:"bool",d,h}),
+  sec:(l)=>({t:"sec",l})
+};
+const tail = (withLift)=>[
+  F.sec("Montering og annet"),
+  ...(withLift?[F.num("lift","Lift (antall dager)",0,"Fasade over 3–4 m")]:[]),
+  F.sel("sone","Reisesone","Ingen reise",()=>PB.soner.map(s=>s.navn)),
+  F.num("ekst","Eksterne tjenester (kostnad kr)",0,"Underleverandør, elektriker, LED – påslag legges på automatisk"),
+  F.num("frakt","Frakt / levering (kostnad kr)",0,"Påslag legges på automatisk")
+];
+
+function L(label,mengde,enhet,kost,pris,note){ return {label,mengde,enhet,kost,pris,note:note||""}; }
+function matLine(D,label,mengde,navn,enhet){ const m=D.mat[navn]||{kost:0,pris:0}; return L(label,mengde,enhet||m.enhet||"stk",mengde*m.kost,mengde*m.pris,navn); }
+function tLine(D,label,timer,rolle,maskinId,note){
+  const r=D.roller[rolle]; const m=maskinId?D.maskin[maskinId]:{kost:0,pris:0};
+  return L(label,timer,"timer",timer*(r.selvkost+m.kost),timer*(r.pris+m.pris),note||"");
+}
+function riggLine(){ return L("Rigg / ordrehåndtering",1,"ordre",PB.regler.riggKost,PB.regler.riggPris,"per ordre"); }
+function tailLines(D,I){
+  const out=[];
+  if("lift" in I) out.push(L("Lift",+I.lift||0,"dager",(+I.lift||0)*PB.lift.kost,(+I.lift||0)*PB.lift.pris));
+  const s=sone(I.sone); const n=I.sone==="Ingen reise"?0:1;
+  out.push(L("Reise (sone)",n,"tur",n*(+s.kost||0),n*(+s.pris||0),I.sone));
+  out.push(L("Eksterne tjenester / underleverandør",+I.ekst||0,"kr",+I.ekst||0,(+I.ekst||0)*(1+PB.regler.paaslagEkst),"kost + påslag"));
+  out.push(L("Frakt / levering",+I.frakt||0,"kr",+I.frakt||0,(+I.frakt||0)*(1+PB.regler.paaslagFrakt),"kost + påslag"));
+  return out;
+}
+
+const MODULES = [
+{ id:"gravering", navn:"Gravering", sub:"graverte skilt, industrimerking", per:["Pris per skilt","antall"],
+  fields:[
+    F.text("kunde","Kunde / jobb","Aker Solutions – ventilskilt"),
+    F.sec("Skiltene"),
+    F.num("antall","Antall skilt",10,null,"1"),
+    F.num("b","Bredde (mm)",200), F.num("h","Høyde (mm)",100),
+    F.sel("mat","Materiale","Laserlaminat 1,6 mm (to-lags)",()=>matList("Laser")),
+    F.sel("grad","Graveringsgrad","Tekst og logo",()=>PB.grad.map(g=>g.navn),"Styrer maskintid per dm²"),
+    F.bool("feste","Festemiddel per skilt",true,"Tape eller skruer"),
+    F.sec("Arbeid"),
+    F.num("oppsett","Oppsett / programmering (min per ordre)",20),
+    F.num("etter","Etterarbeid per skilt (min)",3,"Hull, rensing, tape, kontroll"),
+    F.num("design","Design / korrektur (timer)",0.25),
+    F.num("mont","Montering hos kunde (timer per montør)",0),
+    F.num("montorer","Antall montører",1,null,"1"),
+    ...tail(false)
+  ],
+  calc(I,D){
+    const antall=+I.antall||0, b=+I.b||0, h=+I.h||0;
+    const areal=antall*(b/1000)*(h/1000);
+    const grad=find(PB.grad,I.grad);
+    const lines=[];
+    lines.push(matLine(D,"Materiale (inkl. svinn)",areal,I.mat,"m²"));
+    const grav=tLine(D,"Gravering (operatør + maskin)",antall*(b*h/10000)*(+grad.min||0)/60,"laser","laser",`${grad.min} min/dm²`);
+    const kutt=tLine(D,"Kutting av kontur (operatør + maskin)",antall*2*(b+h)/1000*(+PB.kutt||0)/60,"laser","laser",`${PB.kutt} min/lm`);
+    const opp=tLine(D,"Oppsett / programmering",(+I.oppsett||0)/60,"laser",null,"én gang per ordre");
+    const etter=tLine(D,"Etterarbeid",antall*(+I.etter||0)/60,"prod");
+    lines.push(grav,kutt,opp,etter);
+    lines.push(matLine(D,"Festemiddel",I.feste?antall:0,"Festemiddel per skilt (tape/skruer)","stk"));
+    lines.push(tLine(D,"Design / korrektur",+I.design||0,"des"));
+    lines.push(riggLine());
+    const p=rabattPct(antall);
+    lines.push(L("Mengderabatt på produksjonsdelen",p,"%",0,-p*(grav.pris+kutt.pris+opp.pris+etter.pris),"gravering → etterarbeid"));
+    lines.push(tLine(D,"Montering hos kunde",(+I.mont||0)*(+I.montorer||0),"mont",null,"timer × montører"));
+    return lines.concat(tailLines(D,I));
+  }
+},
+{ id:"skilt", navn:"Skilt", sub:"fasade, innendørs, industri, lys", per:["Pris per skilt","antall"],
+  fields:[
+    F.text("kunde","Kunde / jobb","Fylkesnes Bil – fasadeskilt"),
+    F.sec("Skiltene"),
+    F.num("antall","Antall skilt",2,null,"1"),
+    F.num("b","Bredde (mm)",2000), F.num("h","Høyde (mm)",600),
+    F.sel("plate","Platemateriale","Aluminiumskompositt 3 mm (Dibond)",()=>matList("Plater").filter(n=>n!=="Ingen plate")),
+    F.sel("dekor","Dekor på plate","Printfolie polymer (5–7 år)",()=>matList("Folie"),"Printfolie = print + folie · Skjærefolie = skåret vinyl"),
+    F.bool("laminat","Laminering av print",true,"Anbefalt utendørs"),
+    F.bool("avst","Avstandsholdere (sett per skilt)",true),
+    F.bool("feste","Festemiddel per skilt",false),
+    F.sec("Arbeid"),
+    F.num("fres","Fresing / kutting (timer per skilt)",0.3),
+    F.num("prod","Produksjon – folie på plate (timer per skilt)",0.5),
+    F.num("design","Design / korrektur (timer)",1,"1 t nytt skilt · 0,25 t ferdig fil"),
+    F.num("mont","Montering hos kunde (timer per montør)",3),
+    F.num("montorer","Antall montører",2,null,"1"),
+    ...tail(true)
+  ],
+  calc(I,D){
+    const antall=+I.antall||0, areal=antall*(+I.b||0)/1000*(+I.h||0)/1000;
+    const isPrint=/Printfolie/.test(I.dekor||"");
+    const lines=[];
+    lines.push(matLine(D,"Plate (inkl. svinn)",areal,I.plate,"m²"));
+    lines.push(matLine(D,"Dekorfolie (inkl. svinn)",areal,I.dekor,"m²"));
+    const pm=isPrint?areal:0;
+    lines.push(L("Print (maskin)",pm,"m²",pm*D.maskin.printer.kost,pm*D.maskin.printer.pris,"bare ved printfolie"));
+    lines.push(matLine(D,"Laminat",(I.laminat&&isPrint)?areal:0,"Laminat polymer","m²"));
+    lines.push(tLine(D,"Fresing / kutting (operatør + maskin)",antall*(+I.fres||0),"prod","fres"));
+    lines.push(tLine(D,"Produksjon (folie på plate, klargjøring)",antall*(+I.prod||0),"prod"));
+    lines.push(tLine(D,"Design / korrektur",+I.design||0,"des"));
+    lines.push(matLine(D,"Avstandsholdere",I.avst?antall:0,"Avstandsholdere (sett à 4)","sett"));
+    lines.push(matLine(D,"Festemiddel",I.feste?antall:0,"Festemiddel per skilt (tape/skruer)","stk"));
+    lines.push(riggLine());
+    lines.push(tLine(D,"Montering hos kunde",(+I.mont||0)*(+I.montorer||0),"mont",null,"timer × montører"));
+    return lines.concat(tailLines(D,I));
+  }
+},
+{ id:"bildekor", navn:"Bildekor", sub:"foliering av kjøretøy", per:["Pris per kjøretøy","antall"],
+  fields:[
+    F.text("kunde","Kunde / jobb","Alsaker Fjordbruk – varebil"),
+    F.sec("Kjøretøyet"),
+    F.sel("bil","Kjøretøytype","Mellomstor varebil (Transporter, Vito)",()=>PB.biler.map(b=>b.navn)),
+    F.sel("grad","Dekningsgrad","Delvis dekor",()=>PB.dekning.map(d=>d.navn),"Styrer m², monteringstid og designforslag"),
+    F.num("antall","Antall kjøretøy (like)",1,null,"1"),
+    F.sel("folie","Folietype","Printfolie cast (8–10 år, bil)",()=>["Printfolie polymer (5–7 år)","Printfolie cast (8–10 år, bil)"],"Cast anbefales på buede flater"),
+    F.bool("laminat","Laminering",true,"Anbefalt – UV og vask"),
+    F.bool("demont","Demontering av gammel dekor",false),
+    F.sec("Arbeid"),
+    F.num("prodm2","Produksjonstid per m² folie (timer)",0.15,"Print, laminering, skjæring"),
+    F.num("design_x","Ekstra designtimer utover forslag",0),
+    F.num("mont_x","Justering monteringstimer (+/−)",0,"F.eks. +2 for vanskelig karosseri"),
+    ...tail(false)
+  ],
+  calc(I,D){
+    const bil=find(PB.biler,I.bil), dek=find(PB.dekning,I.grad), antall=+I.antall||0;
+    const m2=antall*(+bil.m2||0)*(+dek.andel||0);
+    const lines=[];
+    lines.push(matLine(D,"Folie (inkl. svinn)",m2,I.folie,"m²"));
+    lines.push(matLine(D,"Laminat cast",I.laminat?m2:0,"Laminat cast","m²"));
+    lines.push(L("Print (maskin)",m2,"m²",m2*D.maskin.printer.kost,m2*D.maskin.printer.pris));
+    lines.push(tLine(D,"Produksjon (print, laminering, skjæring)",m2*(+I.prodm2||0),"prod"));
+    lines.push(tLine(D,"Design / korrektur",(+dek.design||0)+(+I.design_x||0),"des",null,`${dek.design} t forslag + ekstra`));
+    lines.push(tLine(D,"Demontering av gammel dekor",I.demont?antall*(+bil.demont||0)*(+dek.andel||0):0,"mont"));
+    lines.push(tLine(D,"Montering av dekor",antall*(+bil.mont||0)*(+dek.andel||0)+(+I.mont_x||0),"mont",null,"timer hel × dekningsgrad"));
+    lines.push(riggLine());
+    return lines.concat(tailLines(D,I));
+  }
+},
+{ id:"storformat", navn:"Storformat", sub:"banner, plakat, tapet, backlit", per:["Pris per stk","antall"],
+  fields:[
+    F.text("kunde","Kunde / jobb","Stord kommune – bannere"),
+    F.sec("Printen"),
+    F.sel("produkt","Printmedium","Banner PVC 510 g",()=>matList("Print")),
+    F.num("b","Bredde (m)",3), F.num("h","Høyde (m)",1),
+    F.num("antall","Antall",2,null,"1"),
+    F.num("maljer","Maljer per stk",12,"0 hvis ingen"),
+    F.bool("sommer","Sømmer / kantforsterkning",true),
+    F.bool("laminat","Laminering",false),
+    F.sel("plate","Montert på plate","Ingen plate",()=>matList("Plater")),
+    F.sec("Arbeid"),
+    F.num("prod","Etterbehandling (timer per stk)",0.15),
+    F.num("design","Design / korrektur (timer)",0.5),
+    F.num("mont","Montering hos kunde (timer per montør)",0),
+    F.num("montorer","Antall montører",1,null,"1"),
+    ...tail(true)
+  ],
+  calc(I,D){
+    const antall=+I.antall||0, b=+I.b||0, h=+I.h||0, m2=antall*b*h;
+    const lines=[];
+    lines.push(matLine(D,"Printmedium (inkl. svinn)",m2,I.produkt,"m²"));
+    const print=L("Print (maskin)",m2,"m²",m2*D.maskin.printer.kost,m2*D.maskin.printer.pris);
+    lines.push(print);
+    lines.push(matLine(D,"Laminat",I.laminat?m2:0,"Laminat polymer","m²"));
+    lines.push(matLine(D,"Plate (inkl. svinn)",I.plate==="Ingen plate"?0:m2,I.plate,"m²"));
+    lines.push(matLine(D,"Maljer",antall*(+I.maljer||0),"Maljer","stk"));
+    lines.push(matLine(D,"Sømmer / kantforsterkning",I.sommer?antall*2*(b+h):0,"Sømmer / kantforsterkning","lm"));
+    const prod=tLine(D,"Etterbehandling / produksjon",antall*(+I.prod||0),"prod");
+    lines.push(prod);
+    lines.push(tLine(D,"Design / korrektur",+I.design||0,"des"));
+    lines.push(riggLine());
+    const p=rabattPct(antall);
+    lines.push(L("Opplagsrabatt (print + produksjon)",p,"%",0,-p*(print.pris+prod.pris)));
+    lines.push(tLine(D,"Montering hos kunde",(+I.mont||0)*(+I.montorer||0),"mont",null,"timer × montører"));
+    return lines.concat(tailLines(D,I));
+  }
+},
+{ id:"folie", navn:"Folie", sub:"vindu, frostet, solfilm, interiør", per:["Pris per m²","__m2"],
+  fields:[
+    F.text("kunde","Kunde / jobb","Advokatkontor – frostet folie"),
+    F.sec("Flatene"),
+    F.sel("folie","Folietype","Frostet glassfolie",()=>matList("Folie").filter(n=>n!=="Ingen dekor")),
+    F.num("flater","Antall flater (like)",4,null,"1"),
+    F.num("b","Bredde per flate (m)",1.2), F.num("h","Høyde per flate (m)",2),
+    F.bool("print","Skal folien printes",false),
+    F.bool("laminat","Laminering",false),
+    F.sec("Arbeid"),
+    F.num("forarb","Forarbeid / rens (timer per m²)",0.1),
+    F.num("montm2","Montering (timer per m²)",0.5,"Vindusfolie 0,3–0,5 · Cover Styl' på møbler 0,8–1,5"),
+    F.num("demont","Demontering av gammel folie (timer)",0),
+    F.num("design","Design / korrektur (timer)",0.5),
+    ...tail(true)
+  ],
+  calc(I,D){
+    const m2=(+I.flater||0)*(+I.b||0)*(+I.h||0);
+    const lines=[];
+    lines.push(matLine(D,"Folie (inkl. svinn)",m2,I.folie,"m²"));
+    lines.push(L("Print (maskin)",I.print?m2:0,"m²",(I.print?m2:0)*D.maskin.printer.kost,(I.print?m2:0)*D.maskin.printer.pris));
+    lines.push(matLine(D,"Laminat",I.laminat?m2:0,"Laminat polymer","m²"));
+    lines.push(tLine(D,"Forarbeid / rens",m2*(+I.forarb||0),"mont"));
+    lines.push(tLine(D,"Montering",m2*(+I.montm2||0),"mont",null,"m² × timer per m²"));
+    lines.push(tLine(D,"Demontering av gammel folie",+I.demont||0,"mont"));
+    lines.push(tLine(D,"Design / korrektur",+I.design||0,"des"));
+    lines.push(riggLine());
+    return lines.concat(tailLines(D,I));
+  },
+  perDiv(I){ return (+I.flater||0)*(+I.b||0)*(+I.h||0); }
+},
+{ id:"profil", navn:"Profil", sub:"Gosh!-artikler med trykk", per:["Pris per stk","antall"], dbMin:"dbMinProfil",
+  fields:[
+    F.text("kunde","Kunde / jobb","Wärtsilä – t-skjorter"),
+    F.sec("Artikkelen"),
+    F.text("artikkel","Artikkel","T-skjorte, sort, 100 % bomull","Navn / varenummer fra katalogen"),
+    F.num("antall","Antall",50,null,"1"),
+    F.num("innkjop","Innkjøpspris per stk (kr)",65,"Fra leverandør / Gosh!-katalog"),
+    F.num("paaslag","Påslag på artikkel (%)",40,"Forslag fra prisboken"),
+    F.sec("Trykk"),
+    F.sel("metode","Trykkmetode","Transfer / DTF",()=>PB.trykk.map(t=>t.navn)),
+    F.num("pos","Trykkposisjoner per artikkel",2,"F.eks. bryst + rygg","1"),
+    F.num("designs","Antall design / farger (oppstart)",1,"Silketrykk: antall farger","1"),
+    F.sec("Arbeid og frakt"),
+    F.num("design","Design / klargjøring av logo (timer)",0.5),
+    F.num("hand","Håndtering, pakking, kontroll (timer)",0.5),
+    F.num("frakt","Frakt inn (kostnad kr)",350),
+    F.num("ekst","Eksterne tjenester (kostnad kr)",0),
+    F.sel("sone","Reisesone (levering)","Ingen reise",()=>PB.soner.map(s=>s.navn))
+  ],
+  calc(I,D){
+    const antall=+I.antall||0, t=find(PB.trykk,I.metode), pa=(+I.paaslag||0)/100, pt=PB.paaslagTrykk;
+    const lines=[];
+    lines.push(L("Artikler (innkjøp + påslag)",antall,"stk",antall*(+I.innkjop||0),antall*(+I.innkjop||0)*(1+pa),`${Math.round(pa*100)} % påslag`));
+    const n1=(+I.designs||0)*(+I.pos||0);
+    lines.push(L("Oppstart trykk (design × posisjon)",n1,"stk",n1*(+t.oppstart||0),n1*(+t.oppstart||0)*(1+pt),t.navn));
+    const n2=antall*(+I.pos||0);
+    lines.push(L("Trykk per stk per posisjon",n2,"stk",n2*(+t.stk||0),n2*(+t.stk||0)*(1+pt),t.navn));
+    lines.push(tLine(D,"Design / klargjøring",+I.design||0,"des"));
+    lines.push(tLine(D,"Håndtering, pakking, kontroll",+I.hand||0,"prod"));
+    lines.push(riggLine());
+    return lines.concat(tailLines(D,I));
+  }
+}];
+
+/* ============================================================
+   TILSTAND OG RENDERING
+   ============================================================ */
+const $ = id=>document.getElementById(id);
+let cur = MODULES[0];
+const INPUTS = {};
+MODULES.forEach(m=>{ INPUTS[m.id] = defaults(m); });
+function defaults(m){ const o={}; m.fields.forEach(f=>{ if(f.k) o[f.k]=f.d; }); if(m.id==="profil") o.paaslag=Math.round(PB.paaslagArt*100); return o; }
+
+const nf0 = new Intl.NumberFormat("nb-NO",{maximumFractionDigits:0});
+const nf1 = new Intl.NumberFormat("nb-NO",{maximumFractionDigits:1});
+const nf2 = new Intl.NumberFormat("nb-NO",{minimumFractionDigits:2,maximumFractionDigits:2});
+const kr = v=>nf0.format(Math.round(v))+" kr";
+const pct = v=>nf1.format(v*100)+" %";
+function fmtDate(iso){ if(!iso) return "–"; const [y,m,d]=iso.split("-"); return `${d}.${m}.${y}`; }
+function roundUp(p){ if(p<=0) return 0; return p<1000 ? Math.ceil(p/10)*10 : Math.ceil(p/50)*50; }
+
+function renderMods(){
+  $("mods").innerHTML = MODULES.map(m=>`<button data-id="${m.id}" class="${m.id===cur.id?"on":""}">${m.navn}</button>`).join("");
+  $("mods").querySelectorAll("button").forEach(b=>b.onclick=()=>{ cur=MODULES.find(m=>m.id===b.dataset.id); renderMods(); renderFields(); calc(); });
+}
+function renderFields(){
+  const I=INPUTS[cur.id];
+  $("modSub").textContent = cur.sub;
+  const html = cur.fields.map(f=>{
+    if(f.t==="sec") return `<div class="fsec">${f.l}</div>`;
+    const hint = f.h?`<div class="hint">${f.h}</div>`:"";
+    if(f.t==="text") return `<div class="field"><label for="f_${f.k}">${f.l}</label><input id="f_${f.k}" data-k="${f.k}" type="text" value="${esc(I[f.k]??"")}">${hint}</div>`;
+    if(f.t==="num") return `<div class="field"><label for="f_${f.k}">${f.l}</label><input id="f_${f.k}" data-k="${f.k}" type="number" inputmode="decimal" step="${f.step}" value="${I[f.k]??0}">${hint}</div>`;
+    if(f.t==="sel"){ const opts=f.opts(); if(!opts.includes(I[f.k])) I[f.k]=opts[0];
+      return `<div class="field"><label for="f_${f.k}">${f.l}</label><select id="f_${f.k}" data-k="${f.k}">${opts.map(o=>`<option ${o===I[f.k]?"selected":""}>${esc(o)}</option>`).join("")}</select>${hint}</div>`; }
+    if(f.t==="bool") return `<div class="field"><label>${f.l}</label><div class="seg" data-k="${f.k}"><button type="button" data-v="1" class="${I[f.k]?"on":""}">Ja</button><button type="button" data-v="0" class="${!I[f.k]?"on":""}">Nei</button></div>${hint}</div>`;
+    return "";
+  }).join("");
+  $("fields").innerHTML = html;
+  $("fields").querySelectorAll("input,select").forEach(el=>{
+    el.addEventListener("input",()=>{ I[el.dataset.k] = el.type==="number" ? (el.value===""?0:+el.value) : el.value; calc(); });
+  });
+  $("fields").querySelectorAll(".seg").forEach(seg=>{
+    seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ I[seg.dataset.k]=b.dataset.v==="1"; seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); calc(); });
+  });
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+
+function calc(){
+  const D=derived(); const I=INPUTS[cur.id];
+  const lines=cur.calc(I,D);
+  const sumPris=lines.reduce((a,l)=>a+l.pris,0);
+  const pris=Math.max(sumPris,PB.regler.minstepris);
+  const kost=lines.reduce((a,l)=>a+l.kost,0);
+  const timer=lines.filter(l=>l.enhet==="timer").reduce((a,l)=>a+l.mengde,0);
+  const oh=timer*D.overhead;
+  const db=pris-(kost-oh), dbp=pris>0?db/pris:0, res=pris-kost, resp=pris>0?res/pris:0;
+  const grense=PB.regler[cur.dbMin||"dbMin"];
+  const div = cur.perDiv ? cur.perDiv(I) : (+I[cur.per[1]]||0);
+
+  $("resSub").textContent = cur.navn+(I.kunde?" · "+I.kunde:"");
+  $("rPris").innerHTML = nf0.format(Math.round(pris))+"<small>kr</small>";
+  $("rRund").textContent = kr(roundUp(pris));
+  $("rPerLabel").textContent = cur.per[0];
+  $("rPer").textContent = div>0?kr(pris/div):"–";
+  $("rInkl").textContent = kr(pris*(1+PB.regler.mva));
+  $("rTimer").textContent = nf1.format(timer)+" t";
+  $("rKost").textContent = kr(kost);
+  $("rDB").textContent = kr(db);
+  $("rDBP").textContent = pct(dbp);
+  $("rRes").textContent = kr(res)+" ("+pct(resp)+")";
+  const st=$("rStatus"); let cls="ok", txt="OK – innenfor varselgrense";
+  if(dbp<grense){ cls="bad"; txt=`Under varselgrense DB ${pct(grense)} – sjekk pris`; }
+  else if(res<0){ cls="warn"; txt="Dekker ikke sin andel av faste kostnader"; }
+  if(sumPris<PB.regler.minstepris && cls==="ok"){ cls="warn"; txt="Løftet til minstepris"; }
+  st.className="status "+cls; st.textContent=txt;
+  $("stickPris").textContent = kr(pris); $("stickStatus").textContent = cls==="ok"?"":"⚠"; $("stickStatus").style.color = cls==="bad"?"var(--bad)":"var(--warn)";
+
+  // tabell
+  const rows = lines.map(l=>{
+    const isPct=l.enhet==="%";
+    const m = isPct ? pct(l.mengde) : (l.enhet==="timer"?nf2.format(l.mengde):(l.enhet==="m²"?nf2.format(l.mengde):nf1.format(l.mengde)));
+    const zero = l.pris===0 && l.kost===0;
+    return `<tr class="${zero?"zero":""}"><td>${l.label}</td><td class="r">${m}</td><td class="dim">${l.enhet}</td><td class="r dim">${nf0.format(Math.round(l.kost))}</td><td class="r ${l.pris<0?"neg":""}">${nf0.format(Math.round(l.pris))}</td><td class="dim">${esc(l.note)}</td></tr>`;
+  }).join("");
+  $("tbl").innerHTML = `<thead><tr><th>Linje</th><th class="r">Mengde</th><th>Enhet</th><th class="r">Kostnad</th><th class="r">Pris</th><th>Grunnlag</th></tr></thead><tbody>${rows}
+    <tr class="sum"><td>Sum linjer</td><td></td><td></td><td class="r dim">${nf0.format(Math.round(kost))}</td><td class="r">${nf0.format(Math.round(sumPris))}</td><td class="dim">${sumPris<PB.regler.minstepris?"→ minstepris "+nf0.format(PB.regler.minstepris):""}</td></tr></tbody>`;
+
+  // sammendrag
+  const forut = cur.fields.filter(f=>f.k&&f.k!=="kunde").map(f=>{
+    let v=I[f.k]; if(f.t==="bool") v=v?"ja":"nei"; return `${f.l}: ${v}`;
+  }).join("\n");
+  const aktive = lines.filter(l=>l.pris!==0).map(l=>`- ${l.label}: ${l.enhet==="%"?pct(l.mengde):nf1.format(l.mengde)+" "+l.enhet} → ${nf0.format(Math.round(l.pris))} kr`).join("\n");
+  $("sumTxt").value =
+`KALKYLE – ${cur.navn.toUpperCase()}
+Kunde / jobb: ${I.kunde||"–"}
+Dato: ${fmtDate(new Date().toISOString().slice(0,10))} · Prisbok oppdatert ${fmtDate(PB.dato)}
+
+FORUTSETNINGER
+${forut}
+
+PRIS
+Kalkulert pris eks. mva: ${kr(pris)}
+Avrundet tilbudspris eks. mva: ${kr(roundUp(pris))}
+${cur.per[0]}: ${div>0?kr(pris/div):"–"}
+Pris inkl. mva: ${kr(pris*(1+PB.regler.mva))}
+Timer arbeid: ${nf1.format(timer)} t
+
+LINJER
+${aktive}
+
+INTERNT – ikke til kunden
+Selvkost inkl. faste: ${kr(kost)} · DB: ${kr(db)} (${pct(dbp)}) · Resultat etter faste: ${kr(res)}
+Status: ${txt}`;
+}
+
+/* ============================================================
+   PRISBOK-VISNING
+   ============================================================ */
+function pctIn(v){ return v===null||v===undefined||v===""?"":Math.round(v*1000)/10; }
+function tbl(cols, rows, onChange, opts={}){
+  const head = `<thead><tr>${cols.map(c=>`<th class="${c.r?"r":""}">${c.l}</th>`).join("")}${opts.del?"<th></th>":""}</tr></thead>`;
+  const body = rows.map((row,i)=>`<tr>${cols.map(c=>{
+    if(c.t==="calc") return `<td class="calc ${c.key?"key":""}">${c.f(row)}</td>`;
+    if(c.t==="sel") return `<td><select data-i="${i}" data-k="${c.k}">${c.opts.map(o=>`<option ${o===row[c.k]?"selected":""}>${o}</option>`).join("")}</select></td>`;
+    const v = c.t==="pct" ? pctIn(row[c.k]) : (row[c.k]??"");
+    const cls = c.t==="text" ? (c.wide?"wide":"") : "num";
+    const ph = c.ph?`placeholder="${c.ph}"`:"";
+    return `<td><input class="${cls}" data-i="${i}" data-k="${c.k}" data-t="${c.t}" type="${c.t==="text"?"text":"number"}" step="any" value="${esc(v)}" ${ph}></td>`;
+  }).join("")}${opts.del?`<td class="x"><button data-del="${i}" title="Slett rad">×</button></td>`:""}</tr>`).join("");
+  return `<table class="pb">${head}<tbody>${body}</tbody></table>`;
+}
+function card(title, inner, note, add){
+  return `<div class="card ${add&&add.wide?"wide":""}"><h2>${title}</h2><div class="tblwrap" style="padding:4px 12px 8px">${inner}</div>${add?`<button class="addrow" data-add="${add.key}">+ Legg til rad</button>`:""}${note?`<div class="pbnote">${note}</div>`:""}</div>`;
+}
+function renderPB(){
+  const D=derived(); const R=PB.regler, Fk=PB.faste;
+  const g=$("pbgrid");
+  const regler = [
+    ["mva","MVA-sats","pct"],["minstepris","Minstepris per ordre (kr)","num"],["dbMin","Varselgrense DB (%)","pct"],["dbMinProfil","Varselgrense DB – profilartikler (%)","pct"],
+    ["paaslagEkst","Påslag eksterne tjenester (%)","pct"],["paaslagFrakt","Påslag frakt (%)","pct"],["paaslagMaskin","Påslag maskinkostnad (%)","pct"],
+    ["riggKost","Rigg per ordre – kostnad (kr)","num"],["riggPris","Rigg per ordre – pris (kr)","num"],["fortjeneste","Fortjeneste på arbeid – standard (%)","pct"]
+  ];
+  const reglerRows = regler.map(([k,l,t])=>({k,l,t,v:R[k]}));
+  const reglerTbl = `<table class="pb"><thead><tr><th>Regel</th><th class="r">Verdi</th></tr></thead><tbody>${reglerRows.map(r=>`<tr><td>${r.l}</td><td><input class="num" data-scope="regler" data-k="${r.k}" data-t="${r.t}" type="number" step="any" value="${r.t==="pct"?pctIn(r.v):r.v}"></td></tr>`).join("")}
+    <tr><td>Prisbok sist oppdatert</td><td><input data-scope="dato" type="date" value="${PB.dato}"></td></tr></tbody></table>`;
+
+  const fasteTbl = tbl([{k:"navn",l:"Kostnadspost",t:"text",wide:true},{k:"kr",l:"Kr per år",t:"num",r:true}],Fk.poster,null,{del:true});
+  const bem = `<table class="pb"><tbody>
+    <tr><td>Sum faste kostnader per år</td><td class="calc key">${nf0.format(D.sumFaste)} kr</td></tr>
+    <tr><td>Produktive (fakturerbare) ansatte</td><td><input class="num" data-scope="faste" data-k="ansatte" type="number" step="1" value="${Fk.ansatte}"></td></tr>
+    <tr><td>Arbeidstimer per ansatt per år</td><td><input class="num" data-scope="faste" data-k="timer" type="number" step="1" value="${Fk.timer}"></td></tr>
+    <tr><td>Fakturerbar andel (%)</td><td><input class="num" data-scope="faste" data-k="andel" data-t="pct" type="number" step="any" value="${pctIn(Fk.andel)}"></td></tr>
+    <tr><td>Sosiale kostnader på lønn (%)</td><td><input class="num" data-scope="faste" data-k="sos" data-t="pct" type="number" step="any" value="${pctIn(Fk.sos)}"></td></tr>
+    <tr><td>Fakturerbare timer totalt</td><td class="calc">${nf0.format(D.faktTot)} t</td></tr>
+    <tr><td>Overhead per fakturerbar time</td><td class="calc key">${nf0.format(D.overhead)} kr/t</td></tr>
+    <tr><td>Omsetning siste år (kr)</td><td><input class="num" data-scope="faste" data-k="omsetning" type="number" step="1" value="${Fk.omsetning}"></td></tr>
+    <tr><td>Faste kostnader i % av omsetning</td><td class="calc">${Fk.omsetning>0?pct(D.sumFaste/Fk.omsetning):"–"}</td></tr>
+  </tbody></table>`;
+
+  const rollerTbl = tbl([
+    {k:"navn",l:"Rolle",t:"text",wide:true},{k:"lonn",l:"Årslønn",t:"num",r:true},
+    {t:"calc",l:"Lønnskost/t",f:r=>nf0.format(D.roller[r.id].lonnskost)},
+    {t:"calc",l:"Overhead/t",f:r=>nf0.format(D.roller[r.id].overhead)},
+    {t:"calc",l:"Selvkost/t",f:r=>nf0.format(D.roller[r.id].selvkost)},
+    {k:"fortj",l:"Fortj. %",t:"pct",r:true,ph:pctIn(R.fortjeneste)},
+    {t:"calc",l:"Beregnet",f:r=>nf0.format(D.roller[r.id].beregnet)},
+    {k:"pris",l:"Brukt kr/t",t:"num",r:true,ph:Math.round(D.roller[r.id]?.beregnet/10)*10}
+  ],PB.roller);
+  const maskinTbl = tbl([{k:"navn",l:"Maskin",t:"text",wide:true},{k:"kost",l:"Kostnad",t:"num",r:true},{t:"calc",l:"Pris m/påslag",f:m=>nf0.format(D.maskin[m.id].pris)},{t:"calc",l:"Enhet",f:m=>m.enhet}],PB.maskin);
+  const sonerTbl = tbl([{k:"navn",l:"Sone",t:"text",wide:true},{k:"kost",l:"Kostnad",t:"num",r:true},{k:"pris",l:"Pris",t:"num",r:true}],PB.soner,null,{del:true});
+  const liftTbl = `<table class="pb"><thead><tr><th>Utstyr</th><th class="r">Kostnad/dag</th><th class="r">Pris/dag</th></tr></thead><tbody><tr><td>Lift</td><td><input class="num" data-scope="lift" data-k="kost" type="number" value="${PB.lift.kost}"></td><td><input class="num" data-scope="lift" data-k="pris" type="number" value="${PB.lift.pris}"></td></tr></tbody></table>`;
+  const rabattTbl = tbl([{k:"fra",l:"Fra antall",t:"num",r:true},{k:"pct",l:"Rabatt %",t:"pct",r:true}],PB.rabatt,null,{del:true});
+  const gradTbl = tbl([{k:"navn",l:"Graveringsgrad",t:"text",wide:true},{k:"min",l:"Min per dm²",t:"num",r:true}],PB.grad,null,{del:true})
+    + `<table class="pb"><tbody><tr><td>Kuttetid (min per løpemeter omkrets)</td><td><input class="num" data-scope="root" data-k="kutt" type="number" step="any" value="${PB.kutt}"></td></tr></tbody></table>`;
+  const bilerTbl = tbl([{k:"navn",l:"Kjøretøy",t:"text",wide:true},{k:"m2",l:"m² hel",t:"num",r:true},{k:"mont",l:"Mont. t hel",t:"num",r:true},{k:"demont",l:"Demont. t",t:"num",r:true}],PB.biler,null,{del:true});
+  const dekTbl = tbl([{k:"navn",l:"Dekningsgrad",t:"text",wide:true},{k:"andel",l:"Andel %",t:"pct",r:true},{k:"design",l:"Design t",t:"num",r:true}],PB.dekning,null,{del:true});
+  const trykkTbl = tbl([{k:"navn",l:"Metode",t:"text",wide:true},{k:"oppstart",l:"Oppstart kr",t:"num",r:true},{k:"stk",l:"Kr/stk/pos",t:"num",r:true}],PB.trykk,null,{del:true})
+    + `<table class="pb"><tbody><tr><td>Påslag på trykk/dekor (%)</td><td><input class="num" data-scope="root" data-k="paaslagTrykk" data-t="pct" type="number" step="any" value="${pctIn(PB.paaslagTrykk)}"></td></tr><tr><td>Standard påslag på innkjøpte artikler (%)</td><td><input class="num" data-scope="root" data-k="paaslagArt" data-t="pct" type="number" step="any" value="${pctIn(PB.paaslagArt)}"></td></tr></tbody></table>`;
+  const matTbl = tbl([
+    {k:"kat",l:"Kategori",t:"sel",opts:KAT},{k:"navn",l:"Materiale",t:"text",wide:true},{k:"enhet",l:"Enhet",t:"text"},
+    {k:"kjop",l:"Innkjøp",t:"num",r:true},{k:"svinn",l:"Svinn %",t:"pct",r:true},
+    {t:"calc",l:"Selvkost",f:m=>nf2.format(D.mat[m.navn]?.kost||0)},
+    {k:"paaslag",l:"Påslag %",t:"pct",r:true},
+    {t:"calc",l:"Salgspris",key:true,f:m=>nf2.format(D.mat[m.navn]?.pris||0)}
+  ],PB.materialer,null,{del:true});
+
+  g.innerHTML =
+    card("1 · Generelle regler",reglerTbl,"Minstepris løfter små jobber. Varselgrensen styrer statusen i kalkylen.") +
+    card("2 · Faste kostnader per år",fasteTbl,"Legg inn Byråets egne regnskapstall. Summen fordeles på fakturerbare timer.",{key:"faste"}) +
+    card("3 · Bemanning og overhead",bem,"<b>Overhead per time</b> legges automatisk oppå lønnskost i alle timepriser. 20–30 % faste kostnader av omsetning er vanlig.") +
+    card("4 · Timepriser",rollerTbl,"Lønnskost = årslønn × (1 + sosiale) / fakturerbare timer. <b>Brukt kr/t</b> er det modulene bruker – tomt felt = beregnet pris avrundet til nærmeste 10 kr. Skriv inn et tall for å låse.",{wide:true}) +
+    card("5 · Maskinkostnader",maskinTbl,"Kommer i tillegg til operatørtimer. Påslag fra regel 1.") +
+    card("6 · Reisesoner (tur/retur)",sonerTbl,"«Ingen reise» må beholdes som navn.",{key:"soner"}) +
+    card("7 · Lift",liftTbl) +
+    card("8 · Mengderabatt",rabattTbl,"Gjelder produksjonsdelen i Gravering og print + produksjon i Storformat.",{key:"rabatt"}) +
+    card("9 · Gravering – maskintid",gradTbl,null,{key:"grad"}) +
+    card("10 · Kjøretøy (bildekor)",bilerTbl,"Tall for hel foliering. Dekningsgrad skalerer ned.",{key:"biler"}) +
+    card("11 · Dekningsgrad (bildekor)",dekTbl,null,{key:"dekning"}) +
+    card("12 · Trykkmetoder (profil)",trykkTbl,null,{key:"trykk"}) +
+    card("13 · Materialer",matTbl,"Selvkost = innkjøp × (1 + svinn). Salgspris = selvkost × (1 + påslag). Navnet er nøkkelen modulene bruker – behold «Ingen plate» og «Ingen dekor».",{key:"materialer",wide:true});
+
+  // hendelser
+  g.querySelectorAll("input,select").forEach(el=>{
+    el.addEventListener("change",()=>{
+      const t=el.dataset.t, raw=el.value;
+      const val = el.type==="number" ? (raw===""?null:(t==="pct"?+raw/100:+raw)) : raw;
+      const sc=el.dataset.scope, k=el.dataset.k;
+      if(sc==="regler") PB.regler[k]=val??0;
+      else if(sc==="faste") PB.faste[k]=val??0;
+      else if(sc==="lift") PB.lift[k]=val??0;
+      else if(sc==="root") PB[k]=val??0;
+      else if(sc==="dato") PB.dato=raw;
+      else {
+        const table=el.closest(".card"); const key=table.querySelector("[data-add]")?.dataset.add || keyOf(table);
+        const list = key==="faste"?PB.faste.poster:PB[key];
+        const row=list[+el.dataset.i]; row[k]=val;
+      }
+      savePB(); renderPB(); calc();
+    });
+  });
+  g.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    const card=b.closest(".card"); const key=card.querySelector("[data-add]")?.dataset.add||keyOf(card);
+    const list=key==="faste"?PB.faste.poster:PB[key]; list.splice(+b.dataset.del,1); savePB(); renderPB(); calc();
+  });
+  g.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{
+    const key=b.dataset.add;
+    const blank={faste:{navn:"Ny post",kr:0},soner:{navn:"Ny sone",kost:0,pris:0},rabatt:{fra:0,pct:0},grad:{navn:"Ny grad",min:0},
+      biler:{navn:"Nytt kjøretøy",m2:0,mont:0,demont:0},dekning:{navn:"Ny grad",andel:0,design:0},trykk:{navn:"Ny metode",oppstart:0,stk:0},
+      materialer:{kat:"Plater",navn:"Nytt materiale",enhet:"m²",kjop:0,svinn:0,paaslag:0.6}}[key];
+    (key==="faste"?PB.faste.poster:PB[key]).push(blank); savePB(); renderPB(); calc();
+  });
+  function keyOf(card){ const t=card.querySelector("h2").textContent; if(t.includes("Timepriser")) return "roller"; if(t.includes("Maskin")) return "maskin"; return null; }
+}
+
+/* ============================================================
+   NAVIGASJON, KOPIERING, EKSPORT
+   ============================================================ */
+function show(view){
+  $("viewKalk").classList.toggle("hidden",view!=="kalk");
+  $("viewPris").classList.toggle("hidden",view!=="pris");
+  $("stick").style.display = view==="kalk" ? "" : "none";
+  $("btnKalk").classList.toggle("on",view==="kalk");
+  $("btnPris").classList.toggle("on",view==="pris");
+  if(view==="pris") renderPB(); else { renderFields(); calc(); }
+  updateHdr();
+}
+function updateHdr(){ $("hdrSub").textContent = `Prisbok oppdatert ${fmtDate(PB.dato)} · alle priser eks. mva`; }
+$("btnKalk").onclick=()=>show("kalk");
+$("btnPris").onclick=()=>show("pris");
+$("btnHelp").onclick=()=>$("help").classList.add("show");
+$("helpClose").onclick=()=>$("help").classList.remove("show");
+$("help").addEventListener("click",e=>{ if(e.target===$("help")) $("help").classList.remove("show"); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") $("help").classList.remove("show"); });
+
+$("btnCopy").onclick=async()=>{
+  const t=$("sumTxt").value;
+  try{ await navigator.clipboard.writeText(t); toast("Kopiert"); }
+  catch(e){ $("sumTxt").select(); document.execCommand("copy"); toast("Kopiert"); }
+};
+$("btnReset").onclick=()=>{ INPUTS[cur.id]=defaults(cur); renderFields(); calc(); toast("Nullstilt"); };
+function toast(t){ $("toast").textContent=t; setTimeout(()=>$("toast").textContent="",1800); }
+
+$("pbExport").onclick=()=>{
+  const blob=new Blob([JSON.stringify(PB,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`byraet-prisbok-${PB.dato}.json`; a.click();
+};
+$("pbImport").onclick=()=>$("pbFile").click();
+$("pbFile").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{ try{ const o=JSON.parse(r.result); if(o&&o.materialer&&o.roller){ PB=o; savePB(); renderPB(); updateHdr(); } else alert("Filen ser ikke ut som en prisbok."); }catch(err){ alert("Kunne ikke lese filen."); } };
+  r.readAsText(f); e.target.value="";
+});
+$("pbReset").onclick=()=>{ if(confirm("Tilbakestille hele prisboken til forslagsverdiene? Egne endringer forsvinner.")){ PB=JSON.parse(JSON.stringify(DEFAULT_PB)); savePB(); renderPB(); updateHdr(); } };
+
+renderMods(); renderFields(); calc(); updateHdr();
+</script>
+</body>
+</html>

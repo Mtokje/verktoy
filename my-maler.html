@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My-måler – simulator</title>
+<style>
+  :root{
+    --bg:#eef1f4; --card:#ffffff; --ink:#1c2430; --muted:#5b6774; --line:#d7dde4;
+    --accent:#1f5fa8; --accent-soft:#e3ecf8;
+    --ok:#2e8b57; --warn:#d98b00; --bad:#c0392b; --thick:#7b4bb0;
+    --lcd:#c9d6b8; --lcd-ink:#1b2a1b;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header h1{font-size:1.25rem;margin:0}
+  header .sub{color:var(--muted);font-size:.9rem}
+  header .badge{margin-left:auto;font-size:.75rem;background:var(--accent-soft);color:var(--accent);padding:4px 10px;border-radius:999px;font-weight:600}
+  main{max-width:1240px;margin:0 auto;padding:16px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px}
+  @media (max-width:900px){main{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .card h2{font-size:1rem;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+  .card h2 .step{background:var(--accent);color:#fff;border-radius:999px;width:22px;height:22px;display:inline-grid;place-items:center;font-size:.8rem}
+  .hint{color:var(--muted);font-size:.85rem;margin:0 0 8px}
+  .stack{display:flex;flex-direction:column;gap:16px}
+
+  /* Plate */
+  .plate-wrap{position:relative;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+  .plate-wrap canvas{width:100%;height:auto;display:block;border-radius:10px;cursor:none}
+  .plate-wrap.no-probe canvas{cursor:default}
+  .probe{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;pointer-events:none;display:none;transition:transform .08s}
+  .probe.show{display:block}
+  .probe.press{transform:scale(.82)}
+  .probe svg{width:100%;height:100%;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+  .plate-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:.85rem;color:var(--muted)}
+  .legend{display:none;gap:10px;flex-wrap:wrap;font-size:.8rem}
+  .legend.show{display:flex}
+  .legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px;background:var(--c)}
+
+  /* Gauge */
+  .gauge{background:linear-gradient(160deg,#3a4250,#20262f);border-radius:22px;padding:16px 16px 18px;color:#dfe5ec;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 24px rgba(0,0,0,.25)}
+  .gauge .brand{display:flex;justify-content:space-between;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#9aa5b3;margin-bottom:10px}
+  .lcd{background:var(--lcd);color:var(--lcd-ink);border-radius:10px;padding:10px 12px;box-shadow:inset 0 2px 6px rgba(0,0,0,.35);font-family:ui-monospace,Menlo,Consolas,monospace;position:relative;min-height:96px}
+  .lcd .top{display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;opacity:.8}
+  .lcd .top .kal{color:#8a1c1c}
+  .lcd .val{font-size:3rem;font-weight:800;letter-spacing:.06em;text-align:right;line-height:1.1}
+  .lcd .val small{font-size:1rem;font-weight:700;margin-left:6px;letter-spacing:0}
+  .lcd .bot{display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;opacity:.8}
+  .gauge .btns{display:flex;gap:10px;margin-top:14px;align-items:center}
+  .gauge button{border:0;cursor:pointer;font:inherit}
+  .btn-measure{flex:1;background:radial-gradient(circle at 30% 30%,#ff8a5c,#c9411f);color:#fff;font-weight:800;font-size:1.05rem;letter-spacing:.08em;border-radius:14px;padding:14px;box-shadow:0 4px 0 #8b2a12, 0 6px 10px rgba(0,0,0,.35);transition:transform .05s,box-shadow .05s}
+  .btn-measure:active{transform:translateY(3px);box-shadow:0 1px 0 #8b2a12}
+  .btn-measure:disabled{opacity:.5;cursor:not-allowed}
+  .btn-small{background:#4a5566;color:#e6ebf1;border-radius:10px;padding:10px 12px;font-size:.8rem;font-weight:600}
+  .btn-small:hover{background:#5a6678}
+  .btn-small.off{opacity:.55}
+
+  /* Buttons general */
+  .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font:inherit;font-size:.9rem;cursor:pointer;color:var(--ink)}
+  .btn:hover{background:#f5f7fa}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .btn.primary:hover{background:#184d8a}
+  .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:600}
+  .btn.bad{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:600}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  label.inline{display:flex;align-items:center;gap:6px;font-size:.9rem}
+  input[type=number]{width:90px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;font:inherit}
+  select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font:inherit}
+
+  /* Calibration */
+  .cal-steps{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .cal-step{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;font-size:.85rem}
+  .cal-step .target{height:54px;border-radius:8px;margin-bottom:8px;display:grid;place-items:center;font-weight:700;cursor:pointer;border:2px solid transparent;transition:border-color .1s}
+  .cal-step .target:hover{border-color:var(--accent)}
+  .cal-step .target.zero{background:repeating-linear-gradient(45deg,#8e969e 0 6px,#a4abb3 6px 12px);color:#1c2430}
+  .cal-step .target.foil{background:linear-gradient(135deg,#e3c25a,#f4e29a);color:#4a3a00}
+  .cal-step.done{border-color:var(--ok);background:#eef8f1}
+  .cal-step .st{display:block;margin-top:4px;color:var(--muted)}
+  .cal-step.done .st{color:var(--ok);font-weight:600}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0}
+  .stat{background:#f6f8fa;border-radius:10px;padding:8px;text-align:center}
+  .stat .v{font-size:1.3rem;font-weight:700}
+  .stat .l{font-size:.72rem;color:var(--muted);letter-spacing:.05em}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;min-height:28px}
+  .chip{font-size:.8rem;padding:3px 8px;border-radius:999px;background:#eef1f4;border:1px solid var(--line);font-variant-numeric:tabular-nums}
+  .chip.c-bad{background:#fbe9e7;border-color:#f1b8b0;color:#8f2a1f}
+  .chip.c-warn{background:#fff3dd;border-color:#f3d597;color:#7a4d00}
+  .chip.c-ok{background:#e8f5ec;border-color:#b6dfc3;color:#1f5e3a}
+  .chip.c-thick{background:#f0e8f8;border-color:#d3bfe8;color:#4f2a7a}
+
+  /* Verdict */
+  .checks{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+  .check{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;background:#f6f8fa;font-size:.9rem}
+  .check .ic{width:24px;height:24px;border-radius:999px;display:grid;place-items:center;color:#fff;font-weight:800;flex:none}
+  .check.pass .ic{background:var(--ok)} .check.fail .ic{background:var(--bad)} .check.na .ic{background:#9aa5b3}
+  .result{border-radius:12px;padding:12px 14px;margin-top:10px;font-size:.95rem}
+  .result.good{background:#e8f5ec;border:1px solid #b6dfc3}
+  .result.bad{background:#fbe9e7;border:1px solid #f1b8b0}
+  .result.neutral{background:#fff3dd;border:1px solid #f3d597}
+  .result p{margin:4px 0}
+  .rules{font-size:.85rem;color:var(--muted)}
+  .rules ul{margin:4px 0 0 18px;padding:0}
+  .draft{display:inline-block;font-size:.7rem;background:#fff3dd;color:#7a4d00;padding:2px 8px;border-radius:999px;font-weight:600;vertical-align:middle}
+  details summary{cursor:pointer;font-weight:600;font-size:.9rem}
+  details p{font-size:.88rem;margin:6px 0}
+  footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>My-måler – simulator</h1>
+    <div class="sub">Mål tørrfilmtykkelse (DFT) på en malt flate og vurder mot spesifikasjonen</div>
+  </div>
+  <span class="badge">Overflate · Stord Academy</span>
+</header>
+
+<main>
+  <!-- Venstre: flaten -->
+  <div class="stack">
+    <section class="card">
+      <h2><span class="step">2</span> Malt flate <span style="font-weight:400;color:var(--muted);font-size:.85rem">– 1000 × 500 mm (tenkt)</span></h2>
+      <p class="hint" id="plateHint">Før proben over flaten og trykk for å måle. På mobil: trykk direkte der du vil måle.</p>
+      <div class="plate-wrap" id="plateWrap">
+        <canvas id="plate" width="1000" height="500"></canvas>
+        <div class="probe" id="probe">
+          <svg viewBox="0 0 44 44">
+            <circle cx="22" cy="22" r="19" fill="#2b323c" stroke="#e8edf2" stroke-width="2"/>
+            <circle cx="22" cy="22" r="10" fill="#c9d6b8" stroke="#1b2a1b" stroke-width="1.5"/>
+            <circle cx="22" cy="22" r="2.5" fill="#1b2a1b"/>
+            <path d="M22 3v7M22 34v7M3 22h7M34 22h7" stroke="#e8edf2" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="plate-foot">
+        <div class="row">
+          <button class="btn" id="undoBtn">Angre siste</button>
+          <button class="btn" id="clearBtn">Slett alle målinger</button>
+          <label class="inline"><input type="checkbox" id="zonesChk" checked> Vis soner</label>
+        </div>
+        <div class="legend" id="legend">
+          <span style="--c:#c0392b">&lt; 80 % av NDFT</span>
+          <span style="--c:#e0a030">80–100 %</span>
+          <span style="--c:#3aa065">100–200 %</span>
+          <span style="--c:#7b4bb0">&gt; 200 %</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="step">3</span> Vurdering</h2>
+      <div class="stats">
+        <div class="stat"><div class="v" id="sN">0</div><div class="l">Målinger</div></div>
+        <div class="stat"><div class="v" id="sMean">–</div><div class="l">Snitt µm</div></div>
+        <div class="stat"><div class="v" id="sMin">–</div><div class="l">Min µm</div></div>
+        <div class="stat"><div class="v" id="sMax">–</div><div class="l">Maks µm</div></div>
+      </div>
+      <div class="chips" id="chips"></div>
+      <p class="hint" style="margin-top:10px">Når du har målt nok punkter, fordelt over hele flaten: Er belegget godkjent etter kravene?</p>
+      <div class="row">
+        <button class="btn ok" id="okBtn">Godkjent</button>
+        <button class="btn bad" id="badBtn">Ikke godkjent</button>
+        <button class="btn primary" id="newBtn" style="margin-left:auto">Ny flate</button>
+      </div>
+      <div id="verdict"></div>
+      <div class="rules" style="margin-top:12px">
+        <strong>Krav som brukes</strong> <span class="draft">utkast – QA pågår</span>
+        <ul>
+          <li>Gjennomsnittet skal være ≥ NDFT</li>
+          <li>Ingen enkeltmåling under 80 % av NDFT</li>
+          <li>Ingen enkeltmåling over 200 % av NDFT (maks-grense, eksempel)</li>
+          <li>Minst 6 målinger, minst én i hver av de 6 sonene</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <!-- Høyre: måler, kalibrering, innstillinger -->
+  <div class="stack">
+    <section class="card">
+      <h2><span class="step">1</span> Måler</h2>
+      <div class="gauge">
+        <div class="brand"><span>DFT · Fe</span><span>my-måler</span></div>
+        <div class="lcd">
+          <div class="top"><span id="lcdMode">Fe</span><span class="kal" id="lcdKal">KAL?</span></div>
+          <div class="val"><span id="lcdVal">---</span><small>µm</small></div>
+          <div class="bot"><span id="lcdN">n=0</span><span id="lcdAvg">snitt ---</span></div>
+        </div>
+        <div class="btns">
+          <button class="btn-measure" id="measureBtn">MÅL</button>
+          <button class="btn-small" id="soundBtn" title="Lyd av/på">🔊</button>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:8px">MÅL-knappen måler der proben står. Måler du samme punkt flere ganger ser du hvor mye måleren varierer.</p>
+    </section>
+
+    <section class="card" id="calCard">
+      <h2>Kalibrering</h2>
+      <p class="hint">Sjekk måleren før du måler: null på ubehandlet stål, så mot en folie med kjent tykkelse.</p>
+      <div class="cal-steps">
+        <div class="cal-step" id="calZero">
+          <div class="target zero" id="zeroTarget">Nullplate</div>
+          <div>Avlest: <strong id="zeroRead">–</strong></div>
+          <button class="btn" id="zeroBtn" disabled style="margin-top:6px">Nullstill</button>
+          <span class="st" id="zeroSt">Ikke nullstilt</span>
+        </div>
+        <div class="cal-step" id="calFoil">
+          <div class="target foil" id="foilTarget">Folie 250 µm</div>
+          <div>Avlest: <strong id="foilRead">–</strong></div>
+          <button class="btn" id="foilBtn" disabled style="margin-top:6px">Juster til 250</button>
+          <span class="st" id="foilSt">Ikke justert</span>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="newGaugeBtn">Ny måler (ny feil)</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Innstillinger</h2>
+      <div class="row" style="margin-bottom:8px">
+        <label class="inline">NDFT
+          <select id="ndftSel">
+            <option value="60">60 µm</option>
+            <option value="125">125 µm</option>
+            <option value="200">200 µm</option>
+            <option value="300" selected>300 µm</option>
+            <option value="400">400 µm</option>
+            <option value="500">500 µm</option>
+          </select>
+        </label>
+      </div>
+      <label class="inline"><input type="checkbox" id="calChk" checked> Krev kalibrering av måleren</label>
+      <p class="hint" style="margin:8px 0 0">NDFT = nominell (spesifisert) tørrfilmtykkelse. Ny flate lages med samme NDFT.</p>
+    </section>
+
+    <section class="card">
+      <details>
+        <summary>Slik bruker du simulatoren</summary>
+        <p><strong>1.</strong> Kalibrer måleren på nullplate og folie.</p>
+        <p><strong>2.</strong> Mål minst 6 punkter, spredt over hele flaten. Ikke bare i midten – tynne kanter og sig avslører seg først når du måler overalt.</p>
+        <p><strong>3.</strong> Se på snitt, min og maks. Bestem om belegget er godkjent, og trykk på svaret ditt. Du får fasit og et kart over den virkelige tykkelsen.</p>
+        <p>Hver ny flate har en skjult «tilstand» – jevn, for tynn, ujevn, tynne kanter eller sig. Målerens avlesning varierer litt fra gang til gang, akkurat som i virkeligheten.</p>
+      </details>
+    </section>
+  </div>
+</main>
+
+<footer>Simulator for opplæring. Tallverdier er utkast og skal kvalitetssikres av fagansvarlig.</footer>
+
+<script>
+(function(){
+  'use strict';
+  // ---------- Hjelpere ----------
+  const $=id=>document.getElementById(id);
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  function gauss(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+  // ---------- Tilstand ----------
+  const NX=80,NY=40;
+  let ndft=300;
+  let field=new Float32Array(NX*NY);
+  let scenario=null;
+  let meas=[];               // {u,v,val}
+  let probe={u:null,v:null};
+  let revealed=false;
+  let answered=false;
+  let sound=true;
+  let requireCal=true;
+  let gauge={offset:0,gain:1,corrOff:0,corrGain:1,zeroDone:false,foilDone:false,lastZeroRaw:null,lastFoilRaw:null};
+
+  const SCEN={
+    god:  {base:1.10,amp:0.08,desc:'Jevnt påført. Tykkelsen ligger litt over NDFT over hele flaten.'},
+    tynn: {base:0.88,amp:0.08,desc:'For tynt påført. Snittet ligger under NDFT selv om flaten ser jevn ut.'},
+    ujevn:{base:1.05,amp:0.30,desc:'Ujevn sprøyting. Snittet er greit, men enkelte felt ligger under 80 % av NDFT.'},
+    kant: {base:1.12,amp:0.07,edge:0.45,desc:'Tynne kanter. Midten er fin, men langs kantene faller tykkelsen godt under kravet.'},
+    sig:  {base:1.05,amp:0.08,blob:1.3,desc:'Sig / overtykkelse. Et felt har fått altfor mye maling og ligger over maks-grensen.'}
+  };
+
+  // ---------- Felt ----------
+  function genField(){
+    const key=pick(['god','god','tynn','ujevn','kant','sig']);
+    const s=SCEN[key];
+    const gx=8,gy=4,coarse=[];
+    for(let i=0;i<(gx+1)*(gy+1);i++)coarse.push(rnd(-1,1));
+    const f1=rnd(4,9),f2=rnd(4,9),p1=rnd(0,6.28),p2=rnd(0,6.28);
+    const gradx=rnd(-0.08,0.08),grady=rnd(-0.06,0.06);
+    const bx=rnd(0.15,0.85),by=rnd(0.2,0.8),bs=rnd(0.05,0.09);
+    for(let y=0;y<NY;y++)for(let x=0;x<NX;x++){
+      const nx=x/(NX-1),ny=y/(NY-1);
+      const cx=nx*gx,cy=ny*gy,ix=Math.min(gx-1,Math.floor(cx)),iy=Math.min(gy-1,Math.floor(cy)),fx=cx-ix,fy=cy-iy;
+      const c=(i,j)=>coarse[j*(gx+1)+i];
+      const n=(c(ix,iy)*(1-fx)+c(ix+1,iy)*fx)*(1-fy)+(c(ix,iy+1)*(1-fx)+c(ix+1,iy+1)*fx)*fy;
+      const n2=Math.sin(nx*f1+p1)*Math.cos(ny*f2+p2);
+      let v=s.base+s.amp*(0.7*n+0.4*n2)+gradx*(nx-0.5)+grady*(ny-0.5);
+      if(s.edge){const d=Math.min(nx,1-nx,ny*0.5,(1-ny)*0.5);v*=1-s.edge*Math.max(0,(0.10-d)/0.10);}
+      if(s.blob){const dx=(nx-bx),dy=(ny-by)*0.5;v+=s.blob*Math.exp(-(dx*dx+dy*dy)/(2*bs*bs));}
+      field[y*NX+x]=Math.max(0.2,v)*ndft;
+    }
+    scenario={key,...s};
+  }
+  function sample(u,v){
+    const cx=clamp(u,0,1)*(NX-1),cy=clamp(v,0,1)*(NY-1);
+    const ix=Math.min(NX-2,Math.floor(cx)),iy=Math.min(NY-2,Math.floor(cy)),fx=cx-ix,fy=cy-iy;
+    const f=(i,j)=>field[j*NX+i];
+    return (f(ix,iy)*(1-fx)+f(ix+1,iy)*fx)*(1-fy)+(f(ix,iy+1)*(1-fx)+f(ix+1,iy+1)*fx)*fy;
+  }
+  function fieldStats(){
+    let mn=1e9,mx=0,sum=0;
+    for(let i=0;i<field.length;i++){const t=field[i];sum+=t;if(t<mn)mn=t;if(t>mx)mx=t;}
+    return {mean:sum/field.length,min:mn,max:mx};
+  }
+
+  // ---------- Måler ----------
+  function newGauge(){
+    gauge.offset=requireCal?rnd(6,22)*(Math.random()<0.5?-1:1):0;
+    gauge.gain=requireCal?rnd(0.93,1.07):1;
+    gauge.corrOff=0;gauge.corrGain=1;
+    gauge.zeroDone=!requireCal;gauge.foilDone=!requireCal;
+    gauge.lastZeroRaw=null;gauge.lastFoilRaw=null;
+    $('zeroRead').textContent='–';$('foilRead').textContent='–';
+    $('zeroBtn').disabled=true;$('foilBtn').disabled=true;
+    updateCalUI();updateLCD(null);
+  }
+  const isCal=()=>gauge.zeroDone&&gauge.foilDone;
+  function rawReading(truth){return truth*gauge.gain+gauge.offset+gauss()*Math.max(2,truth*0.02);}
+  function shown(raw){return Math.round((raw-gauge.corrOff)*gauge.corrGain);}
+  function updateCalUI(){
+    $('calZero').classList.toggle('done',gauge.zeroDone);
+    $('calFoil').classList.toggle('done',gauge.foilDone);
+    $('zeroSt').textContent=gauge.zeroDone?'Nullstilt ✓':'Ikke nullstilt';
+    $('foilSt').textContent=gauge.foilDone?'Justert ✓':'Ikke justert';
+    $('lcdKal').textContent=isCal()?'':'KAL?';
+    $('calCard').style.display=requireCal?'':'none';
+  }
+  function beep(){
+    if(!sound)return;
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+      if(!beep.ctx)beep.ctx=new AC();
+      const c=beep.ctx,o=c.createOscillator(),g=c.createGain();
+      o.type='square';o.frequency.value=1500;g.gain.value=0.05;
+      o.connect(g);g.connect(c.destination);o.start();
+      g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+0.09);o.stop(c.currentTime+0.1);
+    }catch(e){}
+  }
+  function updateLCD(val){
+    $('lcdVal').textContent=val==null?'---':String(val);
+    const n=meas.length;
+    $('lcdN').textContent='n='+n;
+    $('lcdAvg').textContent=n?('snitt '+Math.round(meas.reduce((a,m)=>a+m.val,0)/n)):'snitt ---';
+    $('lcdKal').textContent=isCal()?'':'KAL?';
+  }
+
+  // Kalibrering – klikk på målene
+  $('zeroTarget').addEventListener('click',()=>{
+    const raw=rawReading(0);gauge.lastZeroRaw=raw;
+    const v=shown(raw);$('zeroRead').textContent=v+' µm';updateLCD(v);beep();pressProbe();
+    $('zeroBtn').disabled=false;
+  });
+  $('zeroBtn').addEventListener('click',()=>{
+    gauge.corrOff=gauge.lastZeroRaw;gauge.zeroDone=true;
+    $('zeroRead').textContent='0 µm';updateLCD(0);updateCalUI();
+  });
+  $('foilTarget').addEventListener('click',()=>{
+    const raw=rawReading(250);gauge.lastFoilRaw=raw;
+    const v=shown(raw);$('foilRead').textContent=v+' µm';updateLCD(v);beep();pressProbe();
+    $('foilBtn').disabled=!gauge.zeroDone;
+    if(!gauge.zeroDone)$('foilSt').textContent='Nullstill først';
+  });
+  $('foilBtn').addEventListener('click',()=>{
+    const net=gauge.lastFoilRaw-gauge.corrOff;
+    if(net>50){gauge.corrGain=250/net;gauge.foilDone=true;}
+    $('foilRead').textContent='250 µm';updateLCD(250);updateCalUI();
+  });
+  $('newGaugeBtn').addEventListener('click',()=>{newGauge();});
+  $('calChk').addEventListener('change',e=>{requireCal=e.target.checked;newGauge();});
+
+  // ---------- Tegning ----------
+  const canvas=$('plate'),ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  let base=null;
+  function makeBase(){
+    base=document.createElement('canvas');base.width=W;base.height=H;
+    const b=base.getContext('2d');
+    const g=b.createLinearGradient(0,0,W,H);g.addColorStop(0,'#8d979f');g.addColorStop(.5,'#7e888f');g.addColorStop(1,'#6f7980');
+    b.fillStyle=g;b.fillRect(0,0,W,H);
+    // sprøytetekstur
+    for(let i=0;i<9000;i++){b.fillStyle=`rgba(${Math.random()<0.5?255:0},${Math.random()<0.5?255:0},${Math.random()<0.5?255:0},${rnd(0.02,0.06)})`;b.fillRect(Math.random()*W,Math.random()*H,rnd(1,3),rnd(1,3));}
+    // glans
+    const s=b.createLinearGradient(0,0,W*0.6,H);s.addColorStop(0,'rgba(255,255,255,.14)');s.addColorStop(.4,'rgba(255,255,255,0)');
+    b.fillStyle=s;b.fillRect(0,0,W,H);
+    // kant
+    b.strokeStyle='#2f3740';b.lineWidth=8;b.strokeRect(4,4,W-8,H-8);
+  }
+  function colorFor(ratio){
+    if(ratio<0.8)return '#c0392b';
+    if(ratio<1.0)return '#e0a030';
+    if(ratio<=2.0){const t=(ratio-1);return `hsl(${140-t*20} ${45+t*15}% ${44-t*14}%)`;}
+    return '#7b4bb0';
+  }
+  function chipClass(val){const r=val/ndft;return r<0.8?'c-bad':r<1?'c-warn':r<=2?'c-ok':'c-thick';}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.drawImage(base,0,0);
+    if(revealed){
+      const cw=W/NX,ch=H/NY;
+      ctx.globalAlpha=0.78;
+      for(let y=0;y<NY;y++)for(let x=0;x<NX;x++){ctx.fillStyle=colorFor(field[y*NX+x]/ndft);ctx.fillRect(x*cw,y*ch,cw+0.6,ch+0.6);}
+      ctx.globalAlpha=1;
+    }
+    if($('zonesChk').checked){
+      ctx.setLineDash([12,10]);ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=2;
+      for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(i*W/3,8);ctx.lineTo(i*W/3,H-8);ctx.stroke();}
+      ctx.beginPath();ctx.moveTo(8,H/2);ctx.lineTo(W-8,H/2);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='600 16px system-ui';
+      for(let z=0;z<6;z++){const zx=(z%3)*W/3+14,zy=Math.floor(z/3)*H/2+26;ctx.fillText('Sone '+(z+1),zx,zy);}
+    }
+    meas.forEach((m,i)=>{
+      const x=m.u*W,y=m.v*H;
+      ctx.beginPath();ctx.arc(x,y,15,0,6.283);ctx.fillStyle=colorFor(m.val/ndft);ctx.fill();
+      ctx.lineWidth=3;ctx.strokeStyle='#fff';ctx.stroke();
+      ctx.fillStyle='#fff';ctx.font='700 14px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i+1),x,y+1);
+      ctx.font='700 13px system-ui';ctx.fillStyle='rgba(0,0,0,.55)';
+      const lbl=m.val+' µm';const tw=ctx.measureText(lbl).width;ctx.fillRect(x-tw/2-5,y+18,tw+10,18);
+      ctx.fillStyle='#fff';ctx.fillText(lbl,x,y+27);
+      ctx.textAlign='start';ctx.textBaseline='alphabetic';
+    });
+  }
+
+  // ---------- Probe og måling ----------
+  const wrap=$('plateWrap'),probeEl=$('probe');
+  function posFromEvent(e){
+    const r=canvas.getBoundingClientRect();
+    const p=e.touches?e.touches[0]:e;
+    return {u:clamp((p.clientX-r.left)/r.width,0,1),v:clamp((p.clientY-r.top)/r.height,0,1)};
+  }
+  function placeProbe(u,v){
+    probe.u=u;probe.v=v;
+    probeEl.style.left=(u*100)+'%';probeEl.style.top=(v*100)+'%';
+    probeEl.classList.add('show');
+    $('measureBtn').disabled=false;
+  }
+  function pressProbe(){probeEl.classList.add('press');setTimeout(()=>probeEl.classList.remove('press'),110);}
+  function measure(){
+    if(probe.u==null||answered)return;
+    const truth=sample(probe.u,probe.v);
+    const val=Math.max(0,shown(rawReading(truth)));
+    meas.push({u:probe.u,v:probe.v,val});
+    pressProbe();beep();updateLCD(val);draw();updateStats();
+  }
+  canvas.addEventListener('mousemove',e=>{if(answered)return;const p=posFromEvent(e);placeProbe(p.u,p.v);});
+  canvas.addEventListener('click',e=>{if(answered)return;const p=posFromEvent(e);placeProbe(p.u,p.v);measure();});
+  canvas.addEventListener('touchstart',e=>{if(answered)return;e.preventDefault();const p=posFromEvent(e);placeProbe(p.u,p.v);measure();},{passive:false});
+  $('measureBtn').addEventListener('click',measure);
+  $('measureBtn').disabled=true;
+  $('soundBtn').addEventListener('click',()=>{sound=!sound;$('soundBtn').textContent=sound?'🔊':'🔇';$('soundBtn').classList.toggle('off',!sound);});
+  $('zonesChk').addEventListener('change',draw);
+  $('undoBtn').addEventListener('click',()=>{if(answered)return;meas.pop();updateLCD(meas.length?meas[meas.length-1].val:null);draw();updateStats();});
+  $('clearBtn').addEventListener('click',()=>{if(answered)return;meas=[];updateLCD(null);draw();updateStats();});
+
+  // ---------- Statistikk og vurdering ----------
+  function stats(vals){
+    const n=vals.length;if(!n)return null;
+    const mean=vals.reduce((a,b)=>a+b,0)/n,min=Math.min(...vals),max=Math.max(...vals);
+    const sd=n>1?Math.sqrt(vals.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)):0;
+    return {n,mean,min,max,sd};
+  }
+  function zonesCovered(){
+    const z=new Set();meas.forEach(m=>z.add(Math.min(2,Math.floor(m.u*3))+3*Math.min(1,Math.floor(m.v*2))));
+    return z;
+  }
+  function updateStats(){
+    const s=stats(meas.map(m=>m.val));
+    $('sN').textContent=meas.length;
+    $('sMean').textContent=s?Math.round(s.mean):'–';
+    $('sMin').textContent=s?s.min:'–';
+    $('sMax').textContent=s?s.max:'–';
+    $('chips').innerHTML=meas.map((m,i)=>`<span class="chip ${chipClass(m.val)}">${i+1}: ${m.val}</span>`).join('');
+  }
+  function judge(st){ // st = {mean,min,max}
+    return {mean:st.mean>=ndft,min:st.min>=0.8*ndft,max:st.max<=2*ndft};
+  }
+  function answer(studentSaysOk){
+    if(answered)return;
+    const s=stats(meas.map(m=>m.val));
+    const zones=zonesCovered();
+    if(!s){renderVerdict(`<div class="result neutral"><p>Du har ikke målt noe ennå. Mål minst 6 punkter først.</p></div>`);return;}
+    answered=true;revealed=true;
+    wrap.classList.add('no-probe');probeEl.classList.remove('show');$('measureBtn').disabled=true;
+    $('legend').classList.add('show');draw();
+
+    const j=judge(s);
+    const enough=s.n>=6,cover=zones.size===6;
+    const fromMeas=j.mean&&j.min&&j.max&&enough&&cover;
+    const truth=fieldStats();const jt=judge(truth);
+    const truthOk=jt.mean&&jt.min&&jt.max;
+    const cal=isCal();
+
+    const chk=(ok,txt)=>`<div class="check ${ok?'pass':'fail'}"><span class="ic">${ok?'✓':'✗'}</span><span>${txt}</span></div>`;
+    let html='<div class="checks">';
+    html+=chk(j.mean,`Snitt ${Math.round(s.mean)} µm ≥ NDFT ${ndft} µm`);
+    html+=chk(j.min,`Laveste måling ${s.min} µm ≥ 80 % (${Math.round(0.8*ndft)} µm)`);
+    html+=chk(j.max,`Høyeste måling ${s.max} µm ≤ 200 % (${2*ndft} µm)`);
+    html+=chk(enough,`${s.n} målinger (minst 6)`);
+    html+=chk(cover,`Målt i ${zones.size} av 6 soner`);
+    html+='</div>';
+
+    let cls,head,body='';
+    const studentRight=(studentSaysOk===fromMeas);
+    if(!cal){
+      cls='bad';head='Måleren var ikke kalibrert';
+      body+=`<p>Avlesningene har en skjult feil (offset ${gauge.offset>0?'+':''}${Math.round(gauge.offset)} µm, faktor ${gauge.gain.toFixed(2)}). Uansett hva du svarte kan ikke målingene brukes. Kalibrer alltid først.</p>`;
+    }else if(studentRight){
+      cls='good';head=`Riktig – ut fra dine målinger er belegget ${fromMeas?'godkjent':'ikke godkjent'}`;
+    }else{
+      cls='bad';head=`Ikke riktig – ut fra dine målinger er belegget ${fromMeas?'godkjent':'ikke godkjent'}`;
+    }
+    if(fromMeas!==truthOk&&cal){
+      body+=`<p><strong>Men se på kartet:</strong> hele flaten er egentlig <strong>${truthOk?'godkjent':'ikke godkjent'}</strong> (virkelig snitt ${Math.round(truth.mean)}, min ${Math.round(truth.min)}, maks ${Math.round(truth.max)} µm). ${truthOk?'Målingene dine traff tilfeldigvis dårlige punkter, eller for få punkter.':'Du målte ikke der belegget var dårlig. Spre målepunktene bedre – kanter, hjørner og steder der det ser annerledes ut.'}</p>`;
+    }else if(cal){
+      body+=`<p>Virkelig tykkelse på hele flaten: snitt ${Math.round(truth.mean)}, min ${Math.round(truth.min)}, maks ${Math.round(truth.max)} µm.</p>`;
+    }
+    body+=`<p><strong>Tilstand:</strong> ${scenario.desc}</p>`;
+    if(s.n>1)body+=`<p class="hint" style="margin:6px 0 0">Standardavvik i dine målinger: ${s.sd.toFixed(1)} µm.</p>`;
+    renderVerdict(html+`<div class="result ${cls}"><p><strong>${head}</strong></p>${body}</div>`);
+    $('plateHint').textContent='Fasit vises på flaten. Trykk «Ny flate» for å prøve igjen.';
+  }
+  function renderVerdict(h){$('verdict').innerHTML=h;}
+  $('okBtn').addEventListener('click',()=>answer(true));
+  $('badBtn').addEventListener('click',()=>answer(false));
+
+  function newPlate(){
+    ndft=parseInt($('ndftSel').value,10);
+    genField();meas=[];revealed=false;answered=false;probe.u=null;probe.v=null;
+    wrap.classList.remove('no-probe');probeEl.classList.remove('show');$('measureBtn').disabled=true;
+    $('legend').classList.remove('show');renderVerdict('');updateLCD(null);updateStats();draw();
+    $('plateHint').textContent='Før proben over flaten og trykk for å måle. På mobil: trykk direkte der du vil måle.';
+  }
+  $('newBtn').addEventListener('click',newPlate);
+  $('ndftSel').addEventListener('change',newPlate);
+
+  // ---------- Start ----------
+  makeBase();newGauge();newPlate();
+})();
+</script>
+</body>
+</html>

@@ -121,6 +121,26 @@
   .check > div i{width:16px;height:16px;border:1px solid var(--ink);border-radius:3px;display:inline-block;position:relative;top:2px;transition:background .5s;}
   .check > div i::after{content:"";position:absolute;left:4px;top:1px;width:5px;height:9px;border:solid var(--paper);border-width:0 2px 2px 0;transform:rotate(45deg) scale(0);transition:transform .3s .3s;}
   .check b{font-weight:500;} .check span{color:var(--ink2);font-size:15px;display:block;}
+  /* agenda */
+  .agenda .task{grid-template-columns:44px 1fr auto;}
+  .agenda .task small{font-size:13px;}
+  /* links */
+  .links{display:flex;flex-wrap:wrap;gap:12px;margin-top:40px;}
+  .links a{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border:1px solid var(--ink);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;font-weight:500;letter-spacing:.02em;transition:background .3s,color .3s;}
+  .links a:hover{background:var(--ink);color:var(--paper);}
+  .links a::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c);}
+  /* cue: discreet marker for leaving the story */
+  .cues{display:flex;flex-wrap:wrap;gap:14px 34px;margin-top:52px;}
+  .cue{display:inline-flex;align-items:center;gap:14px;text-decoration:none;color:inherit;padding:10px 0;border-top:1px solid var(--rule);}
+  .cue .mk{width:18px;height:18px;border:1px solid var(--ink);border-radius:3px;position:relative;flex:none;}
+  .cue .mk::before{content:"";position:absolute;right:-4px;top:-4px;width:7px;height:7px;border-radius:50%;background:var(--c);animation:pulse 2.4s infinite;}
+  .cue .mk::after{content:"";position:absolute;left:5px;top:5px;width:6px;height:6px;border-top:1px solid var(--ink);border-right:1px solid var(--ink);transform:rotate(45deg);}
+  .cue em{font-style:normal;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);}
+  .cue b{font-weight:500;font-size:14px;color:var(--ink);}
+  a.cue:hover b{text-decoration:underline;text-underline-offset:3px;}
+  section.dark .cue{border-top-color:rgba(244,243,239,.2);} section.dark .cue .mk{border-color:var(--paper);} section.dark .cue .mk::after{border-color:var(--paper);} section.dark .cue b{color:var(--paper);}
+  .q{display:grid;gap:18px;margin-top:40px;}
+  .q .rule .n{font-size:28px;}
   /* end */
   .slow{opacity:0;filter:blur(8px);transform:translateY(10px);transition:opacity 3s ease,filter 3s ease,transform 3s ease;margin-top:.3em;color:var(--ink2);}
   .slow.show{opacity:1;filter:blur(0);transform:none;}
@@ -134,15 +154,73 @@
 
 <div class="crop tl"></div><div class="crop tr"></div><div class="crop bl"></div><div class="crop br"></div>
 <div id="strip"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
-<div id="brand"><b>Byrået</b> · Claude · august 2026</div>
-<div id="meta"><span class="reg" id="reg"></span><span id="page">01 / 14</span></div>
+<div id="brand"><b>Byrået</b> · Claude · 7. september 2026</div>
+<div id="meta"><span class="reg" id="reg"></span><span id="page">01 / 16</span></div>
 <div id="hint">Scroll</div>
 
 <main>
 
+<section id="s0">
+  <div class="wrap">
+    <p class="eyebrow r">Oppstartsmøte KI · Byrået · 7. september 2026</p>
+    <h2 class="display r" style="--d:100ms">To timer.<br>Åtte punkter.</h2>
+    <div class="tasks agenda">
+      <div class="task r" style="--d:200ms"><div class="n">1</div><div><h3>Velkommen og runde rundt bordet</h3><small>Hva bruker dere i dag, hva vil dere ha hjelp til</small></div><div class="dur">15 min</div></div>
+      <div class="task r" style="--d:260ms"><div class="n">2</div><div><h3>Slik bruker vi AI i hverdagen</h3><small>Mats og Egil</small></div><div class="dur">10 min</div></div>
+      <div class="task r" style="--d:320ms"><div class="n">3</div><div><h3>Eksempler på hva vi har bygget</h3><small>Kunderadaren · 3D-skiltet · verktøykassa</small></div><div class="dur">15 min</div></div>
+      <div class="task r" style="--d:380ms"><div class="n">4</div><div><h3>Claude for Byrået</h3><small>Hva det er, hvordan dere kommer i gang, hva det koster</small></div><div class="dur">15 min</div></div>
+      <div class="task r" style="--d:440ms"><div class="n">5</div><div><h3>Tilgangsnivå og tryggleik</h3><small>Egil</small></div><div class="dur">10 min</div></div>
+      <div class="task r" style="--d:500ms"><div class="n">6</div><div><h3>Idébank</h3><small>35 forslag — inspirasjon til det første verktøyet</small></div><div class="dur">20 min</div></div>
+      <div class="task r" style="--d:560ms"><div class="n">7</div><div><h3>Veien videre</h3><small>Brukscaser · Team-konto · støtte · datoer</small></div><div class="dur">15 min</div></div>
+      <div class="task r" style="--d:620ms"><div class="n">8</div><div><h3>Oppsummering</h3><small>Hvem gjør hva, innen når</small></div><div class="dur">5 min</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="p1">
+  <div class="wrap">
+    <p class="eyebrow r">01 · Runde rundt bordet</p>
+    <h2 class="display r" style="--d:100ms">Hvem er dere<br>når det gjelder AI?</h2>
+    <div class="rules q">
+      <div class="rule r" style="--d:200ms"><div class="n">1</div><div><h3 class="display">Hva bruker du i dag?</h3><p>ChatGPT, Copilot, Claude, ingenting – alt er et ærlig svar.</p></div></div>
+      <div class="rule r" style="--d:350ms"><div class="n">2</div><div><h3 class="display">Hva vil du ha hjelp til?</h3><p>Den oppgaven du gruer deg til, eller gjør for ofte.</p></div></div>
+      <div class="rule r" style="--d:500ms"><div class="n">3</div><div><h3 class="display">Hva er du usikker på?</h3><p>Data, kvalitet, tid – vi kommer tilbake til alt sammen.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="p2">
+  <div class="wrap">
+    <p class="eyebrow r">02 · Slik bruker vi AI i hverdagen</p>
+    <h2 class="display r" style="--d:100ms">Fra spørsmål<br>til kollega.</h2>
+    <div class="grid g4">
+      <div class="item r" style="--d:250ms"><h3><span class="display">Spør</span></h3><p>Én chat. Et svar. Lukk vinduet, alt er glemt.</p></div>
+      <div class="item r" style="--d:400ms"><h3><span class="display">Skriv</span></h3><p>Tilbud, e-post, korrektur. Første utkast på sekunder.</p></div>
+      <div class="item r" style="--d:550ms"><h3><span class="display">Bygg</span></h3><p>Prosjekter som husker. Verktøy som gjør én jobb godt.</p></div>
+      <div class="item r" style="--d:700ms"><h3><span class="display">Automatiser</span></h3><p>Radarene. Kjører hver mandag før noen er på jobb.</p></div>
+    </div>
+    <div class="cues r" style="--d:850ms"><span class="cue"><span class="mk"></span><em>Egil</em><b>Mi AI-reise og verktøykassa</b></span></div>
+  </div>
+</section>
+
+<section id="p3">
+  <div class="wrap">
+    <p class="eyebrow r">03 · Eksempler på hva vi har bygget</p>
+    <h2 class="display r" style="--d:100ms">Problem, mulighet –<br>eller ren demo.</h2>
+    <p class="lead r" style="--d:200ms">Noe er bygget for å løse et problem eller gripe en mulighet. Annet bare for å vise hva som går an.</p>
+    <div class="grid g2">
+      <div class="item r" style="--d:250ms"><h3><span class="display">Kunderadar</span><span class="tag live">Mulighet</span></h3><p>Nyheter om nøkkelkundene · grunn til å ta kontakt · hver mandag 06:00</p></div>
+      <div class="item r" style="--d:400ms"><h3><span class="display">Skiltet</span><span class="tag">Demo</span></h3><p>Se skiltet i 3D før det produseres · materiale, lys, vær</p></div>
+      <div class="item r" style="--d:550ms"><h3><span class="display">Kalkyle</span><span class="tag">Problem</span></h3><p>Regneark med AI-instruks · fra forespørsel til pris</p></div>
+      <div class="item r" style="--d:700ms"><h3><span class="display">Verktøykassa</span><span class="tag">Styring og læring</span></h3><p>Mats' samling av småverktøy · bygget etter hvert som behovene kom</p></div>
+    </div>
+    <div class="cues r" style="--d:850ms"><a class="cue" href="https://mtokje.github.io/verktoy/byraet/" target="_blank" rel="noopener"><span class="mk"></span><em>Bakrommet</em><b>Kunderadaren · Skiltet · Kalkyle</b></a><a class="cue" href="https://mtokje.github.io/verktoy/" target="_blank" rel="noopener"><span class="mk"></span><em>Verktøykassa</em><b>mtokje.github.io/verktoy</b></a></div>
+  </div>
+</section>
+
 <section id="s1">
   <div class="wrap">
-    <p class="eyebrow r">Claude for Byrået</p>
+    <p class="eyebrow r">04 · Claude for Byrået</p>
     <h1 class="display r" style="--d:120ms">En ny<br>kollega.</h1>
   </div>
 </section>
@@ -166,19 +244,6 @@
   </div>
 </section>
 
-<section id="s4">
-  <div class="wrap">
-    <p class="eyebrow r">Allerede i drift</p>
-    <h2 class="display r" style="--d:100ms">Hver mandag, før dere<br>har kommet på jobb.</h2>
-    <div class="grid g2">
-      <div class="item r" style="--d:250ms"><h3><span class="display">Kunderadar</span><span class="tag live">man 06:00</span></h3><p>Nyheter om nøkkelkundene · grunn til å ta kontakt</p></div>
-      <div class="item r" style="--d:400ms"><h3><span class="display">Prospektradar Kvinnherad</span><span class="tag live">man 06:30</span></h3><p>Nye kunder over 5 MNOK · inngangsvinkel per bedrift</p></div>
-      <div class="item r" style="--d:550ms"><h3><span class="display">Tilbud og tekst</span><span class="tag">Bygges</span></h3><p>Tilbud · produkttekster · korrektur · nynorsk</p></div>
-      <div class="item r" style="--d:700ms"><h3><span class="display">Kundedialog</span><span class="tag">Bygges</span></h3><p>E-post · oppfølging · SoMe</p></div>
-    </div>
-  </div>
-</section>
-
 <section id="s5">
   <div class="wrap">
     <p class="eyebrow r">Claude Team</p>
@@ -195,10 +260,11 @@
   <div class="wrap">
     <p class="eyebrow r">Oppskriften</p>
     <h2 class="display r" style="--d:100ms">Under en halvtime.</h2>
+    <p class="lead r" style="--d:200ms">Er Team-kontoen allerede opprettet? Da hopper vi rett til steg 3.</p>
     <div class="tl grid g3 r" style="--d:250ms">
       <div class="step"><div class="t">10 min · Tove</div><h3 class="display">Opprett kontoen</h3><p>claude.ai · @byraet.no · 4 seter</p></div>
-      <div class="step"><div class="t">5 min</div><h3 class="display">Inviter</h3><p>Tove Primary Owner · Mats Owner · resten Member</p></div>
-      <div class="step"><div class="t">Uke 3 · Mats</div><h3 class="display">Første oppsett</h3><p>Prosjekter · radarene inn · alle prøver Sandkassen</p></div>
+      <div class="step"><div class="t">5 min</div><h3 class="display">Inviter</h3><p>Tove Primary Owner · Mats Owner · Egil og resten Member</p></div>
+      <div class="step"><div class="t">Uke 1–2 · Mats</div><h3 class="display">Første oppsett</h3><p>Prosjekter · Kunderadaren inn · de første brukscasene</p></div>
     </div>
   </div>
 </section>
@@ -209,56 +275,10 @@
     <div class="words display r" style="--d:100ms"><span>Mål</span><i>→</i><span>Kontekst</span><i>→</i><span>Instruks</span><i>→</i><span>Iterasjon</span></div>
     <p class="lead r" style="--d:400ms">Første svar er et utkast. Si hva som er feil – ikke start på nytt.</p>
     <div class="duo">
-      <div class="card forget r" style="--d:500ms"><div class="lbl">En chat</div><div class="bub">Hvem er kundene våre?</div><br><div class="bub">Hva leverte vi til Alsaker?</div><div class="keep">Glemmer alt når du lukker den.</div></div>
-      <div class="card r" style="--d:650ms"><div class="lbl">Et prosjekt</div><div class="bub">Instruks: «Du er researchassistent for salgsteamet …»</div><br><div class="bub">Kundeliste.md · Utgavelogg.md</div><div class="keep">Husker – i hver eneste chat.</div></div>
+      <div class="card forget r" style="--d:500ms"><div class="lbl">En chat</div><div class="bub">Hvem er kundene våre?</div><br><div class="bub">Hva leverte vi til Alsaker?</div><div class="keep">Husker alt du sier – i denne chatten. Neste chat starter blankt.</div></div>
+      <div class="card r" style="--d:650ms"><div class="lbl">Et prosjekt</div><div class="bub">Instruks: «Du er researchassistent for salgsteamet …»</div><br><div class="bub">Kundeliste.md · Utgavelogg.md</div><div class="keep">Instruks og dokumenter følger med inn i hver ny chat.</div></div>
     </div>
-  </div>
-</section>
-
-<section id="s8">
-  <div class="wrap">
-    <p class="eyebrow r">Strukturen</p>
-    <h2 class="display r" style="--d:100ms">Ett formål per prosjekt.</h2>
-    <div class="folders">
-      <div class="folder r" style="--d:250ms"><h3>Byrået – Kunderadar</h3><p>instruks · kundeliste · utgavelogg</p></div>
-      <div class="folder r" style="--d:350ms"><h3>Byrået – Prospekt Kvinnherad</h3><p>instruks · prospektliste · arenaer</p></div>
-      <div class="folder r" style="--d:450ms"><h3>Byrået – Tilbud og tekst</h3><p>tone of voice · maler · standardtekster</p></div>
-      <div class="folder r" style="--d:550ms"><h3>Byrået – Sandkasse</h3><p>alt her kan slettes</p></div>
-    </div>
-    <p class="note r" style="--d:700ms">Instruksen = stillingsbeskrivelsen. Dokumentene = hukommelsen.</p>
-  </div>
-</section>
-
-<section id="s9">
-  <div class="wrap">
-    <p class="eyebrow r">Oppgavesettet</p>
-    <h2 class="display r" style="--d:100ms">Bygg en miniradar selv.</h2>
-    <div class="tasks">
-      <div class="task r" style="--d:200ms"><div class="n">1</div><div><h3>Ditt første prosjekt</h3></div><div class="dur">30 min</div></div>
-      <div class="task r" style="--d:280ms"><div class="n">2</div><div><h3>Gi Claude kunnskap</h3></div><div class="dur">30 min</div></div>
-      <div class="task r" style="--d:360ms"><div class="n">3</div><div><h3>Din egen kunderadar</h3></div><div class="dur">60 min</div></div>
-      <div class="task r" style="--d:440ms"><div class="n">4</div><div><h3>Prospektjakt</h3></div><div class="dur">45 min</div></div>
-      <div class="task r" style="--d:520ms"><div class="n">5</div><div><h3>Sett det i system</h3></div><div class="dur">30 min</div></div>
-      <div class="task r" style="--d:600ms"><div class="n">+</div><div><h3>Fra funn til e-post</h3></div><div class="dur">20 min</div></div>
-    </div>
-    <p class="note r" style="--d:700ms">1–2 i workshopen · 3–5 i egen takt · alle i egen sandkasse først</p>
-  </div>
-</section>
-
-<section id="s10">
-  <div class="wrap">
-    <p class="eyebrow r">Åtte vaner</p>
-    <h2 class="display r" style="--d:100ms">Små grep. Stor forskjell.</h2>
-    <div class="habits">
-      <div class="habit r" style="--d:200ms"><b>Vær spesifikk</b></div>
-      <div class="habit r" style="--d:260ms"><b>Gi rolle og publikum</b></div>
-      <div class="habit r" style="--d:320ms"><b>Vis ønsket format</b></div>
-      <div class="habit r" style="--d:380ms"><b>Krev kilder</b></div>
-      <div class="habit r" style="--d:440ms"><b>La Claude spørre</b></div>
-      <div class="habit r" style="--d:500ms"><b>Iterér, ikke restart</b></div>
-      <div class="habit r" style="--d:560ms"><b>Be om alternativer</b></div>
-      <div class="habit r" style="--d:620ms"><b>Del opp store jobber</b></div>
-    </div>
+    <p class="lead r" style="--d:800ms;margin-top:40px">Forstå minnet: en chat husker seg selv. Et prosjekt gir hver chat samme utgangspunkt. Det som skal huskes varig, skrives inn i instruksen eller et dokument – ikke i chatten.</p>
   </div>
 </section>
 
@@ -269,23 +289,51 @@
   </div>
 </section>
 
+<section id="p5">
+  <div class="wrap">
+    <p class="eyebrow r">05 · Tilgangsnivå og tryggleik</p>
+    <h2 class="display r" style="--d:100ms">Nivået velges<br>per verktøy.</h2>
+    <p class="lead r" style="--d:300ms">Ikke per bedrift. Men Byrået trenger én side med egne retningslinjer: hva kan legges inn, hva kan aldri legges inn. Disse tre er starten.</p>
+    <div class="rules q">
+      <div class="rule r" style="--d:400ms"><div class="n">1</div><div><h3 class="display">Ingen persondata i delte prosjekter.</h3></div></div>
+      <div class="rule r" style="--d:520ms"><div class="n">2</div><div><h3 class="display">Kundens materiale bare med kundens ja.</h3></div></div>
+      <div class="rule r" style="--d:640ms"><div class="n">3</div><div><h3 class="display">Et menneske godkjenner alt som sendes ut.</h3></div></div>
+    </div>
+    <div class="cues r" style="--d:800ms"><span class="cue"><span class="mk"></span><em>Egil</em><b>Tilgangsnivå og tryggleik</b></span></div>
+  </div>
+</section>
+
+<section id="p6">
+  <div class="wrap">
+    <p class="eyebrow r">06 · Idébank</p>
+    <h2 class="display r" style="--d:100ms">35 forslag.<br>Ren inspirasjon.</h2>
+    <p class="lead r" style="--d:300ms">Laget med Claude ut fra det vi vet om Byrået. Noen treffer, noen bommer. Poenget er å finne det første verktøyet.</p>
+    <div class="tl grid g3 r" style="--d:450ms">
+      <div class="step"><div class="t">Nå</div><h3 class="display">Sammen</h3><p>Vi leser noen av kortene. Si fra når noe kjennes igjen.</p></div>
+      <div class="step"><div class="t">Etterpå</div><h3 class="display">Hver for seg</h3><p>Hele lista på mobilen. Hvert kort har tilgangsnivå.</p></div>
+      <div class="step"><div class="t">Innen en uke</div><h3 class="display">2–3 kandidater</h3><p>Til det første verktøyet. Egen idé teller like mye.</p></div>
+    </div>
+    <div class="cues r" style="--d:700ms"><a class="cue" href="https://claude.ai/code/artifact/d7878f68-f3dc-489f-912e-57a43bc7b3a4" target="_blank" rel="noopener"><span class="mk"></span><em>Idébanken</em><b>35 kort · seks områder</b></a><a class="cue" href="https://mtokje.github.io/verktoy/byraet/idedugnad.html" target="_blank" rel="noopener"><span class="mk"></span><em>Storskjerm</em><b>QR-siden</b></a></div>
+  </div>
+</section>
+
 <section id="s12">
   <div class="wrap">
-    <p class="eyebrow r">Veien videre</p>
-    <h2 class="display r" style="--d:100ms">Ett verktøy hver.<br>Innen åtte uker.</h2>
+    <p class="eyebrow r">07 · Veien videre</p>
+    <h2 class="display r" style="--d:100ms">Kom i gang nå.<br>Evaluering om åtte uker.</h2>
     <div class="check r" style="--d:300ms">
-      <div><i></i><div><b>Bestem seteholdere</b><span>Byrået internt – og Egil/Mats?</span></div></div>
-      <div><i></i><div><b>Opprett Team-konto</b><span>@byraet.no · fire standardseter</span></div></div>
-      <div><i></i><div><b>Inviter og sett roller</b><span>Tove Primary Owner · Mats Owner</span></div></div>
-      <div><i></i><div><b>Gi beskjed</b><span>Vi rigger prosjektstruktur og flytter radarene inn</span></div></div>
-      <div><i></i><div><b>Planlegg workshop</b><span>1,5–2 timer</span></div></div>
+      <div><i></i><div><b>Velg de første brukscasene</b><span>Fra idébanken eller egne idéer · 2–3 kandidater · én eier per verktøy</span></div></div>
+      <div><i></i><div><b>Opprett Team-konto</b><span>@byraet.no · fire standardseter · denne uken</span></div></div>
+      <div><i></i><div><b>Inviter og sett roller</b><span>Tove Primary Owner · Mats Owner · Egil Member</span></div></div>
+      <div><i></i><div><b>Finn et verktøy du vil bygge</b><span>Eksperimenter med egne og delte prosjekter</span></div></div>
+      <div><i></i><div><b>Støtte etterpå</b><span>Helt opp til dere. Vi anbefaler 30 min annenhver uke i åtte uker – kontinuitet og fremgang</span></div></div>
     </div>
   </div>
 </section>
 
 <section id="s13">
   <div class="wrap">
-    <p class="eyebrow r">Til slutt</p>
+    <p class="eyebrow r">08 · Til slutt</p>
     <h2 class="display r" style="--d:150ms">Hvordan bruker Byrået<br>AI om seks måneder?</h2>
   </div>
 </section>
@@ -316,7 +364,7 @@
   }, {threshold:[0,0.35,0.6]});
   sections.forEach(s=>io.observe(s));
   // count-up numbers
-  function countUp(s){ s.querySelectorAll('[data-count]').forEach(el=>{ if(el.dataset.done) return; el.dataset.done=1; const to=+el.dataset.count; const t0=performance.now()+1500; const dur=3200; (function f(t){ const k=Math.max(0,Math.min(1,(t-t0)/dur)); const e=1-Math.pow(1-k,3); el.textContent=Math.round(to*e).toLocaleString('nb-NO').replace(/ /g,' '); if(k<1) requestAnimationFrame(f); })(t0); }); }
+  function countUp(s){ s.querySelectorAll('[data-count]').forEach(el=>{ if(el.dataset.done) return; el.dataset.done=1; const to=+el.dataset.count; const t0=performance.now()+1500; const dur=3200; (function f(t){ const k=Math.max(0,Math.min(1,(t-t0)/dur)); const e=1-Math.pow(1-k,3); el.textContent=Math.round(to*e).toLocaleString('nb-NO').replace(/ /g,' '); if(k<1) requestAnimationFrame(f); })(t0); }); }
   // scroll-linked chrome: CMYK strip, registration mark, headline weight
   let lastY = scrollY, vel = 0;
   function onScroll(){

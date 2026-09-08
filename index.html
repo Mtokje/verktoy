@@ -178,7 +178,6 @@
     background: var(--steel); border: 2.5px solid var(--line);
     cursor: default; transition: border-color 400ms ease;
   }
-  .rivet:hover { border-color: var(--ink-soft); }
 
   footer {
     margin-top: 48px;
@@ -225,9 +224,9 @@
    Nytt verktøy = én ny linje. Last opp html-filen til repoet,
    og legg den inn her med filnavn, navn, beskrivelse, kategori.
    Kategoriene under vises alltid, i denne rekkefølgen.
-   Eksterne lenker (Nettsider): bruk full adresse i "file".
+   Nettsider/demoer ligger på Bakrommet (byraet/index.html), ikke her.
    ============================================================ */
-const CATEGORIES = ["Fagopplæring", "Andre verktøy", "Nettsider"];
+const CATEGORIES = ["Fagopplæring", "Andre verktøy"];
 
 const TOOLS = [
   { file: "spool-kalkulator.html", name: "Spool-kalkulator", desc: "Kuttlengder, ISO-tegning, 3D og øvingsmodus for flens–rør–bend-spooler. Med TE, rullet offset og ordliste.", cat: "Fagopplæring" },
@@ -236,9 +235,6 @@ const TOOLS = [
   { file: "truck-veiviser.html", name: "Truck-veiviser", desc: "Sertifisert sikkerhetsopplæring på truck (T1–T5, C1, T8): hvem kan ta hvilket kurs, hva mangler av forkunnskaper, og når kompetansebevis kan bestilles. Flere deltakere, fremdrift over tid og eksport til Excel.", cat: "Fagopplæring" },
   { file: "overflate.html", name: "Overflate-verktøy", desc: "Klima og duggpunkt, forbruk i tre nivåer, filmtykkelse, kalkyle etter fagprøvemalen, datablad-leser, skjema, eksamenstrening og øving. For lærlinger og hjelpearbeidere i industriell overflatebehandling.", cat: "Fagopplæring" },
   { file: "my-maler.html", name: "My-måler", desc: "Øv på tørrfilmmåling: kalibrer på nullplate og folie, mål punkter på en malt flate, vurder mot NDFT-regelen og se fasitkartet etterpå.", cat: "Fagopplæring" },
-  { file: "oppstartsuke-demo/", name: "Oppstartsuke – adminside (instruktørdashbord)", desc: "Demo av instruktørenes dashbord for lærlingenes oppstartsuker: timeplan, grupper, oppmøte, nettlæring og tilbakemeldingsresultater. Alle navn og data er fiktive.", cat: "Nettsider" },
-  { file: "oppstartsuke-demo/info/", name: "Oppstartsuke – visningsside (for lærlingene)", desc: "Demo av den åpne infosiden lærlingene bruker: beskjeder, timeplan, grupper og praktisk info – innholdet styres fra adminsiden. Alle navn og data er fiktive.", cat: "Nettsider" },
-  { file: "dashboard-demo.html", name: "Avdelingsdashboard", desc: "Demo av et dashbord for daglig drift i en opplæringsavdeling: resepsjonsplan, ukentlige oppgaver, timer, adminmøte, bursdager, bemanningsplan med kostnader, idétavle og oppgavefordeling. Alle navn og data er fiktive.", cat: "Nettsider" },
 ];
 /* ============================================================ */
 
@@ -278,10 +274,9 @@ function render(filter) {
 search.addEventListener("input", () => render(search.value));
 render();
 
-/* Bakrommet: klikk på merkehullet øverst til høyre, eller skriv "byraet" hvor som helst på siden. */
+/* Bakrommet: skriv "byraet" hvor som helst på siden (ingen klikkbar inngang). */
 (function(){
   const go = () => { location.href = "byraet/"; };
-  const r = document.getElementById("rivet"); if (r) r.addEventListener("click", go);
   let typed = "";
   document.addEventListener("keydown", e => {
     if (e.key.length !== 1) return;

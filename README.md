@@ -36,6 +36,12 @@ Del den ene adressen – menysiden lenker til resten.
 
 Kategorier lages automatisk ut fra `cat`-feltet – skriv en ny kategori, og den dukker opp som egen seksjon.
 
+## Kode på samlesiden
+
+Forsiden (`index.html`) spør etter en kode før verktøylisten vises. Direktelenker til verktøyene virker uten kode. Godkjenning huskes i nettleseren.
+
+Bytte kode: lag SHA-256 av den nye koden (f.eks. `printf 'NYKODE' | sha256sum` i en terminal, eller et nettbasert SHA-256-verktøy) og lim inn verdien i `HASH` i `<script>`-delen av `index.html`. Dette er en enkel dørterskel, ikke reell sikkerhet – filene ligger åpent i repoet.
+
 ## Verdt å vite
 
 - **Filnavn**: bruk små bokstaver, bindestrek i stedet for mellomrom, unngå æøå i filnavn (`fse-quiz.html`, ikke `FSE quiz.html`).

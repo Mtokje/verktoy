@@ -188,13 +188,59 @@
     color: var(--ink-soft);
   }
 
+  /* ---------- Passordsperre for samlesiden ---------- */
+  body.locked > header, body.locked > .wrap, body.locked > footer { display: none; }
+  .gate {
+    display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 24px;
+  }
+  body.locked .gate { display: flex; }
+  .gate-card {
+    width: 100%; max-width: 380px; background: var(--tag); border: 1.5px solid var(--line);
+    border-radius: var(--radius); padding: 28px 26px 24px; position: relative;
+  }
+  .gate-card::before {
+    content: ""; position: absolute; right: 16px; top: 14px; width: 13px; height: 13px; border-radius: 50%;
+    background: var(--steel); border: 2.5px solid var(--line);
+  }
+  .gate-card .eyebrow { margin-bottom: 6px; }
+  .gate-card h2 { font-family: "Saira Condensed", sans-serif; font-weight: 800; font-size: 30px; line-height: 1; margin-bottom: 14px; }
+  .gate-card h2 .accent { color: var(--signal); }
+  .gate-card p { font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; }
+  .gate-row { display: flex; gap: 8px; }
+  .gate-row input {
+    flex: 1; min-width: 0; font: 500 18px "IBM Plex Mono", monospace; letter-spacing: .12em;
+    padding: 10px 12px; border: 1.5px solid var(--line); border-radius: var(--radius); background: #fff; color: var(--ink);
+  }
+  .gate-row input:focus { outline: none; border-color: var(--ink); }
+  .gate-row button {
+    font: 600 14px "IBM Plex Sans", system-ui, sans-serif; padding: 10px 16px; border: 0; border-radius: var(--radius);
+    background: var(--ink); color: #fff; cursor: pointer;
+  }
+  .gate-row button:hover { background: var(--signal); }
+  .gate-err { display: none; margin-top: 10px; font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--signal); }
+  .gate-card.shake { animation: shake .3s; }
+  @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
   @media (prefers-reduced-motion: reduce) {
     .tag-card { transition: none; }
     .tag-card:hover { transform: none; }
   }
 </style>
 </head>
-<body>
+<body class="locked">
+
+<div class="gate" id="gate">
+  <form class="gate-card" id="gateForm" autocomplete="off">
+    <div class="eyebrow">Verktøykassen · samleside</div>
+    <h2>Skriv inn <span class="accent">kode</span></h2>
+    <p>Samlesiden er lukket. Har du fått en direktelenke til et verktøy, virker den uten kode.</p>
+    <div class="gate-row">
+      <input id="gateInput" type="password" inputmode="numeric" placeholder="••••" aria-label="Kode" autofocus>
+      <button type="submit">Åpne</button>
+    </div>
+    <div class="gate-err" id="gateErr">Feil kode. Prøv igjen.</div>
+  </form>
+</div>
 
 <header>
   <div class="wrap">
@@ -274,12 +320,40 @@ function render(filter) {
 search.addEventListener("input", () => render(search.value));
 render();
 
+/* Passordsperre: koden sjekkes mot en SHA-256-hash, og godkjenning huskes i denne nettleseren.
+   Dette er en enkel dørterskel for samlesiden – verktøyene selv er åpne via direktelenke. */
+(function(){
+  const HASH = "e38ab7d3075c2759fc079276fc667a4963ffe572d0ae90b4b87fb7813872b540";
+  const KEY = "vk-gate-v1";
+  const body = document.body, form = document.getElementById("gateForm"),
+        input = document.getElementById("gateInput"), err = document.getElementById("gateErr"),
+        card = form;
+  const unlock = () => { body.classList.remove("locked"); };
+  try { if (localStorage.getItem(KEY) === HASH) { unlock(); return; } } catch(e) {}
+  async function sha256(str){
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
+  }
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const h = await sha256(input.value.trim());
+    if (h === HASH) {
+      try { localStorage.setItem(KEY, HASH); } catch(e) {}
+      unlock();
+    } else {
+      err.style.display = "block"; input.value = ""; input.focus();
+      card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+    }
+  });
+  setTimeout(() => input.focus(), 50);
+})();
+
 /* Bakrommet: skriv "byraet" hvor som helst på siden (ingen klikkbar inngang). */
 (function(){
   const go = () => { location.href = "byraet/"; };
   let typed = "";
   document.addEventListener("keydown", e => {
-    if (e.key.length !== 1) return;
+    if (e.key.length !== 1 || document.body.classList.contains("locked")) return;
     typed = (typed + e.key.toLowerCase()).slice(-6);
     if (typed === "byraet" || typed === "byrået") go();
   });

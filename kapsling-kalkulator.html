@@ -191,6 +191,7 @@
     letter-spacing:.06em;text-transform:uppercase;padding:9px 12px;cursor:pointer;
   }
   .subnav button.on{border-color:var(--monje);color:var(--chalk);box-shadow:inset 3px 0 0 var(--monje)}
+  .eksvelg button.on{border-color:var(--monje);color:var(--chalk)}
   .subview.hidden{display:none}
 
   .task{background:var(--steel-800);border:1px solid var(--line);border-radius:6px;margin-bottom:18px}
@@ -323,9 +324,19 @@
           <input id="ol" type="number" value="40" min="0" max="100" step="5">
         </div>
         <div class="field">
-          <label for="eol">Ende-overlapp (mm)</label>
+          <label for="eol">Ende-overlapp / sikkedybde (mm)</label>
           <input id="eol" type="number" value="50" min="0" max="150" step="5">
         </div>
+      </div>
+
+      <div class="field">
+        <label for="nDel">Delelinjer rundt omkretsen</label>
+        <select id="nDel">
+          <option value="12" selected>12 (standard)</option>
+          <option value="16">16</option>
+          <option value="24">24</option>
+        </select>
+        <div class="hint">Nummerert 1–12 rundt; linje 13 = linje 1 i skjøten. Ordinatene settes av på hver linje – verkstedmetoden.</div>
       </div>
 
       <!-- RETT -->
@@ -358,17 +369,26 @@
               <input id="bAng" type="number" value="90" min="15" max="90" step="5">
             </div>
             <div class="field">
-              <label for="bSeg">Antall deler</label>
-              <input id="bSeg" type="number" value="4" min="2" max="9" step="1">
+              <label for="bSeg">Hele mellomstykker</label>
+              <input id="bSeg" type="number" value="3" min="1" max="7" step="1">
             </div>
           </div>
           <div class="field">
             <label for="bR">Bendradius senterlinje (mm)</label>
             <input id="bR" type="number" value="230" min="50" step="10">
-            <div class="hint">Følg radien på rørbenden (LR = 1,5 × DN). Antall deler inkluderer de to endestykkene (halve segmenter).</div>
+            <div class="hint">Følg radien på rørbenden (LR = 1,5 × DN). To halve endestykker legges til automatisk. Norm for 90°: 5 hele + 2 halve.</div>
           </div>
           <div class="field">
-            <label for="bMonn">Skjøtemonn pr. segmentkant (mm)</label>
+            <label for="bSkjot">Skjøtplassering</label>
+              <select id="bSkjot">
+                <option value="side" selected>Siden (standard, iht. Isolasjonsboka)</option>
+                <option value="hals">Halsen (innerkurven)</option>
+                <option value="rygg">Ryggen (ytterkurven)</option>
+              </select>
+              <div class="hint">Læreboka: langsgående skjøt legges vanligvis på siden av bendet – sideskjøtene skal danne en jevnest mulig bue.</div>
+            </div>
+            <div class="field">
+              <label for="bMonn">Sikkemonn pr. segmentkant (mm)</label>
             <input id="bMonn" type="number" value="12" min="0" max="30" step="1">
           </div>
         </div>
@@ -453,17 +473,22 @@
       <!-- FESTEMATERIELL -->
       <div class="sectionlbl">Festemateriell</div>
       <div class="field">
-        <label>Festemiddel i sømmer</label>
+        <label>Rundtgående skjøt</label>
+        <div class="hint">Sikkes i sikkemaskin – kapselen tres til stopp i sikken. Ingen gjennomgående festere. Ende-overlappen er sikkedybden.</div>
+      </div>
+      <div class="field">
+        <label>Langsgående skjøt</label>
         <div class="seg" id="festSeg">
-          <button class="on" data-f="skrue" type="button">Plateskrue A2</button>
+          <button class="on" data-f="skrue" type="button">Skrue</button>
           <button data-f="nagle" type="button">Popnagle</button>
+          <button data-f="band" type="button">Bånd</button>
         </div>
         <div class="hint" id="festHint"></div>
       </div>
       <div class="two">
         <div class="field">
           <label for="cc">c/c-avstand (mm)</label>
-          <input id="cc" type="number" value="100" min="30" max="400" step="10">
+          <input id="cc" type="number" value="150" min="30" max="400" step="10">
         </div>
         <div class="field">
           <label for="prisFest">Pris pr. stk (kr)</label>
@@ -476,14 +501,14 @@
           <input id="festOverstyr" type="number" value="" min="0" step="1" placeholder="auto">
         </div>
         <div class="field">
-          <label for="band">Strammebånd pr. kapsel</label>
+          <label for="band">Bånd pr. kapsel</label>
           <input id="band" type="number" value="0" min="0" max="10" step="1">
         </div>
       </div>
       <div class="field">
         <label for="prisBand">Pris pr. bånd m/lås (kr)</label>
         <input id="prisBand" type="number" value="15" min="0" step="1">
-        <div class="hint">Antall foreslås fra sømlengde og c/c – vurder selv og overstyr ved behov. Offshore-praksis: SS316-strammebånd, typisk 4 pr. kapsel.</div>
+        <div class="hint">Skrue/nagle: antall foreslås fra langsgående sømlengde og c/c – vurder selv og overstyr. Bånd-valg: antallet «Bånd pr. kapsel» brukes (typisk 4). Bånd kan også legges til som tillegg ved skrue/nagle.</div>
       </div>
 
     </div>
@@ -550,6 +575,12 @@
         </div>
       </div>
 
+      <!-- ORDINATER -->
+      <div class="card" id="ordCard">
+        <h2>Ordinattabell <span class="approx">(mål pr. delelinje)</span></h2>
+        <div class="body"><table class="t" id="ordTable"></table></div>
+      </div>
+
       <!-- FESTEMATERIELL -->
       <div class="card">
         <h2>Festemateriell <span class="approx">(forslag – vurder selv)</span></h2>
@@ -572,7 +603,7 @@
 
 <footer>
   <p>Materialer og minstetykkelser etter vanlig praksis / NORSOK M-004: aluminium (AlMn1), rustfritt stål AISI 316 2D og alu-sink (kun landanlegg med lavt korrosivt miljø). Utfoldinger etter klassisk platekonstruksjon: rett kapsel = rektangel, segmentbend = sinuskurver, konsentrisk kon = ringsektor, eksentrisk kon = trekantmetoden, avstikker = fiskemunn + hull i hovedkapsel.</p>
-  <p>Priser på plate og festemateriell er veiledende utgangspunkt og varierer med leverandør, mengde og marked – rediger satsene og kontrollér mot egne innkjøpspriser. Demo bygget med Claude. Kontrollér alltid mot isometrisk tegning, isolasjonsklasse og gjeldende spek før produksjon.</p>
+  <p>Fagstoff og arbeidsregler er kontrollert mot Gyldendals lærebøker for isolatørfaget («Isolering og overflatebeskyttelse» og «Bransjelære med tegning og fagregning») samt akademiets treningssett. Priser på plate og festemateriell er veiledende utgangspunkt og varierer med leverandør, mengde og marked – rediger satsene og kontrollér mot egne innkjøpspriser. Demo bygget med Claude. Kontrollér alltid mot isometrisk tegning, isolasjonsklasse og gjeldende spek før produksjon.</p>
 </footer>
 
 <!-- ================= LÆRING ================= -->
@@ -584,6 +615,7 @@
       <button id="subKtr" type="button">Kontrollmodus</button>
       <button id="subFeil" type="button">Finn feilen</button>
       <button id="subFag" type="button">Fagprøve-case</button>
+      <button id="subEks" type="button">Eksamen</button>
       <button id="subTeori" type="button">Teoriquiz</button>
     </div>
     <div class="fields" id="lsOppg">
@@ -619,9 +651,24 @@
       <button class="btn" id="gNy" type="button">Nytt fagprøve-case</button>
       <div class="field"><div class="hint">Komplett case med flere komponenter: mengder, festemateriell og pris. Svar med toleranse, sensor-sjekkliste etterpå.</div></div>
     </div>
+    <div class="fields hidden" id="lsEks">
+      <div class="field"><div class="hint">Fire prøveeksamener på Vg3-nivå (5 t) fra akademiets treningssett – med interaktiv regnedel rettet av appen, sensorpunkter og utskrift. Modellert etter ISO3102-eksamenene H21/V22/H22/H23 og læreplan ISL03-01.</div></div>
+      <div class="eksvelg" style="display:grid;gap:6px">
+        <button class="btn ghost small on" data-e="c1" type="button">1 · Varmt rør – CUI</button>
+        <button class="btn ghost small" data-e="c2" type="button">2 · Tank/kolonne – soner</button>
+        <button class="btn ghost small" data-e="c3" type="button">3 · Kaldt system – kondens</button>
+        <button class="btn ghost small" data-e="c4" type="button">4 · Brann, lyd og krav</button>
+        <button class="btn ghost small" data-e="ov" type="button">Overslagskalkulator</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn ghost small" id="ePrint" type="button">Skriv ut uten fasit</button>
+        <button class="btn ghost small" id="ePrintF" type="button">Skriv ut med fasit</button>
+      </div>
+      <div class="field"><div class="hint">Regnedelen bruker oppgavenes egne påslagsregler (treningsdata, ikke NORSOK-tabellverdier). Full besvarelse skrives for hånd – appen trener beregningene og viser hva sensor ser etter.</div></div>
+    </div>
     <div class="fields hidden" id="lsTeori">
       <button class="btn" id="tStart" type="button">Start quiz</button>
-      <div class="field"><div class="hint">12 spørsmål fra fagteorien. Etter retting kan du åpne forklaringen på hvert begrep via i-knappen.</div></div>
+      <div class="field"><div class="hint">24 spørsmål fra fagteorien. Etter retting kan du åpne forklaringen på hvert begrep via i-knappen.</div></div>
     </div>
   </div>
   <div class="right">
@@ -629,6 +676,7 @@
     <div class="subview hidden" id="cKtr"></div>
     <div class="subview hidden" id="cFeil"></div>
     <div class="subview hidden" id="cFag"></div>
+    <div class="subview hidden" id="cEks"></div>
     <div class="subview hidden" id="cTeori"></div>
   </div>
 </div>
@@ -707,21 +755,23 @@ const PIPE = {
   250:{nps:10,od:273.0}, 300:{nps:12,od:323.8}, 350:{nps:14,od:355.6}, 400:{nps:16,od:406.4},
 };
 const MAT = {
-  alu:{navn:'Aluminium AlMn1', rho:2700, thk:[0.6,0.8,1.0], def:0.8,
+  alu:{navn:'Aluminium AlMg', rho:2700, thk:[0.6,0.8,1.0], def:0.8,
        pris:{0.6:240, 0.8:300, 1.0:360},
-       hint:'Vanligst offshore/industri. NORSOK M-004 minstetykkelse 0,7–0,9 mm etter diameter; 0,8 mm er typisk lagervare.'},
+       hint:'Arbeidshesten – legeringene AlMg/AlMgMn (Isolasjonsboka), 0,5–1,2 mm; NORSOK-minstetykkelse 0,7–0,9 mm etter diameter, 0,8 mm typisk lagervare. Langsgående overlapp 30–50 mm etter omkrets, kant 50 mm.'},
   rf: {navn:'Rustfritt AISI 316 (2D)', rho:7980, thk:[0.5,0.6,0.8], def:0.6,
        pris:{0.5:420, 0.6:490, 0.8:640},
-       hint:'Kreves ofte i klasse 5 (brann) og korrosivt miljø. Tyngre og stivere – 0,5–0,6 mm vanligst på rør.'},
+       hint:'Kreves ofte i klasse 5 (brann) og korrosivt miljø; 0,5–0,6 mm vanligst på rør. Vokt grop- og spenningskorrosjon fra klorider – rør ~60 °C med fersk-/sjøvann er spesielt utsatt (Isolasjonsboka).'},
   az: {navn:'Alu-sink (185 g/m²)', rho:7850, thk:[0.5,0.7,1.0], def:0.7,
        pris:{0.5:150, 0.7:200, 1.0:270},
-       hint:'Varmgalvanisert stål med Al/Zn-belegg. Kun landanlegg med lav korrosjonsrisiko iht. NORSOK M-004.'},
+       hint:'Aluzink/Aludip/Armco: ca. 55 % Al / 43,5 % Zn / 1,5 % Si, 185 g/m² pr. side – opptil dobbel korrosjonsmotstand mot varmgalvanisert (min. 275 g/m²). Kun landanlegg med lav korrosjonsrisiko.'},
 };
 const FEST = {
   skrue:{navn:'Plateskrue A2 4,2×13 mm', pris:1.50,
          hint:'Selvborende blikkskrue i rustfritt A2 – standard i langsgående og tverrgående skjøter. A4 i korrosivt miljø.'},
   nagle:{navn:'Popnagle alu Ø4,0×10 mm', pris:0.80,
-         hint:'Blindnagle i aluminium (rustfri dor) – vanlig på segmentbend og der skruehoder er uønsket.'},
+         hint:'Blindnagle i aluminium (rustfri dor) – vanlig der skruehoder er uønsket.'},
+  band: {navn:'Strammebånd SS316 m/lås', pris:15,
+         hint:'Bånd rundt kapselen lukker den langsgående skjøten uten å perforere platen. Sett antall pr. kapsel under.'},
 };
 
 const $ = id => document.getElementById(id);
@@ -785,7 +835,9 @@ function readInputs(){
     prisBand:Math.max(0,+$('prisBand').value||0),
     rL:Math.max(50,+$('rL').value||0), rPl:Math.max(200,+$('rPl').value||1000),
     bAng:Math.min(90,Math.max(15,+$('bAng').value||90)),
-    bSeg:Math.min(9,Math.max(2,Math.round(+$('bSeg').value||4))),
+    bSeg:Math.min(9,Math.max(3,Math.round(+$('bSeg').value||3)+2)),
+    nDel:Math.max(8,Math.min(24,Math.round(+$('nDel').value||12))),
+    bSkjot:($('bSkjot')&&$('bSkjot').value)||'side',
     bR:Math.max(50,+$('bR').value||230),
     bMonn:Math.max(0,+$('bMonn').value||0),
     kType:konKey,
@@ -816,6 +868,8 @@ function stateFrom(p){
     bAng:p.bAng??90, bSeg:p.bSeg??4,
     bR:p.bR ?? Math.max(Math.round(1.5*od/10)*10, Math.ceil((D/2+30)/10)*10),
     bMonn:p.bMonn??12,
+    nDel:p.nDel??12,
+    bSkjot:p.bSkjot??'side',
     kType:p.kType??'kons',
     kDn2:p.kDn2??50, kIso2:p.kIso2??iso,
     kD2:PIPE[p.kDn2??50].od + 2*(p.kIso2??iso),
@@ -851,12 +905,22 @@ function calc(s){
 
   /* --- pris --- */
   r.prisPlate = r.aBruttoT/1e6 * s.prisM2;
-  r.nFestAuto = (Math.ceil((r.seam||0)/s.cc)+1) * s.ant;
-  r.nFest = s.festOverstyr>0 ? s.festOverstyr : r.nFestAuto;
-  r.prisFestV = r.nFest * s.prisFest;
   const kapsler = (r.nKapsler||1) * s.ant;
-  r.nBand = s.band * kapsler;
-  r.prisBandV = r.nBand * s.prisBand;
+  r.sikkerT = (r.sikker||0) * s.ant;
+  r.nBertel = (s.comp==='tstk' && r.raw && r.raw.bertelN) ? r.raw.bertelN * s.ant : 0;
+  if (s.festKey==='band'){
+    /* bånd lukker langsgående skjøt: antall pr. kapsel × kapsler */
+    r.nFestAuto = Math.max(1, s.band||4) * kapsler;
+    r.nFest = s.festOverstyr>0 ? s.festOverstyr : r.nFestAuto;
+    r.prisFestV = (r.nFest + r.nBertel) * s.prisFest;
+    r.nBand = 0; r.prisBandV = 0;
+  } else {
+    r.nFestAuto = (Math.ceil((r.seam||0)/s.cc)+1) * s.ant;
+    r.nFest = s.festOverstyr>0 ? s.festOverstyr : r.nFestAuto;
+    r.prisFestV = (r.nFest + r.nBertel) * s.prisFest;
+    r.nBand = s.band * kapsler;
+    r.prisBandV = r.nBand * s.prisBand;
+  }
   r.prisSum = r.prisPlate + r.prisFestV + r.prisBandV;
   return r;
 }
@@ -875,8 +939,8 @@ function calcRett(s,C,Cb){
   emner.push({navn: n>1 ? 'Kapsel sluttlengde' : 'Kapsel', ant:1, B:Cb, H:rest, areal:Cb*rest});
   const aBrutto = emner.reduce((a,e)=>a+e.areal*e.ant,0);
   const aNetto  = C * s.rL;
-  const seam = ((n-1)*s.rPl + rest) + (n-1)*C;   // langsgående + tverrgående skjøter
-  return {emner,aNetto,aBrutto,seam,nKapsler:n,raw:{B:Cb,n,rest,aB:aBrutto},
+  const seam = (n-1)*s.rPl + rest;               // kun langsgående søm – tverrskjøtene sikkes
+  return {emner,aNetto,aBrutto,seam,sikker:n-1,nKapsler:n,raw:{B:Cb,n,rest,aB:aBrutto},
     comp:[
       ['Kapseldiameter D', fmt(s.D,1)+' mm'],
       ['Omkrets π·D', fmt(C,0)+' mm'],
@@ -899,6 +963,14 @@ function calcBend(s,C,Cb){
   const beta = (s.bAng * Math.PI/180) / (2*(N-1));
   const tb = Math.tan(beta);
   const hMin = Math.max(0,(R - rc)*tb), hMax = (R + rc)*tb;
+  const nD = s.nDel||12, pitch = C/nD;
+  const u0 = ({hals:0, side:Math.PI/2, rygg:Math.PI}[s.bSkjot] ?? Math.PI/2);
+  const hU = u => Math.max(0,(R - rc*Math.cos(u0+u))*tb);
+  const ordLines = [];
+  for (let k=1; k<=nD+1; k++) ordLines.push({k, h:hU((k-1)/nD*2*Math.PI)});
+  const kOf = ang => Math.round(((ang-u0+8*Math.PI)%(2*Math.PI))/(2*Math.PI)*nD)+1;
+  const marks = {hals:kOf(0), rygg:kOf(Math.PI)};
+  const h600 = 600*tb, h573 = 10*s.bAng/(2*(N-1));
   const aEnd = 2*Math.PI*rc*R*tb;
   const aMid = 2*aEnd;
   const nMid = N-2;
@@ -910,9 +982,9 @@ function calcBend(s,C,Cb){
   if (nMid>0) emner.push({navn:'Mellomstykke (fullt segment)', ant:nMid, B:Cb, H:2*hMax + 2*s.bMonn, areal:aMid*scale + monnMid});
   const aBrutto = emner.reduce((a,e)=>a+e.areal*e.ant,0);
   const aNetto  = 2*aEnd + nMid*aMid;
-  /* søm: (N−1) segmentskjøter rundt omkretsen + langsgående i halsen pr. segment */
-  const seam = (N-1)*C + 2*(hMin+s.bMonn) + nMid*(2*hMin+2*s.bMonn);
-  return {emner,aNetto,aBrutto,seam,warn,raw:{betaDeg:beta*180/Math.PI,hMax,hMin,B:Cb},
+  /* søm: kun langsgående (halsen) – segmentskjøtene og tilslutningene sikkes */
+  const seam = 2*hMin + nMid*2*hMin;
+  return {emner,aNetto,aBrutto,seam,sikker:N+1,warn,raw:{betaDeg:beta*180/Math.PI,hMax,hMin,B:Cb,pitch,n:nD,lines:ordLines,marks,u0,h600,h573},
     comp:[
       ['Kapseldiameter D', fmt(s.D,1)+' mm'],
       ['Bendradius R', fmt(R,0)+' mm'],
@@ -920,11 +992,14 @@ function calcBend(s,C,Cb){
       ['Høyde rygg (maks)', fmt(hMax,1)+' mm  (×2 midtstk.)'],
       ['Høyde hals (min)', fmt(hMin,1)+' mm'],
       ['Snitt (gjæringer)', (N-1)+' stk'],
+      ['Pitch (πD/'+nD+')', fmt(pitch,1)+' mm'],
     ],
     form:`<b>Segmentbend</b> – ${s.bAng}° i ${N} deler<br>
 β <span class="m">=</span> vinkel / (2·(N−1)) <span class="m">=</span> ${s.bAng}° / ${2*(N-1)} <span class="m">=</span> <b>${fmt(beta*180/Math.PI,2)}°</b><br>
 Rygg <span class="m">=</span> (R + D/2)·tanβ <span class="m">=</span> <b>${fmt(hMax,1)} mm</b> &nbsp;·&nbsp; Hals <span class="m">=</span> (R − D/2)·tanβ <span class="m">=</span> <b>${fmt(hMin,1)} mm</b><br>
-Kurven i utfoldingen: h(φ) <span class="m">=</span> (R − (D/2)·cos φ)·tanβ &nbsp;(skjøt i halsen)`};
+Ordinat på delelinje k: h<sub>k</sub> <span class="m">=</span> (R − (D/2)·cos((k−1)·${fmt(360/nD,0)}° + skjøtvinkel))·tanβ &nbsp;·&nbsp; pitch <span class="m">=</span> π·D/${nD} <span class="m">=</span> <b>${fmt(pitch,1)} mm</b><br>
+Mellomstykket har dobbel ordinat (2·h<sub>k</sub>). Skjøt på ${({side:'siden',hals:'halsen',rygg:'ryggen'})[s.bSkjot]} (linje 1) – hals på linje ${marks.hals}, rygg på linje ${marks.rygg}.<br>
+Skjæringshøyde: 600-tabellen <span class="m">=</span> 600·tanβ <span class="m">=</span> <b>${fmt(h600,1)} mm</b> &nbsp;·&nbsp; 573-regelen <span class="m">≈</span> 10·gradtall/halvseksjoner <span class="m">=</span> ${fmt(h573,1)} mm`};
 }
 
 /* ---------- konsentrisk kon ---------- */
@@ -945,8 +1020,8 @@ function calcKon(s){
   const W = half >= Math.PI/2 ? 2*Rb : 2*Rb*Math.sin(half);
   const Hh = Rb - (half>=Math.PI/2 ? -Rb*Math.abs(Math.cos(half)) : Rs*Math.cos(half));
   const emner = [{navn:'Konutbrett (ringsektor)', ant:1, B:W, H:Hh, areal:aBrutto}];
-  const seam = slant + Math.PI*(D1+D2v);   // langsgående søm + tilslutning begge ender
-  return {emner,aNetto,aBrutto,seam,warn,raw:{slant,Rb,Rs,thetaDeg:theta*180/Math.PI,bue:Math.PI*D1,D1,D2:D2v},
+  const seam = slant;                      // kun langsgående – begge ender sikkes
+  return {emner,aNetto,aBrutto,seam,sikker:2,warn,raw:{slant,Rb,Rs,thetaDeg:theta*180/Math.PI,bue:Math.PI*D1,D1,D2:D2v},
     comp:[
       ['D1 (stor ende)', fmt(D1,1)+' mm'],
       ['D2 (liten ende)', fmt(D2v,1)+' mm'],
@@ -1009,8 +1084,8 @@ function calcKonEks(s){
   let xMax=0,yMin=1e9,yMax=-1e9;
   for(const pt of [...u.p,...u.q]){ xMax=Math.max(xMax,pt[0]); yMin=Math.min(yMin,pt[1]); yMax=Math.max(yMax,pt[1]); }
   const emner=[{navn:'Eksentrisk konutbrett', ant:1, B:2*xMax, H:yMax-yMin, areal:aBrutto}];
-  const seam = u.genFlat + Math.PI*(D1+D2v);
-  return {emner,aNetto,aBrutto,seam,warn,_eks:u,raw:{genTop:u.genTop,genFlat:u.genFlat,e:(D1-D2v)/2,D1,D2:D2v},
+  const seam = u.genFlat;                  // kun flatside-sømmen – endene sikkes
+  return {emner,aNetto,aBrutto,seam,sikker:2,warn,_eks:u,raw:{genTop:u.genTop,genFlat:u.genFlat,e:(D1-D2v)/2,D1,D2:D2v},
     comp:[
       ['D1 (stor ende)', fmt(D1,1)+' mm'],
       ['D2 (liten ende)', fmt(D2v,1)+' mm'],
@@ -1056,9 +1131,11 @@ function calcT(s,C,Cb){
     const hx = t*ca - rb*Math.sin(phi)*sa;
     hxMin=Math.min(hxMin,hx); hxMax=Math.max(hxMax,hx);
   }
+  const nD = s.nDel||12, pitchT = 2*Math.PI*rb/nD, ordLinesT = [];
+  for (let k=1; k<=nD+1; k++) ordLinesT.push({k, h:Math.max(0, s.tH - tOf((k-1)/nD*2*Math.PI))});
   const emner = [{navn:'Avstikker-kapsel (fiskemunn)', ant:1, B:Cb2, H:Math.max(0,hMaxA), areal:aAvstB}];
-  const seam = sadel + Math.max(0,hMaxA);
-  return {emner,aNetto:aAvst,aBrutto:aAvstB,seam,warn,raw:{hMax:Math.max(0,hMaxA),hMin:Math.max(0,hMinA),sadel,holeW:hxMax-hxMin,holeH:2*holeC},
+  const seam = Math.max(0,hMaxA);          // kun langsgående – sadelen er bertelkant med egen bokregel
+  return {emner,aNetto:aAvst,aBrutto:aAvstB,seam,sikker:1,warn,raw:{hMax:Math.max(0,hMaxA),hMin:Math.max(0,hMinA),sadel,bertelN:Math.max(4,Math.ceil(sadel/100)),holeW:hxMax-hxMin,holeH:2*holeC,pitch:pitchT,n:nD,lines:ordLinesT},
     comp:[
       ['Hovedkapsel D', fmt(s.D,1)+' mm'],
       ['Avstikker-kapsel d', fmt(s.tD2,1)+' mm'],
@@ -1143,8 +1220,11 @@ function curveDots(f,u0,u1,cc,closed=false,steps=300){
   return pts;
 }
 function festLegend(x,y,fs,s){const r=fs*0.3;
+  if (s.festKey==='band')
+    return `<rect x="${x}" y="${y-fs*0.55}" width="${r*3.2}" height="${r*1.3}" fill="rgba(143,163,181,.35)" stroke="#8fa3b5" stroke-width="${(r*0.3).toFixed(2)}"/>`+
+    `<text x="${x+r*3.6+fs*0.3}" y="${y}" font-size="${fs*0.8}" fill="#9aa6b1">= strammebånd (langsgående skjøt) · rundtgående skjøter sikkes</text>`;
   return `<circle cx="${x+r}" cy="${y-fs*0.3}" r="${r}" fill="${FCOL}" stroke="#171e26" stroke-width="${(r*0.4).toFixed(2)}"/>`+
-  `<text x="${x+r*2+fs*0.4}" y="${y}" font-size="${fs*0.8}" fill="#9aa6b1">= ${s.festKey==='skrue'?'plateskrue':'popnagle'} · c/c ${fmt(s.cc,0)} mm · veiledende plassering</text>`;}
+  `<text x="${x+r*2+fs*0.4}" y="${y}" font-size="${fs*0.8}" fill="#9aa6b1">= ${s.festKey==='skrue'?'plateskrue':'popnagle'} (langsgående skjøt) · c/c ${fmt(s.cc,0)} mm · rundtgående skjøter sikkes</text>`;}
 
 function drawFlat(s,c){
   const el = $('flatView');
@@ -1168,82 +1248,86 @@ function svgRett(s,c){
   g += `<rect x="0" y="0" width="${B}" height="${Hd}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
   g += `<rect x="${B-s.OL}" y="0" width="${s.OL}" height="${Hd}" style="fill:rgba(224,166,60,.14);stroke:#e0a63c;stroke-width:${lw};stroke-dasharray:${lw*4} ${lw*3}"/>`;
   g += `<text x="${B-s.OL/2}" y="${Hd/2}" font-size="${fs*0.8}" fill="#e0a63c" text-anchor="middle" transform="rotate(90 ${B-s.OL/2} ${Hd/2})">OVERLAPP ${s.OL}</text>`;
-  g += `<line x1="0" y1="${s.EOL}" x2="${B}" y2="${s.EOL}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*6} ${lw*4}"/>`;
-  g += `<text x="${B*0.02}" y="${s.EOL-fs*0.4}" font-size="${fs*0.7}" fill="#9aa6b1">ende-overlapp ${s.EOL} mm</text>`;
+  /* sikk: dobbel linje ved sikkedybden – tverrskjøten sikkes, ingen festere */
+  g += `<line x1="0" y1="${s.EOL}" x2="${B}" y2="${s.EOL}" stroke="#8fa3b5" stroke-width="${lw*1.6}"/>`;
+  g += `<line x1="0" y1="${s.EOL+lw*5}" x2="${B}" y2="${s.EOL+lw*5}" stroke="#8fa3b5" stroke-width="${lw*1.6}"/>`;
+  g += `<text x="${B*0.02}" y="${s.EOL-fs*0.4}" font-size="${fs*0.7}" fill="#8fa3b5">SIKK – sikkedybde ${s.EOL} mm (tres til stopp, ingen festere)</text>`;
   g += dimH(0,B,-pad*0.4,`B = π·D + ol = ${fmt(B,0)} mm`,lw,fs);
   g += dimV(B+pad*0.4,0,Hd,`${fmt(Hd,0)} mm`,lw,fs);
   g += `<text x="${B*0.03}" y="${Hd-fs}" font-size="${fs*0.85}" fill="#d4552e">${first.navn.toUpperCase()}${first.ant>1?' × '+first.ant:''}${c.emner.length>1?'  (+ sluttkapsel '+fmt(c.emner[1].H,0)+' mm)':''}</text>`;
-  /* festemiddel: langsgående søm midt i overlappen + tverrsøm midt i ende-overlappen */
+  /* langsgående skjøt: skrue/nagle-prikker ELLER bånd – tverrskjøten sikkes */
   const rd = fs*0.3;
-  if (s.OL>0) g += fdots(lineDots(B-s.OL/2, rd*2.5, B-s.OL/2, Hd-rd*2.5, s.cc), rd);
-  if (c.nKapsler>1 && s.EOL>0) g += fdots(lineDots(rd*3, s.EOL/2, B-s.OL-rd*3, s.EOL/2, s.cc), rd);
+  if (s.festKey==='band'){
+    const nB = Math.max(1, s.band||4);
+    for (let i=0;i<nB;i++){
+      const yB = s.EOL + (Hd-s.EOL)*(i+0.5)/nB;
+      g += `<rect x="${-fs*0.5}" y="${yB-lw*4}" width="${B+fs}" height="${lw*8}" fill="rgba(143,163,181,.35)" stroke="#8fa3b5" stroke-width="${lw}"/>`;
+    }
+    g += `<text x="${B*0.02}" y="${Hd-fs*2.4}" font-size="${fs*0.7}" fill="#8fa3b5">BÅND × ${Math.max(1,s.band||4)} pr. kapsel lukker langsgående skjøt</text>`;
+  } else if (s.OL>0){
+    g += fdots(lineDots(B-s.OL/2, rd*2.5, B-s.OL/2, Hd-rd*2.5, s.cc), rd);
+  }
   g += festLegend(0, Hd+pad*0.62, fs, s);
   return g+'</svg>';
 }
 
-/* ---------- bend ---------- */
+/* ---------- bend – verkstedmetoden: delelinjer og ordinater ---------- */
 function svgBend(s,c){
-  const rc = s.D/2, R = s.bR, N = s.bSeg;
-  const beta = (s.bAng*Math.PI/180)/(2*(N-1)), tb = Math.tan(beta);
-  const Cn = Math.PI*s.D, B = Cn + s.OL;
-  const hMax = (R+rc)*tb;
-  const gap = hMax*0.35 + s.D*0.06;
-  const P = 120;
-  const hOf = u => (R - rc*Math.cos(u))*tb;
+  const rc=s.D/2, R=s.bR, N=s.bSeg;
+  const beta=(s.bAng*Math.PI/180)/(2*(N-1)), tb=Math.tan(beta);
+  const Cn=Math.PI*s.D, B=Cn+s.OL, n=s.nDel;
+  const u0=({hals:0,side:Math.PI/2,rygg:Math.PI}[s.bSkjot] ?? Math.PI/2);
+  const hOf=u=>Math.max(0,(R-rc*Math.cos(u0+u))*tb);
+  const hMax=(R+rc)*tb;
+  const P=140;
+  /* tegner ETT endestykke og ETT mellomstykke med delelinjer – som verkstedsappene */
+  const pieces=[{full:false,H:hMax,lbl:'ENDESTYKKE ×2'}];
+  if(N>2) pieces.push({full:true,H:2*hMax,lbl:'MELLOMSTYKKE ×'+(N-2)});
+  const gap=hMax*0.55+s.D*0.1;
   let y=0, totH=0;
-  const seg = [{type:'end'}];
-  for(let i=0;i<N-2;i++) seg.push({type:'mid'});
-  seg.push({type:'end'});
-  const monn = s.bMonn;
-  const items=[];
-  for(const sg of seg){
-    if(sg.type==='end'){
-      const H = hMax + monn;
-      items.push({y, H, path:(yy)=>{
-        let d = `M0 ${yy+H} L${B} ${yy+H} L${B} ${yy+H-monn-hOf(2*Math.PI)} `;
-        for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;d+=`L${(u/(2*Math.PI)*Cn+s.OL).toFixed(1)} ${(yy+H-monn-hOf(u)).toFixed(1)} `;}
-        d+=`L0 ${yy+H-monn-hOf(0)} Z`; return d;},
-        lbl:'ENDESTYKKE ×2', H1:hMax, full:false});
-      y += H + gap; totH = y;
+  pieces.forEach(pc=>{pc.y=y; y+=pc.H+gap; totH=y;});
+  totH-=gap;
+  const pad=Math.max(B,totH)*0.17, lw=Math.max(B,totH)/480, fs=Math.max(B,totH)/30;
+  let g=svgOpen(-pad,-pad*1.15,B+3.1*pad,totH+2.7*pad);
+  for(const pc of pieces){
+    const yy=pc.y;
+    const topY=u=> pc.full? yy+hMax-hOf(u) : yy+pc.H-hOf(u);
+    const botY=u=> pc.full? yy+hMax+hOf(u) : yy+pc.H;
+    /* omriss: kurve over netto omkrets, flatt parti i overlappsonen */
+    let d;
+    if(pc.full){
+      d='M0 '+topY(0).toFixed(1);
+      for(let i=1;i<=P;i++){const u=i/P*2*Math.PI;d+=' L'+(u/(2*Math.PI)*Cn).toFixed(1)+' '+topY(u).toFixed(1);}
+      d+=' L'+B.toFixed(1)+' '+topY(2*Math.PI).toFixed(1)+' L'+B.toFixed(1)+' '+botY(2*Math.PI).toFixed(1);
+      for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;d+=' L'+(u/(2*Math.PI)*Cn).toFixed(1)+' '+botY(u).toFixed(1);}
+      d+=' Z';
     } else {
-      const H = 2*hMax + 2*monn;
-      items.push({y, H, path:(yy)=>{
-        let d='';
-        for(let i=0;i<=P;i++){const u=i/P*2*Math.PI;d+=(i?'L':'M')+((u/(2*Math.PI)*Cn)).toFixed(1)+' '+(yy+monn+hMax-hOf(u)).toFixed(1)+' ';}
-        d+=`L${B} ${(yy+monn+hMax-hOf(2*Math.PI)).toFixed(1)} L${B} ${(yy+monn+hMax+hOf(2*Math.PI)).toFixed(1)} `;
-        for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;d+=`L${(u/(2*Math.PI)*Cn).toFixed(1)} ${(yy+monn+hMax+hOf(u)).toFixed(1)} `;}
-        d+='Z'; return d;},
-        lbl:'MELLOMSTYKKE'+(N-2>1?' ×'+(N-2):''), H1:2*hMax, full:true});
-      y += H + gap; totH = y;
+      d='M0 '+botY(0).toFixed(1)+' L'+B.toFixed(1)+' '+botY(0).toFixed(1)+' L'+B.toFixed(1)+' '+topY(2*Math.PI).toFixed(1);
+      for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;d+=' L'+(u/(2*Math.PI)*Cn).toFixed(1)+' '+topY(u).toFixed(1);}
+      d+=' Z';
     }
+    g+=`<path d="${d}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
+    /* skjøt/overlapp */
+    g+=`<line x1="${Cn}" y1="${topY(2*Math.PI)}" x2="${Cn}" y2="${botY(2*Math.PI)}" stroke="#e0a63c" stroke-width="${lw}" stroke-dasharray="${lw*4} ${lw*3}"/>`;
+    /* delelinjer med ordinat skrevet på linjen */
+    for(let k=1;k<=n+1;k++){
+      const u=(k-1)/n*2*Math.PI, x=(k-1)/n*Cn;
+      const y1=topY(u), y2=botY(u), val=y2-y1;
+      g+=`<line x1="${x}" y1="${y1.toFixed(1)}" x2="${x}" y2="${y2.toFixed(1)}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*3} ${lw*3}"/>`;
+      g+=`<text x="${x}" y="${yy-fs*0.3}" font-size="${fs*0.58}" fill="#9aa6b1" text-anchor="middle">${k>n?'1':k}</text>`;
+      if(val>fs*1.4)
+        g+=`<text font-size="${fs*0.6}" fill="#8fb8d8" text-anchor="middle" transform="rotate(-90 ${x} ${((y1+y2)/2).toFixed(1)})" x="${x}" y="${((y1+y2)/2-lw*2.5).toFixed(1)}">${fmt(val,1)}</text>`;
+    }
+    g+=`<text x="${B+pad*0.12}" y="${yy+fs*0.9}" font-size="${fs*0.7}" fill="#d4552e">${pc.lbl}</text>`;
+    g+=dimV(B+pad*0.75, yy, yy+pc.H, `${fmt(pc.H,0)}`, lw, fs*0.85);
+    /* kurvekantene sikkes (monn = sikkemonn) – festemiddel kun i langsgående søm */
+    const rd=fs*0.3;
+    if(s.festKey!=='band' && s.OL>0)
+      g+=fdots(lineDots(Cn+s.OL/2, topY(2*Math.PI)+rd, Cn+s.OL/2, botY(2*Math.PI)-rd, s.cc),rd);
   }
-  totH -= gap;
-  const pad = Math.max(B,totH)*0.16;
-  const lw = Math.max(B,totH)/480, fs = Math.max(B,totH)/30;
-  let g = svgOpen(-pad,-pad,B+2.8*pad,totH+2*pad);
-  let drawnMid=false, drawnEnd=false;
-  for(const it of items){
-    g += `<path d="${it.path(it.y)}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
-    g += `<line x1="${s.OL}" y1="${it.y}" x2="${s.OL}" y2="${it.y+it.H}" stroke="#e0a63c" stroke-width="${lw}" stroke-dasharray="${lw*4} ${lw*3}"/>`;
-    const showLbl = (it.full&&!drawnMid)||(!it.full&&!drawnEnd);
-    if(showLbl){
-      g += `<text x="${B*0.02}" y="${it.y+fs*1.1}" font-size="${fs*0.8}" fill="#d4552e">${it.lbl}</text>`;
-      g += dimV(B+pad*0.35, it.y, it.y+it.H, `${fmt(it.H,0)}`, lw, fs*0.9);
-      if(it.full) drawnMid=true; else drawnEnd=true;
-    }
-    /* festemiddel: øvre kurvekant = én skjøt pr. stykke, + kort søm i halsen */
-    const rd = fs*0.32, yy = it.y;
-    if (it.full){
-      g += fdots(curveDots(u=>[u/(2*Math.PI)*Cn, yy+monn+hMax-hOf(u)], 0, 2*Math.PI, s.cc), rd);
-      if (s.OL>0) g += fdots(lineDots(s.OL/2, yy+monn+hMax-hOf(0), s.OL/2, yy+monn+hMax+hOf(0), s.cc), rd);
-    } else {
-      g += fdots(curveDots(u=>[u/(2*Math.PI)*Cn+s.OL, yy+it.H-monn-hOf(u)], 0, 2*Math.PI, s.cc), rd);
-      if (s.OL>0) g += fdots(lineDots(s.OL/2, yy+it.H-monn-hOf(0), s.OL/2, yy+it.H, s.cc), rd);
-    }
-  }
-  g += dimH(0,B,-pad*0.35,`B = π·D + ol = ${fmt(B,0)} mm`,lw,fs);
-  g += `<text x="0" y="${totH+pad*0.55}" font-size="${fs*0.8}" fill="#9aa6b1">β = ${fmt(beta*180/Math.PI,2)}°  ·  rygg midtstk. 2·(R+D/2)·tanβ = ${fmt(2*hMax,0)} mm  ·  hals ${fmt(2*(R-rc)*tb,0)} mm  ·  monn ${monn} mm pr. kant</text>`;
-  g += festLegend(0, totH+pad*0.9, fs, s);
+  g+=dimH(0,B,-pad*0.62,`utviklet lengde = π·D + ol = ${fmt(B,0)} mm`,lw,fs);
+  g+=`<text x="0" y="${totH+pad*0.55}" font-size="${fs*0.78}" fill="#9aa6b1">β = ${fmt(beta*180/Math.PI,2)}°  ·  pitch = πD/${n} = ${fmt(Cn/n,1)} mm  ·  skjøt på ${({side:'siden',hals:'halsen',rygg:'ryggen'})[s.bSkjot]} (linje 1)  ·  rygg ${fmt(2*hMax,0)} mm  ·  hals ${fmt(2*(R-rc)*tb,0)} mm  ·  kurvekantene sikkes – sikkemonn ${s.bMonn} mm pr. kant kommer i tillegg ved kapp</text>`;
+  g+=festLegend(0, totH+pad*0.92, fs, s);
   return g+'</svg>';
 }
 
@@ -1265,17 +1349,22 @@ function svgKon(s,c){
   g += `<path d="${d}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
   g += `<line x1="0" y1="0" x2="${Rb*Math.cos(a0)}" y2="${Rb*Math.sin(a0)}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*5} ${lw*4}"/>`;
   g += `<line x1="0" y1="0" x2="${Rb*Math.cos(a1)}" y2="${Rb*Math.sin(a1)}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*5} ${lw*4}"/>`;
+  /* nummererte delelinjer (radialer) */
+  const nK=s.nDel;
+  for(let k=1;k<=nK+1;k++){
+    const a=a0+(k-1)/nK*th;
+    g+=`<line x1="${(Rs*Math.cos(a)).toFixed(1)}" y1="${(Rs*Math.sin(a)).toFixed(1)}" x2="${(Rb*Math.cos(a)).toFixed(1)}" y2="${(Rb*Math.sin(a)).toFixed(1)}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*3} ${lw*3}"/>`;
+    g+=`<text x="${((Rb+fs*0.9)*Math.cos(a)).toFixed(1)}" y="${((Rb+fs*0.9)*Math.sin(a)).toFixed(1)}" font-size="${fs*0.58}" fill="#9aa6b1" text-anchor="middle" dominant-baseline="middle">${k>nK?'1':k}</text>`;
+  }
   g += `<text x="0" y="${-Rs-fs*0.6}" font-size="${fs}" fill="#e8ebee" text-anchor="middle">R = ${fmt(Rb,0)} · r = ${fmt(Rs,0)}</text>`;
   g += `<text x="0" y="${-Rb-fs*0.8}" font-size="${fs}" fill="#e8ebee" text-anchor="middle">bue stor ende = π·D1 = ${fmt(Math.PI*D1,0)} mm</text>`;
-  g += `<text x="0" y="${yBot+fs*1.6}" font-size="${fs*0.85}" fill="#9aa6b1" text-anchor="middle">θ = ${fmt(th*180/Math.PI,1)}°  ·  slant s = ${fmt(slant,1)} mm  ·  + overlapp ${s.OL} mm langs én slantkant</text>`;
+  g += `<text x="0" y="${yBot+fs*1.6}" font-size="${fs*0.85}" fill="#9aa6b1" text-anchor="middle">θ = ${fmt(th*180/Math.PI,1)}°  ·  slant s = ${fmt(slant,1)} mm  ·  + overlapp ${s.OL} mm langs én slantkant  ·  begge ender sikkes mot nabokapslene</text>`;
   const ox=Rb*Math.cos(a1), oy=Rb*Math.sin(a1), ix=Rs*Math.cos(a1), iy=Rs*Math.sin(a1);
   const nx=Math.cos(a1+Math.PI/2), ny=Math.sin(a1+Math.PI/2);
   g += `<path d="M${ox} ${oy} L${ox+nx*s.OL} ${oy+ny*s.OL} L${ix+nx*s.OL} ${iy+ny*s.OL} L${ix} ${iy} Z" style="fill:rgba(224,166,60,.14);stroke:#e0a63c;stroke-width:${lw};stroke-dasharray:${lw*4} ${lw*3}"/>`;
   /* festemiddel: slantsøm midt i fliken + tilslutning mot nabokapsler langs begge buer */
   const rd = fs*0.3;
-  if (s.OL>0) g += fdots(lineDots(ox+nx*s.OL/2, oy+ny*s.OL/2, ix+nx*s.OL/2, iy+ny*s.OL/2, s.cc), rd);
-  g += fdots(curveDots(a=>[Rb*Math.cos(a),Rb*Math.sin(a)], a0, a1, s.cc), rd);
-  g += fdots(curveDots(a=>[Rs*Math.cos(a),Rs*Math.sin(a)], a0, a1, s.cc), rd);
+  if (s.festKey!=='band' && s.OL>0) g += fdots(lineDots(ox+nx*s.OL/2, oy+ny*s.OL/2, ix+nx*s.OL/2, iy+ny*s.OL/2, s.cc), rd);
   g += festLegend(-xW, yBot+fs*2.8, fs, s);
   return g+'</svg>';
 }
@@ -1301,15 +1390,22 @@ function svgKonEks(s,c){
   const pad=Math.max(w,hh)*0.2, lw=Math.max(w,hh)/460, fs=Math.max(w,hh)/28;
   let g=svgOpen(-xMax-pad, yMin-pad, w+2.6*pad, hh+2.4*pad);
   g += `<path d="${d}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
-  /* trekantlinjer (hver 6.) – viser metoden */
-  for(let k=0;k<=M;k+=6){
+  /* trekantlinjer nummerert 1–13: linje 1 i flatsiden (skjøten), rundt via toppen */
+  const stepE=M/6;   /* 12 delelinjer rundt = 6 pr. halvdel */
+  for(let j=0;j<=6;j++){
+    const k=M-j*stepE;                 /* k=M er flatsiden, k=0 er toppen */
+    const numR=1+j, numL=13-j;         /* høyre halvdel 1..7, venstre 13..7 */
     g+=`<line x1="${u.p[k][0]}" y1="${u.p[k][1]}" x2="${u.q[k][0]}" y2="${u.q[k][1]}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*4} ${lw*4}"/>`;
-    g+=`<line x1="${pL[k][0]}" y1="${pL[k][1]}" x2="${qL[k][0]}" y2="${qL[k][1]}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*4} ${lw*4}"/>`;
+    g+=`<text x="${u.p[k][0]}" y="${u.p[k][1]-fs*0.4}" font-size="${fs*0.55}" fill="#9aa6b1" text-anchor="middle">${numR}</text>`;
+    if(j>0 && j<6){
+      g+=`<line x1="${pL[k][0]}" y1="${pL[k][1]}" x2="${qL[k][0]}" y2="${qL[k][1]}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*4} ${lw*4}"/>`;
+      g+=`<text x="${pL[k][0]}" y="${pL[k][1]-fs*0.4}" font-size="${fs*0.55}" fill="#9aa6b1" text-anchor="middle">${numL===13?'13=1':numL}</text>`;
+    }
   }
   /* senterlinje (toppgenerator) */
   g+=`<line x1="0" y1="${u.p[0][1]}" x2="0" y2="${u.q[0][1]}" stroke="#9aa6b1" stroke-width="${lw}" stroke-dasharray="${lw*8} ${lw*4}"/>`;
   g+=`<text x="0" y="${yMin-fs*0.8}" font-size="${fs*0.85}" fill="#e8ebee" text-anchor="middle">stor ende – bue π·D1 = ${fmt(Math.PI*Math.max(s.D,s.kD2),0)} mm</text>`;
-  g+=`<text x="0" y="${yMax+fs*1.6}" font-size="${fs*0.8}" fill="#9aa6b1" text-anchor="middle">trekantmetoden – stiplede linjer er sanne lengder · skjøt i flatsiden (ytterkantene) · gen. topp ${fmt(u.genTop,0)} / flatside ${fmt(u.genFlat,0)} mm</text>`;
+  g+=`<text x="0" y="${yMax+fs*1.6}" font-size="${fs*0.8}" fill="#9aa6b1" text-anchor="middle">trekantmetoden – stiplede linjer er sanne lengder · skjøt i flatsiden (ytterkantene) · gen. topp ${fmt(u.genTop,0)} / flatside ${fmt(u.genFlat,0)} mm · endene sikkes</text>`;
   /* overlappflik langs høyre flatside-generator */
   const pF=u.p[M], qF=u.q[M];
   const gx=qF[0]-pF[0], gy=qF[1]-pF[1], gl=Math.hypot(gx,gy);
@@ -1318,11 +1414,6 @@ function svgKonEks(s,c){
   /* festemiddel: søm i flatsiden + tilslutning langs begge endekurver (høyre halvdel + speil) */
   const rd = fs*0.3;
   if (s.OL>0) g += fdots(lineDots(pF[0]+nx2*s.OL/2, pF[1]+ny2*s.OL/2, qF[0]+nx2*s.OL/2, qF[1]+ny2*s.OL/2, s.cc), rd);
-  const onPoly = pts => t => { const k=t*M, i=Math.min(M-1,Math.floor(k)), f2=k-i;
-    const a=pts[i], b=pts[i+1]; return [a[0]+(b[0]-a[0])*f2, a[1]+(b[1]-a[1])*f2]; };
-  const pc = curveDots(onPoly(u.p), 0, 1, s.cc);
-  const qc = curveDots(onPoly(u.q), 0, 1, s.cc);
-  g += fdots(pc,rd) + fdots(qc,rd) + fdots(mir(pc),rd) + fdots(mir(qc),rd);
   g += festLegend(-xMax, yMax+fs*3.0, fs, s);
   return g+'</svg>';
 }
@@ -1358,8 +1449,17 @@ function svgT(s,c){
   let g=svgOpen(-pad,-pad,totW+2.4*pad,totH+2.2*pad);
   g+=`<path d="${d}" style="fill:rgba(212,85,46,.10);stroke:#d4552e;stroke-width:${lw*2}"/>`;
   g+=`<line x1="${Cn}" y1="0" x2="${Cn}" y2="${hOf(0)}" stroke="#e0a63c" stroke-width="${lw}" stroke-dasharray="${lw*4} ${lw*3}"/>`;
+  /* delelinjer med ordinat */
+  const nT=s.nDel;
+  for(let k=1;k<=nT+1;k++){
+    const phi=(k-1)/nT*2*Math.PI, x=(k-1)/nT*Cn, hv=hOf(phi);
+    g+=`<line x1="${x}" y1="0" x2="${x}" y2="${hv.toFixed(1)}" stroke="#4a5866" stroke-width="${lw}" stroke-dasharray="${lw*3} ${lw*3}"/>`;
+    g+=`<text x="${x}" y="${-fs*0.35}" font-size="${fs*0.58}" fill="#9aa6b1" text-anchor="middle">${k>nT?'1':k}</text>`;
+    if(hv>fs*1.4)
+      g+=`<text font-size="${fs*0.6}" fill="#8fb8d8" text-anchor="middle" transform="rotate(-90 ${x} ${(hv/2).toFixed(1)})" x="${x}" y="${(hv/2-lw*2.5).toFixed(1)}">${fmt(hv,1)}</text>`;
+  }
   g+=`<text x="${B*0.02}" y="${fs*1.2}" font-size="${fs*0.8}" fill="#d4552e">AVSTIKKER ${fmt(s.tAng,0)}° – FISKEMUNN</text>`;
-  g+=dimH(0,B,-pad*0.35,`B = π·d + ol = ${fmt(B,0)} mm`,lw,fs);
+  g+=dimH(0,B,-pad*0.6,`utviklet lengde = π·d + ol = ${fmt(B,0)} mm · pitch = π·d/${s.nDel} = ${fmt(2*Math.PI*rb/s.nDel,1)} mm`,lw,fs);
   g+=dimV(B+pad*0.3,0,hMax,`${fmt(hMax,0)}`,lw,fs*0.9);
   const hx0=B+gapX-holeW/2, hy0=totH/2;
   g+=`<g transform="translate(${hx0} ${hy0})"><path d="${hole}" style="fill:rgba(224,166,60,.10);stroke:#e0a63c;stroke-width:${lw*2}"/></g>`;
@@ -1368,7 +1468,8 @@ function svgT(s,c){
   /* festemiddel: langs sadelkurven, i langsgående søm, og samme fester sett fra hovedkapselen */
   const rd = fs*0.32;
   g += fdots(curveDots(phi=>[phi/(2*Math.PI)*Cn, hOf(phi)], 0, 2*Math.PI, s.cc), rd);
-  if (s.OL>0 && hOf(0)>rd*5) g += fdots(lineDots((Cn+B)/2, rd*2.5, (Cn+B)/2, hOf(0)-rd*2.5, s.cc), rd);
+  if (s.festKey!=='band' && s.OL>0 && hOf(0)>rd*5) g += fdots(lineDots((Cn+B)/2, rd*2.5, (Cn+B)/2, hOf(0)-rd*2.5, s.cc), rd);
+  g += `<text x="${Cn/2}" y="${hMax+fs*1.1}" font-size="${fs*0.7}" fill="#9aa6b1" text-anchor="middle">BERTELKANT: sadelen skrus/nagles mot hovedrøret – min. 4 fester, maks c/c 100 mm (Isolasjonsboka) · hullet klippes normalt ved montering · toppen sikkes</text>`;
   const hd = curveDots(phi=>{const t=tOf(phi);
     return [t*ca - rb*Math.sin(phi)*sa - hxMid,
             Rm*Math.asin(Math.max(-1,Math.min(1,rb*Math.cos(phi)/Rm)))];}, 0, 2*Math.PI, s.cc, true);
@@ -1418,10 +1519,13 @@ function drawList(s,c){
     rows += row(antTot, e.navn, fmt(e.B,0)+' × '+fmt(e.H,0)+' mm',
       fmt(e.areal/1e6,3)+' m²', fmt(kg,2)+' kg/stk');
   }
-  rows += `<tr class="sec"><td colspan="6">Festemateriell</td></tr>`;
-  rows += row(c.nFest + (s.festOverstyr>0?' (overstyrt)':''), s.fest.navn,
-    'c/c '+fmt(s.cc,0)+' mm', 'søm ≈ '+fmt((c.seam||0)*s.ant/1000,2)+' m', fmt(c.prisFestV,0)+' kr');
-  if (c.nBand>0) rows += row(c.nBand, 'Strammebånd SS316 m/lås', s.band+' pr. kapsel', '', fmt(c.prisBandV,0)+' kr');
+  rows += `<tr class="sec"><td colspan="6">Festemateriell og skjøter</td></tr>`;
+  if (c.sikkerT>0) rows += row(c.sikkerT, 'Rundtgående skjøt – sikkes', 'sikkedybde '+fmt(s.EOL,0)+' mm', 'sikkemaskin', '–');
+  if (c.nBertel>0) rows += row(c.nBertel, s.fest.navn.split(' ')[0]+' i bertelkant (sadel)', 'min. 4 / maks c/c 100', 'Isolasjonsboka', fmt(c.nBertel*s.prisFest,0)+' kr');
+  rows += row(c.nFest + (s.festOverstyr>0?' (overstyrt)':''), s.fest.navn+' (langsgående)',
+    s.festKey==='band' ? Math.max(1,s.band||4)+' pr. kapsel' : 'c/c '+fmt(s.cc,0)+' mm',
+    s.festKey==='band' ? '' : 'søm ≈ '+fmt((c.seam||0)*s.ant/1000,2)+' m', fmt(c.prisFestV,0)+' kr');
+  if (c.nBand>0) rows += row(c.nBand, 'Strammebånd i tillegg', s.band+' pr. kapsel', '', fmt(c.prisBandV,0)+' kr');
   rows += `<tr class="sum"><td></td><td class="r">${c.nEmner}</td><td>Sum ${s.ant>1?'('+s.ant+' komponenter)':''}</td><td class="r"></td><td class="r">${fmt(c.aBruttoT/1e6,3)} m² · ${fmt(c.vekt,1)} kg</td><td class="r">${fmt(c.prisSum,0)} kr</td></tr>`;
   $('cutTable').innerHTML =
     '<tr><th>Pos</th><th class="r">Ant</th><th>Emne / artikkel</th><th class="r">Mål</th><th class="r">Areal / søm</th><th class="r">Vekt / pris</th></tr>'+rows;
@@ -1437,7 +1541,7 @@ function drawCards(s,c){
   /* pris */
   $('prisPlateN').textContent = 'Plate: '+fmt(c.aBruttoT/1e6,3)+' m² × '+fmt(s.prisM2,0)+' kr/m²';
   $('prisPlate').innerHTML = fmt(c.prisPlate,0)+'<small>kr</small>';
-  $('prisFestN').textContent = s.fest.navn.split(' ')[0]+': '+c.nFest+' stk × '+fmt(s.prisFest,2)+' kr';
+  $('prisFestN').textContent = (s.festKey==='band'?'Bånd':s.fest.navn.split(' ')[0])+': '+c.nFest+' stk × '+fmt(s.prisFest,2)+' kr';
   $('prisFestV').innerHTML = fmt(c.prisFestV,0)+'<small>kr</small>';
   $('prisBandRow').style.display = c.nBand>0 ? '' : 'none';
   $('prisBandN').textContent = 'Strammebånd: '+c.nBand+' stk × '+fmt(s.prisBand,0)+' kr';
@@ -1449,13 +1553,33 @@ function drawCards(s,c){
   $('cutDimTable').innerHTML = c.emner.map(e=>
     `<tr><td>${e.navn}${e.ant>1?' ×'+e.ant:''}</td><td>${fmt(e.B,0)} × ${fmt(e.H,0)} mm</td></tr>`).join('');
 
+  /* ordinattabell for bend og T-stykke */
+  const oc = $('ordCard');
+  if ((s.comp==='bend' || s.comp==='tstk') && c.raw && c.raw.lines){
+    oc.style.display='';
+    const L = c.raw.lines;
+    let rows = `<tr><td>Pitch (avstand pr. linje)</td><td>${fmt(c.raw.pitch,1)} mm</td></tr>`;
+    if (s.comp==='bend'){
+      rows += `<tr><td>Skjæringshøyde (600-tabellen / 573-regelen)</td><td>${fmt(c.raw.h600,1)} / ${fmt(c.raw.h573,1)} mm</td></tr>`;
+      rows += L.map(l=>`<tr><td>Linje ${l.k>c.raw.n?(c.raw.n+1)+' = 1':l.k}${l.k===1?' (skjøt)':l.k===c.raw.marks.hals?' (hals)':l.k===c.raw.marks.rygg?' (rygg)':''}</td><td>${fmt(l.h,1)} / ${fmt(2*l.h,1)} mm</td></tr>`).join('');
+      rows += `<tr><td colspan="2" style="color:var(--paper-dim);font-size:.72rem">endestykke / mellomstykke · + monn ${s.bMonn} mm pr. kurvekant ved kapp</td></tr>`;
+    } else {
+      rows += L.map(l=>`<tr><td>Linje ${l.k>c.raw.n?'13 = 1':l.k}</td><td>${fmt(l.h,1)} mm</td></tr>`).join('');
+    }
+    $('ordTable').innerHTML = rows;
+  } else oc.style.display='none';
+
   $('festTable').innerHTML = `
-    <tr><td>Festemiddel</td><td>${s.fest.navn}</td></tr>
-    <tr><td>Sømlengde totalt</td><td>${fmt((c.seam||0)*s.ant/1000,2)} m</td></tr>
-    <tr><td>c/c-avstand</td><td>${fmt(s.cc,0)} mm</td></tr>
-    <tr><td>Foreslått antall</td><td>${c.nFestAuto} stk</td></tr>
+    <tr><td>Rundtgående skjøter</td><td>${c.sikkerT>0? c.sikkerT+' stk – <b>sikkes</b>' : 'ingen'}</td></tr>
+    <tr><td>Langsgående skjøt</td><td>${s.fest.navn}</td></tr>
+    ${s.festKey==='band'
+      ? `<tr><td>Bånd pr. kapsel</td><td>${Math.max(1,s.band||4)} stk</td></tr>`
+      : `<tr><td>Sømlengde (langsgående)</td><td>${fmt((c.seam||0)*s.ant/1000,2)} m</td></tr>
+         <tr><td>c/c-avstand</td><td>${fmt(s.cc,0)} mm</td></tr>`}
+    ${c.nBertel>0?`<tr><td>Bertelkant (sadel mot hovedrør)</td><td>${c.nBertel} stk skrue/nagle – min. 4, maks c/c 100 mm</td></tr>`:''}
+    <tr><td>Foreslått antall (langsgående)</td><td>${c.nFestAuto} stk</td></tr>
     <tr><td>Benyttet antall</td><td>${c.nFest} stk${s.festOverstyr>0?' (overstyrt)':''}</td></tr>
-    ${c.nBand>0?`<tr><td>Strammebånd</td><td>${c.nBand} stk</td></tr>`:''}`;
+    ${c.nBand>0?`<tr><td>Bånd i tillegg</td><td>${c.nBand} stk</td></tr>`:''}`;
 
   const m=s.mat;
   $('matTable').innerHTML = `
@@ -1482,20 +1606,35 @@ iso:{t:'Isolasjonstykkelse',d:`<p>Tykkelsen på isolasjonslaget mellom røret og
 materialer:{t:'Kapslingsmaterialer',d:`<p>De tre vanligste materialene er <b>aluminium (AlMn1)</b>, <b>rustfritt stål AISI 316</b> og <b>alu-sink</b> (varmgalvanisert stål med aluminium/sink-belegg, 185 g/m²).</p><p>Aluminium er lett, enkel å forme og standardvalget offshore og i industrien – tillatt for alle isolasjonsklasser unntatt brannklasse. Rustfritt 316 kreves gjerne til brannisolering og i svært korrosivt miljø, og som perforert plate til personellbeskyttelse over varme flater. Alu-sink er et rimeligere alternativ som etter NORSOK M-004 bare kan vurderes på landanlegg med lav korrosjonsrisiko. Materialvalget skal alltid godkjennes av kunden.</p>`,links:[L_NORSOK,L_FROSIO]},
 tykkelse:{t:'Platetykkelse',d:`<p>NORSOK M-004 setter minstetykkelser for mantling som øker med diameteren – typisk 0,7–0,9 mm for aluminium på rør, og minst 1,0 mm på tanker og beholdere. Rustfritt stål er stivere og kan brukes tynnere (0,5–0,6 mm er vanlig på rør).</p><p>Tynnere plate er lettere å forme og billigere, men buler og «trommer» lettere og tåler mindre tråkk og slag. Tykkelsen påvirker både vekt og pris direkte – prøv å bytte tykkelse i appen og se utslaget.</p>`,links:[L_NORSOK,L_FROSIO]},
 overlapp:{t:'Langsgående overlapp',d:`<p>Den langsgående skjøten der platekanten legges utenpå seg selv når kapselen rulles rundt isolasjonen – typisk 30–50 mm. Platebredden blir derfor π·D + overlapp.</p><p>Skjøten plasseres slik at vann renner <i>av</i> og ikke <i>inn</i>: på horisontale rør legges den nede på siden (klokka 4 eller 8, aldri rett opp), og alltid med le-siden ytterst i værutsatte områder. Festemidlene settes midt i overlappen.</p>`,links:[L_FROSIO,ndla('mantling rør')]},
-endeoverlapp:{t:'Ende-overlapp (tverrskjøt)',d:`<p>Skjøten mellom to kapsler i lengderetningen, typisk 50 mm. På vertikale rør skal øvre kapsel alltid ligge <i>utenpå</i> nedre – som takstein – slik at vann ledes utover og ned.</p><p>Kantene sikkes eller falses gjerne for stivhet og tetthet. I appen bestemmer ende-overlappen hvor mye av kapsellengden som «spises» av hver skjøt når et langt rørstrekk deles i flere kapsler.</p>`,links:[L_FROSIO]},
+endeoverlapp:{t:'Ende-overlapp / sikkedybde',d:`<p>Skjøten mellom to kapsler i lengderetningen, typisk 50 mm. På vertikale rør skal øvre kapsel alltid ligge <i>utenpå</i> nedre – som takstein – slik at vann ledes utover og ned.</p><p>Denne rundtgående skjøten festes ikke med skruer: kapselenden <b>sikkes</b>, og neste kapsel tres utenpå til stopp i sikken – ende-overlappen er sikkedybden (se eget oppslag om sikk). I appen bestemmer sikkedybden hvor mye av kapsellengden som «spises» av hver skjøt når et langt rørstrekk deles i flere kapsler.</p>`,links:[L_FROSIO]},
 utfolding:{t:'Utfolding (utbrett)',d:`<p>Utfolding er å tegne en tredimensjonal form flatt ut på plate – slik at den etter kapping og forming får riktig fasong. Rette kapsler folder ut til rektangler, kjegler til ringsektorer, og skjæringer mellom sylindre gir kurver som må konstrueres punkt for punkt.</p><p>Dette er kjernekompetansen i platearbeidet: å finne <b>sanne lengder</b> og overføre dem til platen. Kalkulatoren viser resultatet, men på fagprøven må du kunne konstruere det samme med passer, linjal og formlene i formelkortet.</p>`,links:[ndla('utfolding plate'),L_SHEET]},
 segmentbend:{t:'Segmentbend',d:`<p>Et bend bygget av rette sylinderstykker («segmenter») som kappes på skrå og settes sammen til en kurve – ofte kalt hummerrygg. Man bruker segmenter fordi plate ikke kan strekkes glatt rundt to krumninger samtidig.</p><p>Bendet består av to halve endestykker og et antall hele mellomstykker. Flere deler gir jevnere kurve, men mer arbeid. Hvert stykke folder ut til en stripe avgrenset av sinuskurver – legg merke til at mellomstykkene har kurve både oppe og nede.</p>`,links:[ndla('segmentbøy utfolding'),L_SHEET]},
 gjaering:{t:'Gjæringsvinkel β',d:`<p>Vinkelen hvert kappesnitt danner med planet vinkelrett på rørets akse. For et bend med total vinkel V fordelt på N deler er β = V / (2·(N−1)) – endestykkene «bruker» én β hver, mellomstykkene to.</p><p>Fra β følger alle målene i utfoldingen: rygghøyden (R + D/2)·tanβ og halshøyden (R − D/2)·tanβ. Sjekk gjerne håndregningen mot komponentdata-kortet.</p>`,links:[ndla('gjæring'),L_SHEET]},
 bendradius:{t:'Bendradius',d:`<p>Radien fra bendets senterpunkt til rørets senterlinje. Kapslingen må følge radien på rørbenden under isolasjonen – standard rørbend er LR (long radius) med R = 1,5 × nominell diameter, eller SR (short radius) med R = 1,0 × D.</p><p>Er kapselradien (D/2 over isolasjon) større enn bendradien, kolliderer halsen – da varsler appen. I praksis løses det med større radius eller segmentering med flere deler.</p>`,links:[L_FROSIO]},
-monn:{t:'Skjøtemonn',d:`<p>Ekstra materiale som legges til hver kurvekant på segmentene, slik at stykkene kan falses/sikkes og tres i hverandre i skjøtene – typisk 10–15 mm per kant.</p><p>Uten monn ville segmentene bare møtes kant i kant uten mulighet for tett og stiv sammenføyning. Monnet inngår i kappemålet og arealet, men ikke i den teoretiske (netto) flaten.</p>`,links:[ndla('falseskjøt'),L_SHEET]},
+monn:{t:'Sikkemonn',d:`<p>Ekstra materiale som legges til hver kurvekant på segmentene – typisk 10–15 mm per kant. Det er dette materialet som går inn i <b>sikken</b> når segmentskjøtene sikkes og stykkene tres i hverandre.</p><p>Uten monn ville segmentene bare møtes kant i kant uten mulighet for tett og stiv sammenføyning. Monnet inngår i kappemålet og arealet, men ikke i den teoretiske (netto) flaten.</p>`,links:[ndla('falseskjøt'),L_SHEET]},
 kon:{t:'Konisk overgang (reduksjon)',d:`<p>Overgangen mellom to rørdimensjoner. En <b>konsentrisk</b> kon har samme senterlinje i begge ender og folder ut til en ringsektor: slantlengden s = √(L² + ((D1−D2)/2)²), utbrettradius R = s·D1/(D1−D2) og sektorvinkel θ = 180°·D1/R.</p><p>Denne konstruksjonen med passer – to buer og en vinkel – er en klassiker i platefaget, og formlene står i formelkortet så du kan kontrollregne.</p>`,links:[ndla('kjegle utfolding'),L_SHEET]},
 eksentrisk:{t:'Eksentrisk kon og trekantmetoden',d:`<p>En eksentrisk reduksjon har en rett side («flatsiden») – den brukes når rørene ligger med felles underkant, f.eks. på rørgater der isolert rør skal ligge an mot støtter. Den kan ikke foldes ut som ringsektor fordi generatorene har ulik lengde.</p><p>Løsningen er <b>trekantmetoden</b>: del begge sirklene i like mange punkter, finn den sanne lengden av hver forbindelseslinje, og legg trekant for trekant flatt ut på platen. Utfoldingen i appen viser trianguleringslinjene stiplet – akkurat slik du konstruerer det for hånd.</p>`,links:[ndla('trekantmetoden utfolding'),L_SHEET]},
 fiskemunn:{t:'Fiskemunn og sadel',d:`<p>Når en avstikker møter et hovedrør, må avstikkerkapselen kappes etter en kurve som følger hovedrørets runding – kurven ligner en fiskemunn, og området der de møtes kalles sadelen. Samtidig skal det skjæres et tilsvarende hull i hovedkapselen.</p><p>Kurven konstrueres punkt for punkt: for hver posisjon rundt avstikkeren regnes høyden ned til hovedrørets flate. Ved 90° er kurven symmetrisk; ved skrå avstikker blir den asymmetrisk og hullet avlangt. Formelen står i formelkortet.</p>`,links:[ndla('rørgjennomføring utfolding'),L_SHEET]},
 avstikker:{t:'Avstikkervinkel',d:`<p>Vinkelen mellom avstikkerens akse og hovedrøret. 90° gir et rett T-stykke; mindre vinkel gir en skrå avstikker (Y-grein), som brukes der rørene grener av på skrå.</p><p>Jo spissere vinkel, desto mer asymmetrisk blir fiskemunn-kurven og desto lengre blir hullet i hovedkapselen i rørets lengderetning. Prøv å dra vinkelen fra 90° mot 30° og se hvordan begge deler endrer seg.</p>`,links:[ndla('grenrør utfolding'),L_SHEET]},
 endebunn:{t:'Endebunn / avslutning',d:`<p>Der isolasjonen slutter – typisk mot en flens, ventil eller uisolert rørstrekk – avsluttes kapslingen med en endebunn: en ring fra kapseldiameteren inn til det bare røret.</p><p>Ringen får en krage (omslag) som klippes med snepper og brettes 90° rundt både kapselen og røret, slik at avslutningen blir stiv og tett og hindrer at vann trenger inn i isolasjonen. Mot flenser lages ofte demonterbare jakker i stedet.</p>`,links:[L_FROSIO]},
+ordinat:{t:'Delelinjer og ordinater',d:`<p>Verkstedmetoden for utfolding: omkretsen (den utviklede lengden π·D) deles i et fast antall like deler – normalt 12 – med delelinjer nummerert 1 til 12 rundt. Linje 13 faller sammen med linje 1 i skjøten. Avstanden mellom linjene kalles <b>pitch</b> = π·D/12.</p><p>For hver delelinje beregnes en <b>ordinat</b>: den målbare høyden på mønsteret akkurat der. Ordinatene settes av med tommestokk på strekket, punktene forbindes med en smidig kurve, og malen er klar. På et segmentbend er ordinaten (R − (D/2)·cos((k−1)·30°))·tanβ – hals på linje 1, rygg på linje 7 – og mellomstykket har dobbel ordinat. Dette er metoden som brukes ved Stord Academy og på fagprøven; kurven i tegningen er trukket gjennom nøyaktig disse punktene.</p>`,links:[ndla('utfolding delelinjer ordinat'),L_SHEET]},
+cui:{t:'CUI – korrosjon under isolasjon',d:`<p>CUI (Corrosion Under Insulation, norsk KUI) er korrosjon som utvikler seg skjult på rør og utstyr <i>under</i> isolasjonen – typisk der vann har trengt inn gjennom åpne skjøter, skadet kapsling eller manglende drenering, og blir liggende mot varmt karbonstål. Faren er størst i området ca. 50–150 °C, i kystnært og fuktig miljø.</p><p>For isolatøren betyr CUI: værbeskyttelsen (kapslingen) er en <b>barriere</b>, ikke pynt. Tette skjøter (sikk!), takstein-prinsippet på vertikale strekk, dreneringsveier og hele avslutninger avgjør om systemet holder i 25 år. Ved rehabilitering må gammel isolasjon demonteres kontrollert slik at røret kan inspiseres og overflatebehandles før ny isolering.</p>`,links:[['Wikipedia – Corrosion under insulation','https://en.wikipedia.org/wiki/Corrosion_under_insulation'],L_NORSOK]},
+dampsperre:{t:'Dampsperre og kalde system',d:`<p>På kalde system (drift under omgivelsestemperatur) drives vanndamp i luften <b>innover</b> mot den kalde rørflaten. Uten tett sperre kondenserer dampen inne i isolasjonen: isolasjonsevnen faller, vann samler seg, og korrosjonsrisikoen øker.</p><p>Derfor krever kalde system enten materialer med lukket cellestruktur og høy dampmotstand (celleglass, elastomerskum) eller en separat, kontinuerlig dampsperre. <b>Kontinuitet er alt</b>: skjøter, avslutninger, oppheng, gjennomføringer, ventiler og flenser er de kritiske punktene – én utetthet kan ødelegge hele systemet. Varme system tåler småfeil; kalde gjør det ikke.</p>`,links:[ndla('dampsperre kondens'),L_FROSIO]},
+celleglass:{t:'Celleglass',d:`<p>Isolasjonsmateriale av skumglass med helt lukket cellestruktur: tar ikke opp vann, har svært høy dampmotstand, er stivt, ubrennbart og trykksterkt. Standardvalg på kalde system og der fuktsikkerhet er avgjørende – kan brukes både kaldt og varmt etter produktdata.</p><p>Motsatsen er åpne fiberstrukturer som mineralull, som isolerer godt varmt, men suger fukt og derfor krever et komplett dampsperresystem ved kulde.</p>`,links:[['Wikipedia – Foam glass','https://en.wikipedia.org/wiki/Foam_glass']]},
+elastomer:{t:'Elastomerskum',d:`<p>Fleksibelt isolasjonsmateriale (syntetisk gummi) med lukket cellestruktur – smidig å montere rundt rør, ventiler og bend, med innebygd dampmotstand. Vanlig på kulde- og kjøleanlegg.</p><p>Begrensningen er temperatur: typisk maks rundt 110 °C etter produktdata. Å foreslå elastomer på en 380 °C kolonne er en klassisk eksamensfelle – sjekk alltid materialets temperaturgrenser mot driftstemperaturen.</p>`,links:[ndla('elastomer isolasjon')]},
+akustisk:{t:'Akustisk isolering',d:`<p>Lydisolering av rør bygger på fire prinsipper: <b>absorpsjon</b> (porøst materiale som spiser lydenergi), <b>masse/barriere</b> (tungt sjikt som stopper lyd), <b>mekanisk frikobling</b> (bryte vibrasjonsveien mellom rør og kapsling) og <b>tetthet/kontinuitet</b> (én glipe lekker lyd som en åpen dør).</p><p>Den konkrete lagoppbygningen – materialer, tykkelser, klasse – hentes alltid fra prosjektets dokumenterte, målte løsning. Isolatørens jobb er å forstå prinsippene og montere systemet nøyaktig som spesifisert.</p>`,links:[L_NORSOK]},
+branngjennomforing:{t:'Branngjennomføring',d:`<p>Der et rør passerer et klassifisert brannskille, må åpningen tettes med en <b>sertifisert, systembasert løsning</b>: underlag, åpningens geometri, rør/isolasjon, tettemateriale, dybde og montasje må samsvare nøyaktig med godkjenningen.</p><p>Derfor kan branntetting aldri improviseres på stedet – en gjennomføring som «ser tett ut» men avviker fra sertifikatet, har ingen dokumentert brannmotstand. Det samme gjelder brannbeskyttelse av rør, flenser og ESD-ventiler: produkt, tykkelse og festemetode skal følge kvalifisert løsning fra prosjektets brannstrategi.</p>`,links:[['Wikipedia – Firestop','https://en.wikipedia.org/wiki/Firestop']]},
+holdpoint:{t:'Hold point',d:`<p>Et avtalt stoppunkt i arbeidet der neste operasjon ikke kan starte før en kontroll er utført og godkjent – for eksempel inspeksjon av røroverflaten før gjenisolering, kontroll av skjulte lag før kapsling lukkes, eller kontroll av en branngjennomføring før den bygges inn.</p><p>Hold points beskytter kvaliteten på det som blir usynlig etterpå. En sterk fagarbeider planlegger dem inn i arbeidsrekkefølgen og dokumenterer at de er lukket.</p>`,links:[L_FROSIO]},
+sikk:{t:'Sikk og sikking',d:`<p>En <b>sikk</b> er en rille som rulles inn i platen med en <b>sikkemaskin</b> – standardutstyr i isolatørens blikkenslagerverksted. Etter Isolasjonsboka skal kapselen ha sikkekant i <b>begge ender: oversikk i den ene og undersikk i den andre</b>. Ved undersikk ligger nederste trinse inne i kapselen; ved oversikk snur du kapselen. Sikkene griper i hverandre når kapslene tres sammen – slik festes den rundtgående skjøten helt uten skruer eller nagler, og vann ledes utenpå.</p><p>Arbeidsteknikk fra boka: prøv alltid på en platebit først; på stive/tykke plater og formstykker sikker du i to operasjoner – først en lav <b>styringssikk</b> med løse trinser, deretter full dybde. Dybden justeres på maskinen en kvart omdreining om gangen (med klokka = dypere). Hjelpenagler i de ytterste hullene holder kapselen sammen under rundsikkingen. På segmentbend sikkes kurvekantene – sikkemonnet er materialet som går inn i sikken – og halvseksjonenes over-/undersikk velges etter bendets retning. Montér nedenfra og opp, og pass på at sikkene går godt i hverandre. Langsgående skjøt kan lages med eller uten sikkekant, og festes mekanisk: skruer, popnagler eller strammebånd.</p>`,links:[['Isopartner – sikkemaskin (teknisk isolasjon)','https://www.tekniskisolering.no/teknisk-isolasjon/maskiner/sikkemaskin'],L_FROSIO]},
+bertel:{t:'Bertel og bertelkant',d:`<p>De fleste greinrør festes til hovedrøret ved hjelp av en <b>bertel</b> – en kant som bøyes ut langs fiskemunn-enden på T-stykket, slik at den ligger an mot hovedrørets krumning. Bertelen lages i sikkemaskinen med flattrinser (berteltrinser): anlegget settes ca. 7–20 mm fra trinsekanten avhengig av rørdiameteren, stykket kjøres fram og tilbake mest på midten, og kapselen bøyes ned mot anlegget. Vinkelen mellom bertel og T-stykke varierer fra 0° ved spissene til 90° midt på; finjuster med plastklubbe eller blikkenslagerhammer.</p><p><b>Festeregelen fra Isolasjonsboka:</b> bor hull gjennom bertel og hovedrør, og fest med popnagler eller plateskruer – <b>minst 4 fester, maksimalt 100 mm mellom hver</b>. Appen regner dette antallet automatisk for T-stykket.</p>`,links:[L_FROSIO]},
+fals:{t:'Fals og falsing',d:`<p>Falsing er en annen sammenføyning enn sikking: platekantene bøyes om hverandre til en <b>fals</b> og klemmes tett. Etter Isolasjonsboka brukes falsing særlig på takplater, plater på toppen av tanker og rektangulære luftekanaler. En enkeltstående fals bygges av en <b>rettvinkelfals</b> på den ene platen og en <b>høyfals</b> på den andre; høyfalsen legges over, og falsen slås eller klemmes sammen (lockformer/falsemaskin). Falsene stenges med popnagler i 200–500 mm avstand eller ved sammenklemming.</p><p>Husk skillet: rundtgående skjøter på rørkapsling <i>sikkes</i>; falsing hører hjemme på flate og rektangulære konstruksjoner.</p>`,links:[ndla('falsing plate')]},
+skjaeringshoyde:{t:'Skjæringshøyde (600-tabellen og 573-regelen)',d:`<p>Skjæringshøyden er hjelpelinjen som gir riktig skjæringsvinkel når du konstruerer bendseksjoner på plata. <b>600-tabellen:</b> trekk en grunnlinje på nøyaktig 600 mm, avsett skjæringshøyden vinkelrett i den ene enden, og trekk skjæringslinjen – høyden er 600·tan(v), der v = gradtall/(2 × seksjonsekvivalenter). To halve seksjoner teller som én hel. For 90° og 5 hele + 2 halve blir v = 90/12 = 7,5°.</p><p><b>573-regelen</b> (fra boka, for ukurante vinkler): mål alltid 573 mm på grunnlinjen – da er skjæringshøyden i millimeter ≈ 10 × gradtall/antall halve seksjoner. Trikset virker fordi tan(v) ≈ v/57,3 for små vinkler. Appen viser begge verdiene i ordinattabellen, regnet av motoren.</p>`,links:[L_SHEET]},
+bendretning:{t:'Bendretning (A-, B-, C- og D-bend)',d:`<p>Isolasjonsboka bruker betegnelsene A-, B-, C- og D-bend (også kalt 1-, 2-, 3- og 4-bend) om hvilken retning bendet har i anlegget. Retningen avgjør hvilken side av hver seksjon som skal ha oversikk og undersikk – slik at vann alltid renner <i>utenpå</i> skjøtene og aldri inn i kapselen etter montering.</p><p>Tenk deg om før du sikker halvseksjonene: feil over-/undersikk på ett stykke kan gjøre hele bendet til en vannfelle. Sideskjøtene på bendseksjonene skal dessuten danne en jevnest mulig bue.</p>`,links:[L_FROSIO]},
+ekspansjon:{t:'Ekspansjon og glidestuss',d:`<p>Rør utvider og trekker seg sammen med temperaturen – i ekstreme tilfeller måles utvidelsen i metervis på lange, varme strekk. Kapslingen må ta høyde for dette: med jevne mellomrom legges det inn en <b>glidestuss</b> (ekspansjonsstykke) eller en egen ekspansjonsskjøt i kapslingen som tar opp bevegelsen, ellers kan rør, isolasjon og kapsling skades.</p><p>Rørsystemet selv kan ha ekspansjonssløyfer eller -belger; kapsling av slike partier utføres på vanlig måte. Vurder alltid total lengde og temperaturområde når du planlegger lange strekk.</p>`,links:[L_FROSIO]},
+talmeter:{t:'Talmeter',d:`<p>Talmeteret er isolatørens målebånd med egne skalaer for både <b>omkrets og diameter</b>: legg det rundt røret og les av begge målene direkte. Mange har også rissenål. Husk å legge til 2 × isolasjonstykkelsen når du måler uisolert rør.</p><p>Boka gir to fine feltregler for innvendig bendradius på 90°-bend når tegning mangler: mål buelengden med talmeter og gang med <b>0,64</b> (fordi R = L·2/π), eller mål korteste avstand mellom start- og sluttpunkt og gang med <b>0,71</b> (fordi R = korde/√2).</p>`,links:[L_FROSIO]},
 cc:{t:'c/c-avstand',d:`<p>Senteravstanden mellom festemidlene langs en skjøt («centre to centre»). Vanlig praksis er 100–150 mm i langsgående og tverrgående skjøter.</p><p>For stor avstand gjør at platekantene gaper og slipper inn vann; for liten avstand svekker platen og koster unødig tid og materiell. Festene fordeles jevnt over sømlengden – man deler inn, ikke «starter i én ende og ser hvor langt man kommer». Prikkene i utfoldingen følger verdien du setter her.</p>`,links:[L_FROSIO]},
-festemiddel:{t:'Plateskruer og popnagler',d:`<p><b>Plateskruer</b> (selvborende «blikkskruer», typisk 4,2×13 mm) i rustfritt A2 er standard i skjøtene – raske å sette og mulige å skru ut ved demontering. I sterkt korrosivt miljø, f.eks. offshore, brukes syrefast A4.</p><p><b>Popnagler</b> (blindnagler, typisk Ø4,0 mm aluminium med rustfri dor) gir en glattere og mer permanent sammenføyning, og er vanlige på segmentbend og der utstikkende skruehoder er uønsket. Merk galvanisk korrosjon: bruk festemiddel som passer platematerialet.</p>`,links:[['Wikipedia – Self-tapping screw','https://en.wikipedia.org/wiki/Self-tapping_screw'],['Wikipedia – Rivet (blindnagle)','https://en.wikipedia.org/wiki/Rivet']]},
-band:{t:'Strammebånd',d:`<p>Bånd av rustfritt stål (SS316) med låser som strammes rundt kapselen og holder den på plass uten å perforere platen – viktig der man vil unngå hull, eller som tillegg til skruer på store diametre.</p><p>Vanlig offshore-praksis etter NORSOK er rundt 4 bånd per kapsel / 5 per meter på værbeskyttelse. Sett antallet per kapsel i feltet, så regnes totalen og prisen ut.</p>`,links:[L_NORSOK,L_FROSIO]},
+festemiddel:{t:'Feste av langsgående skjøt',d:`<p>Den <b>rundtgående</b> skjøten sikkes (se eget oppslag) – den <b>langsgående</b> festes mekanisk. <b>Plateskruer</b> (selvborende «blikkskruer», typisk 4,2×13 mm) i rustfritt A2 er standard – raske å sette og mulige å skru ut ved demontering. I sterkt korrosivt miljø, f.eks. offshore, brukes syrefast A4.</p><p><b>Popnagler</b> (blindnagler, typisk Ø4,0 mm aluminium med rustfri dor) gir en glattere og mer permanent sammenføyning, og er vanlige der utstikkende skruehoder er uønsket. <b>Strammebånd</b> (SS316) er tredje alternativ og lukker skjøten helt uten hull i platen. Merk galvanisk korrosjon: bruk festemiddel som passer platematerialet.</p>`,links:[['Wikipedia – Self-tapping screw','https://en.wikipedia.org/wiki/Self-tapping_screw'],['Wikipedia – Rivet (blindnagle)','https://en.wikipedia.org/wiki/Rivet']]},
+band:{t:'Strammebånd',d:`<p>Bånd av rustfritt stål (SS316) med låser som strammes rundt kapselen. Valgt som festemetode lukker båndene den langsgående skjøten helt uten å perforere platen; de kan også legges til som ekstra sikring ved skruer/nagler på store diametre og i vindutsatte områder.</p><p>Vanlig offshore-praksis etter NORSOK er rundt 4 bånd per kapsel / 5 per meter på værbeskyttelse. Sett antallet per kapsel i feltet, så regnes totalen og prisen ut.</p>`,links:[L_NORSOK,L_FROSIO]},
 };
 
 function openInfo(key){
@@ -1512,14 +1651,14 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('modalBack').cla
 /* sett inn info-knapper ved etikettene */
 (function(){
   const btn = t => ` <button type="button" class="infoBtn" data-term="${t}" aria-label="Forklaring">i</button>`;
-  const forMap = {comp:'kapsling', iso:'iso', thk:'tykkelse', ol:'overlapp', eol:'endeoverlapp',
+  const forMap = {comp:'kapsling', iso:'iso', thk:'tykkelse', ol:'overlapp', eol:'endeoverlapp', nDel:'ordinat', bSkjot:'bendretning',
     bAng:'gjaering', bR:'bendradius', bMonn:'monn', tAng:'avstikker', eKrage:'endebunn',
     cc:'cc', band:'band'};
   for (const id in forMap){
     const lab = document.querySelector('label[for="'+id+'"]');
     if (lab) lab.insertAdjacentHTML('beforeend', btn(forMap[id]));
   }
-  const txtMap = {'Materiale':'materialer','Type':'eksentrisk','Festemiddel i sømmer':'festemiddel'};
+  const txtMap = {'Materiale':'materialer','Type':'eksentrisk','Langsgående skjøt':'festemiddel','Rundtgående skjøt':'sikk'};
   document.querySelectorAll('label:not([for])').forEach(l=>{
     const t=l.textContent.trim(); if(txtMap[t]) l.insertAdjacentHTML('beforeend', btn(txtMap[t]));
   });
@@ -1628,6 +1767,8 @@ function build3d(s,c){
   const matM = new THREE.MeshStandardMaterial({color:MATCOL[matKey], metalness:0.85,
     roughness: matKey==='rf'?0.22 : matKey==='alu'?0.4 : 0.55, side:THREE.DoubleSide});
   const matF = new THREE.MeshStandardMaterial({color:0x5fae7d, metalness:0.2, roughness:0.45});
+  const matSikk = new THREE.MeshStandardMaterial({color:0x55606c, metalness:0.9, roughness:0.35, side:THREE.DoubleSide});
+  const matBand = new THREE.MeshStandardMaterial({color:0x8fa3b5, metalness:0.95, roughness:0.3, side:THREE.DoubleSide});
   const inner = new THREE.Group();
   const add = m => inner.add(m);
   const dotR = Math.max(2.4, s.D*0.018);
@@ -1644,13 +1785,18 @@ function build3d(s,c){
     for (let i=0;i<n;i++){
       const len = i<n-1 ? s.rPl : c.emner[c.emner.length-1].H;
       add(cylBetween(new X(x,0,0), new X(x+len,0,0), R, matM));
-      const ns = seamN(len);                                   // langsgående søm (topp, på platen)
-      for(let k=0;k<ns;k++) add(sph([x+dotR*2+(len-dotR*4)*k/(ns-1), R+off, 0]));
-      if (i>0){                                                // tverrskjøt midt i ende-overlappen
-        const xr = x + s.EOL/2, nr = Math.max(4,Math.round(2*Math.PI*R/s.cc));
-        for(let k=0;k<nr;k++){const a=k/nr*2*Math.PI;
-          add(sph([xr, (R+off)*Math.cos(a), (R+off)*Math.sin(a)]));}
+      if (s.festKey==='band'){
+        const nB = Math.max(1, s.band||4);                     // bånd rundt kapselen
+        for (let b=0;b<nB;b++){
+          const xb = x + s.EOL + (len-s.EOL)*(b+0.5)/nB;
+          add(cylBetween(new X(xb-7,0,0), new X(xb+7,0,0), R*1.018, matBand));
+        }
+      } else {
+        const ns = seamN(len);                                 // langsgående søm (topp, på platen)
+        for(let k=0;k<ns;k++) add(sph([x+dotR*2+(len-dotR*4)*k/(ns-1), R+off, 0]));
       }
+      if (i>0)                                                 // tverrskjøt: SIKK – rille, ingen festere
+        add(cylBetween(new X(x+s.EOL/2-3,0,0), new X(x+s.EOL/2+3,0,0), R*1.012, matSikk));
       x += eff;
     }
   }
@@ -1680,16 +1826,14 @@ function build3d(s,c){
     pieces.push({f:frame(V),   yBot:u=>-hCl(u), yTop:()=>0});
     pieces.forEach((pc,i)=>{
       add(new THREE.Mesh(stripGeo(ringOf(pc.f,pc.yBot,rc), ringOf(pc.f,pc.yTop,rc)), matM));
-      /* halssøm: langs u=0-generatoren, på platen */
-      const y0=pc.yBot(0), y1=pc.yTop(0);
-      const ns=seamN(Math.abs(y1-y0));
-      for(let k=0;k<ns;k++) add(sph(pt(pc.f, y0+(y1-y0)*k/Math.max(1,ns-1), 0, rc+off)));
-      /* segmentskjøt: fester langs øvre gjæringskant (én ring pr. skjøt) */
-      if (i<pieces.length-1){
-        const nr=Math.max(4,Math.round(2*Math.PI*rc/s.cc));
-        for(let k=0;k<nr;k++){const u=k/nr*2*Math.PI;
-          add(sph(pt(pc.f, pc.yTop(u), u, rc+off)));}
+      /* halssøm: langs u=0-generatoren – kun ved skrue/nagle */
+      if (s.festKey!=='band'){
+        const uS=({hals:0,side:Math.PI/2,rygg:Math.PI}[s.bSkjot] ?? Math.PI/2);
+        const y0=pc.yBot(uS), y1=pc.yTop(uS);
+        const ns=seamN(Math.abs(y1-y0));
+        for(let k=0;k<ns;k++) add(sph(pt(pc.f, y0+(y1-y0)*k/Math.max(1,ns-1), uS, rc+off)));
       }
+      /* segmentskjøtene sikkes – gjæringskanten selv viser skjøten */
     });
   }
   else if (s.comp==='kon'){
@@ -1707,14 +1851,16 @@ function build3d(s,c){
     geo.rotateZ(-Math.PI/2);                                   // akse langs x, flatside mot −z
     add(new THREE.Mesh(geo,matM));
     /* fester: tilslutning i begge ender + søm langs flatside/generator */
-    const endRing=(x,rr,zc)=>{const n=Math.max(4,Math.round(2*Math.PI*rr/s.cc));
-      for(let k=0;k<n;k++){const a=k/n*2*Math.PI;
-        add(sph([x,(rr+off)*Math.sin(a), zc+(rr+off)*Math.cos(a)]));}};
-    endRing(-L/2, r1, 0);
-    endRing( L/2, r2, -e);
-    const nsm=seamN(Math.hypot(L, (r1-r2)-e));
-    for(let k=0;k<nsm;k++){const t=k/Math.max(1,nsm-1);
-      add(sph([-L/2+L*t, 0, -( r1+(e+r2-r1)*t + off )]));}     // eks: rett flatside; kons: langs generator
+    /* endene sikkes – vis sikk-riller */
+    const sikkRing=(x,rr,zc)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(rr*1.012,rr*1.012,6,64,1,true),matSikk);
+      m.rotation.z=-Math.PI/2; m.position.set(x,0,zc); add(m);};
+    sikkRing(-L/2+4, r1, 0);
+    sikkRing( L/2-4, r2, -e);
+    if (s.festKey!=='band'){
+      const nsm=seamN(Math.hypot(L, (r1-r2)-e));
+      for(let k=0;k<nsm;k++){const t=k/Math.max(1,nsm-1);
+        add(sph([-L/2+L*t, 0, -( r1+(e+r2-r1)*t + off )]));}   // eks: rett flatside; kons: langs generator
+    }
   }
   else if (s.comp==='tstk'){
     /* Avstikker kappet av NØYAKTIG samme sadelkurve som 2D-utfoldingen. */
@@ -1787,7 +1933,7 @@ function render(){
 /* ============================================================
    UI
    ============================================================ */
-['comp','dn','iso','ol','eol','ant','rL','rPl','bAng','bSeg','bR','bMonn',
+['comp','dn','iso','ol','eol','nDel','ant','rL','rPl','bAng','bSeg','bSkjot','bR','bMonn',
  'kDn2','kIso2','kL','tDn2','tIso2','tAng','tH','eKrage',
  'prisM2','cc','prisFest','festOverstyr','band','prisBand'].forEach(id=>{
   $(id).addEventListener('input', render);
@@ -1855,14 +2001,15 @@ function setMode(m){
 ['Calc','Learn','Prod'].forEach(n=>$('nav'+n).addEventListener('click',()=>setMode(n.toLowerCase())));
 
 function setSub(which){
-  const subs={Oppg:1,Ktr:1,Feil:1,Fag:1,Teori:1};
+  const subs={Oppg:1,Ktr:1,Feil:1,Fag:1,Eks:1,Teori:1};
   for(const k in subs){
     $('sub'+k).classList.toggle('on', k===which);
     $('c'+k).classList.toggle('hidden', k!==which);
     $('ls'+k).classList.toggle('hidden', k!==which);
   }
 }
-['Oppg','Ktr','Feil','Fag','Teori'].forEach(k=>$('sub'+k).addEventListener('click',()=>setSub(k)));
+['Oppg','Ktr','Feil','Fag','Eks','Teori'].forEach(k=>$('sub'+k).addEventListener('click',()=>setSub(k)));
+$('subEks').addEventListener('click',()=>{if(!window._eksInit){window._eksInit=1;renderEks('c1');}});
 
 /* ============================================================
    FELLES: utskrift
@@ -1903,19 +2050,22 @@ const QGEN = {
   bend:{lvl:1, make(lvl){ const dn=pick([80,100,150,200]), iso=pick([40,50,60]);
       return stateFrom({comp:'bend', dn, iso, bAng: lvl>=2? pick([45,60,90]) : 90,
       bSeg: lvl>=2? ri(3,6):4, bMonn:12}); },
-    title:s=>`Segmentbend ${s.bAng}° · ${s.bSeg} deler`,
-    text:s=>`Et ${s.bAng}°-bend på DN${s.dn} med ${s.iso} mm isolasjon (kapseldiameter D = ${fmt(s.D,1)} mm) skal kapsles som segmentbend i ${s.bSeg} deler. Bendradius på senterlinjen er ${fmt(s.bR,0)} mm.`,
+    title:s=>`Segmentbend ${s.bAng}° · ${s.bSeg-2} hele + 2 halve`,
+    text:s=>`Et ${s.bAng}°-bend på DN${s.dn} med ${s.iso} mm isolasjon (kapseldiameter D = ${fmt(s.D,1)} mm) skal kapsles som segmentbend med ${s.bSeg-2} hele mellomstykker + 2 halve endestykker (${s.bSeg} deler), ${s.nDel} delelinjer. Bendradius på senterlinjen er ${fmt(s.bR,0)} mm.`,
     qs:(s,c)=>[
       {q:'Gjæringsvinkel β', ans:c.raw.betaDeg, unit:'°', dec:2, tol:0.05},
       {q:'Rygghøyde mellomstykke (2·(R+D/2)·tanβ)', ans:2*c.raw.hMax, unit:'mm', dec:0, tol:1},
       {q:'Halshøyde mellomstykke (2·(R−D/2)·tanβ)', ans:2*c.raw.hMin, unit:'mm', dec:0, tol:1},
       {q:'Platebredde B', ans:c.raw.B, unit:'mm', dec:0, tol:1},
+      (()=>{const kk=2+((s.dn+s.bSeg)%Math.max(2,Math.floor(s.nDel/2)-1));
+        return {q:'Ordinat mellomstykke på delelinje '+kk+' (2·h)', ans:2*c.raw.lines[kk-1].h, unit:'mm', dec:1, tol:1};})(),
     ],
     sol:(s,c)=>[
       `β = ${s.bAng}° / (2·(${s.bSeg}−1)) = ${fmt(c.raw.betaDeg,2)}°`,
       `Rygg = 2·(${fmt(s.bR,0)} + ${fmt(s.D/2,1)})·tan ${fmt(c.raw.betaDeg,2)}° = ${fmt(2*c.raw.hMax,0)} mm`,
       `Hals = 2·(${fmt(s.bR,0)} − ${fmt(s.D/2,1)})·tan ${fmt(c.raw.betaDeg,2)}° = ${fmt(2*c.raw.hMin,0)} mm`,
       `B = π·${fmt(s.D,1)} + ${s.OL} = ${fmt(c.raw.B,0)} mm`,
+      `Ordinat linje k: h_k = (R − (D/2)·cos((k−1)·${fmt(360/s.nDel,0)}°))·tanβ · mellomstykke = 2·h_k · pitch = π·D/${s.nDel} = ${fmt(c.raw.pitch,1)} mm`,
     ]},
   kon:{lvl:2, make(){ const dn=pick([100,150,200]);
       return stateFrom({comp:'kon', kType:'kons', dn, iso:pick([40,50,60]),
@@ -1962,12 +2112,14 @@ const QGEN = {
       {q:'Lengste kant på fiskemunn-utfoldingen', ans:c.raw.hMax, unit:'mm', dec:1, tol:1},
       {q:'Korteste kant', ans:c.raw.hMin, unit:'mm', dec:1, tol:1},
       {q:'Hullets lengde i hovedkapselen (aksialt)', ans:c.raw.holeW, unit:'mm', dec:0, tol:2},
+      {q:'Høyde på delelinje 4', ans:c.raw.lines[3].h, unit:'mm', dec:1, tol:1},
     ],
     sol:(s,c)=>[
       `h(φ) = H − [√(R² − r²·cos²φ) − r·sinφ·cosα]/sinα`,
       `Lengst (mot rygg) = ${fmt(c.raw.hMax,1)} mm`,
       `Kortest (topp av sadel) = ${fmt(c.raw.hMin,1)} mm`,
       `Hull aksialt = ${fmt(c.raw.holeW,0)} mm${s.tAng<90?' (avlangt pga. skrå vinkel)':''}`,
+      `Delelinje 4: φ = 3·${fmt(360/s.nDel,0)}° → h = ${fmt(c.raw.lines[3].h,1)} mm · pitch = ${fmt(c.raw.pitch,1)} mm`,
     ]},
   ende:{lvl:1, make(){ return stateFrom({comp:'ende', dn:pick([80,100,150]), iso:pick([40,50,60]), eKrage:pick([20,25,30])}); },
     title:s=>'Endebunn',
@@ -2066,7 +2218,8 @@ $('kFraKalk').addEventListener('click',()=>{ if(last3d) newKtr({...last3d.s}); }
 function newFeil(){
   const key=pick(['bend','kon','rett']);
   const g=QGEN[key], s=g.make(2), c=calc(s), qs=g.qs(s,c);
-  const idx=Math.floor(Math.random()*qs.length);
+  const idxPool=Object.keys({bend:{0:1,1:1,2:1,3:1},kon:{0:1,1:1,2:1,3:1},rett:{0:1,1:1,2:1,3:1}}[key]).map(Number);
+  const idx=pick(idxPool);
   const FEIL={  /* typiske regnefeil */
     bend:{0:{f:x=>s.bAng/(2*s.bSeg), e:'β regnet med N i stedet for N−1 i nevneren.'},
           1:{f:x=>2*(s.bR - s.D/2)*Math.tan(c.raw.betaDeg*Math.PI/180), e:'Rygg regnet med minus – (R−D/2) er halsen, ikke ryggen.'},
@@ -2119,21 +2272,21 @@ function newFag(){
             stateFrom({comp:'bend',dn,iso,bSeg:5}),
             stateFrom({comp:'ende',dn,iso,eKrage:25}) ];
     title='Rørstrekk med bend og avslutning';
-    beskr=`Et rørstrekk DN${dn} med ${iso} mm isolasjon skal kapsles i aluminium 0,8 mm: ${fmt(L,0)} mm rett strekk, ett 90°-segmentbend i 5 deler (radius ${fmt(parts[1].bR,0)} mm) og én endebunn med 25 mm krage. Langsgående overlapp 40 mm, ende-overlapp 50 mm, plateskruer c/c ${cc} mm. Platepris ${parts[0].prisM2} kr/m², skruer 1,50 kr/stk.`;
+    beskr=`Et rørstrekk DN${dn} med ${iso} mm isolasjon skal kapsles i aluminium 0,8 mm: ${fmt(L,0)} mm rett strekk, ett 90°-segmentbend med 3 hele + 2 halve (radius ${fmt(parts[1].bR,0)} mm) og én endebunn med 25 mm krage. Langsgående overlapp 40 mm, sikkedybde 50 mm. Langsgående skjøt skrus c/c ${cc} mm – rundtgående skjøter sikkes. Platepris ${parts[0].prisM2} kr/m², skruer 1,50 kr/stk.`;
   } else if (variant===1){
     const dn=pick([100,150]), dn2=pick([50,80]), iso=50;
     parts=[ stateFrom({comp:'rett',dn,iso,rL:2000}),
             stateFrom({comp:'kon',kType:'kons',dn,iso,kDn2:dn2,kIso2:iso,kL:250}),
             stateFrom({comp:'rett',dn:dn2,iso,rL:1500}) ];
     title='Dimensjonsovergang';
-    beskr=`Strekk med reduksjon, alt med ${iso} mm isolasjon og aluminium 0,8 mm: 2000 mm DN${dn}, konsentrisk kon (L = 250 mm) ned til DN${dn2}, deretter 1500 mm DN${dn2}. Overlapper 40/50 mm, skruer c/c ${cc} mm.`;
+    beskr=`Strekk med reduksjon, alt med ${iso} mm isolasjon og aluminium 0,8 mm: 2000 mm DN${dn}, konsentrisk kon (L = 250 mm) ned til DN${dn2}, deretter 1500 mm DN${dn2}. Overlapper 40/50 mm. Langsgående skjøt skrus c/c ${cc} mm – rundtgående sikkes.`;
   } else {
     const dn=pick([200,250]), iso=pick([60,80]);
     const p2=stateFrom({comp:'tstk',dn,iso,tDn2:80,tIso2:50});
     p2.tH=Math.ceil((p2.D/2+200)/10)*10;
     parts=[ stateFrom({comp:'rett',dn,iso,rL:2600}), p2 ];
     title='Hovedrør med avstikker';
-    beskr=`Hovedrør DN${dn} med ${iso} mm isolasjon: 2600 mm rett strekk med 90° avstikker DN80 (50 mm isolasjon, høyde ${fmt(p2.tH,0)} mm fra senter). Aluminium 0,8 mm, overlapper 40/50 mm, skruer c/c ${cc} mm.`;
+    beskr=`Hovedrør DN${dn} med ${iso} mm isolasjon: 2600 mm rett strekk med 90° avstikker DN80 (50 mm isolasjon, høyde ${fmt(p2.tH,0)} mm fra senter). Aluminium 0,8 mm, overlapper 40/50 mm. Langsgående skjøt skrus c/c ${cc} mm – rundtgående sikkes.`;
   }
   const results=parts.map(p=>{p.cc=cc; return calc(p);});
   const sum={
@@ -2186,6 +2339,18 @@ const QUIZ=[
  {q:'Når velges syrefast A4 fremfor A2?',a:['Innendørs tørt','I sterkt korrosivt miljø, f.eks. offshore','Aldri','Bare på aluminium'],r:1,term:'festemiddel'},
  {q:'På vertikale rør skal …',a:['nedre kapsel ligge utenpå øvre','øvre kapsel ligge utenpå nedre','kapslene stumpes kant i kant','skjøten fuges med silikon'],r:1,term:'endeoverlapp'},
  {q:'En konsentrisk kon folder ut til …',a:['et rektangel','en ellipse','en ringsektor','en sinuskurve'],r:2,term:'kon'},
+ {q:'Hvordan festes den rundtgående skjøten mellom to kapsler?',a:['Plateskruer c/c 100 mm','Den sikkes – kapselen tres til stopp i sikken','Popnagler c/c 150 mm','Silikonfuge'],r:1,term:'sikk'},
+ {q:'Hva står CUI for i isolatørfaget?',a:['Kontroll under installasjon','Korrosjon under isolasjon','Kapsling uten isolasjon','Kondens ved ujevn isolering'],r:1,term:'cui'},
+ {q:'Hvorfor er kalde system mer kritiske for fukt enn varme?',a:['Kald plate er glattere','Vanndamp drives innover mot den kalde flaten og kondenserer i systemet','Isolasjonen krymper i kulde','Skruene ruster fortere'],r:1,term:'dampsperre'},
+ {q:'Hvilket materiale er uegnet på en kolonne med 380 °C driftstemperatur?',a:['Steinull lamell','Høytemperatur mineralfiber','Elastomerskum (maks ca. 110 °C)','Alle tåler det'],r:2,term:'elastomer'},
+ {q:'Hva gjelder for en gjennomføring i et klassifisert brannskille?',a:['Tettes med det som er tilgjengelig','Kun sertifisert, systembasert løsning montert etter godkjenningen','Mineralull dyttes godt til','Kapsles som vanlig rør'],r:1,term:'branngjennomforing'},
+ {q:'Overslagsberegning: rett areal 100 m², +18 % komponenter, deretter +10 % svinn. Hva bestilles?',a:['128,0 m²','129,8 m²','118,0 m²','110,0 m²'],r:1,term:'kapsling'},
+ {q:'Hvilken standard erstattet NORSOK R-004:2006?',a:['NORSOK M-501','NORSOK M-004:2018','ISO 12944','NS-EN 1090'],r:1,term:'cui'},
+ {q:'Hvor legges den langsgående skjøten på et horisontalt rør?',a:['Rett opp','Rett ned','Ca. 45° fra horisontal diameter – øvre plate alltid utenpå','Der det passer'],r:2,term:'overlapp'},
+ {q:'Hvordan sikkes en kapsel etter læreboka?',a:['Sikk kun i én ende','Oversikk i den ene enden, undersikk i den andre','Sikk bare på langsgående skjøt','Sikkes ikke – skrus'],r:1,term:'sikk'},
+ {q:'Hva sier bokregelen om festing av bertelkanten på et T-stykke?',a:['Minst 2 skruer','Minst 4 fester, maks c/c 100 mm','Kun lim','Den sikkes'],r:1,term:'bertel'},
+ {q:'Du måler buelengden på et 90°-bend med talmeter. Innvendig radius er …',a:['lengden × 0,5','lengden × 0,64','lengden × 0,71','lengden × 1,5'],r:1,term:'talmeter'},
+ {q:'Hvor ofte bores festehull i langsgående skjøt etter boka?',a:['c/c 50 mm','c/c 150 mm – 8 hull pr. meter','c/c 300 mm','Bare i endene'],r:1,term:'cc'},
 ];
 function startQuiz(){
   $('cTeori').innerHTML = QUIZ.map((z,i)=>`<div class="qz" id="qz${i}"><div class="qq">${i+1}. ${esc(z.q)}</div>
@@ -2210,6 +2375,187 @@ function startQuiz(){
   });
 }
 $('tStart').addEventListener('click',startQuiz);
+
+/* ============================================================
+   LÆRING 6 – EKSAMEN
+   Fire prøveeksamener fra akademiets treningssett (ISO3102-form,
+   ISL03-01). Regnedelen rettes av påslagsmotoren under – testet
+   mot kontrollsvarene i sensorveiledningene.
+   ============================================================ */
+const EKS_KILDE = 'Stord Academy treningssett · modellert etter ISO3102 H21/V22/H22/H23 · læreplan ISL03-01 · NORSOK M-004:2018 (erstatter R-004:2006)';
+
+function eksRor(OD,iso,L,kK,kS,iK,iS,pi){ /* påslagsmodellen for rørlinje */
+  const D=OD+2*iso, A=pi*D*L, A1=A*(1+kK/100), A2=A1*(1+kS/100);
+  const V=pi*(Math.pow(D/2,2)-Math.pow(OD/2,2))*L, V2=V*(1+iK/100)*(1+iS/100);
+  return {D,A,A1,A2,V,V2};
+}
+function eksTank(soner,ekstra,dPct,sPct){ /* sylindersoner + oppgitt areal */
+  const deler=soner.map(z=>Math.PI*z[0]*z[1]);
+  const sum=deler.reduce((a,b)=>a+b,0)+ekstra;
+  const iso=sum*(1+dPct/100), kaps=iso*(1+sPct/100);
+  return {deler,sum,iso,kaps};
+}
+
+const EKS = {
+ c1:{navn:'Prøveeksamen 1 · Varmt rørsystem – vedlikehold og CUI',
+  situasjon:`Et landbasert prosessanlegg skal rehabilitere en utendørs 8" heating-medium-linje av karbonstål. Inspeksjon har avdekket våt isolasjon, åpne skjøter i kapslingen, mangelfull drenering og lokale korrosjonsindikasjoner. Isolasjonen skal demonteres, røret klargjøres for inspeksjon/overflatebehandling, og et nytt robust system monteres. Driftstemperatur 110 °C; anlegget er kystnært med vind, regn og salt.`,
+  data:[['Rør','8" karbonstål, utv. Ø 219 mm'],['Rett rørlengde','84 m'],['90° bend','6 stk, senterlinjeradius 305 mm'],['Flenspar / ventiler / T-stykker','4 / 3 / 2 stk'],['Driftstemperatur','110 °C'],['Ny isolasjon','80 mm mineralull, 2 lag à 40 mm'],['Kapsling','0,5 mm rustfri stålplate'],['Forventet levetid','25 år']],
+  regler:'Kapslingsdiameter = utv. rørdiameter + 2 × isolasjonstykkelse. Bruk π = 3,14. Kapsling: +18 % komponenttillegg på rett areal, deretter +10 % kapp/svinn. Isolasjon: +15 % komponent, deretter +5 % svinn. Prosentene er treningsdata, ikke NORSOK-tabellverdier.',
+  opg:['Forklar hvorfor isolasjonen bør fjernes og hva CUI/KUI-problematikken betyr for planleggingen.','Lag arbeidsplan fra mottatt arbeidspakke til overlevering – tillatelser, avklaringer og koordinering med andre disipliner.','Beskriv sikker demontering av gammel isolasjon/kapsling og hvordan røret gjøres tilgjengelig for inspeksjon og overflatebehandling.','Beskriv og begrunn det nye isolasjonssystemet: redusert vanninntrenging, skjøter, avslutninger, drenering, flenser og ventiler.','Beregn nødvendig kapslingsareal og isolasjonsvolum ut fra beregningsdataene. Vis framgangsmåten.','Lag enkel bemannings- og tidsplan med begrunnede produksjonsrater.','Beskriv HMS-risikoer og tiltak: høyde, skarpe kanter, støv/fibre, varmt anlegg/restenergi, løft, samtidige aktiviteter.','Beskriv egenkontroll og sluttkontroll – hva dokumenteres før kunden overtar?'],
+  felt(){const r=eksRor(0.219,0.080,84,18,10,15,5,3.14);return [
+   {q:'Kapslingsdiameter (0,219 + 2 × 0,080)',ans:r.D,unit:'m',dec:3,tol:0.001},
+   {q:'Rett kapslingsareal (π × D × 84)',ans:r.A,unit:'m²',dec:1,tol:0.3},
+   {q:'Med 18 % komponenttillegg',ans:r.A1,unit:'m²',dec:1,tol:0.4},
+   {q:'Med 10 % kapp/svinn',ans:r.A2,unit:'m²',dec:1,tol:0.5},
+   {q:'Isolasjonsvolum rett rør (π·(R²−r²)·L)',ans:r.V,unit:'m³',dec:2,tol:0.06},
+   {q:'Isolasjon med komponenter og svinn (×1,15 ×1,05)',ans:r.V2,unit:'m³',dec:2,tol:0.08}];},
+  sensor:['Forstår at våt/skadet isolasjon og svikt i værbeskyttelsen øker CUI-sannsynligheten, og at systemet må åpnes kontrollert for inspeksjon.','Planlegger i riktig grensesnitt: drift, stillas/tilkomst, inspeksjon/NDT, overflatebehandling, ev. heat tracing, kunde/QC.','Skiller demontering → inspeksjonsklar overflate → frigivelse etter overflatebehandling → ny isolering.','Værbestandig kapsling med gjennomtenkte skjøter, avslutninger og dreneringsveier – uten udokumenterte standarddetaljer.','Systematisk egenkontroll: underlag, tykkelse/lagdeling, passform, kapsling, skjøter, penetrasjoner, fall/drenering, merking, dokumentasjon.','HMS: arbeidstillatelse/SJA, energikontroll før demontering, fallsikring, vern mot støv/fibre og skarpe kanter, kontroll på gammelt avfall. Hold points mot inspeksjon før gjenisolering er et sterkt svar.'],
+  nivaa:[['Lav (1–2)','Fragmentert plan, lite begrunnelse, vesentlige HMS-/kvalitetsmangler eller beregninger uten forståelig metode.'],['Middels (3–4)','Gjennomførbar plan og hovedsakelig riktige valg/beregninger, men mangler dybde, sammenheng eller dokumentasjon.'],['Høy (5–6)','Helhetlig og realistisk plan, presise begrunnelser, god CUI-forståelse, sporbare beregninger, sterk HMS-/kvalitets- og grensesnittforståelse.']]},
+
+ c2:{navn:'Prøveeksamen 2 · Tank/kolonne – temperatursoner og underkonstruksjon',
+  situasjon:`En ny rustfri prosesskolonne skal isoleres på et kystnært industrianlegg. Kolonnen leveres uten avstandsringer og underkonstruksjon, er delt i tre temperatursoner, og kunden krever lang levetid, vedlikeholdstilgang og hensyn til termisk bevegelse.`,
+  data:[['Del 1 – nedre sylinder','Ø 2,40 m · H 2,00 m · 380 °C · 160 mm (to lag)'],['Del 2 – konisk overgang','Ø 2,40→1,60 m · H 1,20 m · 260 °C · 140 mm (to lag) · beregningsareal oppgitt 7,6 m²'],['Del 3 – øvre sylinder','Ø 1,60 m · H 3,20 m · 140 °C · 100 mm (to lag)'],['Materiale A','Steinull lamell/matte – ubrennbar, formbar · maks 600 °C'],['Materiale B','Høytemperatur mineralfiber – ubrennbar · maks 700 °C'],['Materiale C','Fleksibelt elastomerskum, lukket celle · maks 110 °C']],
+  regler:'Se bort fra topp/bunn og nozzler. Bruk oppgitt 7,6 m² for den koniske delen. +12 % tillegg for isolasjon rundt detaljer, deretter +10 % kapp/svinn på kapsling. Tillegg er treningsdata.',
+  opg:['Tegn prinsippskisse av underkonstruksjonen: bæringer/avstandsholdere, termisk bevegelse og hensynet til rustfritt underlag.','Hvilke disipliner/funksjoner må du koordinere med før og under arbeidet?','Vurder materiale A, B og C. Velg oppbygning for hver temperatursone og begrunn – samme materiale kan brukes i flere soner.','Nevn tre aktuelle ytterkledninger/kapslingstyper. Velg én for denne installasjonen og begrunn ut fra miljø, levetid, mekanisk belastning, korrosjonsrisiko og vedlikehold.','Beregn isolert areal for del 1 og del 3, bruk 7,6 m² for del 2, og finn total isolasjon (+12 %) og kapsling (+10 % svinn). Vis regnestykkene.','Beskriv montasjerekkefølgen fra mottakskontroll til ferdig kapsling: lagdeling, skjøteforskyvning, passform, nozzler, overganger, avslutninger.','Beskriv verktøy, HMS, løfte-/tilkomstbehov og egenkontroll.','Beskriv ferdigbefaring med kunden og dokumentasjonen som leveres.'],
+  felt(){const t=eksTank([[2.40,2.00],[1.60,3.20]],7.6,12,10);return [
+   {q:'Del 1: π × 2,40 × 2,00',ans:t.deler[0],unit:'m²',dec:2,tol:0.05},
+   {q:'Del 3: π × 1,60 × 3,20',ans:t.deler[1],unit:'m²',dec:2,tol:0.05},
+   {q:'Sum geometrisk areal (inkl. 7,6 m² for del 2)',ans:t.sum,unit:'m²',dec:2,tol:0.08},
+   {q:'Isolasjonsareal med 12 % detaljtillegg',ans:t.iso,unit:'m²',dec:2,tol:0.1},
+   {q:'Kapsling med 10 % kapp/svinn',ans:t.kaps,unit:'m²',dec:2,tol:0.12}];},
+  sensor:['Underkonstruksjonen skal bære kapslingen uten unødige varme-/kuldebroer og uten å hindre termisk bevegelse; detaljene avhenger av prosjektstandard.','Festemetode mot rustfritt underlag må avklares – ingen tilfeldig sveising/festemateriale uten godkjenning.','Materiale C er uegnet ved de oppgitte temperaturene; A og/eller B kan begrunnes med temperatur, lagdeling, mekanikk, levetid og prosjektkrav.','Kapslingsvalg (f.eks. aluminium, rustfritt eller annet prosjektgodkjent system) må begrunnes – fasiten krever ikke ett bestemt materiale.','Utførelse: mottakskontroll, planlagt bæring, lagvis montering med forskjøvede skjøter, presisjon rundt nozzler/overganger, kontroll av tykkelse/lagdeling/festemidler, ferdigbefaring med punch-liste og sporbar dokumentasjon.'],
+  nivaa:[['Lav (1–2)','Lite helhet, svake materialbegrunnelser, manglende forståelse av underkonstruksjon og temperaturbevegelse.'],['Middels (3–4)','Gjennomførbar løsning og hovedsakelig riktige beregninger; noe manglende dybde.'],['Høy (5–6)','God skisse- og konstruksjonsforståelse, sterke materialbegrunnelser, presise beregninger, god utførelses-, HMS- og kvalitetsplan.']]},
+
+ c3:{navn:'Prøveeksamen 3 · Kaldt prosessystem – kondens og fuktsikring',
+  situasjon:`Et nytt 6" prosessrør skal føre medium på −25 °C, utendørs på kystnært anlegg med høy luftfuktighet. Kunden krever at systemet hindrer overflatekondens og begrenser fuktinntrenging i hele levetiden. Linjen har ventiler, flenser og en vertikal avgrening; røret er karbonstål og frigitt fra overflatebehandling.`,
+  data:[['Rør','6", utv. Ø 168 mm'],['Rett lengde','48 m'],['Driftstemperatur','−25 °C'],['Isolasjonstykkelse','100 mm (prosjektdata)'],['Flenser / ventiler / T-avgrening','3 / 2 / 1 stk'],['Materiale A','Celleglass – lukket celle, høy dampmotstand, stivt'],['Materiale B','Mineralull – åpen fiberstruktur; krever separat, robust dampbarriere ved kulde'],['Materiale C','Elastomerskum – lukket celle, fleksibelt, innenfor produktets temperaturgrenser']],
+  regler:'Kapslingsdiameter = rørdiameter + 2 × isolasjonstykkelse. Rett areal = π × D × L. +25 % for komponenter og detaljer, deretter +10 % kapp/svinn. Prosentene er treningsdata.',
+  opg:['Forklar hvorfor kalde systemer stiller andre krav til fukt- og damptetting enn varme – hva skjer når varm, fuktig luft når den kalde rørflaten?','Vurder materiale A, B og C, foreslå et system og begrunn. Trenger materialet separat dampsperre, beskriv hvordan den inngår.','Beskriv kontinuiteten i damp-/fuktsperren ved langsgående og tverrgående skjøter, ventiler, flenser, oppheng, avgreninger og avslutninger – uten udokumenterte produsentdetaljer.','Beregn nødvendig kapslingsareal med de oppgitte tilleggene. Vis framgangsmåten.','Lag arbeidsrekkefølge fra mottakskontroll til ferdig kontroll, inkl. værbeskyttelse under montasje.','Beskriv hvordan ventiler og flenser utformes for inspeksjon/vedlikehold uten at kuldesystemets tetthet ødelegges.','Beskriv HMS-risiko og tiltak: kuldeeksponering, kjemikalier/lim/fugemasse etter sikkerhetsdatablad, høyde, platearbeid.','Lag egenkontrollsjekkliste som spesielt fanger feil som gir kondens eller fuktinntrenging.'],
+  felt(){const r=eksRor(0.168,0.100,48,25,10,0,0,Math.PI);return [
+   {q:'Kapslingsdiameter (0,168 + 2 × 0,100)',ans:r.D,unit:'m',dec:3,tol:0.001},
+   {q:'Rett kapslingsareal (π × D × 48)',ans:r.A,unit:'m²',dec:1,tol:0.2},
+   {q:'Med 25 % komponenttillegg og 10 % svinn',ans:r.A2,unit:'m²',dec:1,tol:0.3}];},
+  sensor:['Vanndamp drives mot kaldere soner: lekkasjer i damp-/fuktsperren gir kondens/vann i systemet, redusert isolasjonsevne og korrosjonsrisiko.','Kontinuitet er alt: skjøter, avslutninger, oppheng, gjennomføringer, ventiler og flenser er de kritiske detaljene.','A eller C er naturlige valg i treningsdataene; B kan bare forsvares med et komplett, dokumentert dampsperresystem som prosjektet tillater.','Ingen universaldetalj finnes – vis til prosjektspesifikasjon og produsentens monteringsanvisning.','Egenkontroll: tørt/rent/frigitt underlag, riktig materiale og tykkelse, ingen åpne skjøter eller hulrom, kontinuerlig sperre (særlig ved oppheng og komponenter), kapsling uten vanninnledende punkter, dokumenterte avvik før lukking.'],
+  nivaa:[['Lav (1–2)','Behandler kulde omtrent som varme; svak forståelse av damp/kondens og kritiske detaljer.'],['Middels (3–4)','Forstår hovedprinsippene og foreslår gjennomførbar løsning, men mangler detaljkontroll eller begrunnelse.'],['Høy (5–6)','Helhetlig kuldeteknisk forståelse, sterk detaljering av fuktsikring, gode materialbegrunnelser, korrekte beregninger, systematisk QA/HMS.']]},
+
+ c4:{navn:'Prøveeksamen 4 · Brann, lyd og kombinerte funksjonskrav',
+  situasjon:`Offshore skal en 8" prosesslinje bygges om. Sone A (14 m) krever akustisk isolering pga. dokumentert høyt støynivå. Sone B (16 m) inngår i en brannbeskyttet funksjon med rør, flenser og en ESD-ventil, og linjen passerer et klassifisert brannskille. Detaljert brannmotstand, systemoppbygning og godkjente produkter er definert i prosjektets brannstrategi og produktdokumentasjon – og skal ikke gjettes.`,
+  data:[['Rør','8", utv. Ø 219 mm'],['Total lengde','30 m (14 m akustikk + 16 m brann)'],['Flenser / ventiler','4 stk / 2 stk, hvorav én ESD/ESV'],['Gjennomføring','1 stk gjennom klassifisert brannskille'],['Normal temperatur','40 °C'],['Ferdig isolert diameter (regneoppgaven)','419 mm']],
+  regler:'Geometrisk kapslingsareal for hele den rette lengden med ferdig isolert Ø 419 mm. +30 % for komponenter/detaljer, deretter +12 % kapp/svinn. Treningsdata.',
+  opg:['Lag plan for kravavklaring før arbeidet: hvilke dokumenter og disipliner må involveres for lyd, brannbeskyttelse og branngjennomføring?','Forklar prinsippene for akustisk isolering av rør – hvilke egenskaper må systemet ha, uten å dikte en oppbygning som ikke er gitt?','Hvordan håndteres brannbeskyttelsen av rør, flenser og ESD/ESV – hva må være dokumentert før produkt, tykkelse, feste og detalj velges?','Hvordan håndteres en gjennomføring i klassifisert brannskille – og hvorfor kan branntetting aldri improviseres på stedet?','Lag prinsippskisse av overgangen sone A → gjennomføring → sone B med kontrollpunkter/hold points.','Beregn geometrisk kapslingsareal for rett lengde med de oppgitte tilleggene. Vis beregningen.','Beskriv koordinering og HMS: høyde, løft, samtidige aktiviteter, skarpe kanter, støv/fibre, brann-/eksplosjonsfare, sikkerhetskritisk utstyr.','Beskriv egenkontroll, inspeksjon og dokumentasjon – hva kontrolleres før lukking, og hva inngår i sluttdokumentasjonen?'],
+  felt(){const r=eksRor(0.419,0,30,30,12,0,0,Math.PI);return [
+   {q:'Rett kapslingsareal (π × 0,419 × 30)',ans:r.A,unit:'m²',dec:1,tol:0.2},
+   {q:'Med 30 % detaljtillegg',ans:r.A1,unit:'m²',dec:1,tol:0.3},
+   {q:'Med 12 % kapp/svinn',ans:r.A2,unit:'m²',dec:1,tol:0.3}];},
+  sensor:['Etterspør prosjektets brannstrategi, isolasjonsspesifikasjon, akustikkrav, klassifisering av brannskillet, godkjente system-/produktdata, tegninger og arbeidsordre.','Involverer riktige fag: prosess/drift, piping, brann/teknisk sikkerhet, akustikk, ev. elektro/heat tracing, stillas, QC/inspeksjon, kunde.','Akustikk: absorpsjon, masse/barriere, mekanisk frikobling og tetthet/kontinuitet – konkrete lag følger dokumentert løsning.','Brann: type system, tykkelse, festemidler, overlapper og bolt-/flens-/ventildetaljer skal følge kvalifisert/godkjent løsning – aldri egen konstruksjon uten dokumentasjon.','Branngjennomføring er en sertifisert, systembasert løsning: underlag, åpning, tettemateriale, dybde/geometri og montasje må samsvare med godkjenningen.','Hold points: bekreftet krav før bestilling, kontroll av underlag, av skjulte lag før kapsling, av gjennomføring før innbygging, sluttkontroll med sporbar dokumentasjon.'],
+  nivaa:[['Lav (1–2)','Gjetter brann-/lydsystem, overser dokumentasjonskrav eller sikkerhetskritiske grensesnitt.'],['Middels (3–4)','Forstår hovedkrav og grensesnitt; gjennomførbar plan, men noe manglende dybde/dokumentasjon.'],['Høy (5–6)','Tydelig skille mellom prosjektkrav og egne valg; sterk forståelse av brann, lyd, gjennomføring, hold points, HMS og sporbar kvalitet.']]},
+};
+
+let eksCur='c1';
+function renderEks(id){
+  eksCur=id;
+  document.querySelectorAll('.eksvelg button').forEach(b=>b.classList.toggle('on',b.dataset.e===id));
+  if(id==='ov') return renderOverslag();
+  const c=EKS[id], F=c.felt();
+  let h=`<div class="task"><div class="thead">${c.navn}</div><div class="tbody">
+    <p style="color:var(--paper-dim);font-size:.78rem;margin:0 0 8px">Anbefalt tid 5 t · Vg3-nivå · treningsmateriell, ikke offisiell Udir-eksamen</p>
+    <p>${c.situasjon}</p>
+    <table class="t" style="margin:10px 0">${c.data.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>
+    <div class="hint" style="margin-bottom:10px"><b>Beregningsregler for oppgaven:</b> ${c.regler}</div>
+    <b style="color:var(--chalk)">Oppgave</b>
+    <ol style="margin:6px 0 12px 20px;padding:0">${c.opg.map(o=>`<li style="margin:4px 0">${o}</li>`).join('')}</ol>
+    <b style="color:var(--chalk)">Regnedel – tast svarene, appen retter</b>
+    <div style="display:grid;gap:8px;margin:8px 0 10px">`;
+  F.forEach((f,i)=>{
+    h+=`<div style="display:grid;grid-template-columns:1fr 120px 44px;gap:8px;align-items:center">
+      <label style="font-size:.82rem">${f.q}</label>
+      <input id="eIn${i}" type="number" step="any" style="padding:7px 9px;background:var(--steel-800);border:1px solid var(--line);border-radius:4px;color:var(--chalk);font-family:'IBM Plex Mono',monospace">
+      <span style="font-size:.78rem;color:var(--paper-dim)">${f.unit}</span></div>
+    <div id="eRes${i}" style="font-size:.78rem;margin:-4px 0 0"></div>`;
+  });
+  h+=`</div><div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn small" id="eRett" type="button">Rett regnedelen</button>
+    <button class="btn ghost small" id="eSensor" type="button">Vis sensorpunkter</button></div>
+    <div id="eSensorBox" class="hidden" style="margin-top:12px">
+      <b style="color:var(--chalk)">Sensor ser etter</b>
+      <ul style="margin:6px 0 10px 20px;padding:0">${c.sensor.map(s=>`<li style="margin:4px 0;font-size:.84rem">${s}</li>`).join('')}</ul>
+      <table class="t">${c.nivaa.map(n=>`<tr><td style="white-space:nowrap">${n[0]}</td><td>${n[1]}</td></tr>`).join('')}</table>
+    </div>
+    <p style="color:var(--paper-dim);font-size:.72rem;margin:12px 0 0">${EKS_KILDE}</p>
+  </div></div>`;
+  $('cEks').innerHTML=h;
+  $('eRett').addEventListener('click',()=>{
+    F.forEach((f,i)=>{
+      const v=parseFloat(String($('eIn'+i).value).replace(',','.'));
+      const el=$('eRes'+i);
+      if(isNaN(v)){el.innerHTML='<span style="color:var(--paper-dim)">– ikke besvart · fasit '+fmt(f.ans,f.dec)+' '+f.unit+'</span>';return;}
+      const ok=Math.abs(v-f.ans)<=f.tol;
+      el.innerHTML=ok?'<span style="color:#5fae7d">✓ riktig ('+fmt(f.ans,f.dec)+' '+f.unit+')</span>'
+        :'<span style="color:#d4552e">✗ fasit '+fmt(f.ans,f.dec)+' '+f.unit+'</span>';
+    });
+  });
+  $('eSensor').addEventListener('click',()=>$('eSensorBox').classList.toggle('hidden'));
+}
+
+function renderOverslag(){
+  let h=`<div class="task"><div class="thead">Overslagskalkulator – påslagsmodellen</div><div class="tbody">
+    <p style="font-size:.84rem">Rask mengdeberegning slik den gjøres på eksamen og i tilbudsfasen: rett geometri først, deretter prosenttillegg for komponenter/detaljer og kapp/svinn. Prosentene settes av prosjektet – tallene under er forhåndsutfylt fra prøveeksamenene og kan endres fritt.</p>
+    <b style="color:var(--chalk)">Rørlinje</b>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:8px 0">
+      ${[['ovOD','Utv. rørdiameter (mm)',219],['ovIso','Isolasjon (mm)',80],['ovL','Rett lengde (m)',84],['ovKK','Komponent­tillegg kapsling (%)',18],['ovKS','Kapp/svinn kapsling (%)',10],['ovIK','Komponenttillegg isolasjon (%)',15],['ovIS','Svinn isolasjon (%)',5]].map(f=>`<div class="field"><label for="${f[0]}" style="font-size:.72rem">${f[1]}</label><input id="${f[0]}" type="number" step="any" value="${f[2]}" style="padding:7px 9px;background:var(--steel-800);border:1px solid var(--line);border-radius:4px;color:var(--chalk);font-family:'IBM Plex Mono',monospace"></div>`).join('')}
+    </div>
+    <button class="btn small" id="ovRegn" type="button">Regn ut rørlinje</button>
+    <table class="t" id="ovUt" style="margin:10px 0 16px"></table>
+    <b style="color:var(--chalk)">Tank/kolonne – sylindersoner</b>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:8px 0">
+      ${[['tD1','Sone 1: Ø (m)',2.40],['tH1','Sone 1: høyde (m)',2.00],['tD2','Sone 2: Ø (m)',1.60],['tH2','Sone 2: høyde (m)',3.20],['tEx','Oppgitt tilleggsareal (m²)',7.6],['tDet','Detaljtillegg (%)',12],['tSv','Kapp/svinn kapsling (%)',10]].map(f=>`<div class="field"><label for="${f[0]}" style="font-size:.72rem">${f[1]}</label><input id="${f[0]}" type="number" step="any" value="${f[2]}" style="padding:7px 9px;background:var(--steel-800);border:1px solid var(--line);border-radius:4px;color:var(--chalk);font-family:'IBM Plex Mono',monospace"></div>`).join('')}
+    </div>
+    <button class="btn small" id="tRegn" type="button">Regn ut tank/kolonne</button>
+    <table class="t" id="tUt" style="margin:10px 0"></table>
+    <div class="hint">Overslaget erstatter ikke komponentberegningen i kalkulatoren – det er den raske metoden for tilbud, bestilling og eksamen. π brukes med full presisjon her; på eksamen følger du oppgavens angitte π.</div>
+  </div></div>`;
+  $('cEks').innerHTML=h;
+  const num=id=>parseFloat(String($(id).value).replace(',','.'))||0;
+  $('ovRegn').addEventListener('click',()=>{
+    const r=eksRor(num('ovOD')/1000,num('ovIso')/1000,num('ovL'),num('ovKK'),num('ovKS'),num('ovIK'),num('ovIS'),Math.PI);
+    $('ovUt').innerHTML=`<tr><td>Kapslingsdiameter</td><td>${fmt(r.D*1000,0)} mm</td></tr>
+      <tr><td>Rett kapslingsareal</td><td>${fmt(r.A,1)} m²</td></tr>
+      <tr><td>+ komponenttillegg</td><td>${fmt(r.A1,1)} m²</td></tr>
+      <tr><td><b>Kapsling å bestille</b></td><td><b>${fmt(r.A2,1)} m²</b></td></tr>
+      <tr><td>Isolasjonsvolum rett rør</td><td>${fmt(r.V,2)} m³</td></tr>
+      <tr><td><b>Isolasjon å bestille</b></td><td><b>${fmt(r.V2,2)} m³</b></td></tr>`;
+  });
+  $('tRegn').addEventListener('click',()=>{
+    const t=eksTank([[num('tD1'),num('tH1')],[num('tD2'),num('tH2')]],num('tEx'),num('tDet'),num('tSv'));
+    $('tUt').innerHTML=`<tr><td>Sone 1</td><td>${fmt(t.deler[0],2)} m²</td></tr>
+      <tr><td>Sone 2</td><td>${fmt(t.deler[1],2)} m²</td></tr>
+      <tr><td>Sum geometrisk (inkl. tillegg)</td><td>${fmt(t.sum,2)} m²</td></tr>
+      <tr><td>Isolasjonsareal + detaljtillegg</td><td>${fmt(t.iso,2)} m²</td></tr>
+      <tr><td><b>Kapsling + kapp/svinn</b></td><td><b>${fmt(t.kaps,2)} m²</b></td></tr>`;
+  });
+}
+
+document.querySelectorAll('.eksvelg button').forEach(b=>b.addEventListener('click',()=>renderEks(b.dataset.e)));
+function printEks(medFasit){
+  if(eksCur==='ov') return;
+  const c=EKS[eksCur], F=c.felt();
+  let h=`<h1>${esc(c.navn)}</h1><p><i>Anbefalt tid 5 t · Vg3-nivå · treningsmateriell, ikke offisiell Udir-eksamen</i></p>
+    <p>${esc(c.situasjon)}</p>
+    <table>${c.data.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</table>
+    <p><b>Beregningsregler:</b> ${esc(c.regler)}</p>
+    <h2>Oppgave</h2><ol>${c.opg.map(o=>`<li>${esc(o)}</li>`).join('')}</ol>`;
+  if(medFasit){
+    h+=`<h2>Fasit – regnedel</h2><table>${F.map(f=>`<tr><td>${esc(f.q)}</td><td>${fmt(f.ans,f.dec)} ${f.unit}</td></tr>`).join('')}</table>
+      <h2>Sensor ser etter</h2><ul>${c.sensor.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+      <table>${c.nivaa.map(n=>`<tr><td>${esc(n[0])}</td><td>${esc(n[1])}</td></tr>`).join('')}</table>`;
+  } else {
+    h+=`<h2>Regnedel</h2><ol>${F.map(f=>`<li>${esc(f.q)} = ______ ${f.unit}</li>`).join('')}</ol>`;
+  }
+  h+=`<p><i>${esc(EKS_KILDE)}</i></p>`;
+  doPrint(h);
+}
+$('ePrint').addEventListener('click',()=>printEks(false));
+$('ePrintF').addEventListener('click',()=>printEks(true));
 
 /* ============================================================
    PRODUKSJON – PROSJEKT
@@ -2310,17 +2656,22 @@ function outlines(s,c){
     });
   } else if (s.comp==='bend'){
     const rc=s.D/2,R=s.bR,N=s.bSeg,beta=(s.bAng*Math.PI/180)/(2*(N-1)),tb=Math.tan(beta);
-    const Cn=Math.PI*s.D,B=Cn+s.OL,monn=s.bMonn,hOf=u=>(R-rc*Math.cos(u))*tb,hMax=(R+rc)*tb;
+    const Cn=Math.PI*s.D,B=Cn+s.OL,u0b=({hals:0,side:Math.PI/2,rygg:Math.PI}[s.bSkjot] ?? Math.PI/2),hOf=u=>Math.max(0,(R-rc*Math.cos(u0b+u))*tb),hMax=(R+rc)*tb,n=s.nDel;
     let y=0;
     /* endestykke */
-    {const H=hMax+monn,pts=[[0,y+H],[B,y+H]];
-     for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;pts.push([u/(2*Math.PI)*Cn+s.OL,y+H-monn-hOf(u)]);}
-     pts.push([0,y+H-monn-hOf(0)]); poly(pts,true,'endestykke ×2'); y+=H+60;}
-    if (N>2){const H=2*hMax+2*monn,pts=[];
-     for(let i=0;i<=P;i++){const u=i/P*2*Math.PI;pts.push([u/(2*Math.PI)*Cn,y+monn+hMax-hOf(u)]);}
-     pts.push([B,y+monn+hMax-hOf(2*Math.PI)],[B,y+monn+hMax+hOf(2*Math.PI)]);
-     for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;pts.push([u/(2*Math.PI)*Cn,y+monn+hMax+hOf(u)]);}
-     poly(pts,true,'mellomstykke ×'+(N-2));}
+    {const pts=[[0,y+hMax],[B,y+hMax],[B,y+hMax-hOf(2*Math.PI)]];
+     for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;pts.push([u/(2*Math.PI)*Cn,y+hMax-hOf(u)]);}
+     poly(pts,true,'endestykke ×2');
+     for(let k=1;k<=n+1;k++){const u=(k-1)/n*2*Math.PI,x=(k-1)/n*Cn;
+       poly([[x,y+hMax-hOf(u)],[x,y+hMax]],false,'delelinje '+k);}
+     y+=hMax+60;}
+    if (N>2){const pts=[];
+     for(let i=0;i<=P;i++){const u=i/P*2*Math.PI;pts.push([u/(2*Math.PI)*Cn,y+hMax-hOf(u)]);}
+     pts.push([B,y+hMax-hOf(2*Math.PI)],[B,y+hMax+hOf(2*Math.PI)]);
+     for(let i=P;i>=0;i--){const u=i/P*2*Math.PI;pts.push([u/(2*Math.PI)*Cn,y+hMax+hOf(u)]);}
+     poly(pts,true,'mellomstykke ×'+(N-2));
+     for(let k=1;k<=n+1;k++){const u=(k-1)/n*2*Math.PI,x=(k-1)/n*Cn;
+       poly([[x,y+hMax-hOf(u)],[x,y+hMax+hOf(u)]],false,'delelinje '+k);}}
   } else if (s.comp==='kon' && s.kType!=='eks'){
     const D1=Math.max(s.D,s.kD2),D2v=Math.min(s.D,s.kD2),h=s.kL;
     const sl=Math.sqrt(h*h+((D1-D2v)/2)**2),Rb=sl*D1/(D1-D2v||1),Rs=Rb-sl,th=Math.PI*D1/Rb;
@@ -2347,6 +2698,8 @@ function outlines(s,c){
     const pts=[[0,0],[B,0],[B,hOf(0)]];
     for(let i=P;i>=0;i--){const phi=i/P*2*Math.PI;pts.push([phi/(2*Math.PI)*Cn,hOf(phi)]);}
     poly(pts,true,'avstikker');
+    for(let k=1;k<=s.nDel+1;k++){const phi=(k-1)/s.nDel*2*Math.PI,x=(k-1)/s.nDel*Cn;
+      poly([[x,0],[x,hOf(phi)]],false,'delelinje '+k);}
     let hxMin=1e9; const hp=[];
     for(let i=0;i<=P;i++){const phi=i/P*2*Math.PI,t=tOf(phi);
       const hx=t*ca-rb*Math.sin(phi)*sa;hxMin=Math.min(hxMin,hx);

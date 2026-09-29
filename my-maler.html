@@ -114,7 +114,8 @@
 <meta name="theme-color" content="#1C2733">
 <link rel="icon" type="image/png" href="app/my-maler-192.png">
 <link rel="apple-touch-icon" href="app/my-maler-180.png">
-<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__vkInstallEvent=e;});</script>
+<script src="app/installer.js" defer></script>
 </head>
 <body>
 <header>

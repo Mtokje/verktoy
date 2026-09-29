@@ -1,0 +1,31 @@
+{
+  "id": "verktoy-wps-leser",
+  "name": "WPS-leser",
+  "short_name": "WPS-leser",
+  "lang": "nb",
+  "start_url": "../wps-leser.html",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#E9EDF0",
+  "theme_color": "#1C2733",
+  "icons": [
+    {
+      "src": "wps-leser-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "wps-leser-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "wps-leser-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

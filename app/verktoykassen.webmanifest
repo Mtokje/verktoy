@@ -1,0 +1,31 @@
+{
+  "id": "verktoy-verktoykassen",
+  "name": "Verktøykassen",
+  "short_name": "Verktøy",
+  "lang": "nb",
+  "start_url": "../",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#E9EDF0",
+  "theme_color": "#1C2733",
+  "icons": [
+    {
+      "src": "verktoykassen-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "verktoykassen-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "verktoykassen-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

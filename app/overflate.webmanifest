@@ -1,0 +1,31 @@
+{
+  "id": "verktoy-overflate",
+  "name": "Overflate-verktøy",
+  "short_name": "Overflate",
+  "lang": "nb",
+  "start_url": "../overflate.html",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#E9EDF0",
+  "theme_color": "#1C2733",
+  "icons": [
+    {
+      "src": "overflate-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "overflate-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "overflate-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

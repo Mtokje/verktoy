@@ -1,0 +1,31 @@
+{
+  "id": "verktoy-my-maler",
+  "name": "My-måler",
+  "short_name": "My-måler",
+  "lang": "nb",
+  "start_url": "../my-maler.html",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#E9EDF0",
+  "theme_color": "#1C2733",
+  "icons": [
+    {
+      "src": "my-maler-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "my-maler-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "my-maler-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Overflate-verktøy – klima, forbruk og filmtykkelse</title>
+<title>Overflate-verktøy – industriell overflatebehandling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -235,6 +235,71 @@
   .readings span.low{border-color:var(--warn);color:var(--warn)}
   .readings span.bad{border-color:var(--bad);color:var(--bad)}
   .readings span.high{border-color:#a97bd6;color:#c9a4f0}
+
+  /* ---------- MALINGSFEIL (v0.8) ---------- */
+  .feillist{display:grid;gap:6px}
+  .feillist button{display:flex;align-items:center;gap:10px;text-align:left;background:var(--steel-900);border:1px solid var(--line);border-radius:4px;color:var(--paper);padding:6px 8px;cursor:pointer;font-size:.86rem}
+  .feillist button:hover{border-color:var(--monje)}
+  .feillist button.on{border-color:var(--monje);background:var(--steel-700)}
+  .feillist button:focus-visible,.fwhenbar button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+  .feillist .fthumb{flex:0 0 72px;height:36px;border-radius:3px;overflow:hidden;display:block}
+  .feillist .fthumb svg{width:72px;height:36px;display:block}
+  .feillist small{display:block;font-family:var(--mono);font-size:.64rem;color:var(--paper-dim)}
+  .fser{font-size:1.12rem;line-height:1.45;color:var(--chalk);margin-bottom:12px;max-width:62ch}
+  .fwhen{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+  .fwhen span{flex:1 1 120px;text-align:center;font-family:var(--cond);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:6px 4px;border:1px solid var(--line);color:var(--paper-dim);border-radius:3px}
+  .fwhen span.on{background:var(--monje);border-color:var(--monje);color:#fff}
+  .fviz{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .fviz figure{margin:0}
+  .fviz svg{width:100%;height:auto;display:block;border-radius:6px;border:1px solid var(--line)}
+  .fviz figcaption{font-size:.78rem;color:var(--paper-dim);margin-top:6px}
+  .fcats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .fcat{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--fc);border-radius:20px;padding:3px 10px;font-size:.78rem;color:var(--chalk)}
+  .fcat i{width:10px;height:10px;border-radius:50%;background:var(--fc)}
+  .fcat.small{font-size:.68rem;padding:1px 8px;margin-right:8px;vertical-align:1px}
+  .flist{list-style:none;display:grid;gap:8px}
+  .flist li{border-left:4px solid var(--fc,var(--line));padding:4px 0 4px 10px;line-height:1.45}
+  .flist.plain li{border-left-color:var(--line)}
+  .ftwo{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .fdot{display:inline-block;width:10px;height:10px;border-radius:50%}
+  .fsjekk p{margin-bottom:8px;line-height:1.5}
+  .fsjekk .btn{margin-top:6px}
+  .fwhenbar{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .fwhenbar button{background:var(--steel-900);border:1px solid var(--line);border-radius:4px;color:var(--paper-dim);font-size:.74rem;padding:7px 4px;cursor:pointer}
+  .fwhenbar button.on{background:var(--monje);border-color:var(--monje);color:#fff}
+  .fqviz{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fqviz svg{width:100%;height:auto;border-radius:6px}
+  .quiz .qviz .fqviz svg{min-width:0}
+  .qgrp{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+  .qgrp button{background:none;border:0;color:var(--paper-dim);font-size:.72rem;text-decoration:underline;cursor:pointer}
+  @media(max-width:700px){.fviz,.ftwo{grid-template-columns:1fr}.fqviz{grid-template-columns:1fr}}
+
+  /* ---------- SØK (v0.8) ---------- */
+  .srchBtn{display:inline-flex;align-items:center;gap:8px;background:var(--steel-800);border:1px solid var(--line);border-radius:6px;color:var(--paper);font-family:var(--sans);font-size:.85rem;padding:8px 12px;cursor:pointer;min-width:150px}
+  .srchBtn:hover{border-color:var(--monje)}
+  .srchBtn kbd{margin-left:auto;font-family:var(--mono);font-size:.65rem;color:var(--paper-dim);border:1px solid var(--line);border-radius:3px;padding:0 5px}
+  .srchBtn:focus-visible,.srchRes button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+  .srch{position:fixed;inset:0;z-index:60;background:rgba(10,14,18,.72);display:none;align-items:flex-start;justify-content:center;padding:6vh 14px 14px}
+  .srch.show{display:flex}
+  .srchBox{width:100%;max-width:720px;max-height:86vh;display:flex;flex-direction:column;background:var(--steel-800);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .srchIn{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .srchIn svg{flex:0 0 20px}
+  .srchIn input{flex:1;background:none;border:0;color:var(--chalk);font-family:var(--sans);font-size:1.15rem;outline:none;min-width:0}
+  .srchIn button{background:none;border:1px solid var(--line);border-radius:4px;color:var(--paper-dim);font-size:.75rem;padding:4px 8px;cursor:pointer}
+  .srchRes{overflow-y:auto;padding:6px 0 10px}
+  .srchGrp{font-family:var(--cond);font-weight:600;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--monje);padding:12px 16px 4px}
+  .srchRes button.hit{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;color:var(--paper);padding:8px 16px;cursor:pointer;font-size:.92rem;line-height:1.4}
+  .srchRes button.hit:hover,.srchRes button.hit.cur{background:var(--steel-700);border-left-color:var(--monje)}
+  .srchRes .hic{flex:0 0 26px;height:26px;border-radius:4px;display:grid;place-items:center;font-family:var(--mono);font-size:.7rem;font-weight:600;color:#1f2833}
+  .srchRes .hic svg{width:48px;height:24px;border-radius:3px}
+  .srchRes .hic.img{flex-basis:48px}
+  .srchRes b.t{display:block;color:var(--chalk);font-weight:600}
+  .srchRes small{display:block;color:var(--paper-dim);font-size:.8rem}
+  .srchRes mark{background:rgba(224,166,60,.35);color:inherit;border-radius:2px;padding:0 1px}
+  .srchEmpty{padding:18px 16px;color:var(--paper-dim);font-size:.9rem;line-height:1.6}
+  .srchEmpty button{background:var(--steel-900);border:1px solid var(--line);border-radius:20px;color:var(--paper);padding:4px 11px;margin:4px 4px 0 0;cursor:pointer;font-size:.82rem}
+  .srchMore{background:none;border:0;color:var(--paper-dim);text-decoration:underline;font-size:.8rem;padding:4px 16px 4px 57px;cursor:pointer}
+  @media(max-width:700px){.srchBtn{order:3;width:100%}.srch{padding:0}.srchBox{max-height:100vh;height:100%;border-radius:0}}
 </style>
 <link rel="manifest" href="app/overflate.webmanifest">
 <meta name="theme-color" content="#1C2733">
@@ -248,6 +313,7 @@
 <header>
   <h1 id="homeLink">Overflate<span>／</span>verktøy</h1>
   <div class="sub">LÆRINGSVERKTØY · INDUSTRIELL OVERFLATEBEHANDLING &nbsp;·&nbsp; regnes fortløpende</div>
+  <button type="button" class="srchBtn" id="srchOpen" aria-label="Søk i verktøyet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 L21 21"/></svg>Søk<kbd>/</kbd></button>
   <div class="modenav" id="modenav">
     <button data-group="home" class="on" type="button">Forside</button>
     <button data-group="regne" type="button">Regne</button>
@@ -258,6 +324,14 @@
   </div>
 </header>
 <div class="subnav" id="subnav"></div>
+<div class="srch" id="srch" role="dialog" aria-modal="true" aria-label="Søk">
+  <div class="srchBox">
+    <div class="srchIn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9aa6b1" stroke-width="2.2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 L21 21"/></svg>
+      <input type="text" enterkeyhint="search" id="srchQ" placeholder="Søk etter ord, feil, standard, oppgave …" autocomplete="off" spellcheck="false" aria-label="Søkeord">
+      <button type="button" id="srchClose">Lukk</button></div>
+    <div class="srchRes" id="srchRes" aria-live="polite"></div>
+  </div>
+</div>
 
 <!-- ============================================================ FORSIDE -->
 <div id="view-home" class="home modeview">
@@ -280,7 +354,7 @@
 
   <div class="credit">
     <span>Fagansvarlig og kvalitetssikring: <b>Svein Egil Lærøy</b>, Stord Academy</span>
-    <span class="tag draft">v0.7 · utkast – ikke QA</span>
+    <span class="tag draft">v0.8 · utkast – ikke QA</span>
   </div>
 </div>
 
@@ -671,11 +745,23 @@
       </div>
       <div class="field" id="qModsField">
         <label>Tema</label>
-        <label class="chkbox"><input type="checkbox" class="qmod" value="klima" checked> Klima og duggpunkt</label>
-        <label class="chkbox"><input type="checkbox" class="qmod" value="forbruk" checked> Forbruk og blanding</label>
-        <label class="chkbox"><input type="checkbox" class="qmod" value="film" checked> Filmtykkelse</label>
-        <label class="chkbox"><input type="checkbox" class="qmod" value="eksamen" checked> Eksamensteori (standarder, korrosjon, HMS, utstyr)</label>
-        <label class="chkbox"><input type="checkbox" class="qmod" value="fagprove" checked> Fagprøvekalkyle (areal, forbruk, sand, tid, pris, rapporter)</label>
+        <div class="qgrp"><span class="sectionlbl">Regning</span><button type="button" data-all="r">alle / ingen</button></div>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="r" value="klima" checked> Klima og duggpunkt</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="r" value="forbruk" checked> Forbruk og blanding</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="r" value="film" checked> Filmtykkelse</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="r" value="fagprove" checked> Fagprøvekalkyle</label>
+        <div class="qgrp"><span class="sectionlbl">Teori</span><button type="button" data-all="t">alle / ingen</button></div>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="eksamen" checked> Eksamensteori (standarder, korrosjon, utstyr)</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="feil" checked> Malingsfeil</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="hms2" checked> Verneutstyr og arbeidsmiljø</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="hoyde" checked> Arbeid i høyden</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="forstehjelp" checked> Førstehjelp</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="masker" checked> Tildekking og maskering</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="pfp" checked> Passiv brannbeskyttelse</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="betong" checked> Betong og armering</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="farge" checked> Farger – RAL og NCS</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="robot" checked> Robot</label>
+        <label class="chkbox"><input type="checkbox" class="qmod" data-g="t" value="arbeidsliv" checked> Arbeidsliv – rettigheter og plikter</label>
       </div>
       <div class="field">
         <label for="qCount">Antall oppgaver</label>
@@ -695,6 +781,26 @@
       <div class="qfoot"><span id="qScore" style="font-family:var(--mono);font-size:.75rem;color:var(--paper-dim)"></span><span><button type="button" class="btn hidden" id="qCheck">Sjekk svar</button> <button type="button" class="btn hidden" id="qNext">Neste →</button></span></div>
     </div>
   </div>
+</div>
+
+<!-- ============================================================ MALINGSFEIL -->
+<div id="view-feil" class="wrap modeview hidden">
+  <aside class="panel">
+    <h2>Malingsfeil <span class="tag draft">utkast</span></h2>
+    <div class="fields">
+      <div class="field">
+        <label>Når oppstår feilen?</label>
+        <div class="fwhenbar" id="feilWhen">
+          <button type="button" data-w="alle" class="on">Alle</button>
+          <button type="button" data-w="paa">Under påføring</button>
+          <button type="button" data-w="herd">Under herding</button>
+          <button type="button" data-w="bruk">Etter tid i bruk</button>
+        </div>
+      </div>
+      <div class="feillist" id="feilList"></div>
+    </div>
+  </aside>
+  <div class="right" id="feilDetail"></div>
 </div>
 
 <!-- ============================================================ ORDLISTE -->
@@ -1331,6 +1437,12 @@ const ndla = q => ['NDLA – søk: «'+q+'»','https://ndla.no/search?query='+en
 const wiki = (t,u) => ['Wikipedia – '+t,'https://en.wikipedia.org/wiki/'+u];
 
 const GLOSS = {
+pfp:{t:'Passiv brannbeskyttelse (PFP)',en:'Passive fire protection',d:`<p>Belegg, plater eller isolasjon som forsinker oppvarmingen av stål i en brann, uten at noe må aktiveres. Epoksybasert PFP <b>sveller</b> (intumescent) og danner et isolerende forkullet lag.</p><p>Krav angis som brannklasse og tid, f.eks. <b>H60</b> = hydrokarbonbrann i 60 minutter. Tykkelsen avhenger av profilen og står i produsentens tabeller.</p>`,links:[L_NORSOK]},
+karbonatisering:{t:'Karbonatisering',en:'Carbonation',d:`<p>CO₂ fra lufta reagerer med betongen og senker pH-en fra ca. 12–13. Når fronten når armeringen, er stålet ikke lenger beskyttet og kan ruste.</p><p>Dybden måles med fenolftalein på en fersk bruddflate: rosa = ikke karbonatisert.</p>`,links:[wiki('Carbonatation','Carbonatation')]},
+ral:{t:'RAL',en:'RAL colour standard',d:`<p>Fargesystem med firesifrede koder. Første siffer er fargegruppen: 1 gul, 2 oransje, 3 rød, 4 fiolett, 5 blå, 6 grønn, 7 grå, 8 brun, 9 hvit og svart. Eksempel: RAL 7035 lysegrå.</p>`,links:[wiki('RAL colour standard','RAL_colour_standard')]},
+ncs:{t:'NCS',en:'Natural Colour System',d:`<p>Fargesystem som beskriver hvordan fargen ser ut. <b>S 2030-Y90R</b>: 20 % svarthet, 30 % kulørthet, og kulørtonen gul med 90 % rød. Svarthet + kulørthet + hvithet = 100.</p>`,links:[wiki('Natural Color System','Natural_Color_System')]},
+aminutsvetting:{t:'Aminutsvetting',en:'Amine blush',d:`<p>Hvit, fet hinne på epoksy som herder i kulde og fukt. Aminherderen reagerer med fukt og CO₂ i lufta. Må vaskes bort med ferskvann før neste strøk, ellers får strøket dårlig heft.</p>`,links:[]},
+kritting:{t:'Kritting',en:'Chalking',d:`<p>Pulver på overflaten når UV-lys bryter ned bindemidlet. Typisk for epoksy i sol. Vurderes med tapetest etter ISO 4628-6. Forebygges med UV-bestandig toppstrøk.</p>`,links:[L_ISO]},
 duggpunkt:{t:'Duggpunkt',en:'Dew point',d:`<p>Temperaturen der lufta er så mettet med vanndamp at det begynner å danne seg dugg (kondens). Kjøles ei flate ned til duggpunktet, blir den våt – selv om du ikke ser det.</p><p>Duggpunktet regnes ut fra <b>lufttemperatur</b> og <b>relativ fuktighet</b>. Høy RH gir duggpunkt tett opp mot lufttemperaturen. Maler du på stål som ligger nær duggpunktet, får du fukt under malingen – og det gir dårlig heft og blærer senere.</p>`,links:[wiki('Dew point','Dew_point'),ndla('duggpunkt'),L_NORSOK]},
 rh:{t:'Relativ fuktighet (RH)',en:'Relative humidity',d:`<p>Hvor mye vanndamp lufta inneholder, i prosent av det den maksimalt kan holde ved den temperaturen. 100 % betyr mettet luft – tåke eller dugg.</p><p>Vanlig krav ved maling er <b>maks 85 % RH</b>. Noen produkter (f.eks. sinksilikat) trenger fuktighet for å herde, mens andre tåler lite. Sjekk databladet. RH måles med hygrometer eller «slyngepsykrometer».</p>`,links:[wiki('Relative humidity','Relative_humidity'),ndla('relativ fuktighet')]},
 staaltemp:{t:'Ståltemperatur',en:'Steel / substrate temperature',d:`<p>Temperaturen på selve overflaten som skal males. Den kan være flere grader lavere enn lufta – særlig om morgenen, på skyggesiden og på tykt gods som har stått kaldt om natta.</p><p>Måles med kontakttermometer eller IR-termometer direkte på stålet. Det er <b>denne</b> temperaturen som skal sammenlignes med duggpunktet, ikke lufttemperaturen.</p>`,links:[L_NORSOK,L_FROSIO]},
@@ -1430,6 +1542,7 @@ document.addEventListener('click',e=>{
    AUTOMATISKE INFO-KNAPPER – faguttrykk og forkortelser
    ============================================================ */
 const TERMS = [
+  [/\b(PFP|passiv brannbeskyttelse|intumescent)\b/i,'pfp'],[/\bkarbonatiser(ing|ingen|t)\b/i,'karbonatisering'],[/\bRAL\b/,'ral'],[/\bNCS\b/,'ncs'],[/\baminutsvetting(en)?\b/i,'aminutsvetting'],[/\bkritting(en)?\b/i,'kritting'],
   [/\bduggpunkt(et|er)?\b/i,'duggpunkt'],[/\b(RH|relativ fuktighet(en)?)\b/i,'rh'],[/\bståltemp(eratur(en)?)?\b/i,'staaltemp'],[/\b3-graders-regelen\b/i,'tregrader'],
   [/\b(VS|volumtørrstoff(et)?|tørrstoff(et|innhold)?)\b/i,'vs'],[/%T\b/,'vs'],[/\b(DFT|TFT|NDFT|tørrfilm(tykkelse[n]?|en)?)\b/,'dft'],[/\b(WFT|VFT|våtfilm(tykkelse[n]?|en)?)\b/,'wft'],
   [/\bdekkevne(n)?\b/i,'dekkevne'],[/\b(BF|bruksfaktor(en)?)\b/,'bruksfaktor'],[/\bsvinn(et)?\b/i,'tap'],[/\b(DV|dødt volum(et)?)\b/,'doedtvolum'],
@@ -1483,9 +1596,9 @@ function autoInfo(root){
 /* ============================================================
    NAVIGASJON
    ============================================================ */
-const VIEWS = ['home','klima','forbruk','film','kalkyle','datablad','skjema','eksamen','oving','ord'];
-const GROUPS = {home:['home'],regne:['klima','forbruk','film','kalkyle'],lese:['datablad','ord'],skjema:['skjema'],eksamen:['eksamen'],oving:['oving']};
-const VNAME = {home:'Forside',klima:'Klima',forbruk:'Forbruk',film:'Filmtykkelse',kalkyle:'Kalkyle',datablad:'Datablad',ord:'Ordliste',skjema:'Skjema',eksamen:'Eksamen',oving:'Øving'};
+const VIEWS = ['home','klima','forbruk','film','kalkyle','datablad','feil','skjema','eksamen','oving','ord'];
+const GROUPS = {home:['home'],regne:['klima','forbruk','film','kalkyle'],lese:['datablad','feil','ord'],skjema:['skjema'],eksamen:['eksamen'],oving:['oving']};
+const VNAME = {home:'Forside',klima:'Klima',forbruk:'Forbruk',film:'Filmtykkelse',kalkyle:'Kalkyle',datablad:'Datablad',feil:'Malingsfeil',ord:'Ordliste',skjema:'Skjema',eksamen:'Eksamen',oving:'Øving'};
 function groupOf(view){ return Object.keys(GROUPS).find(g=>GROUPS[g].includes(view))||'home'; }
 function show(view){
   VIEWS.forEach(v=>{ $('view-'+v).classList.toggle('hidden', v!==view); });
@@ -1503,6 +1616,7 @@ function show(view){
   if (view==='datablad') setTimeout(tdsFit,0);
   if (view==='kalkyle') kkCalc();
   if (view==='skjema') skjRender();
+  if (view==='feil') feilRender();
   autoInfo($('view-'+view));
 }
 $('modenav').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const g=b.dataset.group; let v=GROUPS[g][0]; try{ const last=localStorage.getItem('ovf_view'); if(GROUPS[g].includes(last)) v=last; }catch(x){} show(v); });
@@ -1527,9 +1641,11 @@ const MODULES = [
    ic:`<svg viewBox="0 0 200 56"><rect x="40" y="6" width="120" height="44" rx="3" fill="#2a3542" stroke="#9aa6b1"/><rect x="50" y="14" width="70" height="5" fill="#d4552e"/><rect x="50" y="24" width="100" height="4" fill="#9aa6b1"/><rect x="50" y="32" width="90" height="4" fill="#9aa6b1"/><rect x="50" y="40" width="60" height="4" fill="#4a5866"/><circle cx="172" cy="16" r="10" fill="none" stroke="#e0a63c" stroke-width="2"/><line x1="172" y1="16" x2="172" y2="10" stroke="#e0a63c" stroke-width="2"/><line x1="172" y1="16" x2="176" y2="19" stroke="#e0a63c" stroke-width="2"/></svg>`},
   {n:'Ø',t:'Øving',view:'oving',d:'Oppgaver med nye tall hver gang, og forklaring etter hvert svar.',
    ic:`<svg viewBox="0 0 200 56"><rect x="30" y="8" width="140" height="40" rx="4" fill="#2a3542" stroke="#9aa6b1"/><circle cx="50" cy="20" r="5" fill="#5fae7d"/><circle cx="50" cy="36" r="5" fill="none" stroke="#9aa6b1"/><rect x="62" y="17" width="80" height="6" fill="#9aa6b1"/><rect x="62" y="33" width="60" height="6" fill="#4a5866"/></svg>`},
+  {n:'F',t:'Malingsfeil',view:'feil',d:'Tolv vanlige feil med tegning, årsak, forebygging og utbedring. Fra appelsinhud til rust gjennom belegget.',
+   ic:`<svg viewBox="0 0 200 56"><rect x="10" y="10" width="180" height="36" rx="3" fill="#8fa3b3"/><circle cx="50" cy="28" r="9" fill="#6f8494"/><circle cx="47" cy="25" r="3" fill="#eef1f3"/><circle cx="90" cy="26" r="6" fill="#6f8494"/><path d="M130 10 L150 10 L146 40 Q140 46 134 40Z" fill="#6f8494"/><circle cx="172" cy="20" r="5" fill="#a4532a"/><path d="M171 24 L173 24 L172.5 44 L171.5 44Z" fill="#c9713d"/></svg>`},
   {n:'02',t:'Forbehandling',soon:'Fase 2',d:'Rustgrader, renhetsgrader, ruhet, kanter og sveiser, salt og støv.'},
   {n:'05',t:'Systembygger (NORSOK)',soon:'Fase 2',d:'Velg objekt og miljø – få malingssystemet lag for lag.'},
-  {n:'06',t:'Utstyr og påføring',soon:'Fase 4',d:'Dysekoder, trykk, feilsøking av malingsfeil.'},
+  {n:'06',t:'Utstyr og påføring',soon:'Fase 4',d:'Dysekoder, trykk, filtre og sprøyteteknikk.'},
   {n:'07',t:'HMS og kjemi',soon:'Fase 4',d:'Faresymboler, datablad, verneutstyr.'},
 ];
 $('modgrid').innerHTML = MODULES.map(m=>`
@@ -2767,17 +2883,25 @@ let quiz={list:[],i:0,right:0,answered:false,sel:null};
 function loadStats(){ try{ return JSON.parse(localStorage.getItem('ovf_stats')||'{}'); }catch(e){ return {}; } }
 function saveStat(mod,ok){ try{ const s=loadStats(); s[mod]=s[mod]||{n:0,r:0}; s[mod].n++; if(ok) s[mod].r++; localStorage.setItem('ovf_stats',JSON.stringify(s)); }catch(e){} }
 function qRenderStats(){
-  const s=loadStats(); const keys=Object.keys(MODNAME);
+  const s=loadStats(); const all=Object.keys(MODNAME); const keys=all.filter(k=>s[k]&&s[k].n);
+  if(!keys.length){ $('qStats').innerHTML='<p style="color:var(--paper-dim)">Ingen svar ennå.</p>'; return; }
   $('qStats').innerHTML = keys.map(k=>{ const st=s[k]||{n:0,r:0}; const pct=st.n?Math.round(100*st.r/st.n):0;
-    return `<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.8rem"><span>${MODNAME[k]}</span><span style="font-family:var(--mono);color:var(--paper-dim)">${st.r}/${st.n}${st.n?' · '+pct+' %':''}</span></div><div class="scorebar"><i style="width:${pct}%"></i></div></div>`; }).join('');
+    return `<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.8rem"><span>${MODNAME[k]}</span><span style="font-family:var(--mono);color:var(--paper-dim)">${st.r}/${st.n}${st.n?' · '+pct+' %':''}</span></div><div class="scorebar"><i style="width:${pct}%"></i></div></div>`; }).join('') + `<p style="font-size:.75rem;color:var(--paper-dim);margin-top:6px">Øvd på ${keys.length} av ${all.length} temaer.</p>`;
 }
 $('qClear').addEventListener('click',()=>{ try{ localStorage.removeItem('ovf_stats'); }catch(e){} qRenderStats(); });
 
+$('qModsField').addEventListener('click',e=>{ const b=e.target.closest('button[data-all]'); if(!b) return; const cs=[...document.querySelectorAll(`.qmod[data-g="${b.dataset.all}"]`)]; const on=!cs.every(c=>c.checked); cs.forEach(c=>c.checked=on); });
 let qType='q', qDiff='blandet';
 $('qType').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; qType=b.dataset.t; document.querySelectorAll('#qType button').forEach(x=>x.classList.toggle('on',x===b)); $('qModsField').classList.toggle('hidden',qType==='case'); });
 $('qDiff').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; qDiff=b.dataset.d; document.querySelectorAll('#qDiff button').forEach(x=>x.classList.toggle('on',x===b)); });
+function shufOpts(q){
+  if(q && q.type==='mc' && Array.isArray(q.opts)){ const idx=q.opts.map((_,i)=>i).sort(()=>Math.random()-.5); q.opts=idx.map(i=>q.opts[i]); q.ans=idx.indexOf(q.ans); }
+  if(q && q.type==='case' && Array.isArray(q.parts)) q.parts=q.parts.map(p=>shufOpts(Object.assign({},p)));
+  return q;
+}
 function buildQuiz(mods,n){
   const list=[]; let lastGen=null;
+  mods=[...mods].sort(()=>Math.random()-.5);
   const pool = mod => { const all=Q[mod]; const f = qDiff==='blandet' ? all : all.filter(g=>g.diff===qDiff); return f.length?f:all; };
   const plan=[];
   if (qType==='q') for(let i=0;i<n;i++) plan.push(mods[i%mods.length]);
@@ -2787,7 +2911,7 @@ function buildQuiz(mods,n){
     const p=pool(mod); let gen, tries=0;
     do { gen=pick(p); tries++; } while(gen===lastGen && p.length>1 && tries<5);
     lastGen=gen;
-    let q=gen.fn(); if(!q) q=gen.fn(); q.diff=q.diff||gen.diff;
+    let q=gen.fn(); if(!q) q=gen.fn(); q.diff=q.diff||gen.diff; shufOpts(q);
     list.push(q);
   });
   return list.sort(()=>Math.random()-.5);
@@ -2884,6 +3008,520 @@ function qSummary(){
     <p style="color:var(--paper-dim);font-size:.9rem">${pct>=80?'Bra! Prøv med flere oppgaver eller et annet tema.':(pct>=50?'På vei. Les forklaringene på det du bommet på, og prøv igjen – tallene er nye hver gang.':'Bruk kalkulatorene i modulene og se hvordan tallene henger sammen. Så prøver du igjen.')}</p>`;
   $('qCheck').classList.add('hidden'); $('qNext').classList.add('hidden');
 }
+
+/* ============================================================
+   NYE ØVINGSTEMAER (v0.8) – dekker kompetansemål i IMF03-02
+   som manglet eller var tynne i v0.7.
+   Svaralternativene stokkes automatisk (se buildQuiz).
+   ============================================================ */
+Object.assign(MODNAME,{feil:'Malingsfeil',betong:'Betong og armering',farge:'RAL og NCS',robot:'Robot',hoyde:'Arbeid i høyden',forstehjelp:'Førstehjelp',arbeidsliv:'Arbeidsliv',masker:'Tildekking og maskering',pfp:'Brannbeskyttelse (PFP)',hms2:'Verneutstyr og arbeidsmiljø'});
+['feil','betong','farge','robot','hoyde','forstehjelp','arbeidsliv','masker','pfp','hms2'].forEach(k=>{ Q[k]=[]; });
+
+/* hjelper: registrer en bank med flervalg, hvert element {d,q,opts,ans,expl,viz?} */
+const QBANKS=[];
+function defBank(mod,bank){
+  QBANKS.push([mod,bank]);
+  ['lett','middels','vanskelig'].forEach(d=>{ const b=bank.filter(x=>(x.d||'middels')===d); if(b.length) def(mod,d,()=>Object.assign({mod,type:'mc'},pick(b))); });
+}
+const svgWrap=(inner,h=200)=>`<svg viewBox="0 0 640 ${h}" role="img">${inner}</svg>`;
+const T=(x,y,t,o={})=>`<text x="${x}" y="${y}" font-size="${o.s||13}" fill="${o.c||'#e8ebee'}" text-anchor="${o.a||'start'}" font-family="IBM Plex Sans,sans-serif" ${o.w?`font-weight="${o.w}"`:''}>${t}</text>`;
+
+/* ---------- MALINGSFEIL (bruker dataene i feilsøkeren) ---------- */
+def('feil','lett',()=>{
+  const k=pick(FEIL_ORDER); const wrong=FEIL_ORDER.filter(x=>x!==k).sort(()=>Math.random()-.5).slice(0,3);
+  return {mod:'feil',type:'mc',q:'Hvilken malingsfeil er dette?',viz:`<div class="fqviz">${feilTop(k)}${feilSnitt(k)}</div>`,
+    opts:[k,...wrong].map(x=>FEIL[x].t),ans:0,expl:`Dette er <b>${FEIL[k].t}</b>: ${FEIL[k].ser} Se feilsøkeren under Lese → Malingsfeil.`};
+});
+def('feil','middels',()=>{
+  const k=pick(FEIL_ORDER), f=FEIL[k], a=pick(f.aars);
+  const others=[]; FEIL_ORDER.filter(x=>x!==k).forEach(x=>FEIL[x].aars.forEach(y=>{ if(!f.aars.some(z=>z[1]===y[1])) others.push(y[1]); }));
+  const wrong=[...new Set(others)].sort(()=>Math.random()-.5).slice(0,3);
+  return {mod:'feil',type:'mc',q:`Du finner <b>${f.t.toLowerCase()}</b>. Hva kan være årsaken?`,viz:`<div class="fqviz">${feilTop(k)}</div>`,opts:[a[1],...wrong],ans:0,
+    expl:`Mulige årsaker til ${f.t.toLowerCase()}: ${f.aars.map(x=>x[1].toLowerCase()).join('; ')}.`};
+});
+def('feil','middels',()=>{
+  const k=pick(FEIL_ORDER), f=FEIL[k];
+  const others=FEIL_ORDER.filter(x=>x!==k).map(x=>FEIL[x].forb[0]).filter(x=>!f.forb.includes(x)).sort(()=>Math.random()-.5).slice(0,3);
+  return {mod:'feil',type:'mc',q:`Hvordan forebygger du <b>${f.t.toLowerCase()}</b>?`,opts:[f.forb[0],...others],ans:0,expl:`Forebygging: ${f.forb.join('. ')}.`};
+});
+const FEIL_CASE=[
+  {d:'vanskelig',q:'Epoksy er påført i et verksted om kvelden. Det er kaldt, og det står en oljefyrt varmekanon rett inn i rommet. Neste morgen er flaten fet og hvitaktig. Hva har skjedd, og hva gjør du før neste strøk?',opts:['Aminutsvetting – vask med ferskvann og la tørke før overmaling','Kritting – slip ned til grunning','Tørrsprøyt – legg et tykkere strøk','Ingenting – det forsvinner når malingen herder'],ans:0,expl:'Kulde, fukt og CO₂ fra direkte fyrt varme gir aminutsvetting på epoksy. Vaskes bort med ferskvann – ellers får neste strøk dårlig heft.'},
+  {d:'vanskelig',q:'En ballasttank ble malt etter spesifikasjonen, men salttesten ble hoppet over. Etter ett år er det blærer på og ved sveisene. Mest sannsynlig årsak?',opts:['Osmotisk blæring fra løselige salter under filmen','Kritting fra UV-lys','Appelsinhud fra lavt trykk','For tynn film'],ans:0,expl:'Salter under filmen trekker vann gjennom malingen. Sveiser er utsatt fordi flussmiddel og sprut gir salter. Bresle-test og ferskvannsvask forebygger.'},
+  {d:'vanskelig',q:'Sinksilikat er sprøytet på et hjørne med mange stivere. I hjørnene er tykkelsen 180 µm, maks i databladet er 120 µm. Hva må du forvente?',opts:['Mud cracking – sprekker i hjørnene','Aminutsvetting','Kritting','Ingen problemer, tykkere er bedre'],ans:0,expl:'Sinksilikat tåler lite overtykkelse. Sprekkene går ned til stålet, og belegget må fjernes. Mål VFT underveis og sprøyt hjørnene med kortere slag.'},
+  {d:'middels',q:'Tre ulike malere får kratere på flatene sine samme dag. Hva sjekker du først?',opts:['Trykklufta – olje eller vann fra kompressoren','Malingens farge','Ståltemperaturen','Viftebredden på dysa'],ans:0,expl:'Når flere får samme feil samtidig, let etter en felles kilde. Olje i trykklufta er en klassiker. Test med blotter-papir foran luftslangen.'},
+  {d:'middels',q:'Et epoksysystem utendørs har blitt pulveraktig og blekt etter to år, men det er ingen rust. Hva er riktig tiltak?',opts:['Rengjøre og legge et UV-bestandig toppstrøk (f.eks. polyuretan)','Blåse alt ned til stål','Ingenting – kritting er farlig korrosjon','Male med alkyd direkte'],ans:0,expl:'Kritting på epoksy er UV-nedbryting av bindemidlet. Filmen beskytter fortsatt, men trenger et UV-bestandig toppstrøk.'}
+];
+defBank('feil',FEIL_CASE);
+
+/* ---------- BETONG OG ARMERING ---------- */
+function betongSVG(cover,depth){
+  const sc=3.2, y0=30, w=640;
+  const cy=y0+cover*sc, dy=y0+Math.min(depth,55)*sc;
+  return svgWrap(`<rect x="0" y="0" width="${w}" height="220" fill="#1f2833"/><rect x="40" y="${y0}" width="560" height="180" fill="#8b8f93"/><rect x="40" y="${y0}" width="560" height="${dy-y0}" fill="#b9a26a" opacity=".55"/>
+   <line x1="40" y1="${dy}" x2="600" y2="${dy}" stroke="#e0a63c" stroke-width="2" stroke-dasharray="6 4"/>
+   ${[140,320,500].map(x=>`<circle cx="${x}" cy="${cy+9}" r="9" fill="${depth>=cover?'#a4532a':'#4a5866'}" stroke="#20262d"/>`).join('')}
+   <line x1="570" y1="${y0}" x2="570" y2="${cy}" stroke="#1f2833" stroke-width="2"/><line x1="562" y1="${y0}" x2="578" y2="${y0}" stroke="#1f2833" stroke-width="2"/><line x1="562" y1="${cy}" x2="578" y2="${cy}" stroke="#1f2833" stroke-width="2"/>
+   ${T(560,(y0+cy)/2+4,'overdekning '+cover+' mm',{s:12,a:'end',c:'#1f2833',w:600})}${T(50,y0+18,'karbonatisert sone',{c:'#1f2833',s:12})}${T(300,dy+16,'karbonatiseringsfront',{c:'#e0a63c',s:12,a:'middle',w:600})}${T(50,200,'armering',{c:'#1f2833',s:12})}${T(40,20,'luft / regn / CO₂',{c:'#9aa6b1',s:12})}`,220);
+}
+def('betong','middels',()=>{
+  const k=rnd(2,5,0.5), t=rnd(15,60,5), cover=rnd(20,40,5), x=k*Math.sqrt(t);
+  return {mod:'betong',type:'num',q:`Karbonatiseringen går inn i betongen etter regelen <b>dybde = k × √år</b>. Her er k = <b>${fmt(k,1)} mm/√år</b>. Hvor dypt har karbonatiseringen kommet etter <b>${t} år</b>? (±1 mm)`,
+    viz:betongSVG(cover,x),ans:x,tol:1,unit:'mm',expl:`${fmt(k,1)} × √${t} = ${fmt(k,1)} × ${fmt(Math.sqrt(t),2)} = <b>${fmt(x,1)} mm</b>. Overdekningen er ${cover} mm – ${x>=cover?'fronten har nådd armeringen, og stålet kan begynne å ruste.':'armeringen er fortsatt beskyttet av den basiske betongen.'}`};
+});
+def('betong','vanskelig',()=>{
+  const k=rnd(2,5,0.5), cover=rnd(20,45,5), t=Math.pow(cover/k,2);
+  return {mod:'betong',type:'num',q:`Overdekningen over armeringen er <b>${cover} mm</b> og k = <b>${fmt(k,1)} mm/√år</b>. Omtrent hvor mange år tar det før karbonatiseringen når armeringen? (±5 %)`,
+    viz:betongSVG(cover,cover*0.6),ans:t,tol:t*0.05,unit:'år',expl:`Snu formelen: år = (dybde / k)² = (${cover} / ${fmt(k,1)})² = <b>${fmt(t,0)} år</b>. Dobbel overdekning gir fire ganger så lang tid – derfor er overdekning viktig.`};
+});
+defBank('betong',[
+  {d:'lett',q:'Hvorfor ruster ikke armeringen i ny, god betong?',opts:['Betongen er sterkt basisk (pH ca. 12–13) og danner et beskyttende lag på stålet','Armeringen er alltid galvanisert','Betong slipper ikke gjennom luft i det hele tatt','Sement inneholder rusthindrende maling'],ans:0,expl:'Den høye pH-en gjør stålet passivt. Når pH synker (karbonatisering) eller klorider trenger inn, starter korrosjonen.'},
+  {d:'lett',q:'Hvilket tegn på en betongkonstruksjon tyder på armeringskorrosjon?',opts:['Rustutslag og riss langs armeringen, betong som skaller av','Grønn alge på overflaten','Mørke flekker etter regn','Jevn grå farge'],ans:0,expl:'Rust tar mye større plass enn stålet. Den sprenger betongen innenfra – riss, avskalling og rustrenner er typiske tegn.'},
+  {d:'middels',q:'Hva er <b>karbonatisering</b>?',opts:['CO₂ fra lufta reagerer med betongen og senker pH-en utover i dybden','Sjøvann som trenger inn i betongen','At betongen blir hardere med årene','Maling som reagerer med sement'],ans:0,expl:'Fronten går sakte innover. Når den når armeringen, mister stålet beskyttelsen. Måles med fenolftalein: rosa = ikke karbonatisert.'},
+  {d:'middels',q:'Hvorfor er klorider (sjøvann, veisalt) farlige for armert betong?',opts:['De bryter ned stålets beskyttende lag lokalt og gir groptæring – selv om pH-en fortsatt er høy','De gjør betongen mykere','De farger betongen','De øker overdekningen'],ans:0,expl:'Kloridkorrosjon kan gå fort og lokalt. Kaier, broer og offshore-konstruksjoner er utsatt.'},
+  {d:'middels',q:'Du skal reparere et område med rustet armering. Hva er riktig rekkefølge?',opts:['Fjern skadet betong bak armeringen → rengjør armeringen → korrosjonsbeskytt → reprofiler med mørtel → overflatebeskyttelse','Mal rett over rustflekkene','Sparkle over rissene og mal','Fjern bare løs betong og mal armeringen'],ans:0,expl:'Betongen må fjernes rundt og bak armeringen så den kan rengjøres helt. Reparasjon av betong følger NS-EN 1504.'},
+  {d:'vanskelig',q:'Hvordan måler du hvor langt karbonatiseringen har kommet?',opts:['Spray fenolftalein på en fersk bruddflate – den karbonatiserte sonen forblir fargeløs','Med tørrfilmmåler','Med Bresle-test','Med våtfilmkam'],ans:0,expl:'Fenolftalein blir rosa ved høy pH. Den fargeløse sonen ytterst viser karbonatiseringsdybden. Sammenlign med overdekningen.'},
+  {d:'vanskelig',q:'Hvorfor kan en ny betongreparasjon gjøre at armeringen ruster <b>ved siden av</b> reparasjonen?',opts:['Det dannes et korrosjonselement mellom reparert og ureparert område (ring-anode-effekt)','Mørtelen inneholder salt','Malingen er for tykk','Reparasjonen blir for kald'],ans:0,expl:'Armeringen i den nye, basiske mørtelen blir katode, og stålet i gammel betong rundt blir anode. Derfor fjernes skadet betong godt ut over det synlige skadeområdet.'}
+]);
+
+/* ---------- RAL OG NCS ---------- */
+const RALS=[['1023','Trafikkgul','#f0ca00'],['2004','Ren oransje','#e75b12'],['3000','Flammerød','#a72920'],['4005','Blålilla','#6c4675'],['5015','Himmelblå','#2874b2'],['6018','Gulgrønn','#48a43f'],['7035','Lysegrå','#cbd0cc'],['7042','Trafikkgrå A','#8f9695'],['8017','Sjokoladebrun','#45302b'],['9005','Dyp svart','#0e0e10'],['9010','Ren hvit','#f1ece1']];
+const RALGRP={1:'Gul',2:'Oransje',3:'Rød',4:'Fiolett',5:'Blå',6:'Grønn',7:'Grå',8:'Brun',9:'Hvit og svart'};
+def('farge','lett',()=>{
+  const r=pick(RALS), g=+r[0][0]; const wrong=Object.keys(RALGRP).filter(k=>+k!==g).sort(()=>Math.random()-.5).slice(0,3);
+  return {mod:'farge',type:'mc',q:`Første siffer i en RAL-kode forteller fargegruppen. Hvilken gruppe er <b>RAL ${r[0]}</b>?`,
+    viz:svgWrap(`<rect x="220" y="20" width="200" height="130" rx="6" fill="${r[2]}" stroke="#9aa6b1"/>${T(320,180,'RAL '+r[0],{a:'middle',s:18,w:600})}`,200),
+    opts:[RALGRP[g],...wrong.map(k=>RALGRP[k])],ans:0,expl:`RAL ${r[0]} heter «${r[1]}». Gruppene: 1 gul, 2 oransje, 3 rød, 4 fiolett, 5 blå, 6 grønn, 7 grå, 8 brun, 9 hvit og svart. Fargeprøven på skjermen er bare omtrentlig – bruk alltid fysisk fargekart.`};
+});
+function ncsSVG(s,c){ const w=100-s-c, W=500, x0=70;
+  return svgWrap(`<rect x="${x0}" y="40" width="${W*s/100}" height="46" fill="#1a1a1a"/><rect x="${x0+W*s/100}" y="40" width="${W*c/100}" height="46" fill="#d4552e"/><rect x="${x0+W*(s+c)/100}" y="40" width="${W*w/100}" height="46" fill="#f4f6f8"/>
+  ${T(x0+W*s/200,110,'svarthet '+s,{a:'middle',s:12})}${T(x0+W*s/100+W*c/200,110,'kulørthet '+c,{a:'middle',s:12})}${T(x0+W*(s+c)/100+W*w/200,110,'hvithet ?',{a:'middle',s:12})}${T(320,26,'Sum = 100',{a:'middle',s:12,c:'#9aa6b1'})}`,130); }
+def('farge','middels',()=>{
+  const s=rnd(1,6)*10, c=rnd(1,5)*10; const hue=pick(['Y90R','R10B','G','B20G','Y']);
+  return {mod:'farge',type:'num',q:`NCS-koden er <b>S ${String(s).padStart(2,'0')}${String(c).padStart(2,'0')}-${hue}</b>. Hvor stor er <b>hvitheten</b>?`,viz:ncsSVG(s,c),ans:100-s-c,tol:0.5,unit:'%',
+    expl:`I NCS er de fire første sifrene svarthet (${s}) og kulørthet (${c}). Svarthet + kulørthet + hvithet = 100, så hvitheten er 100 − ${s} − ${c} = <b>${100-s-c} %</b>. Bokstavene etter bindestreken (${hue}) er kulørtonen.`};
+});
+defBank('farge',[
+  {d:'lett',q:'Hva står «S» for foran en NCS-kode, f.eks. S 1050-Y90R?',opts:['Standardfarge – fargen er en del av det offisielle NCS-utvalget','Silke-glans','Svart','Skygge'],ans:0,expl:'S = standard. Etter S følger svarthet og kulørthet (fire sifre), og så kulørtonen.'},
+  {d:'middels',q:'I NCS-koden S 2030-<b>Y90R</b>, hva betyr Y90R?',opts:['Gul med 90 % innslag av rød – altså nesten rød','90 % gul','Gul og rød i like deler','Farge nummer 90 i gul gruppe'],ans:0,expl:'Kulørtonen angis mellom to av de fire grunnfargene Y, R, B og G. Y90R ligger 90 % av veien fra gul mot rød.'},
+  {d:'middels',q:'En hvit og en mørk tank står i sola. Hva er riktig?',opts:['Den mørke blir varmere – mer fordamping av produktet og større temperaturbelastning på malingen','Fargen påvirker ikke temperaturen','Den hvite blir varmest','Mørke farger reflekterer mest varme'],ans:0,expl:'Farge påvirker funksjon: lyse farger reflekterer sollys. Derfor males lagertanker ofte lyse.'},
+  {d:'middels',q:'Hvilken farge brukes typisk for å merke fare (snublekanter, hindringer) på en konstruksjon?',opts:['Gul, gjerne med svarte skråstriper','Blå','Grønn','Hvit'],ans:0,expl:'Sikkerhetsfarger: rød = brann/stopp, gul = fare/varsel, grønn = sikkerhet/nødutgang, blå = påbud.'},
+  {d:'lett',q:'Hvorfor blander vi ikke farge «på øyet» når kunden har oppgitt en RAL-kode?',opts:['Fargen skal være lik over hele anlegget og ved senere reparasjoner – bestill malingen i riktig kode','Det er forbudt å blande maling','RAL-farger kan ikke blandes','Øyet ser bare RAL-farger'],ans:0,expl:'Kode + produsent + batch gir samme farge neste gang. Sjekk fargen mot fysisk fargekart i dagslys før du starter.'},
+  {d:'vanskelig',q:'Du skal sette sammen en farge som ligger mellom to fargeprøver. Hva er viktigst å huske?',opts:['Bland bare produkter fra samme produsent og type, test på en prøveplate og la den tørke før du sammenligner','Bland alltid 50/50','Våt maling har alltid samme farge som tørr','Tynner gjør fargen lysere'],ans:0,expl:'Ulike bindemidler passer ikke sammen, og fargen endrer seg fra våt til tørr. Prøveplate og dagslys er fagmessig praksis.'}
+]);
+
+/* ---------- ROBOT ---------- */
+def('robot','vanskelig',()=>{
+  const Qd=rnd(1,4,0.5), v=rnd(20,60,5), w=pick([0.25,0.3,0.35,0.4]);
+  const vft=Qd/(v*w)*1000;
+  return {mod:'robot',type:'num',q:`En sprøyterobot pumper <b>${fmt(Qd,1)} L/min</b>, kjører <b>${v} m/min</b> og har viftebredde <b>${fmt(w,2)} m</b>. Hvor tykk våtfilm legger den (uten tap)? (±5 %)`,
+    viz:svgWrap(`<rect x="40" y="120" width="560" height="50" fill="#4a5866"/><rect x="40" y="108" width="330" height="12" fill="#d4552e"/><path d="M370 30 L360 108 L420 108Z" fill="#d4552e" opacity=".35"/><rect x="355" y="10" width="30" height="24" fill="#9aa6b1"/><path d="M400 20 h120 m-10 -6 l10 6 l-10 6" stroke="#e8ebee" fill="none"/>${T(530,24,v+' m/min')}${T(40,196,'viftebredde '+fmt(w,2)+' m · '+fmt(Qd,1)+' L/min',{c:'#9aa6b1',s:12})}`,200),
+    ans:vft,tol:vft*0.05,unit:'µm',expl:`Liter per m² = ${fmt(Qd,1)} / (${v} × ${fmt(w,2)}) = ${fmt(Qd/(v*w),3)} L/m². 1 L/m² = 1000 µm, så VFT ≈ <b>${fmt(vft,0)} µm</b>. Kjører roboten dobbelt så fort, blir filmen halvparten så tykk.`};
+});
+defBank('robot',[
+  {d:'lett',q:'Hvorfor bruker verft og fabrikker robot til overflatebehandling?',opts:['Jevn filmtykkelse, samme kvalitet hver gang, og mindre eksponering for maleren','Roboten trenger ingen programmering','Roboten kan male alle former uten oppsett','Det gir alltid tykkere film'],ans:0,expl:'Roboter egner seg best på like, gjentatte deler. Komplekse former med mange stivere er fortsatt ofte manuelt arbeid.'},
+  {d:'lett',q:'Hva må være på plass før du går inn i en robotcelle?',opts:['Roboten skal være stoppet og sikret mot start (låst og merket)','Roboten kan gå i lav hastighet','Det holder å ha hjelm','Ingenting hvis du er rask'],ans:0,expl:'Roboten kan starte uventet. Cellen har sperrer og nødstopp – gå aldri inn uten at den er sikret etter prosedyren.'},
+  {d:'middels',q:'Hva betyr det å programmere en robot med <b>teach pendant</b>?',opts:['Du kjører roboten til punkter med en håndholdt enhet og lagrer banen og parametrene','Du skriver programmet på papir','Roboten lærer selv ved å se på en maler','Du laster ned en ferdig malingsspesifikasjon'],ans:0,expl:'Alternativet er offline-programmering fra en 3D-modell på PC, som så lastes inn i roboten.'},
+  {d:'middels',q:'Roboten gir for tynn film på én del av flaten. Hvilken parameter kan du justere?',opts:['Lavere hastighet eller større overlapp på den delen av banen','Høyere hastighet','Mindre maling i pumpa','Lengre avstand til flaten'],ans:0,expl:'Tykkelse styres av mengde maling per areal: pumpemengde, hastighet, viftebredde, overlapp og avstand. Mål TFT og juster programmet.'},
+  {d:'middels',q:'Hvilke parametere må du stille inn i et robotprogram for sprøyting?',opts:['Bane, avstand, vinkel, hastighet, overlapp og når pistolen slår av og på','Bare farge','Bare hastighet','Bare trykk'],ans:0,expl:'Samme ting som en dyktig maler tenker på – bare at roboten må få det eksakt. Feil av/på-punkter gir tørrsprøyt eller manglende maling på kanter.'},
+  {d:'vanskelig',q:'Hvorfor må sprøyteroboter og elektrisk utstyr i sprøytekabinen ofte være Ex-godkjent?',opts:['Løsemiddeldamp og luft kan danne eksplosiv atmosfære i kabinen','Fordi roboter er tunge','For å spare strøm','Det er bare et krav i vannbasert maling'],ans:0,expl:'Kabinen er et eksplosjonsfarlig område. Utstyr, jording og ventilasjon må passe til sonen.'}
+]);
+
+/* ---------- ARBEID I HØYDEN ---------- */
+function stigeSVG(h,foot){ const sc=150/h, x0=180, y0=180, top=y0-h*sc, fx=x0-foot*sc;
+  return svgWrap(`<rect x="0" y="${y0}" width="640" height="20" fill="#4a5866"/><rect x="${x0}" y="10" width="14" height="${y0-10}" fill="#9aa6b1"/>
+  <line x1="${fx}" y1="${y0}" x2="${x0}" y2="${top}" stroke="#e0a63c" stroke-width="6"/><line x1="${fx}" y1="${y0+2}" x2="${x0}" y2="${y0+2}" stroke="#e8ebee" stroke-dasharray="4 3"/>
+  ${T((fx+x0)/2,y0+16,'?',{a:'middle',s:14,w:700,c:'#1f2833'})}${T(x0+24,(top+y0)/2,'høyde '+fmt(h,1)+' m',{s:13})}${T(330,60,'Stigen skal stå ca. 1 : 4',{s:13,c:'#9aa6b1'})}${T(330,80,'(ca. 75°)',{s:13,c:'#9aa6b1'})}`,200); }
+def('hoyde','middels',()=>{
+  const h=rnd(3,8,0.5); const f=h/4;
+  return {mod:'hoyde',type:'num',q:`Stigen skal lene mot en vegg i en høyde på <b>${fmt(h,1)} m</b>. Hvor langt fra veggen skal foten stå? (±0,1 m)`,viz:stigeSVG(h,f),ans:f,tol:0.1,unit:'m',
+    expl:`Regelen er 1 : 4 – én meter ut for hver fjerde meter opp. ${fmt(h,1)} / 4 = <b>${fmt(f,2)} m</b>. Stigen skal sikres mot å skli og stikke ca. 1 m over der du går av.`};
+});
+defBank('hoyde',[
+  {d:'lett',q:'Når er stige riktig arbeidsutstyr?',opts:['Til kortvarig, enkelt arbeid der det ikke er praktisk med stillas eller lift','Til all maling i høyden','Til sandblåsing i høyden','Aldri'],ans:0,expl:'Stige er først og fremst for atkomst. Blåsing og sprøyting med tunge slanger og tilbakeslag krever stillas eller lift.'},
+  {d:'lett',q:'Hva sjekker du på et stillas før du går opp?',opts:['At det er kontrollert og merket som klart til bruk, og at rekkverk, dekke og atkomst er på plass','At det er malt','Bare at det står rett','At stillasbyggeren er der'],ans:0,expl:'Stillaset skal ha merking som viser at det er kontrollert. Mangler noe – ikke bruk det, og meld fra.'},
+  {d:'middels',q:'Du ser at et rekkverk mangler på stillaset du skal jobbe på. Hva gjør du?',opts:['Går ikke opp, melder fra og venter til stillasbygger har rettet det','Fjerner et rekkverk et annet sted og setter det på','Bruker sele og jobber videre','Retter det selv hvis det går fort'],ans:0,expl:'Bare personer med opplæring som stillasmontør skal endre stillaset. Å bygge om selv er både farlig og brudd på regelverket.'},
+  {d:'middels',q:'Når må du bruke fallsikring (sele festet i forankring)?',opts:['Når det er fare for fall og kollektiv sikring som rekkverk ikke er mulig – typisk i bomlift og ved arbeid over åpne kanter','Bare over 10 meter','Aldri på stillas','Bare om vinteren'],ans:0,expl:'Kollektiv sikring (rekkverk, stillas) kommer først. Personlig fallsikring brukes når det ikke går, og krever opplæring og redningsplan.'},
+  {d:'middels',q:'Hva kreves for å kjøre personløfter (lift)?',opts:['Dokumentert sikkerhetsopplæring på den typen lift','Førerkort klasse B','Ingenting hvis liften er liten','Bare at du er over 18'],ans:0,expl:'Lift er arbeidsutstyr som krever dokumentert sikkerhetsopplæring. Sjekk også daglig kontroll og vindgrense.'},
+  {d:'vanskelig',q:'Tre personer skal jobbe i høyden: en maler i bomlift, en blåser på stillas med rekkverk og en inspektør som skal inn på en rist uten rekkverk. Hvem trenger sele festet til forankring?',opts:['Maleren i bomliften og inspektøren på rista','Bare blåseren','Alle tre','Ingen av dem'],ans:0,expl:'Kurven i bomlift kan kaste deg ut ved rykk. Rist uten rekkverk mangler kollektiv sikring. Blåseren på stillas med rekkverk er sikret kollektivt. Dette er «behov for sikringsutstyr for ulike brukere» i læreplanen.'},
+  {d:'vanskelig',q:'Hva må være klart før noen arbeider med sele og fallsikring?',opts:['En plan for hvordan en person som har falt og henger i selen skal reddes raskt','Ingenting ekstra','At selen har riktig farge','At arbeidet tar under en time'],ans:0,expl:'Å henge lenge i sele kan gi alvorlig sirkulasjonssvikt. Redning må kunne skje raskt – planlegg det i SJA-en.'}
+]);
+
+/* ---------- FØRSTEHJELP ---------- */
+defBank('forstehjelp',[
+  {d:'lett',q:'Hvilket nummer ringer du ved akutt sykdom eller skade?',opts:['113','110','112','1881'],ans:0,expl:'113 = medisinsk nødhjelp, 110 = brann, 112 = politi. På verftet: følg også den lokale beredskapsplanen og varsle internt.'},
+  {d:'lett',q:'Du får herder i øyet. Hva gjør du?',opts:['Skyller med øyeskyll eller rent vann i lang tid – minst 15 minutter – og går til lege','Gnir øyet','Skyller med tynner','Venter og ser om det går over'],ans:0,expl:'Skyll med øyelokket åpent, fra nesen og utover. Ta med sikkerhetsdatabladet til legen.'},
+  {d:'lett',q:'Du har fått maling på huden. Hva bruker du for å vaske den av?',opts:['Såpe og vann eller spesiell håndrens – aldri tynner','Tynner','Bensin','Blåsesand'],ans:0,expl:'Løsemidler trekker kjemikaliene lenger inn i huden og tørker den ut. Bruk hansker neste gang.'},
+  {d:'middels',q:'En kollega er svimmel og uvel etter sprøyting i en tank. Hva gjør du først?',opts:['Sørger for at du selv er trygg, får personen ut i frisk luft og varsler','Går inn uten åndedrettsvern og hjelper','Gir personen vann og lar hen jobbe videre','Venter til skiftet er over'],ans:0,expl:'Ikke bli skadet nr. 2 – mange dødsulykker i trange rom rammer den som kommer for å hjelpe. Varsle, få personen ut, og ring 113 ved behov.'},
+  {d:'middels',q:'Personen er bevisstløs men puster normalt. Hva gjør du?',opts:['Legger personen i stabilt sideleie, ringer 113 og følger med på pusten','Starter HLR','Lar personen ligge på ryggen','Gir noe å drikke'],ans:0,expl:'Sideleie holder luftveiene åpne. Slutter personen å puste normalt: start HLR.'},
+  {d:'middels',q:'Hvordan gjør du HLR på en voksen?',opts:['30 brystkompresjoner og 2 innblåsninger, og bruk hjertestarter så fort den er der','5 kompresjoner og 5 innblåsninger','Bare innblåsninger','15 kompresjoner og 1 innblåsning'],ans:0,expl:'Trykk hardt og raskt midt på brystet, ca. 100–120 i minuttet. Hjertestarteren gir talebeskjeder – følg dem.'},
+  {d:'vanskelig',q:'En airless-pistol går av mot fingeren og det blir bare et lite hull. Hva er riktig?',opts:['Dra rett til sykehus og si at det er en høytrykksinjeksjon med maling – det er en akutt skade','Sett på plaster og jobb videre','Vask med tynner','Vent til dagen etter'],ans:0,expl:'Malingen presses inn i vevet under trykk på flere hundre bar. Skaden ser liten ut, men kan gi alvorlig vevsskade. Rask kirurgisk behandling er avgjørende.'}
+]);
+
+/* ---------- ARBEIDSLIV ---------- */
+defBank('arbeidsliv',[
+  {d:'lett',q:'Hvilken lov regulerer arbeidsmiljø, arbeidstid og stillingsvern i Norge?',opts:['Arbeidsmiljøloven','Plan- og bygningsloven','Produktkontrolloven','Opplæringsloven'],ans:0,expl:'Arbeidsmiljøloven gjelder for nesten alle arbeidstakere. Opplæringsloven regulerer blant annet lærekontrakten din.'},
+  {d:'lett',q:'Hva er verneombudets oppgave?',opts:['Å ivareta arbeidstakernes interesser i saker om arbeidsmiljø og sikkerhet','Å bestemme lønn','Å føre timelister','Å kontrollere malingsforbruk'],ans:0,expl:'Verneombudet velges av de ansatte. Ta kontakt hvis du ser farlige forhold som ikke blir fikset.'},
+  {d:'middels',q:'Verneombudet ser umiddelbar fare for liv og helse. Hva kan hen gjøre?',opts:['Stanse arbeidet til arbeidsgiver har vurdert faren','Ingenting uten leders godkjenning','Bare skrive en rapport','Sende alle hjem for dagen'],ans:0,expl:'Stansingsretten står i arbeidsmiljøloven. Den gjelder når det er umiddelbar fare.'},
+  {d:'middels',q:'Hva er <b>arbeidsgiverens</b> ansvar når det gjelder HMS?',opts:['Å sørge for et fullt forsvarlig arbeidsmiljø, opplæring og nødvendig verneutstyr','Bare å betale lønn','Å velge verneutstyr den ansatte må betale selv','Ingenting – det er verneombudets ansvar'],ans:0,expl:'Arbeidsgiver har hovedansvaret. Verneutstyr skal stilles til rådighet uten kostnad for deg.'},
+  {d:'middels',q:'Hva er <b>arbeidstakerens</b> plikter?',opts:['Å bruke verneutstyr, følge rutiner, medvirke i HMS-arbeidet og melde fra om feil og farer','Ingen – det er arbeidsgiverens ansvar','Å kjøpe eget verneutstyr','Bare å møte presis'],ans:0,expl:'Medvirkningsplikten står i arbeidsmiljøloven. Du skal også melde fra om uønskede hendelser.'},
+  {d:'middels',q:'Hva regulerer en <b>tariffavtale</b>?',opts:['Lønn og arbeidsvilkår avtalt mellom fagforening og arbeidsgiverorganisasjon','Hvilken maling som skal brukes','Krav til korrosjonsbeskyttelse','Skatten din'],ans:0,expl:'Tariffavtaler gir ofte bedre vilkår enn lovens minimum, f.eks. lønn, tillegg og overtidsbetaling.'},
+  {d:'middels',q:'Hva er alminnelig arbeidstid etter arbeidsmiljøloven?',opts:['Høyst 9 timer i døgnet og 40 timer i uka','12 timer i døgnet','37,5 timer uten unntak','Det er ingen grense'],ans:0,expl:'Tariffavtaler har ofte kortere arbeidstid (f.eks. 37,5 timer). Skiftordninger og overtid har egne regler.'},
+  {d:'vanskelig',q:'Du ser at en kollega stadig blir utsatt for stygge kommentarer om bakgrunnen sin. Hva er riktig?',opts:['Si fra, og meld fra til leder eller verneombud – trakassering er et brudd på kravene til arbeidsmiljøet','Blande seg ikke – det er spøk','Vente til kollegaen klager selv','Ta det opp i lunsjen med andre'],ans:0,expl:'Alle har rett til et arbeidsmiljø uten trakassering og diskriminering. Et likeverdig og inkluderende yrkesfellesskap er et kompetansemål i faget.'},
+  {d:'vanskelig',q:'Hva kalles det når du melder fra om kritikkverdige forhold i virksomheten, og hva sier loven?',opts:['Varsling – du har rett til å varsle, og arbeidsgiver kan ikke straffe deg for det (gjengjeldelse er forbudt)','Klaging – det er bare lov anonymt','Sladring – det er ikke lov','Rapportering – bare ledere kan gjøre det'],ans:0,expl:'Arbeidsmiljøloven har egne regler om varsling. Følg bedriftens varslingsrutine.'}
+]);
+
+/* ---------- TILDEKKING OG MASKERING ---------- */
+const maskSVG=svgWrap(`<rect x="0" y="0" width="640" height="200" fill="#1f2833"/><rect x="170" y="30" width="300" height="140" rx="8" fill="#4a5866"/><circle cx="320" cy="100" r="58" fill="#8fa3b3"/><circle cx="320" cy="100" r="30" fill="#1f2833"/>${[0,1,2,3,4,5,6,7].map(i=>{const a=i*Math.PI/4;return `<circle cx="${320+80*Math.cos(a)}" cy="${100+80*Math.sin(a)}" r="7" fill="#e0a63c"/>`;}).join('')}<rect x="170" y="30" width="300" height="140" rx="8" fill="none" stroke="#d4552e" stroke-width="10" opacity=".7"/>${T(495,70,'pakningsflate',{s:12})}${T(495,86,'= ikke mal',{s:12})}${T(495,120,'boltehull',{s:12,c:'#e0a63c'})}${T(495,136,'= plugg',{s:12,c:'#e0a63c'})}${T(40,100,'maling',{s:12,c:'#d4552e'})}`,200);
+defBank('masker',[
+  {d:'lett',q:'Hva skal normalt maskeres før blåsing og maling?',viz:maskSVG,opts:['Pakningsflater, gjenger, maskinerte flater, skilt og instrumenter','Alle sveiser','Hele konstruksjonen','Ingenting – alt skal males'],ans:0,expl:'Maling på en pakningsflate kan gi lekkasje, og maling i gjenger gjør at bolten ikke går inn. Sjekk spesifikasjonen og tegningen for hva som ikke skal males.'},
+  {d:'lett',q:'Hvorfor dekker vi til omgivelsene før sprøyting og blåsing?',opts:['For å hindre sprøytetåke og blåsemiddel på utstyr, biler og natur – og for å samle opp avfall','Fordi det ser bedre ut','For å holde varmen','Det er ikke nødvendig utendørs'],ans:0,expl:'Sprøytetåke kan drive langt med vinden. Skader på andres eiendom er dyre, og utslipp til natur er et miljøproblem.'},
+  {d:'middels',q:'Hvilken tape bruker du for å maskere under blåsing?',opts:['Kraftig blåsetape eller gummimaske som tåler slitasjen','Vanlig papirtape','Isolasjonstape','Kontortape'],ans:0,expl:'Papirtape blåses bort på sekunder. Til maling holder vanlig maskeringstape – men sjekk at den tåler løsemidlet og temperaturen.'},
+  {d:'middels',q:'Når fjerner du maskeringstapen etter maling?',opts:['Når malingen har satt seg men ikke er gjennomherdet – og trekk den skrått bakover','Etter at malingen er helt herdet i en uke','Mens malingen er helt våt','Aldri – den blir sittende'],ans:0,expl:'Herdet maling kan rives opp sammen med tapen og gi ujevn kant. Helt våt maling kan renne inn under.'},
+  {d:'middels',q:'Et område nær en sveisefuge som skal sveises senere, er merket «ikke mal». Hvorfor?',opts:['Maling i sveiseområdet gir dårlig sveis og giftig røyk – området males etter sveising','Fordi sveisen skal være blank','Fordi maling ikke fester på stål der','Det er bare en anbefaling'],ans:0,expl:'Slike soner holdes umalte eller maskeres, og males med reparasjonssystemet etter at sveisingen er ferdig og kontrollert.'},
+  {d:'vanskelig',q:'Hvordan kan dårlig maskering påvirke verdien av en konstruksjon?',opts:['Maling på feil steder kan gi lekkasjer, feil funksjon, dyr opprensking og forsinkelser','Maskering påvirker bare utseendet','Mer maling gir alltid bedre beskyttelse','Det påvirker ikke noe'],ans:0,expl:'Læreplanen ber deg vurdere hvordan tildekking påvirker funksjon og verdi. En ventil med maling i spindelen kan måtte byttes.'}
+]);
+
+/* ---------- PASSIV BRANNBESKYTTELSE ---------- */
+const pfpSVG=svgWrap(`<rect x="0" y="0" width="640" height="200" fill="#1f2833"/>
+ <g transform="translate(70,30)"><rect x="0" y="0" width="120" height="16" fill="#4a5866"/><rect x="52" y="16" width="16" height="108" fill="#4a5866"/><rect x="0" y="124" width="120" height="16" fill="#4a5866"/><rect x="-6" y="-6" width="132" height="152" fill="none" stroke="#e0a63c" stroke-width="6"/></g>${T(130,190,'Før brann: tynt lag',{a:'middle',s:12})}
+ <path d="M280 100 h60 m-10 -8 l10 8 l-10 8" stroke="#d4552e" stroke-width="3" fill="none"/>${T(310,86,'varme',{a:'middle',s:12,c:'#d4552e'})}
+ <g transform="translate(430,30)"><rect x="-30" y="-30" width="180" height="200" rx="18" fill="#2b2b2b"/><rect x="0" y="0" width="120" height="16" fill="#4a5866"/><rect x="52" y="16" width="16" height="108" fill="#4a5866"/><rect x="0" y="124" width="120" height="16" fill="#4a5866"/></g>${T(490,190,'Under brann: sveller til et isolerende forkullet lag',{a:'middle',s:12})}`,200);
+defBank('pfp',[
+  {d:'lett',q:'Hva gjør et <b>intumescent</b> (svellende) brannbeskyttende belegg?',viz:pfpSVG,opts:['Sveller opp ved høy varme og danner et isolerende lag som forsinker oppvarmingen av stålet','Slukker brannen','Gjør stålet ubrennbart for alltid','Kjøler stålet med vann'],ans:0,expl:'Målet er at stålet ikke skal nå kritisk temperatur (der det mister bæreevne) før tiden i kravet har gått.'},
+  {d:'lett',q:'Hva betyr <b>passiv</b> brannbeskyttelse?',opts:['Beskyttelse som virker uten at noe må aktiveres – f.eks. belegg og isolasjon','Sprinkleranlegg','Brannslukkere','Brannvakt'],ans:0,expl:'Aktiv brannbeskyttelse er sprinkler, deluge og slukkeutstyr. Passiv er belegg, plater og isolasjon.'},
+  {d:'middels',q:'Hva betyr <b>H60</b> i et krav til brannbeskyttelse?',opts:['Konstruksjonen skal tåle en hydrokarbonbrann i 60 minutter','60 mm tykkelse','60 °C maks temperatur','60 % tørrstoff'],ans:0,expl:'H = hydrokarbonbrann, som er typisk for olje og gass: den blir svært varm svært fort. Tallet er minutter.'},
+  {d:'middels',q:'Hvorfor trenger en tynn stålprofil <b>tykkere</b> brannbeskyttelse enn en kraftig profil?',opts:['Tynt stål varmes opp raskere fordi det har mye overflate i forhold til massen','Tynt stål brenner','Tykt stål leder ikke varme','Det stemmer ikke – alle trenger lik tykkelse'],ans:0,expl:'Forholdet mellom oppvarmet omkrets og tverrsnitt (profilfaktor) avgjør tykkelsen. Tykkelsen står i tabeller fra produsenten.'},
+  {d:'middels',q:'Hva ligger normalt <b>under</b> et epoksybasert brannbeskyttende belegg på stål?',opts:['Et korrosjonsbeskyttende grunningssystem som produsenten har godkjent sammen med PFP-en','Ingenting – rett på blåst stål uten unntak','Alkydmaling','Rust'],ans:0,expl:'Grunning og PFP må være testet sammen. Feil grunning kan gi dårlig heft – og da faller PFP-en av i brann.'},
+  {d:'vanskelig',q:'Hvorfor legges det ofte et <b>armeringsnett</b> inn i epoksy-PFP?',opts:['For å holde det forkullede laget på plass under brann og hindre sprekker','For å gjøre det lettere å male','For katodisk beskyttelse','For å spare materiale'],ans:0,expl:'Nettet og plasseringen av det (dybde i filmen) er en del av det testede systemet. Følg produsentens påføringsprosedyre nøyaktig.'},
+  {d:'vanskelig',q:'Hvordan kontrollerer du tykkelsen på PFP mens du påfører?',opts:['Med våtfilmmåling (f.eks. nålemåler) underveis, og tykkelsesmåling etter herding – mot tabellen for hver profil','Med øyemål','Med Bresle-test','Bare ved å telle spann'],ans:0,expl:'PFP legges i mye større tykkelser enn vanlig maling, gjerne flere millimeter. For lite gir for kort brannmotstand. For mye koster og kan sprekke.'}
+]);
+
+/* ---------- VERNEUTSTYR OG ARBEIDSMILJØ ---------- */
+const FILTERS=[['A','brun','#8a5a2b','organiske gasser og damper (løsemidler)'],['B','grå','#9aa6b1','uorganiske gasser (f.eks. klor)'],['E','gul','#e0c02a','sure gasser (f.eks. svoveldioksid)'],['K','grønn','#48a43f','ammoniakk'],['P','hvit','#f4f6f8','partikler (støv, sprøytetåke)']];
+def('hms2','lett',()=>{
+  const f=pick(FILTERS); const wrong=FILTERS.filter(x=>x!==f).map(x=>x[3]).sort(()=>Math.random()-.5).slice(0,3);
+  return {mod:'hms2',type:'mc',q:`Et filter er merket <b>${f[0]}</b> og har ${f[1]} fargebånd. Hva beskytter det mot?`,
+    viz:svgWrap(`<rect x="250" y="30" width="140" height="140" rx="70" fill="#33404e" stroke="#9aa6b1"/><rect x="250" y="85" width="140" height="30" fill="${f[2]}"/>${T(320,106,f[0],{a:'middle',s:20,w:700,c:'#1f2833'})}`,200),
+    opts:[f[3],...wrong],ans:0,expl:`Fargekoder: A brun (organiske damper), B grå, E gul, K grønn, P hvit (partikler). Ved sprøyting brukes ofte <b>A2P3</b> – løsemiddeldamp og sprøytetåke. Isocyanater og trange rom krever ofte luftforsynt åndedrettsvern.`};
+});
+defBank('hms2',[
+  {d:'lett',q:'Hvilken støygrense gjør at du <b>må</b> bruke hørselvern?',opts:['85 dB(A) gjennomsnitt over arbeidsdagen','50 dB(A)','120 dB(A)','Det er valgfritt'],ans:0,expl:'Sandblåsing ligger ofte godt over 100 dB. Hørselsskader er varige – bruk vern hele tiden, også inne i blåsehjelmen om nødvendig.'},
+  {d:'middels',q:'Hva må være i orden med <b>pustelufta</b> til en blåsehjelm eller friskluftsmaske?',opts:['Den skal være ren og ha pustekvalitet – filter, CO-varsler og rent luftinntak','Den kan tas fra samme slange som blåselufta uten filter','Den skal være varm','Det er ingen krav'],ans:0,expl:'Kompressorluft kan inneholde olje, vann og karbonmonoksid (CO). Pusteluft skal tilfredsstille kravene i NS-EN 12021.'},
+  {d:'middels',q:'Før du går inn i en tank (trangt rom), hva er riktig?',opts:['Arbeidstillatelse, gassmåling (oksygen, eksplosive gasser, giftige gasser), ventilasjon, vakt ved mannhullet og redningsplan','Bare lommelykt','Gå inn og se om lufta kjennes grei','Gassmåling er bare nødvendig om vinteren'],ans:0,expl:'Oksygenmangel og gass kjennes ikke. Mål før og under arbeidet. Vakten skal aldri gå inn alene for å redde.'},
+  {d:'middels',q:'Hvorfor er blåsestøv fra gammel maling ekstra farlig?',opts:['Det kan inneholde bly, krom eller andre tungmetaller fra gamle malingssystemer','Det lukter vondt','Det er bare farlig for øynene','Det er ikke farligere enn vanlig støv'],ans:0,expl:'Kartlegg gammel maling før blåsing. Riktig åndedrettsvern, avsug og håndtering av avfallet er avgjørende.'},
+  {d:'middels',q:'Hvorfor skal blåsemiddelet ikke inneholde fritt krystallinsk silika (kvarts)?',opts:['Støvet gir silikose – en alvorlig og uhelbredelig lungesykdom','Det sliter for mye på dysa','Det gir for grov ruhet','Det er for dyrt'],ans:0,expl:'Bruk godkjente blåsemidler (f.eks. stålsand, olivin, garnet). Sjekk sikkerhetsdatabladet.'},
+  {d:'middels',q:'Hvordan skal du behandle brukt blåsemiddel med malingsrester, og filler med løsemiddel?',opts:['Som farlig avfall – samle, merk og lever etter bedriftens rutine','Kast i vanlig restavfall','Spyl ut i sjøen','Brenn på stedet'],ans:0,expl:'Kildesorter: herdet maling, flytende malingsrester, løsemidler, tomme spann og blåsemiddel går ofte i hver sin fraksjon. Farlig avfall skal deklareres.'},
+  {d:'middels',q:'Du holder en tung sprøytepistol og slange over hodet i lange økter. Hva gjør du for å unngå belastningsskader?',opts:['Planlegger arbeidet med stillas i riktig høyde, bytter på oppgaver og tar korte pauser','Jobber fortest mulig','Ignorerer det til det gjør vondt','Bruker lengre slange'],ans:0,expl:'Ergonomi er et eget kompetansemål. Riktig arbeidshøyde, avlastning av slangevekten og variasjon forebygger skader i skuldre, rygg og hender.'},
+  {d:'vanskelig',q:'I et Ex-område (eksplosjonsfarlig område) skal du bruke lys og vifte. Hva er kravet?',opts:['Utstyret må være Ex-merket for riktig sone og gassgruppe, og slanger og utstyr må jordes','Vanlig utstyr er greit hvis det er nytt','Det holder å slå av mobilen','Bare lys må være Ex-merket'],ans:0,expl:'En gnist fra vanlig utstyr kan tenne løsemiddeldampen. Statisk elektrisitet fra slanger og pumpe må ledes bort med jording.'},
+  {d:'vanskelig',q:'Hvorfor er feil bruk av verneutstyr farlig – f.eks. et filter som har vært åpent i ukevis?',opts:['Filteret kan være mettet og slippe gjennom damp uten at du merker det','Det er ikke farlig så lenge masken sitter','Filter varer evig','Det påvirker bare lukten'],ans:0,expl:'Kullfiltre mettes og har begrenset levetid etter åpning. Følg produsentens bytteintervall og skift straks du kjenner lukt eller smak.'}
+]);
+
+/* ---------- UTSTYR: vedlikehold (legges i eksamensteori) ---------- */
+[
+  {q:'Hva gjør du med airless-sprøyta når du er ferdig med 2-komponent maling?',opts:['Skyller pumpe, slange og pistol med riktig tynner med én gang – før potlife går ut','Lar den stå til neste dag','Skyller bare pistolen','Skyller med vann'],ans:0,expl:'Herder malingen i pumpa, kan utstyret bli ødelagt. Rengjør filtre og dyse samtidig.'},
+  {q:'Hvorfor tapper du kondensvann fra kompressor og lufttank daglig?',opts:['Vann i lufta gir fukt på flaten, dårlig blåsing og korrosjon i utstyret','For å spare strøm','For å øke trykket','Det er ikke nødvendig'],ans:0,expl:'Sjekk også olje- og vannutskiller. Test lufta med blotter-papir.'},
+  {q:'Hva sjekker du på en blåseslange før bruk?',opts:['Slitasje og sprekker, hele koblinger med låsepinner og slangesikring (whip checks), og jording','Bare fargen','At den er lang nok','Ingenting – slanger tåler alt'],ans:0,expl:'En slange som ryker under trykk kan slå og skade. Dødmannsknappen må virke.'},
+  {q:'Når skal en blåsedyse byttes?',opts:['Når åpningen er slitt ca. 1,5 mm (1/16") større enn ny – den bruker da mye mer luft og blåser dårligere','Hver dag uansett','Når den er skitten','Aldri'],ans:0,expl:'Mål dysa med dyselære. En slitt dyse gir lavere trykk ved dysa, mer sandforbruk og dårligere rensetempo.'}
+].forEach(x=>EKS_MC.push(x));
+
+/* ============================================================
+   MALINGSFEIL – feilsøker (v0.8)
+   Data: hva du ser, når, årsaker (kategori), forebygg, utbedre, sjekk.
+   Tegninger: flate sett ovenfra + snitt gjennom belegget.
+   ============================================================ */
+const FCAT = {
+  forb:{n:'Forbehandling',c:'#5b9bd5'},
+  klima:{n:'Klima',c:'#4fc3c7'},
+  paa:{n:'Påføring',c:'#d4552e'},
+  tykk:{n:'Filmtykkelse',c:'#5fae7d'},
+  prod:{n:'Produkt og blanding',c:'#e0a63c'},
+  miljo:{n:'Miljø og bruk',c:'#b08bd9'}
+};
+const FWHEN = {paa:'Under påføring',herd:'Under tørking og herding',bruk:'Etter uker eller år i bruk'};
+const FEIL = {
+ appelsin:{t:'Appelsinhud',en:'Orange peel',when:'paa',
+  ser:'Ujevn, nuppete overflate – som skallet på en appelsin.',
+  aars:[['paa','For lavt sprøytetrykk eller feil dyse – malingen forstøves dårlig'],['prod','For tyktflytende maling: for kald, eller for lite tynner'],['prod','Feil tynner som fordamper for fort'],['klima','Høy temperatur – filmen rekker ikke å flyte ut']],
+  forb:['Trykk og dyse etter databladet','Temperer malingen før bruk','Bruk tynneren produsenten oppgir'],
+  utb:['Oftest bare et utseendeproblem','Stilles det krav til utseende: slip lett og legg nytt strøk innenfor overmalingsintervallet'],
+  sjekk:'Se på flaten i skrått lys. Mål TFT – tykkelsen kan variere mye.',
+  kons:'Lite fare for korrosjon, men ujevn tykkelse.'},
+ sig:{t:'Sig og renning',en:'Sagging / runs',when:'paa',
+  ser:'Tykke «gardiner» eller dråper som har rent nedover på loddrette flater.',
+  aars:[['tykk','For tykk våtfilm i ett strøk'],['paa','Sprøyter for nært eller beveger pistolen for sakte'],['paa','For stor overlapp eller for stor dyse'],['prod','For mye tynner'],['klima','Lav temperatur – malingen tørker sakte og rekker å renne']],
+  forb:['Mål VFT med våtfilmkam mens du sprøyter','Hold jevn avstand og fart, ca. 50 % overlapp','Tynn bare så mye databladet tillater'],
+  utb:['Mens malingen er våt: børst ut siget med pensel med én gang','Når den har herdet: slip ned til jevn flate, mål TFT og flekkmal'],
+  sjekk:'Våtfilmkam under påføring. TFT-måling etterpå – siget er ofte langt over maks tykkelse.',
+  kons:'Overtykk film kan sprekke og holde på løsemiddel. Utseendet blir dårlig.'},
+ torr:{t:'Tørrsprøyt',en:'Dry spray / overspray',when:'paa',
+  ser:'Ru, matt overflate som kjennes som sandpapir.',
+  aars:[['paa','For stor avstand fra pistol til flate'],['paa','Pistolen holdes på skrå, ikke 90°'],['paa','Sprøytetåke legger seg på flate som allerede er malt'],['klima','Varme eller vind – løsemidlet fordamper før malingen treffer flaten'],['prod','Tynner som fordamper for fort']],
+  forb:['Hold pistolen vinkelrett på flaten og på riktig avstand','Skjerm mot vind','Planlegg sprøyteretningen så tåken ikke faller på ferdig flate','Bruk langsommere tynner i varme'],
+  utb:['Fjern det løse, porøse laget med sliping eller børsting','Rengjør og legg nytt strøk'],
+  sjekk:'Stryk hånden (med hanske) over flaten. Tørrsprøyt gir sandaktig støv.',
+  kons:'Porøs film. Dårlig heft til neste strøk, og kan gi porer.'},
+ porer:{t:'Porer (pinholes)',en:'Pinholes',when:'herd',
+  ser:'Små, dype hull i filmen – ofte helt ned til underlaget.',
+  aars:[['forb','Porøst underlag (sinksilikat, termisk sprøytet metall) slipper ut luft'],['tykk','For tykk film – overflaten lukker seg før løsemidlet er ute'],['paa','Tørrsprøyt i strøket under'],['prod','Feil tynner eller for lite tynner']],
+  forb:['Legg et tynt tåkestrøk (mist coat) på porøse underlag, og så fullt strøk','Hold filmtykkelsen innenfor databladet','Unngå tørrsprøyt'],
+  utb:['Slip, rengjør og legg nytt strøk','Kontroller med holiday-test der det er krav'],
+  sjekk:'Lupe eller holiday-test. Porene er ofte for små til å se med det blotte øyet.',
+  kons:'Vann når stålet gjennom hullene – punktkorrosjon.'},
+ krater:{t:'Kratere og fiskeøyne',en:'Cratering / fish eyes',when:'paa',
+  ser:'Runde groper der malingen har trukket seg vekk fra et punkt.',
+  aars:[['forb','Olje, fett eller silikon på flaten'],['paa','Olje eller vann i trykklufta (dårlig utskiller)'],['forb','Fingeravtrykk og skitne hansker'],['miljo','Silikonspray eller annet i nærheten av malestedet']],
+  forb:['Avfett før maling','Sjekk trykklufta med et hvitt papir eller filter (blotter-test)','Rene hansker, ingen silikonprodukter i nærheten'],
+  utb:['Slip ned kraterne','Avfett hele området','Mal på nytt'],
+  sjekk:'Krateret har en ring rundt og tynn film i midten. Se etter en felles kilde (luft, hansker, sprut).',
+  kons:'Tynn film i midten av krateret gir svakt punkt.'},
+ blaer:{t:'Blæring',en:'Blistering',when:'bruk',
+  ser:'Kuler eller bobler under malingen. Kan være fylt med væske.',
+  aars:[['forb','Løselige salter under filmen trekker vann gjennom malingen (osmotisk blæring)'],['klima','Kondens eller fukt på flaten da den ble malt'],['tykk','Løsemiddel innestengt – for tykk film eller for kort tid mellom strøk'],['miljo','For høy katodisk beskyttelse på neddykkede konstruksjoner'],['prod','Feil malingssystem for neddykking']],
+  forb:['Salttest (Bresle) og vask med ferskvann før maling','Følg klimakravene – stål minst 3 °C over duggpunktet','Riktig TFT og overmalingstider'],
+  utb:['Åpne noen blærer og sjekk væsken (salt, pH)','Fjern belegget i området og blås til kravet','Bygg opp systemet på nytt'],
+  sjekk:'Blæring vurderes etter ISO 4628-2 – størrelse og mengde.',
+  kons:'Filmen mister heft. Korrosjon under blærene.'},
+ flass:{t:'Avflassing – dårlig heft',en:'Flaking / delamination',when:'bruk',
+  ser:'Malingen løsner i flak – enten fra stålet eller mellom to strøk.',
+  aars:[['forb','For dårlig forbehandling: glatt flate, for lav ruhet, glødeskall, salt eller støv'],['prod','Maks overmalingsintervall er overskredet – forrige strøk er for hardt og glatt'],['klima','Fukt eller kondens mellom strøkene'],['prod','Aminutsvetting som ikke ble vasket bort'],['prod','Produkter som ikke passer sammen']],
+  forb:['Ruhet og renhet etter spesifikasjonen, og støvtest','Hold overmalingsintervallet – eller rugg opp flaten (sweep-blåsing)','Vask bort aminhinne før neste strøk'],
+  utb:['Fjern alt løst til fast kant','Skrå kantene (feathering)','Forbehandle og bygg opp med reparasjonssystemet i spesifikasjonen'],
+  sjekk:'Hefttest med avtrekk (ISO 4624) eller gitterrissing (ISO 2409). Se om bruddet går mot stål eller mellom strøk.',
+  kons:'Stålet blir liggende åpent. Feilen sprer seg ofte.'},
+ sprekk:{t:'Sprekker – «mud cracking»',en:'Mud cracking',when:'herd',
+  ser:'Et nett av sprekker, som tørr leire. Typisk i sinksilikat og tykke strøk.',
+  aars:[['tykk','For tykk film – særlig sinksilikat over maks TFT'],['klima','For rask tørk i varme eller vind'],['prod','For stivt produkt for underlaget eller bruken']],
+  forb:['Hold deg under maks TFT i databladet','Mål VFT underveis','Jevne strøk – ikke bygg tykkelse i hjørner'],
+  utb:['Fjern det sprukne belegget ned til fast underlag – ofte med blåsing','Mal på nytt'],
+  sjekk:'Sprekker vurderes etter ISO 4628-4.',
+  kons:'Sprekkene når ned til stålet. Belegget må fjernes.'},
+ rynk:{t:'Rynking',en:'Wrinkling',when:'herd',
+  ser:'Rynkete overflate – som skinnet på kokt melk.',
+  aars:[['tykk','For tykk film: overflaten tørker og krymper før malingen under'],['klima','Sterk varme eller sol under påføring'],['prod','Overmalt før strøket under var tørt']],
+  forb:['Riktig tykkelse, flere tynne strøk heller enn ett tykt','Unngå maling i sterk sol','Hold tørketidene'],
+  utb:['Fjern rynkene – ofte hele strøket','Mal på nytt'],
+  sjekk:'Vanligst med oksidativt tørkende maling (alkyd).',
+  kons:'Myk, uherdet maling under skinnet.'},
+ amin:{t:'Aminutsvetting',en:'Amine blush',when:'herd',
+  ser:'Hvit, fet eller klissen hinne på epoksy.',
+  aars:[['klima','Lav temperatur og høy fuktighet under herdingen'],['klima','Kondens eller røykgass fra oljefyrte varmekanoner'],['prod','For kort induksjonstid'],['prod','Feil blandingsforhold']],
+  forb:['Hold klimakravene under hele herdingen','Respekter induksjonstiden','Bland riktig og bland godt','Bruk indirekte oppvarming'],
+  utb:['Vask med ferskvann og svamp eller børste før neste strøk','La flaten tørke'],
+  sjekk:'Kjennes fet. Vann perler seg på flaten.',
+  kons:'Neste strøk får dårlig heft og kan flasse.'},
+ kritt:{t:'Kritting',en:'Chalking',when:'bruk',
+  ser:'Pulver på overflaten. Fargen blekner.',
+  aars:[['miljo','UV-lys bryter ned bindemidlet – typisk epoksy i sol'],['prod','Toppstrøk uten nok UV-bestandighet']],
+  forb:['Bruk UV-bestandig toppstrøk (polyuretan eller polysiloksan) over epoksy utendørs'],
+  utb:['Vask og rengjør flaten','Slip lett ved behov','Mal over med et toppstrøk som passer'],
+  sjekk:'Tapetest etter ISO 4628-6: tape på flaten, se hvor mye pulver som følger med.',
+  kons:'Filmen blir tynnere med årene. Først utseende, siden beskyttelse.'},
+ rust:{t:'Rust gjennom belegget',en:'Rust breakthrough / edge corrosion',when:'bruk',
+  ser:'Rustflekker og rustrenner – ofte langs kanter, sveiser og hjørner.',
+  aars:[['tykk','For tynn film på kanter – malingen trekker seg fra skarpe kanter'],['paa','Manglende stripe coat'],['forb','Skarpe kanter og sveiser ikke avrundet og slipt'],['tykk','Porer eller for lav TFT'],['miljo','Mekanisk skade']],
+  forb:['Avrund kanter (NORSOK: radius minst 2 mm) og behandle sveiser','Stripe coat på kanter, sveiser og hjørner','Mål TFT også på kantene'],
+  utb:['Fjern rust lokalt (St 3 eller Sa 2½ etter spesifikasjon)','Skrå kantene inn mot intakt maling','Legg reparasjonssystemet'],
+  sjekk:'Rustgrad på malt flate vurderes etter ISO 4628-3 (Ri 0–5).',
+  kons:'Korrosjonen sprer seg under belegget.'}
+};
+const FEIL_ORDER=['appelsin','sig','torr','krater','porer','sprekk','rynk','amin','blaer','flass','kritt','rust'];
+
+/* ---------- tegninger ---------- */
+function frand(seed){ let s=seed>>>0; return ()=>{ s=(s+0x6D2B79F5)>>>0; let t=s; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
+function fseed(k){ let h=7; for(const c of k) h=(h*31+c.charCodeAt(0))>>>0; return h; }
+const FC={bg:'#1f2833',steel:'#4a5866',steelD:'#3b4652',primer:'#e0a63c',top:'#8fa3b3',topD:'#6f8494',topL:'#b7c6d2',rust:'#a4532a',rustL:'#c9713d',water:'#4fc3c7',white:'#eef1f3',dirt:'#5b9bd5'};
+
+/* flate sett ovenfra, 300×150 */
+function feilTop(k){
+  const r=frand(fseed(k)); let g='';
+  const base=`<rect x="0" y="0" width="300" height="150" fill="${FC.top}"/>`;
+  if(k==='appelsin'){ for(let i=0;i<150;i++){ const x=r()*300,y=r()*150,rr=5+r()*7; g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rr.toFixed(1)}" fill="${r()<.5?FC.topD:FC.topL}" opacity=".45"/>`; } }
+  else if(k==='sig'){ for(let i=0;i<7;i++){ const x=20+i*40+r()*14, w=12+r()*14, len=40+r()*80; g+=`<path d="M${x-w} 10 L${x+w} 10 L${x+w*0.7} ${10+len} Q${x} ${22+len} ${x-w*0.7} ${10+len}Z" fill="${FC.topD}"/><path d="M${x-w*0.5} 14 L${x-w*0.3} ${len}" stroke="${FC.topL}" stroke-width="2" opacity=".6"/>`; } g+=`<rect x="0" y="0" width="300" height="14" fill="${FC.topD}"/>`; }
+  else if(k==='torr'){ for(let i=0;i<900;i++){ const x=r()*300,y=r()*150; g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(0.6+r()*1.3).toFixed(1)}" fill="${r()<.5?FC.topL:FC.topD}"/>`; } }
+  else if(k==='porer'){ for(let i=0;i<45;i++){ const x=10+r()*280,y=10+r()*130; g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1.3+r()*1.5).toFixed(1)}" fill="#20262d"/><circle cx="${(x+.6).toFixed(1)}" cy="${(y+.6).toFixed(1)}" r="0.7" fill="${FC.rust}"/>`; } }
+  else if(k==='krater'){ for(let i=0;i<9;i++){ const x=25+r()*250,y=20+r()*110,rr=8+r()*10; g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(rr+3).toFixed(1)}" fill="${FC.topL}"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rr.toFixed(1)}" fill="${FC.topD}"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(rr*0.4).toFixed(1)}" fill="${FC.primer}"/>`; } }
+  else if(k==='blaer'){ for(let i=0;i<22;i++){ const x=15+r()*270,y=15+r()*120,rr=4+r()*9; g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rr.toFixed(1)}" fill="${FC.topD}"/><circle cx="${(x-rr*0.3).toFixed(1)}" cy="${(y-rr*0.3).toFixed(1)}" r="${(rr*0.35).toFixed(1)}" fill="${FC.white}" opacity=".7"/>`; } }
+  else if(k==='flass'){ const pts=[[70,60],[190,90],[240,40]]; pts.forEach(([x,y],i)=>{ const w=40+i*10,h=28+i*6; g+=`<path d="M${x-w} ${y} q${w*0.3} ${-h} ${w} ${-h*0.7} q${w*0.8} ${h*0.2} ${w} ${h} q${-w*0.4} ${h*0.9} ${-w} ${h*0.8} q${-w*0.7} ${-h*0.2} ${-w} ${-h*1.1}Z" fill="${i===1?FC.steel:FC.primer}"/><path d="M${x+w*0.95} ${y-h*0.1} q${w*0.25} ${h*0.3} ${w*0.1} ${h*0.8}" stroke="${FC.topL}" stroke-width="4" fill="none"/>`; if(i===1) g+=`<circle cx="${x-10}" cy="${y+8}" r="5" fill="${FC.rust}" opacity=".8"/>`; }); }
+  else if(k==='sprekk'){ const nx=9,ny=5,P=[]; for(let y=0;y<=ny;y++){ P.push([]); for(let x=0;x<=nx;x++){ P[y].push([x*300/nx+(x&&x<nx?r()*20-10:0), y*150/ny+(y&&y<ny?r()*18-9:0)]); } }
+    const ln=(a,b)=>{ const mx=(a[0]+b[0])/2+r()*8-4, my=(a[1]+b[1])/2+r()*8-4; return `<path d="M${a[0].toFixed(1)} ${a[1].toFixed(1)} L${mx.toFixed(1)} ${my.toFixed(1)} L${b[0].toFixed(1)} ${b[1].toFixed(1)}" stroke="#20262d" stroke-width="${(1.6+r()*1.4).toFixed(1)}" fill="none" stroke-linejoin="round"/>`; };
+    for(let y=0;y<=ny;y++) for(let x=0;x<=nx;x++){ if(x<nx && y>0 && y<ny) g+=ln(P[y][x],P[y][x+1]); if(y<ny && x>0 && x<nx) g+=ln(P[y][x],P[y+1][x]); if(x<nx&&y<ny&&r()<.35) g+=ln(P[y][x],P[y+1][x+1]); } }
+  else if(k==='rynk'){ for(let i=0;i<16;i++){ const y=6+i*9; let d=`M0 ${y}`; for(let x=0;x<=300;x+=15) d+=` Q${x+7} ${y+(r()*10-5)} ${x+15} ${y+(r()*4-2)}`; g+=`<path d="${d}" stroke="${i%2?FC.topD:FC.topL}" stroke-width="3" fill="none"/>`; } }
+  else if(k==='amin'){ for(let i=0;i<7;i++){ const x=r()*260,y=r()*120,w=60+r()*90,h=20+r()*30; g+=`<ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w/2}" ry="${h/2}" fill="${FC.white}" opacity="${(0.25+r()*0.3).toFixed(2)}"/>`; } for(let i=0;i<14;i++){ g+=`<circle cx="${(r()*300).toFixed(1)}" cy="${(r()*150).toFixed(1)}" r="${(2+r()*3).toFixed(1)}" fill="${FC.white}" opacity=".55"/>`; } }
+  else if(k==='kritt'){ g+=`<rect x="0" y="0" width="300" height="150" fill="${FC.white}" opacity=".35"/>`; for(let i=0;i<500;i++) g+=`<circle cx="${(r()*300).toFixed(1)}" cy="${(r()*150).toFixed(1)}" r="${(0.5+r()).toFixed(1)}" fill="${FC.white}" opacity=".7"/>`; }
+  else if(k==='rust'){ g+=`<rect x="0" y="0" width="300" height="22" fill="${FC.topD}"/><line x1="0" y1="22" x2="300" y2="22" stroke="${FC.topL}" stroke-width="2"/>`; for(let i=0;i<9;i++){ const x=15+i*32+r()*10, len=25+r()*70; g+=`<circle cx="${x.toFixed(1)}" cy="22" r="${(4+r()*4).toFixed(1)}" fill="${FC.rust}"/><path d="M${(x-2).toFixed(1)} 24 L${(x+2).toFixed(1)} 24 L${(x+1).toFixed(1)} ${(24+len).toFixed(1)} L${(x-1).toFixed(1)} ${(24+len).toFixed(1)}Z" fill="${FC.rustL}" opacity=".7"/>`; } for(let i=0;i<4;i++) g+=`<circle cx="${(30+r()*240).toFixed(1)}" cy="${(90+r()*50).toFixed(1)}" r="${(2+r()*3).toFixed(1)}" fill="${FC.rust}"/>`; }
+  return `<svg viewBox="0 0 300 150" role="img" aria-label="${esc(FEIL[k].t)} sett ovenfra"><defs><clipPath id="fc_${k}"><rect x="0" y="0" width="300" height="150" rx="6"/></clipPath></defs><g clip-path="url(#fc_${k})">${base}${g}</g></svg>`;
+}
+
+/* snitt gjennom belegget, 300×150: stål nederst, grunning, toppstrøk */
+function feilSnitt(k){
+  const r=frand(fseed(k)+3);
+  const W=300, sTop=108, pTh=16, tTh=26;
+  // ru stålprofil
+  let prof=`M0 150 L0 ${sTop}`; for(let x=0;x<=W;x+=6) prof+=` L${x} ${sTop+(x/6%2?4:-3)}`; prof+=` L${W} 150Z`;
+  const steel=`<path d="${prof}" fill="${FC.steel}"/>`;
+  const primer=(y0=sTop-pTh)=>`<rect x="0" y="${y0}" width="${W}" height="${pTh+3}" fill="${FC.primer}"/>`;
+  const top=(y0,h)=>`<rect x="0" y="${y0}" width="${W}" height="${h}" fill="${FC.top}"/>`;
+  const pY=sTop-pTh, tY=pY-tTh;
+  let g='', std=steel+primer()+top(tY,tTh);
+  const lbl=(x,y,t,c='#e8ebee',a='start')=>`<text x="${x}" y="${y}" font-size="11" fill="${c}" text-anchor="${a}" font-family="IBM Plex Sans,sans-serif">${t}</text>`;
+  if(k==='appelsin'){ let d=`M0 ${tY}`; for(let x=0;x<=W;x+=20) d+=` Q${x+10} ${tY-9} ${x+20} ${tY}`; g=steel+primer()+`<path d="${d} L${W} ${pY} L0 ${pY}Z" fill="${FC.top}"/>`+lbl(8,tY-16,'bølgete overflate'); }
+  else if(k==='sig'){ g=steel+primer()+`<path d="M0 ${tY} L110 ${tY} Q140 ${tY-2} 150 ${tY-30} Q165 ${tY-44} 185 ${tY-18} Q195 ${tY-4} 220 ${tY} L${W} ${tY} L${W} ${pY} L0 ${pY}Z" fill="${FC.top}"/>`+lbl(200,tY-34,'for tykk – renner')+`<path d="M168 ${tY-46} v-14 m-5 5 l5 -5 l5 5" stroke="#e8ebee" fill="none" transform="rotate(180 168 ${tY-53})"/>`; }
+  else if(k==='torr'){ g=steel+primer()+top(tY+8,tTh-8); for(let x=4;x<W;x+=9){ const rr=3+r()*2; g+=`<circle cx="${x+r()*4}" cy="${tY+6-r()*6}" r="${rr.toFixed(1)}" fill="${FC.top}" stroke="${FC.bg}" stroke-width=".8"/>`; } g+=lbl(8,tY-12,'løse, tørre dråper – porøst'); }
+  else if(k==='porer'){ g=std; [50,120,200,250].forEach((x,i)=>{ const deep=i%2===0; g+=`<rect x="${x}" y="${tY}" width="5" height="${deep?tTh+pTh:tTh}" fill="${FC.bg}"/>`; }); g+=lbl(8,tY-10,'små kanaler – noen helt ned til stålet'); }
+  else if(k==='krater'){ g=steel+primer()+`<path d="M0 ${tY} L90 ${tY} Q110 ${tY-8} 120 ${tY+4} Q150 ${pY-2} 180 ${tY+4} Q190 ${tY-8} 210 ${tY} L${W} ${tY} L${W} ${pY} L0 ${pY}Z" fill="${FC.top}"/><ellipse cx="150" cy="${pY-1}" rx="10" ry="3" fill="${FC.dirt}"/>`+lbl(150,tY-16,'olje/silikon i bunnen','#e8ebee','middle'); }
+  else if(k==='blaer'){ g=steel+primer(); g+=`<path d="M0 ${tY} L60 ${tY} Q100 ${tY-40} 140 ${tY} L200 ${tY} Q225 ${tY-24} 250 ${tY} L${W} ${tY} L${W} ${pY} L250 ${pY} Q225 ${pY-22} 200 ${pY} L140 ${pY} Q100 ${pY-38} 60 ${pY} L0 ${pY}Z" fill="${FC.top}"/><path d="M60 ${pY} Q100 ${pY-38} 140 ${pY}Z" fill="${FC.water}" opacity=".8"/><path d="M200 ${pY} Q225 ${pY-22} 250 ${pY}Z" fill="${FC.water}" opacity=".8"/>`; [80,95,110,120,215,230].forEach(x=>g+=`<rect x="${x}" y="${pY-3}" width="3" height="3" fill="${FC.white}"/>`); g+=lbl(100,tY-44,'vann + salt under filmen','#e8ebee','middle'); }
+  else if(k==='flass'){ g=steel+primer()+top(tY,tTh-6).replace(`width="${W}"`,'width="120"')+`<path d="M130 ${tY-14} Q170 ${tY-26} 210 ${tY-18} L214 ${tY-2} Q170 ${tY-10} 132 ${tY+4}Z" fill="${FC.top}"/>`+top(tY,tTh).replace('x="0"','x="230"').replace(`width="${W}"`,'width="70"')+lbl(175,tY-30,'løsner mellom strøk','#e8ebee','middle'); }
+  else if(k==='sprekk'){ const thick=tY-24; g=steel+primer()+top(thick,pY-thick); [40,95,150,205,260].forEach(x=>{ g+=`<path d="M${x} ${thick} L${x+4} ${thick+14} L${x-2} ${thick+28} L${x+2} ${pY+pTh-2}" stroke="${FC.bg}" stroke-width="3" fill="none"/>`; }); g+=lbl(8,thick-8,'for tykk film – sprekker ned til stålet'); }
+  else if(k==='rynk'){ let d=`M0 ${tY}`; for(let x=0;x<=W;x+=12) d+=` Q${x+6} ${tY-(x/12%2?10:2)} ${x+12} ${tY}`; g=steel+primer()+`<rect x="0" y="${tY+4}" width="${W}" height="${pY-tY-4}" fill="${FC.topD}"/><path d="${d} L${W} ${tY+5} L0 ${tY+5}Z" fill="${FC.top}"/>`+lbl(8,tY-14,'tørt skinn over myk maling'); }
+  else if(k==='amin'){ g=std+`<rect x="0" y="${tY-5}" width="${W}" height="5" fill="${FC.white}" opacity=".85"/>`+lbl(8,tY-12,'tynn hvit hinne (karbamat) på epoksyen'); }
+  else if(k==='kritt'){ g=steel+primer()+top(tY+8,tTh-8); for(let i=0;i<60;i++) g+=`<circle cx="${(r()*W).toFixed(1)}" cy="${(tY+6-r()*10).toFixed(1)}" r="${(1+r()*1.5).toFixed(1)}" fill="${FC.white}" opacity=".85"/>`; g+=`<rect x="0" y="${tY}" width="${W}" height="8" fill="${FC.top}" opacity=".25"/>`+lbl(8,tY-14,'UV bryter ned toppen – løst pulver'); }
+  else if(k==='rust'){ // kant: stålplate med skarp kant
+    g=`<rect x="0" y="0" width="${W}" height="150" fill="${FC.bg}"/><path d="M40 150 L40 50 L260 50 L260 150Z" fill="${FC.steel}"/><path d="M30 150 L30 40 Q30 36 34 38 L150 42 L266 38 Q270 36 270 40 L270 150 L260 150 L260 50 L40 50 L40 150Z" fill="${FC.top}"/><circle cx="40" cy="50" r="7" fill="${FC.rust}"/><circle cx="260" cy="50" r="7" fill="${FC.rust}"/>`+lbl(150,30,'tynn film på skarpe kanter','#e8ebee','middle')+lbl(150,100,'stål','#e8ebee','middle');
+  }
+  if(k!=='rust') g+=lbl(W-6,146,'stål','#e8ebee','end')+lbl(W-6,pY+12,'grunning','#1f2833','end');
+  return `<svg viewBox="0 0 300 150" role="img" aria-label="${esc(FEIL[k].t)} i snitt"><rect x="0" y="0" width="300" height="150" fill="${FC.bg}"/>${g}</svg>`;
+}
+
+/* ---------- visning ---------- */
+let feilCur='appelsin', feilWhen='alle';
+function feilRender(){
+  const list=FEIL_ORDER.filter(k=>feilWhen==='alle'||FEIL[k].when===feilWhen);
+  if(!list.includes(feilCur)) feilCur=list[0];
+  $('feilList').innerHTML=list.map(k=>`<button type="button" data-f="${k}" class="${k===feilCur?'on':''}"><span class="fthumb">${feilTop(k)}</span><span><b>${esc(FEIL[k].t)}</b><small>${esc(FEIL[k].en)}</small></span></button>`).join('');
+  const f=FEIL[feilCur];
+  const cats=[...new Set(f.aars.map(a=>a[0]))];
+  $('feilDetail').innerHTML=`
+    <div class="card">
+      <h2>${esc(f.t)} <span style="font-family:var(--mono);text-transform:none;letter-spacing:0;color:var(--paper-dim)">${esc(f.en)}</span><span class="tag draft" style="margin-left:auto">utkast</span></h2>
+      <div class="body">
+        <p class="fser">${esc(f.ser)}</p>
+        <div class="fwhen">${Object.keys(FWHEN).map(w=>`<span class="${w===f.when?'on':''}">${FWHEN[w]}</span>`).join('')}</div>
+        <div class="fviz">
+          <figure>${feilTop(feilCur)}<figcaption>Slik ser det ut</figcaption></figure>
+          <figure>${feilSnitt(feilCur)}<figcaption>Slik ser det ut i snitt</figcaption></figure>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Hvorfor skjer det?</h2>
+      <div class="body">
+        <div class="fcats">${cats.map(c=>`<span class="fcat" style="--fc:${FCAT[c].c}"><i></i>${FCAT[c].n}</span>`).join('')}</div>
+        <ul class="flist">${f.aars.map(a=>`<li style="--fc:${FCAT[a[0]].c}"><span class="fcat small" style="--fc:${FCAT[a[0]].c}"><i></i>${FCAT[a[0]].n}</span>${esc(a[1])}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div class="ftwo">
+      <div class="card"><h2><span class="fdot" style="background:var(--ok)"></span>Forebygg</h2><div class="body"><ul class="flist plain">${f.forb.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></div>
+      <div class="card"><h2><span class="fdot" style="background:var(--warn)"></span>Utbedre</h2><div class="body"><ul class="flist plain">${f.utb.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></div>
+    </div>
+    <div class="card"><div class="body fsjekk"><p><b>Slik sjekker du:</b> ${esc(f.sjekk)}</p><p><b>Hva skjer hvis du lar det være:</b> ${esc(f.kons)}</p>
+      <button type="button" class="btn small" id="feilOv">Øv på malingsfeil</button></div></div>`;
+  autoInfo($('feilDetail'));
+}
+$('feilList').addEventListener('click',e=>{ const b=e.target.closest('button[data-f]'); if(!b) return; feilCur=b.dataset.f; feilRender(); if(window.innerWidth<900) $('feilDetail').scrollIntoView({behavior:'smooth'}); });
+$('feilWhen').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; feilWhen=b.dataset.w; document.querySelectorAll('#feilWhen button').forEach(x=>x.classList.toggle('on',x===b)); feilRender(); });
+$('feilDetail').addEventListener('click',e=>{ if(e.target.id!=='feilOv') return;
+  document.querySelectorAll('.qmod').forEach(c=>c.checked=c.value==='feil');
+  show('oving'); $('qStart').click(); });
+
+
+/* ============================================================
+   SØK – moduler, ordliste, malingsfeil, eksamenscase, oppgaver
+   ============================================================ */
+const sFold = s => String(s).toLowerCase().replace(/<[^>]+>/g,' ').replace(/&[a-z]+;/g,' ').replace(/ø/g,'o').replace(/æ/g,'ae').replace(/å/g,'a').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9%²³½µ\s\-\/]/g,' ').replace(/\s+/g,' ').trim();
+const sPlain = s => String(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+let SIDX=null;
+function sBuild(){
+  const I=[];
+  const add=(grp,title,sub,text,go,ic)=>I.push({grp,title,sub,text:sPlain(text),ft:sFold(title+' '+(sub||'')),fx:sFold(text),go,ic});
+  MODULES.filter(m=>m.view).forEach(m=>add('Moduler',m.t,'',m.d,()=>show(m.view),`<span class="hic" style="background:var(--monje);color:#fff">${esc(m.n)}</span>`));
+  add('Moduler','Ordliste','Alle faguttrykk på norsk og engelsk','ordliste begreper forklaring engelsk',()=>show('ord'),`<span class="hic" style="background:var(--monje);color:#fff">O</span>`);
+  Object.keys(GLOSS).forEach(k=>{ const g=GLOSS[k]; add('Ordliste',g.t,g.en||'',g.d,()=>openInfo(k),`<span class="hic" style="background:var(--cyan)">i</span>`); });
+  FEIL_ORDER.forEach(k=>{ const f=FEIL[k]; add('Malingsfeil',f.t,f.en,[f.ser,...f.aars.map(a=>a[1]),...f.forb,...f.utb,f.sjekk,f.kons].map(x=>x.replace(/[.:]$/,'')).join('. ')+'.',()=>{ feilWhen='alle'; document.querySelectorAll('#feilWhen button').forEach(x=>x.classList.toggle('on',x.dataset.w==='alle')); feilCur=k; show('feil'); },`<span class="hic img">${feilTop(k)}</span>`); });
+  EXAMS.forEach((x,i)=>add('Eksamenscase',x.t,(x.chips||[]).join(' · '),x.s+' '+(x.tasks||[]).map(y=>y.q).join(' '),()=>{ eCur=i; $('eSel').value=i; show('eksamen'); },`<span class="hic" style="background:var(--warn)">${esc(x.id||'E')}</span>`));
+  const banks=[['klima',KLIMA_MC],['eksamen',EKS_MC],['fagprove',FP_MC],...QBANKS];
+  const seen=new Set();
+  banks.forEach(([mod,bank])=>bank.forEach(item=>{ if(seen.has(item)) return; seen.add(item);
+    add('Øvingsoppgaver',sPlain(item.q),MODNAME[mod]||mod,item.q+' '+item.opts[item.ans]+' '+item.expl,()=>sQuiz(mod,item),`<span class="hic" style="background:var(--ok)">?</span>`); }));
+  return I;
+}
+function sQuiz(mod,item){
+  show('oving');
+  const first=shufOpts(Object.assign({mod,type:'mc',diff:item.d||'middels'},item));
+  const rest=buildQuiz([mod],4).filter(q=>q.q!==item.q);
+  quiz={list:[first,...rest],i:0,right:0,answered:false,sel:null}; qRender();
+}
+function sLev1(a,b){ // maks én skrivefeil
+  if(a===b) return true; if(Math.abs(a.length-b.length)>1) return false;
+  let i=0,j=0,e=0; while(i<a.length&&j<b.length){ if(a[i]===b[j]){i++;j++;continue;} if(++e>1) return false; if(a.length>b.length) i++; else if(b.length>a.length) j++; else {i++;j++;} }
+  return e+(a.length-i)+(b.length-j)<=1;
+}
+function sScore(it,words){
+  let score=0;
+  for(const w of words){
+    let s=0;
+    const short=w.length<=3, esc2=w.replace(/[-\/]/g,'\\$&'), wre=new RegExp('(^|[\\s\/-])'+esc2+(short?'([\\s\/-]|$)':''));
+    if(short ? new RegExp('^'+esc2+'([\\s\/-]|$)').test(it.ft) : it.ft.startsWith(w)) s=12; else if(wre.test(it.ft)) s=9; else if(!short&&it.ft.includes(w)) s=6;
+    else if(wre.test(it.fx)) s=3; else if(!short&&it.fx.includes(w)) s=2;
+    else if(w.length>=4 && (it.wd||(it.wd=(it.ft+' '+it.fx).split(' ').filter(x=>x.length>=3))).some(x=>sLev1(w,x)||(x.length>w.length&&sLev1(w,x.slice(0,w.length))))) s=1;
+    if(!s) return 0; score+=s;
+  }
+  return score;
+}
+function sMark(text,words){
+  // finn utdrag rundt første treff og marker treffene
+  const raw=text; const f=sFold(raw);
+  let pos=-1; for(const w of words){ const p=f.indexOf(w); if(p>=0&&(pos<0||p<pos)) pos=p; }
+  let a=Math.max(0,pos-50), b=Math.min(raw.length,(pos<0?0:pos)+110); if(pos<0){a=0;b=110;}
+  let snip=(a>0?'… ':'')+raw.slice(a,b)+(b<raw.length?' …':'');
+  let out=esc(snip);
+  words.filter(w=>w.length>=2).forEach(w=>{ const re=new RegExp((w.length<=3?'(?<![A-Za-zÆØÅæøå])':'')+'('+w.replace(/[.*+?^${}()|[\]\\\-\/]/g,'\\$&').replace(/o/g,'[oø]').replace(/ae/g,'(?:ae|æ)').replace(/a/g,'[aå]')+')'+(w.length<=3?'(?![A-Za-zÆØÅæøå])':''),'gi'); out=out.replace(re,'<mark>$1</mark>'); });
+  return out;
+}
+let sHits=[], sCur=0, sOpenGrp={};
+const S_ORDER=['Moduler','Malingsfeil','Ordliste','Eksamenscase','Øvingsoppgaver'];
+const S_SUGG=['duggpunkt','Sa 2½','sig','blæring','NORSOK','isocyanat','stripe coat','RAL','stillas','PFP'];
+function sRun(){
+  if(!SIDX) SIDX=sBuild();
+  const q=$('srchQ').value; const words=sFold(q).split(' ').filter(Boolean);
+  const box=$('srchRes');
+  if(!words.length){ sHits=[]; box.innerHTML=`<div class="srchEmpty">Skriv et ord – for eksempel:<br>${S_SUGG.map(s=>`<button type="button" data-sugg="${esc(s)}">${esc(s)}</button>`).join('')}</div>`; return; }
+  const scored=SIDX.map(it=>({it,s:sScore(it,words)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+  sHits=[]; let h='';
+  S_ORDER.forEach(g=>{
+    const all=scored.filter(x=>x.it.grp===g); if(!all.length) return;
+    const lim=sOpenGrp[g]?all.length:(g==='Øvingsoppgaver'?5:4);
+    h+=`<div class="srchGrp">${g} (${all.length})</div>`;
+    all.slice(0,lim).forEach(x=>{ const i=sHits.push(x.it)-1; const it=x.it;
+      const sub = g==='Øvingsoppgaver' ? `Tema: ${esc(it.sub)}` : (g==='Ordliste'||g==='Malingsfeil' ? (it.sub?`<i>${esc(it.sub)}</i> – `:'')+sMark(it.text,words) : sMark(it.text,words));
+      h+=`<button type="button" class="hit" data-i="${i}">${it.ic||''}<span><b class="t">${g==='Øvingsoppgaver'?sMark(it.title,words):esc(it.title)}</b><small>${sub}</small></span></button>`; });
+    if(all.length>lim) h+=`<button type="button" class="srchMore" data-more="${g}">Vis alle ${all.length}</button>`;
+  });
+  box.innerHTML = h || `<div class="srchEmpty">Ingen treff på «${esc(q)}». Prøv et kortere ord, eller søk på engelsk (f.eks. «blistering»).</div>`;
+  sCur=0; sHi();
+}
+function sHi(){ document.querySelectorAll('#srchRes .hit').forEach(b=>b.classList.toggle('cur',+b.dataset.i===sCur)); const c=document.querySelector('#srchRes .hit.cur'); if(c) c.scrollIntoView({block:'nearest'}); }
+function sOpen(){ $('srch').classList.add('show'); sOpenGrp={}; $('srchQ').value=''; sRun(); setTimeout(()=>$('srchQ').focus(),0); }
+function sClose(){ $('srch').classList.remove('show'); }
+function sGo(i){ const it=sHits[i]; if(!it) return; sClose(); it.go(); }
+$('srchOpen').addEventListener('click',sOpen);
+$('srchClose').addEventListener('click',sClose);
+$('srch').addEventListener('click',e=>{ if(e.target.id==='srch') sClose(); });
+let sT=null; $('srchQ').addEventListener('input',()=>{ clearTimeout(sT); sOpenGrp={}; sT=setTimeout(sRun,90); });
+$('srchQ').addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'){ e.preventDefault(); sCur=Math.min(sHits.length-1,sCur+1); sHi(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); sCur=Math.max(0,sCur-1); sHi(); }
+  else if(e.key==='Enter'){ e.preventDefault(); sGo(sCur); }
+});
+$('srchRes').addEventListener('click',e=>{
+  const s=e.target.closest('[data-sugg]'); if(s){ $('srchQ').value=s.dataset.sugg; sRun(); $('srchQ').focus(); return; }
+  const m=e.target.closest('[data-more]'); if(m){ sOpenGrp[m.dataset.more]=true; sRun(); return; }
+  const b=e.target.closest('.hit'); if(b) sGo(+b.dataset.i);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && $('srch').classList.contains('show')) { sClose(); return; }
+  const tag=(document.activeElement&&document.activeElement.tagName)||'';
+  if((e.key==='/' || ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k')) && !/INPUT|TEXTAREA|SELECT/.test(tag)){ e.preventDefault(); sOpen(); }
+});
 
 </script>
 </body>

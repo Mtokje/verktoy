@@ -8,84 +8,90 @@
 <meta name="description" content="Skjema for skoler som ønsker utplassering av elever ved Aker Solutions, Stord Yard.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Del C – forespørselsskjema. Samme visuelle språk som admin-oversikten (del B):
-   himmelblått toppfelt, blekk #10223a, oransje kun for advarsler; Outfit + Inter. Mobil først. */
-:root{color-scheme:light;--bg:#f4f7fa;--card:#fff;--ink:#10223a;--mut:#5a6a7e;--line:#dbe3ec;--sky:#4fb3e8;--skyink:#0b2238;--or:#ff7a1a;--orbg:#fff0e3;--orink:#9a3d00;--soft:#eef3f8;--ok:#157a43;--okbg:#e6f5ec;--err:#c62f34}
+/* Del C – forespørselsskjema. Designprofil «A · Himmel» (Aker-profil, Stord Academy foran), se prosjektdokumentet
+   «Designprofil utplassering». Marineblå tekst, himmelblått toppfelt, lyseblå flate, oransje bare som merke.
+   Newsreader (Stord Academy og tall) + Schibsted Grotesk (alt annet). Mobil først. */
+:root{color-scheme:light;--bg:#ECF9FF;--card:#FFFFFF;--ink:#081E32;--mut:#4A5A68;--line:#081E32;--line2:#B9CCDA;--sky:#A9E0FF;--sky2:#D8F0FA;--skyink:#081E32;--or:#FF9900;--orbg:#FFF1DC;--orink:#6B3B00;--soft:#D8F0FA;--ok:#0F6B3A;--okbg:#E2F3E8;--err:#B3261E;--r:3px;--serif:Newsreader,Georgia,"Times New Roman",serif;--sans:"Schibsted Grotesk",Arial,"Helvetica Neue",sans-serif}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
-h1,h2,h3{font-family:Outfit,Inter,sans-serif;font-weight:600;line-height:1.15;margin:0;text-wrap:balance}
-h1{font-size:clamp(24px,6vw,32px)}h2{font-size:19px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans)}
+h1,h2,h3{font-family:var(--sans);font-weight:500;line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(20px,5vw,24px)}h2{font-size:19px}
 button,input,textarea{font:inherit;color:inherit}
 .top{background:var(--sky);color:var(--skyink)}
-.top-in{max-width:640px;margin:0 auto;padding:18px 16px 20px}
-.top small{display:block;font-size:13px;opacity:.85;margin-bottom:4px}
-.top p{margin:8px 0 0;font-size:15px}
-.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;padding:1px 7px;border-radius:6px;background:#ffe08a;color:#5a4300;vertical-align:middle;margin-left:6px}
-main{max-width:640px;margin:0 auto;padding:16px 16px 48px}
-.privacy{display:flex;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:14px}
-.privacy svg{flex:none;width:20px;height:20px;margin-top:1px;color:var(--sky)}
-.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
-.sec>h2{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font:600 14px Inter,sans-serif;flex:none}
-.q{margin:0 0 16px;border:0;padding:0}
+.top-in{max-width:640px;margin:0 auto;padding:22px 16px 24px}
+.endorse{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;letter-spacing:.02em}
+.endorse i{width:9px;height:9px;background:var(--or);flex:none}
+.brand{font:300 clamp(40px,11vw,52px)/1 var(--serif);letter-spacing:-.01em;margin:18px 0 14px}
+.top p{margin:6px 0 0;font-size:15px}
+.tag{display:inline-block;margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.04em;padding:1px 6px;border:1px solid var(--ink);border-radius:0}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+.privacy{display:flex;gap:10px;background:var(--card);padding:12px 14px;font-size:14px;margin-bottom:22px}
+.privacy svg{flex:none;width:20px;height:20px;margin-top:1px;color:var(--ink)}
+.sec{border-top:1px solid var(--line);padding:14px 0 6px;margin-bottom:22px}
+.sec>h2{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.num{font:300 30px/1 var(--serif);flex:none;min-width:34px}
+.q{margin:0 0 18px;border:0;padding:0}
 .q:last-child{margin-bottom:0}
-.q>legend,.q>.lbl{display:block;font-weight:600;font-size:15px;margin:0 0 6px;padding:0}
+.q>legend,.q>.lbl{display:block;font-weight:600;font-size:14px;margin:0 0 8px;padding:0}
 .opt{font-weight:400;color:var(--mut);font-size:13px}
 .hint{font-size:13px;color:var(--mut);margin:4px 0 0}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{position:relative}
 .chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
-.chip span{display:flex;align-items:center;min-height:44px;padding:8px 14px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);font-size:15px;cursor:pointer;user-select:none}
+.chip span{display:flex;align-items:center;min-height:44px;padding:8px 15px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);font-size:15px;cursor:pointer;user-select:none}
 .chip input:checked+span{background:var(--ink);border-color:var(--ink);color:#fff}
-.chip input:focus-visible+span{outline:3px solid var(--or);outline-offset:2px}
+.chip input:focus-visible+span{outline:2px solid var(--ink);outline-offset:3px}
 .chips.fag .chip span{font-size:14px;min-height:40px;padding:6px 12px}
 .chips.fag .chip input:checked+span::before{content:"✓";margin-right:6px;font-weight:700}
 .cards{display:grid;gap:10px;grid-template-columns:1fr 1fr}
 .tcard{position:relative}
 .tcard input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
-.tcard>span{display:block;height:100%;border:2px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:var(--card)}
-.tcard b{display:block;font:600 16px Outfit,Inter,sans-serif;margin-bottom:4px}
+.tcard>span{display:block;height:100%;border:1px solid var(--line);border-radius:var(--r);padding:12px;cursor:pointer;background:var(--card)}
+.tcard b{display:block;font:600 16px var(--sans);margin-bottom:4px}
 .tcard small{display:block;font-size:13px;color:var(--mut);line-height:1.35}
-.tcard input:checked+span{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset;background:var(--soft)}
-.tcard input:focus-visible+span{outline:3px solid var(--or);outline-offset:2px}
-input[type=text],input[type=email],input[type=tel],input[type=date],textarea{width:100%;min-height:48px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);font-size:16px}
+.tcard input:checked+span{box-shadow:0 0 0 2px var(--ink) inset;background:var(--sky2)}
+.tcard input:focus-visible+span{outline:2px solid var(--ink);outline-offset:3px}
+input[type=text],input[type=email],input[type=tel],input[type=date],textarea{width:100%;min-height:48px;padding:10px 12px;border-radius:var(--r);border:1px solid var(--line);background:var(--card);font-size:16px}
 textarea{min-height:96px;line-height:1.45;resize:vertical}
-input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .two{display:grid;gap:10px;grid-template-columns:1fr 1fr}
-.fld{display:flex;flex-direction:column;gap:4px}
-.fld>span{font-size:14px;font-weight:500}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld>span{font-size:14px;font-weight:600}
 .mt{margin-top:10px}
-.stepper{display:flex;align-items:center;gap:8px}
-.stepper button{width:48px;height:48px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);font-size:22px;font-weight:600;cursor:pointer;line-height:1}
-.stepper input{width:80px;text-align:center;font-size:20px;font-weight:600}
+.stepper{display:flex;align-items:center}
+.stepper button{width:48px;height:48px;border-radius:var(--r) 0 0 var(--r);border:1px solid var(--line);background:var(--card);font-size:22px;font-weight:500;cursor:pointer;line-height:1}
+.stepper button:last-child{border-radius:0 var(--r) var(--r) 0}
+.stepper input{width:72px;height:48px;min-height:48px;padding:0 6px;text-align:center;font-size:20px;font-weight:600;border-radius:0!important;border-left:0!important;border-right:0!important}
 .weeks{font-size:14px;color:var(--mut);margin-top:6px;min-height:21px}
-.warn{background:var(--orbg);color:var(--orink);border-left:4px solid var(--or);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.warn{background:var(--orbg);color:var(--orink);border:1px solid var(--or);border-radius:var(--r);padding:10px 12px;font-size:14px;margin-top:10px}
 .warn b{display:block;margin-bottom:2px}
-.confirm{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:var(--card)}
-.confirm input{width:24px;height:24px;flex:none;margin:1px 0 0;accent-color:#10223a}
-.confirm:has(input:checked){border-color:var(--ink);background:var(--soft)}
+.confirm{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--r);padding:12px;cursor:pointer;background:var(--card)}
+.confirm input{width:24px;height:24px;flex:none;margin:1px 0 0;accent-color:#081E32}
+.confirm:has(input:checked){background:var(--sky2);box-shadow:0 0 0 1px var(--ink) inset}
 .err-msg{color:var(--err);font-size:13px;font-weight:600;margin-top:6px}
-.bad>.chips .chip span,.bad input[type=text],.bad input[type=email],.bad input[type=date],.bad .tcard>span,.bad .confirm,.bad.confirm{border-color:var(--err)}
-.errbox{background:#fdecec;color:#8a1c20;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:15px}
+.bad>.chips .chip span,.bad input[type=text],.bad input[type=email],.bad input[type=date],.bad .tcard>span,.bad .confirm,.bad.confirm{border-color:var(--err);box-shadow:0 0 0 1px var(--err) inset}
+.errbox{background:#FCE9E7;color:#7A1A14;border:1px solid var(--err);border-radius:var(--r);padding:12px 14px;margin-bottom:18px;font-size:15px}
 .errbox ul{margin:6px 0 0;padding-left:20px}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;padding:12px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);font-weight:600;font-size:16px;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;padding:12px 18px;border-radius:var(--r);border:1px solid var(--line);background:var(--card);font-weight:500;font-size:16px;cursor:pointer;text-decoration:none;color:var(--ink)}
 .btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
-.btn.ghost{border-color:transparent;background:transparent;color:var(--mut);font-weight:500;min-height:44px}
+.btn.pri:hover{background:#163A5A}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink);font-weight:500;min-height:44px;text-decoration:underline;text-underline-offset:3px}
 .stack{display:grid;gap:10px}
-.sum{margin:0;display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:15px}
+.sum{margin:0;display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:15px;background:var(--card);padding:12px 14px}
 .sum dt{color:var(--mut)}.sum dd{margin:0;overflow-wrap:anywhere}
 .steps{margin:0;padding:0;list-style:none;counter-reset:s}
-.steps li{position:relative;padding:0 0 14px 40px;counter-increment:s}
-.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:600;font-size:14px}
+.steps li{position:relative;padding:0 0 14px 42px;counter-increment:s}
+.steps li::before{content:counter(s);position:absolute;left:0;top:-4px;font:300 26px/1 var(--serif)}
 .steps li b{display:block}
-.ok{display:flex;gap:12px;align-items:center;background:var(--okbg);color:var(--ok);border-radius:14px;padding:14px 16px;margin-bottom:14px}
-.ok svg{flex:none;width:32px;height:32px}
-.ok h1{font-size:22px;color:var(--ok)}
-.ref{font:600 15px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--soft);padding:2px 8px;border-radius:6px}
+.ok{display:flex;gap:12px;align-items:center;background:var(--card);color:var(--ink);border-top:3px solid var(--ok);padding:14px 16px;margin-bottom:22px}
+.ok svg{flex:none;width:32px;height:32px;color:var(--ok)}
+.ok h1{font-size:22px}
+.ref{font:600 15px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--sky2);padding:2px 8px}
 .mailto{font-size:14px;color:var(--mut);margin:0}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+a{color:var(--ink);text-underline-offset:3px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:var(--r);font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
 #toast.on{opacity:1}
 footer{max-width:640px;margin:0 auto;padding:0 16px 32px;font-size:13px;color:var(--mut)}
 footer a{color:inherit}
@@ -96,8 +102,9 @@ footer a{color:inherit}
 </head>
 <body>
 <header class="top"><div class="top-in">
-  <small>Aker Solutions, Stord Yard · Stord Academy</small>
-  <h1>Forespørsel om utplassering <span class="tag">TESTVERSJON</span></h1>
+  <div class="endorse"><i aria-hidden="true"></i><span>Aker Solutions · Stord Yard</span><span class="tag">TESTVERSJON</span></div>
+  <div class="brand">Stord Academy</div>
+  <h1>Forespørsel om utplassering</h1>
   <p>For skoler som ønsker å sende elever på utplassering. Tar ca. 3 minutter.</p>
 </div></header>
 
@@ -113,7 +120,7 @@ footer a{color:inherit}
   <div id="listeFeil" class="errbox" role="alert" hidden><b>Listene over skoler og fag kunne ikke lastes.</b> Last siden på nytt. Hjelper ikke det, kan du velge «Annen skole» og skrive inn skole og linje selv.</div>
 
   <section class="sec">
-    <h2><span class="num">1</span>Skole og klasse</h2>
+    <h2><span class="num">01</span>Skole og klasse</h2>
     <fieldset class="q" id="q-skole">
       <legend>Skole</legend>
       <div class="chips" id="skoler"></div>
@@ -136,7 +143,7 @@ footer a{color:inherit}
   </section>
 
   <section class="sec">
-    <h2><span class="num">2</span>Når og hvordan</h2>
+    <h2><span class="num">02</span>Når og hvordan</h2>
     <fieldset class="q" id="q-periode">
       <legend>Periode</legend>
       <div class="chips" style="margin-bottom:10px">
@@ -182,13 +189,13 @@ footer a{color:inherit}
   </section>
 
   <section class="sec">
-    <h2><span class="num">3</span>Fag av interesse <span class="opt">(valgfritt)</span></h2>
+    <h2><span class="num">03</span>Fag av interesse <span class="opt">(valgfritt)</span></h2>
     <p class="hint" style="margin:-6px 0 10px">Velg gjerne flere. La stå tomt hvis dere ikke vet ennå.</p>
     <div class="chips fag" id="fag"></div>
   </section>
 
   <section class="sec">
-    <h2><span class="num">4</span>Kontaktperson på skolen</h2>
+    <h2><span class="num">04</span>Kontaktperson på skolen</h2>
     <div class="q" id="q-knavn"><label class="fld"><span>Navn</span><input type="text" id="knavn" autocomplete="name"></label></div>
     <div class="two">
       <div class="q" id="q-kepost"><label class="fld"><span>E-post</span><input type="email" id="kepost" autocomplete="email" inputmode="email"></label></div>
@@ -197,7 +204,7 @@ footer a{color:inherit}
   </section>
 
   <section class="sec">
-    <h2><span class="num">5</span>Bekreft og send</h2>
+    <h2><span class="num">05</span>Bekreft og send</h2>
     <div class="q" id="q-motivert">
       <label class="confirm"><input type="checkbox" id="motivert"><span>Lærer bekrefter å ha snakket med elevene, og at de er motivert for utplassering ved Aker Solutions, Stord Yard</span></label>
     </div>

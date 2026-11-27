@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Utplassering – Aker Solutions, Stord Yard</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="Startside for utplasseringssystemet ved Aker Solutions, Stord Yard – Stord Academy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Utplassering – startside. Designprofil «A · Himmel» (prosjektdokumentet «Designprofil utplassering»). */
+:root{color-scheme:light;--bg:#ECF9FF;--card:#FFFFFF;--ink:#081E32;--mut:#4A5A68;--line:#081E32;--line2:#B9CCDA;--sky:#A9E0FF;--sky2:#D8F0FA;--or:#FF9900;--r:3px;--serif:Newsreader,Georgia,"Times New Roman",serif;--sans:"Schibsted Grotesk",Arial,"Helvetica Neue",sans-serif}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans)}
+h1,h2,h3{font-family:var(--sans);font-weight:500;line-height:1.2;margin:0}
+a{color:var(--ink);text-underline-offset:3px}
+.top{background:var(--sky);color:var(--ink)}
+.top-in{max-width:880px;margin:0 auto;padding:22px 18px 24px}
+.endorse{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;letter-spacing:.02em}
+.endorse i{width:9px;height:9px;background:var(--or);flex:none}
+.tag{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.04em;padding:1px 6px;border:1px solid var(--ink)}
+.brand{font:300 clamp(40px,11vw,56px)/1 var(--serif);letter-spacing:-.01em;margin:18px 0 12px}
+.top h1{font-size:clamp(19px,4.5vw,24px);font-weight:500}
+.top p{margin:6px 0 0;font-size:15px;max-width:60ch}
+main{max-width:880px;margin:0 auto;padding:24px 18px 48px}
+.sec{border-top:1px solid var(--line);padding-top:14px;margin-bottom:28px}
+.sec>h2{display:flex;align-items:baseline;gap:12px;font-size:18px;margin-bottom:4px}
+.sec>h2 .n{font:300 26px/1 var(--serif)}
+.sec>.lead{color:var(--mut);font-size:14px;margin:0 0 16px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr))}
+.card{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);background:var(--card);border-top:3px solid var(--ink);padding:16px 16px 18px;min-height:120px}
+.card:hover{background:var(--sky2)}
+.card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.card .who{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
+.card .t{font:500 18px/1.2 var(--sans)}
+.card .d{font-size:14px;color:var(--mut);line-height:1.4}
+.card .go{margin-top:auto;font-size:14px;font-weight:600;color:var(--ink)}
+.card .go::after{content:" →"}
+.card.ext .who::after{content:" · Claude-artefakt";font-weight:500;text-transform:none;letter-spacing:0}
+.note{background:var(--card);padding:12px 14px;font-size:14px;color:var(--mut);margin-bottom:28px}
+.note b{color:var(--ink);font-weight:600}
+footer{max-width:880px;margin:0 auto;padding:0 18px 36px;font-size:13px;color:var(--mut)}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="endorse"><i aria-hidden="true"></i><span>Aker Solutions · Stord Yard</span><span class="tag">TESTVERSJON</span></div>
+  <div class="brand">Stord Academy</div>
+  <h1>Utplassering</h1>
+  <p>Startside for utplasseringssystemet. Her finner du alle delene – fra skolens forespørsel til tilbakemeldingen etter oppholdet.</p>
+</div></header>
+
+<main>
+  <p class="note"><b>Dette er en testversjon.</b> Delene henger sammen, men settes i full drift først når alt er prøvd ut. Har du en direktelenke til en av delene, virker den uten denne siden.</p>
+
+  <section class="sec">
+    <h2><span class="n">01</span>For skolen</h2>
+    <p class="lead">Skolen starter her når de vil sende elever på utplassering.</p>
+    <div class="grid">
+      <a class="card" href="./">
+        <span class="who">Skolen</span>
+        <span class="t">Forespørselsskjema</span>
+        <span class="d">Kort skjema der skolen oppgir antall elever, linje, periode og fag. Sendes som ferdig e-post til Stord Academy.</span>
+        <span class="go">Åpne skjemaet</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2><span class="n">02</span>Administrasjon</h2>
+    <p class="lead">Stord Academy håndterer forespørsler, avdelinger og kalender her.</p>
+    <div class="grid">
+      <a class="card ext" href="https://claude.ai/artifact/6vVyXiZpntzz1R3wbDVuin">
+        <span class="who">Stord Academy</span>
+        <span class="t">Admin-oversikt</span>
+        <span class="d">Forespørsler, statusflyt, kalender, avdelingsregister og e-postmaler. Lager også infopakken.</span>
+        <span class="go">Åpne admin</span>
+      </a>
+      <a class="card" href="admin-lokal.html">
+        <span class="who">Stord Academy</span>
+        <span class="t">Admin – lokal reserve</span>
+        <span class="d">Samme oversikt uten innlogging. Tom til du importerer en sikkerhetskopi. Data lagres bare i denne nettleseren.</span>
+        <span class="go">Åpne reserven</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2><span class="n">03</span>Når eleven kommer</h2>
+    <p class="lead">Infopakken lages normalt fra «Lag infopakke» i admin. Tilbakemeldingen åpnes fra QR-koden på elevens ark.</p>
+    <div class="grid">
+      <a class="card" href="infopakke/">
+        <span class="who">Stord Academy</span>
+        <span class="t">Infopakke til elev</span>
+        <span class="d">Lager A4-ark med oppmøte, kontaktperson, avdeling, forventninger og QR-koder. Åpnes vanligvis fra admin.</span>
+        <span class="go">Åpne infopakken</span>
+      </a>
+      <a class="card" href="tilbakemelding/">
+        <span class="who">Kontaktpersonen</span>
+        <span class="t">Tilbakemelding om elev</span>
+        <span class="d">Fylles ut av kontaktpersonen siste dag. Åpnes via QR-koden på arket, der elevens navn er forhåndsutfylt.</span>
+        <span class="go">Åpne skjemaet</span>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>Stord Academy, Aker Solutions Stord Yard · <a href="../">Tilbake til Verktøykassen</a></footer>
+</body>
+</html>

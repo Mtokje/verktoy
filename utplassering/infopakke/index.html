@@ -9,9 +9,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="../lister.js"></script>
 <style>
-/* Del D – infopakke-generator for Grace. Samme visuelle språk som del B/C.
-   Elevnavn finnes bare i minnet mens siden er åpen, i arket og i QR-lenken. Ingenting med elevnavn lagres. */
+/* Del D – infopakke. Grunnlagsdokumentet v1.0.
+   Data kommer i lenken fra admin («Lag infopakke», #p=). Siden lagrer ingenting.
+   Elevnavn finnes bare i minnet mens siden er åpen, på arket og i QR-lenken til del E. */
 :root{color-scheme:light;--bg:#f4f7fa;--card:#fff;--ink:#10223a;--mut:#5a6a7e;--line:#dbe3ec;--sky:#4fb3e8;--skyink:#0b2238;--or:#ff7a1a;--orbg:#fff0e3;--orink:#9a3d00;--soft:#eef3f8;--ok:#157a43;--okbg:#e6f5ec;--err:#c62f34;--errbg:#fdecec}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -19,12 +21,9 @@ h1,h2,h3{font-family:Outfit,Inter,sans-serif;font-weight:600;line-height:1.15;ma
 h1{font-size:24px}h2{font-size:18px}h3{font-size:15px}
 button,input,textarea,select{font:inherit;color:inherit}
 .top{background:var(--sky);color:var(--skyink)}
-.top-in{max-width:1400px;margin:0 auto;padding:14px 18px 0;display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 24px}
+.top-in{max-width:1400px;margin:0 auto;padding:14px 18px}
 .top small{display:block;font-size:13px;opacity:.85}
 .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;padding:1px 7px;border-radius:6px;background:#ffe08a;color:#5a4300;vertical-align:middle;margin-left:6px}
-.tabs{display:flex;gap:4px;margin-left:auto}
-.tabs button{border:0;background:transparent;padding:10px 14px;border-radius:10px 10px 0 0;font-weight:600;cursor:pointer;color:var(--skyink)}
-.tabs button[aria-selected=true]{background:var(--bg)}
 .wrap{max-width:1400px;margin:0 auto;padding:16px 18px 48px}
 .cols{display:grid;grid-template-columns:minmax(340px,480px) 1fr;gap:18px;align-items:start}
 .sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px}
@@ -36,54 +35,51 @@ button,input,textarea,select{font:inherit;color:inherit}
 .fld>span{font-size:13px;font-weight:600}
 .opt{font-weight:400;color:var(--mut);font-size:12px}
 .hint{font-size:13px;color:var(--mut);margin:2px 0 8px}
-input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=url],select,textarea{width:100%;min-height:42px;padding:8px 10px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);font-size:15px}
-textarea{min-height:80px;line-height:1.4;resize:vertical}
-input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=url],input[type=number],select,textarea{width:100%;min-height:42px;padding:8px 10px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);font-size:15px}
+textarea{min-height:110px;line-height:1.4;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--or);outline-offset:2px}
 input.miss,select.miss{border-color:var(--err);background:var(--errbg)}
 .two{display:grid;gap:10px;grid-template-columns:1fr 1fr}
-.three{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:8px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;color:var(--ink)}
 .btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
 .btn.sm{min-height:34px;padding:4px 10px;font-size:13px}
 .btn.dan{color:var(--err)}
 .btn.ghost{border-color:transparent;background:transparent;color:var(--mut)}
-.btn.wide{width:100%}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sum dl{margin:0;display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:14px}
+.sum dt{color:var(--mut)}.sum dd{margin:0;overflow-wrap:anywhere}
+.avdl{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
+.avdl li{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px;background:#fbfcfe}
+.avdl b{font-weight:600}
+.avdl .m{font-size:12.5px;color:var(--mut)}
+.mtag{display:inline-block;background:var(--errbg);color:var(--err);border:1px solid var(--err);border-radius:6px;padding:0 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.cnt{display:inline-block;min-width:44px;text-align:center;font-weight:700;border-radius:999px;padding:0 8px;font-size:12.5px;background:var(--soft)}
+.cnt.over{background:var(--orbg);color:var(--orink)}
+.cnt.ok{background:var(--okbg);color:var(--ok)}
 .elev{border:1.5px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;background:#fbfcfe}
 .elev-h{display:grid;grid-template-columns:28px 1fr 1.3fr auto;gap:8px;align-items:center}
 .elev-h .nr{font-weight:700;color:var(--mut);text-align:center}
 .elev details{margin-top:6px}
-.elev summary{cursor:pointer;font-size:13px;color:var(--mut)}
+.elev summary,.sec summary{cursor:pointer;font-size:13px;color:var(--mut)}
 .elev .more{padding-top:8px}
 .from{font-size:12px;color:var(--mut)}
+.mavd{border:1.5px dashed var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
 .missbox{background:var(--errbg);color:#8a1c20;border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:14px}
 .missbox ul{margin:4px 0 0;padding-left:20px}
 .okbox{background:var(--okbg);color:var(--ok);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:14px;font-weight:600}
-.warn{background:var(--orbg);color:var(--orink);border-left:4px solid var(--or);border-radius:10px;padding:8px 12px;font-size:13px;margin:6px 0 10px}
+.warn{background:var(--orbg);color:var(--orink);border-left:4px solid var(--or);border-radius:10px;padding:8px 12px;font-size:13.5px;margin:0 0 12px}
+.errbox{background:var(--errbg);color:#8a1c20;border-radius:12px;padding:10px 14px;font-size:14px;margin-bottom:14px}
 .prevbar{position:sticky;top:0;z-index:3;background:var(--bg);padding:6px 0 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .prevbar h2{margin-right:auto}
 .arkwrap{margin:0 auto 22px;width:fit-content;box-shadow:0 2px 14px rgba(16,34,58,.14);background:#fff}
 .arkbar{display:flex;gap:8px;justify-content:center;margin:-12px 0 26px}
 .empty{color:var(--mut);text-align:center;padding:40px 10px;border:2px dashed var(--line);border-radius:14px}
-table.reg{width:100%;border-collapse:collapse;font-size:14px}
-table.reg th{text-align:left;font-size:12px;color:var(--mut);font-weight:600;padding:4px 6px;border-bottom:1px solid var(--line)}
-table.reg td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
-table.reg td:first-child{font-weight:600;width:24%}
-table.reg input{min-height:36px;font-size:14px;padding:5px 8px}
-table.reg tr.sub td:first-child{padding-left:20px;font-weight:500}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{position:relative}
-.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
-.chip span{display:flex;align-items:center;min-height:40px;padding:6px 14px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);font-size:14px;cursor:pointer}
-.chip input:checked+span{background:var(--ink);border-color:var(--ink);color:#fff}
-.chip input:focus-visible+span{outline:3px solid var(--or);outline-offset:2px}
-pre.mail{white-space:pre-wrap;font:13px/1.45 Inter,sans-serif;background:var(--soft);border-radius:10px;padding:10px 12px;margin:6px 0;overflow-wrap:anywhere}
 code{font-size:13px;background:var(--soft);padding:1px 5px;border-radius:5px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
 #toast.on{opacity:1}
 [hidden]{display:none!important}
 @media(max-width:900px){.cols{grid-template-columns:1fr}.prevbar{position:static}}
-@media(max-width:480px){.two,.three{grid-template-columns:1fr}.elev-h{grid-template-columns:24px 1fr auto}.elev-h select{grid-column:2/4}.tabs{margin-left:0}}
+@media(max-width:480px){.two{grid-template-columns:1fr}.elev-h{grid-template-columns:24px 1fr auto}.elev-h select{grid-column:2/4}.sum dl{grid-template-columns:1fr;gap:0}.sum dt{margin-top:6px}}
 
 /* ================= ARKET (A4) ================= */
 .ark{width:210mm;height:297mm;padding:9mm 11mm 7mm;display:flex;flex-direction:column;gap:3mm;background:#fff;color:#10223a;font:9.6pt/1.38 Inter,system-ui,sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -135,38 +131,50 @@ code{font-size:13px;background:var(--soft);padding:1px 5px;border-radius:5px}
  #innst{display:none!important}
 }
 </style>
+
 </head>
 <body>
 <header class="top"><div class="top-in">
-  <div style="padding-bottom:12px"><small>Stord Academy · Utplassering</small>
-  <h1>Infopakke til elever <span class="tag">TESTVERSJON</span></h1></div>
-  <div class="tabs" role="tablist">
-    <button role="tab" aria-selected="true" data-tab="lag">Lag infopakke</button>
-    <button role="tab" aria-selected="false" data-tab="innst">Innstillinger og register</button>
-  </div>
+  <small>Stord Academy · Utplassering</small>
+  <h1>Infopakke til elever <span class="tag">TESTVERSJON</span></h1>
 </div></header>
 
 <div class="wrap">
-<!-- ===================== LAG INFOPAKKE ===================== -->
-<div id="lag" class="cols">
+<div class="cols">
  <div class="ui">
   <div class="privacy" role="note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-    <span><b>Elevnavn lagres ikke.</b> De finnes bare på arket og i QR-koden. Lukker du siden, er navnene borte. Lag PDF eller skriv ut før du lukker.</span>
+    <span><b>Siden lagrer ingenting.</b> Elevnavn finnes bare på arket og i QR-koden. Lukker du siden, er navnene borte. Lag PDF eller skriv ut før du lukker.</span>
   </div>
+  <div id="lenkeFeil" class="errbox" role="alert" hidden></div>
 
-  <section class="sec">
+  <!-- ====== Med lenke fra admin ====== -->
+  <section class="sec sum" id="fraAdmin" hidden>
+    <h2><span class="num">1</span>Forespørsel fra admin</h2>
+    <dl id="sumDl"></dl>
+    <details style="margin-top:10px"><summary>Endre første dag eller oppmøtetid for alle ark</summary>
+      <div class="two" style="margin-top:8px">
+        <label class="fld"><span>Første dag</span><input type="date" data-r="dag1"></label>
+        <label class="fld"><span>Oppmøtetid</span><input type="time" data-r="tid"></label>
+      </div></details>
+    <h3 style="margin:12px 0 0">Avdelinger som har sagt ja</h3>
+    <ul class="avdl" id="avdListe"></ul>
+    <p class="hint" style="margin-top:8px">Er noe feil eller mangler, rett det i admin og trykk «Lag infopakke» på nytt.</p>
+  </section>
+
+  <!-- ====== Uten lenke: for hånd ====== -->
+  <div id="forHand" hidden>
+   <div class="warn"><b>Siden ble åpnet uten lenke fra admin.</b> Den vanlige veien er «Lag infopakke» på forespørselen i admin. Her kan du fylle ut for hånd. Ingenting lagres.</div>
+   <section class="sec">
     <h2><span class="num">1</span>Forespørsel</h2>
-    <label class="fld" id="velgReqWrap"><span>Velg fra admin <span class="opt">(etter import under Innstillinger)</span></span>
-      <select id="velgReq"></select></label>
     <div class="two">
       <label class="fld"><span>Forespørsels-ID</span><input type="text" data-r="id" placeholder="U-2026-001" autocomplete="off"></label>
       <label class="fld"><span>Skole</span><select data-r="skoleId"></select></label>
     </div>
-    <label class="fld" id="annenSkoleWrap" hidden><span>Navn på skolen</span><input type="text" data-r="skoleNavn" autocomplete="off"></label>
+    <label class="fld" id="annenSkoleWrap" hidden><span>Navn på skolen</span><input type="text" data-r="skoleFri" autocomplete="off"></label>
     <div class="two">
-      <label class="fld"><span>Trinn</span><select data-r="trinn"></select></label>
-      <label class="fld"><span>Linje</span><select data-r="linjeSel"></select></label>
+      <label class="fld"><span>Trinn</span><select data-r="trinn"><option>Vg1</option><option>Vg2</option><option>Vg3</option></select></label>
+      <label class="fld" id="linjeSelWrap"><span>Linje</span><select data-r="linjeSel"></select></label>
     </div>
     <label class="fld" id="linjeFriWrap" hidden><span>Linje</span><input type="text" data-r="linjeFri" autocomplete="off"></label>
     <div class="two">
@@ -174,36 +182,41 @@ code{font-size:13px;background:var(--soft);padding:1px 5px;border-radius:5px}
       <label class="fld"><span>Periode til</span><input type="date" data-r="til"></label>
     </div>
     <div class="two">
-      <label class="fld"><span>Oppmøte første dag</span><input type="date" data-r="dag1"></label>
+      <label class="fld"><span>Første dag</span><input type="date" data-r="dag1"></label>
       <label class="fld"><span>Oppmøtetid</span><input type="time" data-r="tid"></label>
     </div>
-    <p class="hint" style="margin-top:-4px">Første dag settes lik fra-datoen. Oppmøtetid hentes fra Innstillinger hvis den er lagt inn der.</p>
-    <h3 style="margin:6px 0 6px">Lærer på skolen</h3>
-    <label class="fld"><span>Navn</span><input type="text" data-r="lNavn" autocomplete="off"></label>
+    <h3 style="margin:6px 0">Lærer på skolen</h3>
+    <label class="fld"><span>Navn</span><input type="text" data-l="navn" autocomplete="off"></label>
     <div class="two">
-      <label class="fld"><span>Telefon</span><input type="tel" data-r="lTlf" autocomplete="off"></label>
-      <label class="fld"><span>E-post <span class="opt">(tilbakemeldingen sendes hit)</span></span><input type="email" data-r="lEpost" autocomplete="off"></label>
+      <label class="fld"><span>Telefon</span><input type="tel" data-l="tlf" autocomplete="off"></label>
+      <label class="fld"><span>E-post</span><input type="email" data-l="epost" autocomplete="off"></label>
     </div>
-  </section>
+   </section>
+   <section class="sec">
+    <h2>Avdelinger</h2>
+    <div id="mAvd"></div>
+    <button type="button" class="btn sm" id="nyAvd">+ Legg til avdeling</button>
+   </section>
+   <section class="sec">
+    <h2>Oppmøte og elevens tilbakemelding</h2>
+    <label class="fld"><span>Oppmøtested – Ankomstsenteret</span><input type="text" data-f="sted" autocomplete="off"></label>
+    <div class="two">
+      <label class="fld"><span>Eleven ringer hvis ingen møter</span><input type="text" data-f="ringNavn" autocomplete="off"></label>
+      <label class="fld"><span>Telefon</span><input type="tel" data-f="ringTlf" autocomplete="off"></label>
+    </div>
+    <label class="fld"><span>Forms-lenke til del F <span class="opt">(med plassholderne {ID} {AVDELING} {SKOLE} {LINJE} {PERIODE})</span></span><input type="url" id="formsFri" autocomplete="off"></label>
+   </section>
+  </div>
 
   <section class="sec">
-    <h2><span class="num">2</span>Elever</h2>
-    <div id="elever"></div>
-    <div class="row">
-      <button type="button" class="btn" id="leggTil">+ Legg til elev</button>
-      <button type="button" class="btn ghost" id="visFlere">Lim inn flere navn</button>
-    </div>
-    <div id="flereWrap" hidden style="margin-top:10px">
-      <label class="fld"><span>Ett navn per linje <span class="opt">(får første avdeling som har sagt ja, kan endres etterpå)</span></span>
-      <textarea id="flere" autocomplete="off" spellcheck="false"></textarea></label>
+    <h2><span class="num" id="elevNum">2</span>Elever</h2>
+    <p class="hint">Skriv navnene fra personalskjemaet. Elevene fordeles på avdelingene etter antall, og du kan bytte avdeling.</p>
+    <label class="fld"><span>Lim inn navn, ett per linje</span><textarea id="flere" autocomplete="off" spellcheck="false" placeholder="Ola Nordmann&#10;Kari Nordmann"></textarea></label>
+    <div class="row" style="margin-bottom:12px">
       <button type="button" class="btn pri" id="leggTilFlere">Legg til navnene</button>
+      <button type="button" class="btn ghost" id="leggTil">+ Én elev</button>
     </div>
-  </section>
-
-  <section class="sec" id="fSkole" hidden>
-    <h2>Elevens tilbakemelding – til skolen</h2>
-    <p class="hint">Skolen gjennomfører elevens tilbakemelding (valgt under Innstillinger). Send lenken til læreren. Lenken har ikke elevnavn, bare avdeling, skole, linje og periode.</p>
-    <div id="fSkoleInnhold"></div>
+    <div id="elever"></div>
   </section>
  </div>
 
@@ -217,60 +230,6 @@ code{font-size:13px;background:var(--soft);padding:1px 5px;border-radius:5px}
   <div id="arkene"></div>
  </div>
 </div>
-
-<!-- ===================== INNSTILLINGER ===================== -->
-<div id="innst" hidden>
- <div class="cols" style="grid-template-columns:minmax(340px,520px) 1fr">
-  <div>
-   <section class="sec">
-     <h2>Oppmøte første dag</h2>
-     <p class="hint">Gjelder alle ark. Lagres på denne maskinen.</p>
-     <label class="fld"><span>Oppmøtested – Ankomstsenteret <span class="opt">(adresse eller veibeskrivelse)</span></span><input type="text" data-c="felles.sted" autocomplete="off"></label>
-     <label class="fld"><span>Standard oppmøtetid</span><input type="time" data-c="felles.tid"></label>
-     <h3 style="margin:6px 0">Hvis ingen møter eleven</h3>
-     <div class="two">
-       <label class="fld"><span>Eleven ringer</span><input type="text" data-c="felles.ringNavn" placeholder="Navn eller funksjon" autocomplete="off"></label>
-       <label class="fld"><span>Telefon</span><input type="tel" data-c="felles.ringTlf" autocomplete="off"></label>
-     </div>
-   </section>
-
-   <section class="sec">
-     <h2>Elevens tilbakemelding (del F)</h2>
-     <fieldset style="border:0;padding:0;margin:0 0 10px"><legend class="fld" style="font-size:13px;font-weight:600;padding:0;margin-bottom:6px">Hvem gjennomfører?</legend>
-     <div class="chips">
-       <label class="chip"><input type="radio" name="fmodus" value="academy"><span>Stord Academy – QR på arket</span></label>
-       <label class="chip"><input type="radio" name="fmodus" value="skole"><span>Skolen – vi sender lenke</span></label>
-     </div></fieldset>
-     <label class="fld"><span>Forhåndsutfylt lenke fra Microsoft Forms</span><input type="url" data-c="f.forms" placeholder="https://forms.office.com/…{ID}…" autocomplete="off"></label>
-     <div id="formsStatus"></div>
-     <p class="hint">Lag lenken i Forms med plassholderne <code>{ID}</code> <code>{AVDELING}</code> <code>{SKOLE}</code> <code>{LINJE}</code> <code>{PERIODE}</code> i de forhåndsutfylte feltene. Se oppskriften i prosjektet.</p>
-     <button type="button" class="btn sm" id="testForms">Test lenken med eksempelverdier</button>
-   </section>
-
-   <section class="sec">
-     <h2>Flytt innstillinger</h2>
-     <p class="hint">Hent registeret fra admin: «Mer» → «Eksporter» i admin, og velg filen her. Elevnavn finnes ikke i eksporten.</p>
-     <label class="fld"><span>Admin-eksport eller innstillingsfil</span><input type="file" id="impFil" accept=".json,application/json"></label>
-     <details><summary style="cursor:pointer;font-size:13px;color:var(--mut)">Eller lim inn teksten</summary>
-       <textarea id="impTxt" style="margin-top:6px"></textarea>
-       <button type="button" class="btn sm" id="impBtn" style="margin-top:6px">Les inn</button></details>
-     <div id="impStatus" class="hint" style="margin-top:8px"></div>
-     <div class="row" style="margin-top:6px">
-       <button type="button" class="btn sm" id="eksBtn">Last ned innstillinger (til en annen PC)</button>
-     </div>
-   </section>
-  </div>
-
-  <div>
-   <section class="sec">
-     <h2>Avdelingsregister</h2>
-     <p class="hint">Kopi av registeret i admin, med feltet «Sted» i tillegg. Endringer her lagres bare på denne maskinen. Tomme felt vises som «mangler» på arket. Hentes på nytt fra admin ved import (stedsfeltet beholdes).</p>
-     <div style="overflow-x:auto"><table class="reg"><thead><tr><th>Avdeling</th><th>Kontaktperson</th><th>Telefon</th><th>Sted / hvordan finne fram</th><th></th></tr></thead><tbody id="regBody"></tbody></table></div>
-     <div class="row" style="margin-top:10px"><input type="text" id="nyttProsjekt" placeholder="Nytt prosjekt (navn)" style="max-width:260px" autocomplete="off"><button type="button" class="btn sm" id="leggProsjekt">+ Legg til prosjekt</button></div>
-   </section>
-  </div>
- </div>
-</div>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 
@@ -280,24 +239,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 </script>
 <script>
 'use strict';
-/* ====== Faste verdier (grunnlagsdokumentet v0.8) ====== */
+/* ====== Faste verdier (grunnlagsdokumentet v1.0) ====== */
 const HMS_GODKJENT=false; // Settes til true når Mats har godkjent HMS-teksten. Fjerner gul merking.
 const ACADEMY='utplassering.stord@akersolutions.com';
 const E_FAST='https://mtokje.github.io/verktoy/utplassering/tilbakemelding/';
-const KEY='utplassering-infopakke-v1';
-const SKOLER=[
- {id:'stord',navn:'Stord vidaregåande skule',kort:'Stord vgs',linjer:{Vg1:["Bygg- og anleggsteknikk","Elektro og datateknologi","Teknologi- og industrifag (TIP)","Salg, service og reiseliv"],Vg2:["Automatisering","Elenergi og ekom","Industriteknologi","Kjøretøy","Tømrer"],Vg3:["Automatiseringsfaget"]}},
- {id:'bomlo',navn:'Bømlo vidaregåande skule',kort:'Bømlo vgs',linjer:{Vg1:["Elektro og datateknologi","Teknologi- og industrifag (TIP)","Naturbruk"],Vg2:["Automatisering","Elenergi og ekom","Industriteknologi"],Vg3:["Automatiseringsfaget"]}}];
-const TRINN=['Vg1','Vg2','Vg3'];
-const REG0=[
- ['plateverksted-3','Plateverksted 3','Nils Anders Nilsen'],['praksisverksted','Praksisverksted (Stord Academy)','Freddy Sporsheim'],
- ['ndt','NDT',''],['demolering','Demolering',''],['provisorisk-elektro','Provisorisk elektro','Daniel Playfoot'],
- ['prosjekt','Prosjekt','',true],['prefab-ror','Prefab rør','Inge Buchvold'],['kaldboying','Kaldbøying',''],['lager','Lager',''],
- ['tools-and-equipment','Tools and Equipment',''],['transport','Transport','Geir Åge'],['stillas','Stillas',''],
- ['overflate-fabrikasjon','Overflate, Fabrikasjon','Eugen Brask'],['isolasjon','Isolasjon (Stord Academy, Isolasjonsfabrikken, prosjekt)','Brian Nielsen'],
- ['cnc-automasjon-robotikk','CNC / Automasjon / Robotikk','']
-].map(([id,navn,kontakt,gruppe])=>({id,navn,kontakt,telefon:'',sted:'',gruppe:!!gruppe,parent:null}));
-const STATUSNAVN={tidlig:'Tidlig estimat',mottatt:'Mottatt',vurdering:'Til vurdering hos Mats',behandling:'Under behandling',reservert:'Reservert',bekreftet:'Bekreftet','ps-mottatt':'Personalskjema mottatt','ps-sendt':'Personalskjema sendt',gjennomfort:'Gjennomført',avslatt:'Avslått',avlyst:'Avlyst av skolen'};
+const LISTER=window.UTPL_LISTER||null;
+const SKOLER=LISTER&&Array.isArray(LISTER.skoler)?LISTER.skoler:[];
 const FORVENTER=[
  ['Møt presis hver dag, på avtalt sted. Blir du syk eller forsinket, ringer du kontaktpersonen din før arbeidstid og gir beskjed til skolen.',0],
  ['Følg alltid beskjeder fra kontaktpersonen og andre som har ansvar for deg.',0],
@@ -316,91 +263,97 @@ const FORVENTE=[
 /* ====== Hjelpere ====== */
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const str=v=>typeof v==='string'?v.trim():(typeof v==='number'?String(v):'');
 const pd=s=>{const[y,m,d]=String(s).split('-').map(Number);return new Date(y,m-1,d)};
 const okDato=s=>/^\d{4}-\d\d-\d\d$/.test(s||'');
 const fy=s=>{if(!okDato(s))return '';const d=pd(s);return d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()};
 const langDato=s=>{if(!okDato(s))return '';const t=pd(s).toLocaleDateString('nb-NO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});return t.charAt(0).toUpperCase()+t.slice(1)};
 const periodeTxt=(f,t)=>okDato(f)&&okDato(t)&&f!==t?fy(f)+'–'+fy(t):fy(f||t);
-const b64url=s=>{const b=new TextEncoder().encode(s);let x='';b.forEach(c=>x+=String.fromCharCode(c));return btoa(x).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const b64url=s=>{const b=new TextEncoder().encode(s);let x='';for(let i=0;i<b.length;i+=8192)x+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(x).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
 let tt;const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2600)};
 const uid=()=>Math.random().toString(36).slice(2,9);
 const M=t=>`<span class="mangler">mangler${t?': '+esc(t):''}</span>`;
 
-/* ====== Innstillinger (lagres lokalt – aldri elevnavn) ====== */
-function nyC(){return{reg:REG0.map(a=>({...a})),felles:{sted:'',tid:'',ringNavn:'',ringTlf:''},f:{modus:'academy',forms:''},req:[],importDato:null}}
-function lastC(){try{const c=JSON.parse(localStorage.getItem(KEY)||'null');if(!c)return nyC();const d=nyC();
- return{reg:Array.isArray(c.reg)&&c.reg.length?c.reg:d.reg,felles:{...d.felles,...c.felles},f:{...d.f,...c.f},req:Array.isArray(c.req)?c.req:[],importDato:c.importDato||null}}catch(e){return nyC()}}
-let C=lastC();
-const lagreC=()=>{try{localStorage.setItem(KEY,JSON.stringify(C))}catch(e){toast('Kunne ikke lagre innstillingene i nettleseren')}};
+/* ====== Les lenken fra admin (#p=) ====== */
+function lesLenke(h){
+ const m=/[#&]p=([A-Za-z0-9_-]+)/.exec(h||'');if(!m)return{ingen:true};
+ try{let b=m[1].replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';
+  const o=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b),c=>c.charCodeAt(0))));
+  if(!o||typeof o!=='object')throw 0;
+  if(o.v!==1)return{feil:`Den er laget med en nyere versjon av admin (versjon ${esc(o.v)}). Last siden på nytt, eller be om at infopakke-siden oppdateres.`};
+  return{data:o}}catch(e){return{feil:'Den kan være avkuttet. Trykk «Lag infopakke» i admin på nytt, eller bruk «Kopier lenke» og lim hele lenken inn i adressefeltet.'}}}
+const L=lesLenke(location.hash);
+const FRA_ADMIN=!!L.data;
 
 /* ====== Arbeidsdata (kun i minnet) ====== */
-let R={reqId:'',id:'',skoleId:'stord',skoleNavn:'',trinn:'Vg1',linjeSel:'',linjeFri:'',fra:'',til:'',dag1:'',tid:C.felles.tid||'',lNavn:'',lTlf:'',lEpost:'',avdJa:[]};
+let R,A,F,FORMS;
+if(FRA_ADMIN){const d=L.data,r=d.r||{},l=r.laerer||{},f=d.f||{};
+ R={id:str(r.id),skole:str(r.skole),kort:str(r.kort),trinn:str(r.trinn),linje:str(r.linje),fra:str(r.fra),til:str(r.til),dag1:str(r.fra),tid:str(f.tid),
+    laerer:{navn:str(l.navn),tlf:str(l.tlf),epost:str(l.epost)}};
+ A=(Array.isArray(d.a)?d.a:[]).map(a=>({key:uid(),navn:str(a.navn),antall:Math.max(0,parseInt(a.antall,10)||0),kontakt:str(a.kontakt),tlf:str(a.tlf),sted:str(a.sted),prosjekt:str(a.prosjekt)}));
+ F={sted:str(f.sted),tid:str(f.tid),ringNavn:str(f.ringNavn),ringTlf:str(f.ringTlf)};FORMS=str(d.forms);
+}else{
+ R={id:'',skole:'',kort:'',trinn:'Vg1',linje:'',fra:'',til:'',dag1:'',tid:'',laerer:{navn:'',tlf:'',epost:''},skoleId:SKOLER[0]?SKOLER[0].id:'annen',skoleFri:'',linjeSel:'',linjeFri:''};
+ A=[{key:uid(),navn:'',antall:0,kontakt:'',tlf:'',sted:'',prosjekt:''}];F={sted:'',tid:'',ringNavn:'',ringTlf:''};FORMS='';
+}
 let E=[];
-const nyElev=navn=>({key:uid(),navn:navn||'',avdId:(R.avdJa[0]||{}).avdId||'',prosjekt:'',kontakt:'',tlf:'',sted:'',fra:'',til:'',dag1:'',tid:''});
+const nyElev=(navn,ak)=>({key:uid(),navn:navn||'',ak:ak??(A[0]?A[0].key:''),kontakt:'',tlf:'',sted:'',fra:'',til:'',dag1:'',tid:''});
 
 /* ====== Utledning ====== */
-const skole=()=>R.skoleId==='annen'?{navn:R.skoleNavn.trim(),kort:R.skoleNavn.trim()}:(SKOLER.find(s=>s.id===R.skoleId)||{navn:'',kort:''});
-const linje=()=>R.skoleId==='annen'||R.linjeSel==='__fri'?R.linjeFri.trim():R.linjeSel;
-const avd=id=>C.reg.find(a=>a.id===id);
-function info(e){
- const a=avd(e.avdId);const sub=a&&a.parent?avd(a.parent):null;
- let avdNavn='';if(a){avdNavn=a.gruppe?(e.prosjekt.trim()?'Prosjekt: '+e.prosjekt.trim():''):(sub?sub.navn+': '+a.navn:a.navn)}
- return{a,avdNavn,kontakt:e.kontakt.trim()||(a?a.kontakt:''),tlf:e.tlf.trim()||(a?a.telefon:''),sted:e.sted.trim()||(a?a.sted:''),
-  fra:e.fra||R.fra,til:e.til||R.til,dag1:e.dag1||R.dag1||e.fra||R.fra,tid:e.tid||R.tid}}
+function syncHand(){if(FRA_ADMIN)return;const s=SKOLER.find(x=>x.id===R.skoleId);
+ R.skole=s?s.navn:R.skoleFri.trim();R.kort=s?(s.kort||s.navn):R.skoleFri.trim();
+ R.linje=(!s||R.linjeSel==='__fri')?R.linjeFri.trim():R.linjeSel}
+const linjeTxt=()=>[R.trinn,R.linje].filter(Boolean).join(' ');
+const avdNavn=a=>!a?'':(a.prosjekt?(a.navn?a.navn+': ':'Prosjekt: ')+a.prosjekt:a.navn);
+const avdAv=e=>A.find(a=>a.key===e.ak);
+function info(e){const a=avdAv(e);
+ return{a,avdNavn:avdNavn(a),kontakt:e.kontakt.trim()||(a?a.kontakt:''),tlf:e.tlf.trim()||(a?a.tlf:''),sted:e.sted.trim()||(a?a.sted:''),
+  fra:e.fra||R.fra,til:e.til||R.til,dag1:e.dag1||R.dag1||e.fra||R.fra,tid:e.tid||R.tid||F.tid}}
 function eUrl(){return /^https?:$/.test(location.protocol)?new URL('../tilbakemelding/',location.href).href:E_FAST}
-function eLenke(e,i){const s=skole();const o={v:1,id:R.id.trim(),n:e.navn.trim(),a:i.avdNavn,k:i.kontakt,f:i.fra,t:i.til,s:s.kort||s.navn,l:[R.trinn,linje()].filter(Boolean).join(' '),e:R.lEpost.trim()};
+function eLenke(e,i){const o={v:1,id:R.id,n:e.navn.trim(),a:i.avdNavn,k:i.kontakt,f:i.fra,t:i.til,s:R.kort||R.skole,l:linjeTxt(),e:R.laerer.epost};
  Object.keys(o).forEach(k=>{if(o[k]===''||o[k]==null)delete o[k]});return eUrl()+'#d='+b64url(JSON.stringify(o))}
 const PH=['ID','AVDELING','SKOLE','LINJE','PERIODE'];
-function formsInfo(){const u=(C.f.forms||'').trim();if(!u)return{ok:false,tom:true};
- const funnet=PH.filter(p=>u.includes('{'+p+'}')||u.toUpperCase().includes('%7B'+p+'%7D'));
- return{ok:/^https:\/\//.test(u),funnet,ms:/forms\.(office|microsoft|cloud\.microsoft)/.test(u)}}
-function fLenke(vals){let u=(C.f.forms||'').trim();if(!u)return '';
+function fLenke(vals){let u=(FORMS||'').trim();if(!/^https:\/\//.test(u))return '';
  PH.forEach(p=>{const v=encodeURIComponent(vals[p]||'');u=u.split('{'+p+'}').join(v).replace(new RegExp('%7B'+p+'%7D','gi'),v)});return u}
-const fVals=i=>{const s=skole();return{ID:R.id.trim(),AVDELING:i.avdNavn,SKOLE:s.navn,LINJE:[R.trinn,linje()].filter(Boolean).join(' '),PERIODE:periodeTxt(i.fra,i.til)}};
+const fVals=i=>({ID:R.id,AVDELING:i.avdNavn,SKOLE:R.skole,LINJE:linjeTxt(),PERIODE:periodeTxt(i.fra,i.til)});
 function qrSvg(text){try{const q=qrcode(0,'M');q.addData(text);q.make();return q.createSvgTag({cellSize:4,margin:0,scalable:true}).replace('<svg ','<svg shape-rendering="crispEdges" ')}catch(e){return '<div class="qrmiss">Lenken er for lang for QR-kode</div>'}}
 
 /* ====== Mangler ====== */
 function mangler(e,i){const m=[];
  if(!e.navn.trim())m.push('elevens navn');
- if(!R.id.trim())m.push('forespørsels-ID');else if(!/^(U-\d{4}-\d{3}|EKS-\d+)$/.test(R.id.trim()))m.push('forespørsels-ID har feil format (U-ÅÅÅÅ-NNN)');
+ if(!R.id)m.push('forespørsels-ID');else if(!/^(U-\d{4}-\d{3}|EKS-\d+)$/.test(R.id))m.push('forespørsels-ID har feil format (U-ÅÅÅÅ-NNN)');
  if(!okDato(i.fra)||!okDato(i.til))m.push('periode');
  if(!okDato(i.dag1))m.push('dato første dag');
  if(!i.tid)m.push('oppmøtetid');
- if(!C.felles.sted.trim())m.push('oppmøtested (Ankomstsenteret)');
- if(!C.felles.ringNavn.trim()||!C.felles.ringTlf.trim())m.push('hvem eleven ringer hvis ingen møter');
- if(!i.a)m.push('avdeling');else{
-  if(i.a.gruppe&&!e.prosjekt.trim())m.push('navn på prosjektet');
+ if(!F.sted)m.push('oppmøtested (Ankomstsenteret)');
+ if(!F.ringNavn||!F.ringTlf)m.push('hvem eleven ringer hvis ingen møter');
+ if(!i.a||!i.avdNavn)m.push('avdeling');else{
   if(!i.sted)m.push('sted for avdelingen');
   if(!i.kontakt)m.push('kontaktperson');
   if(!i.tlf)m.push('telefon til kontaktperson')}
- if(!R.lNavn.trim())m.push('lærerens navn');
- if(!R.lTlf.trim())m.push('lærerens telefon');
- if(!R.lEpost.trim())m.push('lærerens e-post (tilbakemeldingen går da bare til Stord Academy)');
- if(C.f.modus==='academy'&&!C.f.forms.trim())m.push('lenke til elevens skjema (Forms) under Innstillinger');
+ if(!R.laerer.navn)m.push('lærerens navn');
+ if(!R.laerer.tlf)m.push('lærerens telefon');
+ if(!R.laerer.epost)m.push('lærerens e-post (tilbakemeldingen går da bare til Stord Academy)');
+ if(!fLenke(fVals(i)))m.push('Forms-lenke til elevens tilbakemelding'+(FRA_ADMIN?' (legges inn i admin under «Mer»)':''));
  return m}
 
 /* ====== Arket ====== */
 const li=([t,u])=>`<li${u&&!HMS_GODKJENT?' class="utk"':''}>${esc(t)}</li>`;
 const utkLbl=()=>HMS_GODKJENT?'':'<div class="utk-lbl">UTKAST – gule linjer må kontrolleres mot rutinene på yarden</div>';
 function ark(e,i){
- const s=skole(),l=linje();
  const v=(x,t)=>x?esc(x):M(t);
- const fr=C.f.modus==='academy';
- const flink=fr?fLenke(fVals(i)):'';
- const fBox=fr?`<div class="qrb f"><div class="qr">${flink?qrSvg(flink):'<div class="qrmiss">MANGLER lenke til elevskjema</div>'}</div>
-   <div><span class="who">For deg</span><div class="t">Din tilbakemelding</div><div class="d">Skann selv siste dag. Fortell oss hvordan utplasseringen var. Tar 2 minutter, og vi spør ikke om navnet ditt.</div></div></div>`
-  :`<div class="qrb f nf"><div><span class="who">For deg</span><div class="t">Din tilbakemelding</div><div class="d">Etter utplasseringen sender skolen din deg en lenke til et kort skjema om hvordan du hadde det. Tar 2 minutter, og vi spør ikke om navnet ditt.</div></div></div>`;
- const ftekst=fr?'Vi vil også høre hvordan du syntes utplasseringen var. Skann QR-koden «Din tilbakemelding» siste dag.':'Vi vil også høre hvordan du syntes utplasseringen var. Skolen sender deg en lenke etter utplasseringen.';
+ const flink=fLenke(fVals(i));
  const tidTxt=i.tid?'kl. '+esc(i.tid.replace(':','.')):M('tid');
+ const navn=e.navn.trim();
  return `<article class="ark">
  <header class="a-top"><div class="a-org">Aker Solutions, Stord Yard · Stord Academy</div>
-  <div class="a-row"><div><div class="a-h">Infopakke – utplassering</div><div class="a-navn">${e.navn.trim()?esc(e.navn.trim()):M('navn')}</div></div>
-  <div class="a-ref">Periode<b>${periodeTxt(i.fra,i.til)?esc(periodeTxt(i.fra,i.til)):M()}</b>Ref.<b>${v(R.id.trim())}</b></div></div></header>
+  <div class="a-row"><div><div class="a-h">Infopakke – utplassering</div><div class="a-navn">${navn?esc(navn):M('navn')}</div></div>
+  <div class="a-ref">Periode<b>${periodeTxt(i.fra,i.til)?esc(periodeTxt(i.fra,i.til)):M()}</b>Ref.<b>${v(R.id)}</b></div></div></header>
  <section class="a-grid">
-  <div class="box hl"><div class="k">Første dag</div><div class="v">${okDato(i.dag1)?esc(langDato(i.dag1)):M('dato')}<br>${tidTxt}</div><div class="s">Møt opp på <b>Ankomstsenteret</b><br>${v(C.felles.sted.trim(),'sted')}</div></div>
-  <div class="box hl"><div class="k">Hvis ingen møter deg</div><div class="v">Ring ${v(C.felles.ringNavn.trim(),'hvem')}</div><div class="s">Tlf. ${v(C.felles.ringTlf.trim())}</div></div>
-  <div class="box"><div class="k">Skolen din</div><div class="v">${v(R.lNavn.trim(),'lærer')}</div><div class="s">Tlf. ${v(R.lTlf.trim())}<br>${esc([s.kort||s.navn,R.trinn,l].filter(Boolean).join(', '))}</div></div>
-  <div class="box"><div class="k">Avdelingen din</div><div class="v">${v(i.avdNavn,i.a&&i.a.gruppe?'prosjekt':'')}</div><div class="s">${v(i.sted,'sted')}</div></div>
+  <div class="box hl"><div class="k">Første dag</div><div class="v">${okDato(i.dag1)?esc(langDato(i.dag1)):M('dato')}<br>${tidTxt}</div><div class="s">Møt opp på <b>Ankomstsenteret</b><br>${v(F.sted,'sted')}</div></div>
+  <div class="box hl"><div class="k">Hvis ingen møter deg</div><div class="v">Ring ${v(F.ringNavn,'hvem')}</div><div class="s">Tlf. ${v(F.ringTlf)}</div></div>
+  <div class="box"><div class="k">Skolen din</div><div class="v">${v(R.laerer.navn,'lærer')}</div><div class="s">Tlf. ${v(R.laerer.tlf)}<br>${esc([R.kort||R.skole,linjeTxt()].filter(Boolean).join(', '))}</div></div>
+  <div class="box"><div class="k">Avdelingen din</div><div class="v">${v(i.avdNavn)}</div><div class="s">${v(i.sted,'sted')}</div></div>
   <div class="box"><div class="k">Kontaktperson</div><div class="v">${v(i.kontakt)}</div><div class="s">Tlf. ${v(i.tlf)}</div></div>
   <div class="box"><div class="k">Blir du syk eller forsinket</div><div class="s" style="margin:0">Ring kontaktpersonen din før arbeidstid, og gi beskjed til skolen.</div></div>
  </section>
@@ -408,101 +361,108 @@ function ark(e,i){
  <section class="a-txt">
   <div><h3>Dette forventer vi av deg</h3>${utkLbl()}<ul>${FORVENTER.map(li).join('')}</ul></div>
   <div><h3>Dette kan du forvente av oss</h3><ul>${FORVENTE.map(li).join('')}</ul>
-   <div class="siste" style="margin-top:3mm"><h3>Siste dag</h3><p>Vis QR-koden på dette arket til kontaktpersonen din. Den åpner et kort skjema der kontaktpersonen gir tilbakemelding til skolen og Stord Academy.</p><p>${ftekst}</p></div></div>
+   <div class="siste" style="margin-top:3mm"><h3>Siste dag</h3><p>Vis den svarte QR-koden på dette arket til kontaktpersonen din. Den åpner et kort skjema der kontaktpersonen gir tilbakemelding til skolen og Stord Academy.</p><p>Vi vil også høre hvordan du syntes utplasseringen var. Skann den blå QR-koden «Din tilbakemelding». Det tar 2 minutter, og vi spør ikke om navnet ditt.</p></div></div>
  </section>
  <section class="a-qr">
-  <div class="qrb"><div class="qr">${qrSvg(eLenke(e,i))}<div class="qrname">${e.navn.trim()?esc(e.navn.trim()):M('navn')}</div></div>
+  <div class="qrb"><div class="qr">${qrSvg(eLenke(e,i))}<div class="qrname">${navn?esc(navn):M('navn')}</div></div>
    <div><span class="who">For kontaktpersonen</span><div class="t">Siste dag: vis denne koden til kontaktpersonen</div><div class="d">Kontaktpersonen skanner og gir tilbakemelding om deg til skolen og Stord Academy.</div></div></div>
-  ${fBox}
+  <div class="qrb f"><div class="qr">${flink?qrSvg(flink):'<div class="qrmiss">MANGLER lenke til elevskjema</div>'}</div>
+   <div><span class="who">For deg</span><div class="t">Din tilbakemelding</div><div class="d">Skann selv siste dag og fortell oss hvordan utplasseringen var. Tar 2 minutter, og vi spør ikke om navnet ditt.</div></div></div>
  </section>
- <footer class="a-foot"><span>Spørsmål om utplasseringen: Stord Academy, ${ACADEMY}</span><span>Ref. ${esc(R.id.trim()||'–')}</span></footer>
+ <footer class="a-foot"><span>Spørsmål om utplasseringen: Stord Academy, ${ACADEMY}</span><span>Ref. ${esc(R.id||'–')}</span></footer>
 </article>`}
 
-/* ====== Tegn forhåndsvisning ====== */
+/* ====== Tegn ====== */
 let rt;const tegnSnart=()=>{clearTimeout(rt);rt=setTimeout(tegn,120)};
-function tegn(){
+function tegn(){syncHand();
  const box=$('#arkene');$('#antArk').textContent=E.length;
- if(!E.length){box.innerHTML='<div class="empty">Legg til en elev for å se arket.</div>';$('#mangelboks').innerHTML='';return}
+ if(!E.length){box.innerHTML='<div class="empty">Lim inn elevnavn for å lage arkene.</div>';$('#mangelboks').innerHTML='';tegnTelling();merkFelt();return}
  const miss=[];
  box.innerHTML=E.map((e,n)=>{const i=info(e);const m=mangler(e,i);if(m.length)miss.push([n,e,m]);
   return `<div class="arkwrap" data-k="${e.key}">${ark(e,i)}</div><div class="arkbar ui"><button type="button" class="btn sm" data-print="${e.key}">Skriv ut / PDF – bare dette arket</button></div>`}).join('');
- $('#mangelboks').innerHTML=miss.length?`<div class="missbox"><b>${miss.reduce((s,x)=>s+x[2].length,0)} felt mangler.</b> Feltene står som «mangler» på arket. Fyll dem ut her eller under Innstillinger før du skriver ut.<ul>${miss.map(([n,e,m])=>`<li><b>Ark ${n+1}${e.navn.trim()?' ('+esc(e.navn.trim())+')':''}:</b> ${m.map(esc).join(', ')}</li>`).join('')}</ul></div>`:'<div class="okbox">Alle felt er fylt ut.</div>';
- skaler();tegnFSkole();merkFelt()}
+ $('#mangelboks').innerHTML=miss.length?`<div class="missbox"><b>${miss.reduce((s,x)=>s+x[2].length,0)} felt mangler.</b> Feltene står som «mangler» på arket.${FRA_ADMIN?' Det meste rettes i admin, og så trykker du «Lag infopakke» på nytt. Elevnavn må da skrives inn igjen.':''}<ul>${miss.map(([n,e,m])=>`<li><b>Ark ${n+1}${e.navn.trim()?' ('+esc(e.navn.trim())+')':''}:</b> ${m.map(esc).join(', ')}</li>`).join('')}</ul></div>`:'<div class="okbox">Alle felt er fylt ut.</div>';
+ skaler();tegnTelling();merkFelt()}
 function skaler(){const w=$('#arkene').clientWidth;const px=210*96/25.4;const z=Math.min(1,(w-4)/px);$$('.arkwrap').forEach(a=>a.style.zoom=z)}
 addEventListener('resize',skaler);
+function tegnTelling(){$$('[data-cnt]').forEach(el=>{const a=A.find(x=>x.key===el.dataset.cnt);if(!a)return;const n=E.filter(e=>e.ak===a.key).length;
+ el.textContent=a.antall?`${n} av ${a.antall}`:`${n}`;el.className='cnt'+(a.antall&&n>a.antall?' over':a.antall&&n===a.antall?' ok':'');el.title=a.antall&&n>a.antall?'Flere elever enn avdelingen har sagt ja til':''})}
 function merkFelt(){
- const tom=sel=>{const e=$(sel);return e&&!e.value.trim()};
- [['[data-r=id]'],['[data-r=fra]'],['[data-r=til]'],['[data-r=dag1]'],['[data-r=tid]'],['[data-r=lNavn]'],['[data-r=lTlf]'],['[data-r=lEpost]']].forEach(([s])=>{const e=$(s);if(e)e.classList.toggle('miss',!!E.length&&tom(s))});
  $$('.elev').forEach(el=>{const e=E.find(x=>x.key===el.dataset.k);if(!e)return;const i=info(e);
-  el.querySelector('[data-e=navn]').classList.toggle('miss',!e.navn.trim());el.querySelector('[data-e=avdId]').classList.toggle('miss',!i.a);
-  const f=el.querySelector('.from');if(f)f.innerHTML=i.a?`Fra registeret: ${i.kontakt?esc(i.kontakt):'<b style="color:var(--err)">kontaktperson mangler</b>'} · ${i.tlf?esc(i.tlf):'<b style="color:var(--err)">telefon mangler</b>'} · ${i.sted?esc(i.sted):'<b style="color:var(--err)">sted mangler</b>'}`:''})}
+  el.querySelector('[data-e=navn]').classList.toggle('miss',!e.navn.trim());el.querySelector('[data-e=ak]').classList.toggle('miss',!i.a);
+  const f=el.querySelector('.from');const mt=t=>`<b style="color:var(--err)">${t} mangler</b>`;
+  if(f)f.innerHTML=i.a?`${i.kontakt?esc(i.kontakt):mt('kontaktperson')} · ${i.tlf?esc(i.tlf):mt('telefon')} · ${i.sted?esc(i.sted):mt('sted')}`:''});
+ if(!FRA_ADMIN&&E.length){const tom=s=>{const e=$(s);return e&&!e.value.trim()};
+  ['#forHand [data-r=id]','#forHand [data-r=fra]','#forHand [data-r=til]','#forHand [data-r=tid]','[data-l=navn]','[data-l=tlf]','[data-l=epost]','[data-f=sted]','[data-f=ringNavn]','[data-f=ringTlf]','#formsFri'].forEach(s=>{const e=$(s);if(e)e.classList.toggle('miss',tom(s))})}}
 
-/* ====== Skjema: forespørsel ====== */
-function fyllSkoler(){$('[data-r=skoleId]').innerHTML=SKOLER.map(s=>`<option value="${s.id}">${esc(s.kort)}</option>`).join('')+'<option value="annen">Annen skole</option>';
- $('[data-r=trinn]').innerHTML=TRINN.map(t=>`<option>${t}</option>`).join('')}
-function fyllLinjer(){const s=SKOLER.find(x=>x.id===R.skoleId);const ann=R.skoleId==='annen';
- $('#annenSkoleWrap').hidden=!ann;
- const sel=$('[data-r=linjeSel]');sel.closest('.fld').hidden=ann;
- if(!ann){const ls=(s&&s.linjer[R.trinn])||[];if(R.linjeSel&&R.linjeSel!=='__fri'&&!ls.includes(R.linjeSel)){R.linjeFri=R.linjeSel;R.linjeSel='__fri'}
-  sel.innerHTML='<option value="">Velg linje</option>'+ls.map(l=>`<option>${esc(l)}</option>`).join('')+'<option value="__fri">Annen linje</option>';sel.value=R.linjeSel}
- $('#linjeFriWrap').hidden=!(ann||R.linjeSel==='__fri')}
-function settR(){$$('[data-r]').forEach(el=>{const k=el.dataset.r;if(k in R)el.value=R[k]??''});fyllLinjer()}
-function fyllReqValg(){const sel=$('#velgReq');const reqs=C.req.filter(r=>!['tidlig','avslatt','avlyst'].includes(r.status));
- $('#velgReqWrap').hidden=!C.req.length;
- const rek=['bekreftet','ps-mottatt','ps-sendt','reservert'];
- const g=(t,a)=>a.length?`<optgroup label="${t}">${a.map(r=>`<option value="${esc(r.id)}">${esc(r.id)} · ${esc(kortSkoleNavn(r.skole))} ${esc(r.trinn||'')} ${esc(r.linje||'')} · ${esc(periodeTxt(r.fra,r.til))} · ${esc(STATUSNAVN[r.status]||r.status||'')}</option>`).join('')}</optgroup>`:'';
- const sort=a=>a.sort((x,y)=>String(x.fra).localeCompare(String(y.fra)));
- sel.innerHTML='<option value="">– Skriv inn selv –</option>'+g('Bekreftet / reservert',sort(reqs.filter(r=>rek.includes(r.status))))+g('Andre',sort(reqs.filter(r=>!rek.includes(r.status))));
- sel.value=R.reqId}
-const kortSkoleNavn=n=>(SKOLER.find(s=>s.navn===n)||{}).kort||n||'';
-$('#velgReq').addEventListener('change',e=>{const r=C.req.find(x=>x.id===e.target.value);R.reqId=e.target.value;
- if(r){const s=SKOLER.find(x=>x.navn===r.skole);
-  Object.assign(R,{id:r.id,skoleId:s?s.id:'annen',skoleNavn:s?'':r.skole||'',trinn:r.trinn||'Vg1',linjeSel:'',linjeFri:'',fra:r.fra||'',til:r.til||'',dag1:r.fra||'',
-   lNavn:(r.kontakt||{}).navn||'',lTlf:(r.kontakt||{}).tlf||'',lEpost:(r.kontakt||{}).epost||'',avdJa:(r.avd||[]).filter(a=>a.status==='ja')});
-  if(s&&s.linjer[R.trinn]&&s.linjer[R.trinn].includes(r.linje))R.linjeSel=r.linje;else if(s){R.linjeSel='__fri';R.linjeFri=r.linje||''}else R.linjeFri=r.linje||'';
-  E.forEach(x=>{if(!x.avdId&&R.avdJa[0])x.avdId=R.avdJa[0].avdId});
-  if(!E.length)E.push(nyElev());
-  const ant=R.avdJa.reduce((s,a)=>s+(a.antall||0),0);if(ant)toast(`${ant} plass${ant>1?'er':''} med «Ja» fra ${R.avdJa.length} avdeling${R.avdJa.length>1?'er':''}`)}
- else R.avdJa=[];
- settR();tegnElever();tegn()});
-$$('[data-r]').forEach(el=>el.addEventListener('input',()=>{const k=el.dataset.r;R[k]=el.value;
- if(k==='fra'){if(!R.dag1||R.dag1===R._fraFor)R.dag1=R.fra;R._fraFor=R.fra;$('[data-r=dag1]').value=R.dag1;if(okDato(R.fra)&&(!R.til||R.til<R.fra)){const d=pd(R.fra);d.setDate(d.getDate()+4);R.til=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');$('[data-r=til]').value=R.til}}
- if(k==='skoleId'||k==='trinn'){if(k==='skoleId')R.linjeSel='';fyllLinjer()}
- if(k==='linjeSel')fyllLinjer();
- tegnSnart()}));
+/* ====== Oppsummering fra admin ====== */
+function tegnSum(){
+ const mt=t=>`<span class="mtag">${esc(t||'mangler')}</span>`;const v=x=>x?esc(x):mt();
+ const rows=[['Ref.',v(R.id)],['Skole',v([R.skole,linjeTxt()].filter(Boolean).join(', '))],['Periode',periodeTxt(R.fra,R.til)?esc(periodeTxt(R.fra,R.til)):mt()],
+  ['Første dag',(okDato(R.dag1)?esc(langDato(R.dag1)):mt())+', '+(R.tid?'kl. '+esc(R.tid.replace(':','.')):mt('tid mangler'))],
+  ['Lærer',`${v(R.laerer.navn)} · ${R.laerer.tlf?esc(R.laerer.tlf):mt('tlf mangler')} · ${R.laerer.epost?esc(R.laerer.epost):mt('e-post mangler')}`],
+  ['Oppmøtested',v(F.sted)],['Ring hvis ingen møter',F.ringNavn&&F.ringTlf?esc(F.ringNavn+', '+F.ringTlf):mt()],
+  ['Elevens skjema (F)',FORMS&&/^https:\/\//.test(FORMS)?'Forms-lenke er med':mt('Forms-lenke mangler')]];
+ $('#sumDl').innerHTML=rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('');
+ $('#avdListe').innerHTML=A.length?A.map(a=>`<li><b>${esc(avdNavn(a)||'(uten navn)')}</b> <span class="cnt" data-cnt="${a.key}"></span><div class="m">${a.kontakt?esc(a.kontakt):mt('kontakt mangler')} · ${a.tlf?esc(a.tlf):mt('tlf mangler')} · ${a.sted?esc(a.sted):mt('sted mangler')}</div></li>`).join(''):'<li>Ingen avdeling har sagt ja i lenken.</li>';
+ $('[data-r=dag1]').value=R.dag1;$('[data-r=tid]').value=R.tid}
 
-/* ====== Skjema: elever ====== */
-function avdOptions(valgt){const ja=R.avdJa.map(a=>a.avdId).filter(id=>avd(id));
- const opt=a=>{const p=a.parent?avd(a.parent):null;const n=p?p.navn+': '+a.navn:a.navn+(a.gruppe?' (skriv prosjektnavn)':'');return `<option value="${a.id}"${a.id===valgt?' selected':''}>${esc(n)}</option>`};
- const alle=C.reg.filter(a=>!ja.includes(a.id));
- return '<option value="">Velg avdeling</option>'+(ja.length?`<optgroup label="Har sagt ja til denne forespørselen">${ja.map(id=>opt(avd(id))).join('')}</optgroup><optgroup label="Alle avdelinger">`:'')+alle.map(opt).join('')+(ja.length?'</optgroup>':'')}
+/* ====== For hånd ====== */
+function fyllSkoler(){const sel=$('#forHand [data-r=skoleId]');sel.innerHTML=SKOLER.map(s=>`<option value="${esc(s.id)}">${esc(s.kort||s.navn)}</option>`).join('')+'<option value="annen">Annen skole</option>';sel.value=R.skoleId}
+function fyllLinjer(){const s=SKOLER.find(x=>x.id===R.skoleId);$('#annenSkoleWrap').hidden=!!s;$('#linjeSelWrap').hidden=!s;
+ if(s){const ls=(s.linjer&&s.linjer[R.trinn])||[];const sel=$('[data-r=linjeSel]');
+  sel.innerHTML='<option value="">Velg linje</option>'+ls.map(l=>`<option>${esc(l)}</option>`).join('')+'<option value="__fri">Annen linje</option>';if(R.linjeSel&&R.linjeSel!=='__fri'&&!ls.includes(R.linjeSel))R.linjeSel='';sel.value=R.linjeSel}
+ $('#linjeFriWrap').hidden=!!s&&R.linjeSel!=='__fri'}
+function tegnMAvd(){$('#mAvd').innerHTML=A.map((a,n)=>`<div class="mavd" data-a="${a.key}">
+  <div class="two"><label class="fld"><span>Avdeling</span><input type="text" data-af="navn" value="${esc(a.navn)}" autocomplete="off"></label>
+  <label class="fld"><span>Antall elever <span class="cnt" data-cnt="${a.key}"></span></span><input type="number" min="0" data-af="antall" value="${a.antall||''}"></label></div>
+  <div class="two"><label class="fld"><span>Kontaktperson</span><input type="text" data-af="kontakt" value="${esc(a.kontakt)}" autocomplete="off"></label>
+  <label class="fld"><span>Telefon</span><input type="tel" data-af="tlf" value="${esc(a.tlf)}" autocomplete="off"></label></div>
+  <label class="fld"><span>Sted / hvordan finne fram</span><input type="text" data-af="sted" value="${esc(a.sted)}" autocomplete="off"></label>
+  ${A.length>1?`<button type="button" class="btn sm ghost dan" data-fjernavd="${a.key}">Fjern avdeling</button>`:''}</div>`).join('');tegnTelling()}
+if(!FRA_ADMIN){
+ $('#forHand').addEventListener('input',ev=>{const el=ev.target;
+  if(el.dataset.r){R[el.dataset.r]=el.value;
+   if(el.dataset.r==='fra'){if(!R.dag1||R.dag1===R._fraFor){R.dag1=R.fra;$('#forHand [data-r=dag1]').value=R.dag1}R._fraFor=R.fra;
+    if(okDato(R.fra)&&(!R.til||R.til<R.fra)){const d=pd(R.fra);d.setDate(d.getDate()+4);R.til=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');$('#forHand [data-r=til]').value=R.til}}
+   if(['skoleId','trinn','linjeSel'].includes(el.dataset.r)){if(el.dataset.r==='skoleId')R.linjeSel='';fyllLinjer()}}
+  else if(el.dataset.l)R.laerer[el.dataset.l]=el.value.trim();
+  else if(el.dataset.f)F[el.dataset.f]=el.value.trim();
+  else if(el.id==='formsFri')FORMS=el.value.trim();
+  else if(el.dataset.af){const a=A.find(x=>x.key===el.closest('.mavd').dataset.a);a[el.dataset.af]=el.dataset.af==='antall'?Math.max(0,parseInt(el.value,10)||0):el.value.trim();
+   if(el.dataset.af==='navn')tegnElever()}
+  tegnSnart()});
+ $('#nyAvd').onclick=()=>{A.push({key:uid(),navn:'',antall:0,kontakt:'',tlf:'',sted:'',prosjekt:''});tegnMAvd();tegnElever();$$('#mAvd [data-af=navn]').pop().focus()};
+ $('#mAvd').addEventListener('click',ev=>{const b=ev.target.closest('[data-fjernavd]');if(!b)return;A=A.filter(a=>a.key!==b.dataset.fjernavd);E.forEach(e=>{if(!A.find(a=>a.key===e.ak))e.ak=A[0]?A[0].key:''});tegnMAvd();tegnElever();tegn()});
+}else{
+ $('#fraAdmin').addEventListener('input',ev=>{const el=ev.target;if(el.dataset.r){R[el.dataset.r]=el.value;tegnSum();tegnSnart()}});
+}
+
+/* ====== Elever ====== */
+function avdOptions(valgt){return (A.length>1||!valgt?'<option value="">Velg avdeling</option>':'')+A.map(a=>`<option value="${a.key}"${a.key===valgt?' selected':''}>${esc(avdNavn(a)||'(avdeling uten navn)')}</option>`).join('')}
 function tegnElever(){
- $('#elever').innerHTML=E.map((e,n)=>{const a=avd(e.avdId);return `<div class="elev" data-k="${e.key}">
+ $('#elever').innerHTML=E.map((e,n)=>{const a=avdAv(e);return `<div class="elev" data-k="${e.key}">
   <div class="elev-h"><span class="nr">${n+1}</span><input type="text" data-e="navn" value="${esc(e.navn)}" placeholder="Elevens navn" aria-label="Elevens navn" autocomplete="off" spellcheck="false" autocapitalize="words">
-  <select data-e="avdId" aria-label="Avdeling">${avdOptions(e.avdId)}</select>
+  <select data-e="ak" aria-label="Avdeling">${avdOptions(e.ak)}</select>
   <button type="button" class="btn sm ghost dan" data-fjern="${e.key}" aria-label="Fjern elev">✕</button></div>
-  ${a&&a.gruppe?`<label class="fld" style="margin:8px 0 0 36px"><span>Navn på prosjektet</span><input type="text" data-e="prosjekt" value="${esc(e.prosjekt)}" autocomplete="off"></label>`:''}
   <div class="from" style="margin:6px 0 0 36px"></div>
   <details style="margin-left:36px"><summary>Endre for dette arket (kontaktperson, sted, periode, tid)</summary><div class="more">
    <div class="two"><label class="fld"><span>Kontaktperson</span><input type="text" data-e="kontakt" value="${esc(e.kontakt)}" placeholder="${esc(a?a.kontakt:'')}" autocomplete="off"></label>
-   <label class="fld"><span>Telefon</span><input type="tel" data-e="tlf" value="${esc(e.tlf)}" placeholder="${esc(a?a.telefon:'')}" autocomplete="off"></label></div>
+   <label class="fld"><span>Telefon</span><input type="tel" data-e="tlf" value="${esc(e.tlf)}" placeholder="${esc(a?a.tlf:'')}" autocomplete="off"></label></div>
    <label class="fld"><span>Sted</span><input type="text" data-e="sted" value="${esc(e.sted)}" placeholder="${esc(a?a.sted:'')}" autocomplete="off"></label>
    <div class="two"><label class="fld"><span>Fra</span><input type="date" data-e="fra" value="${esc(e.fra)}"></label><label class="fld"><span>Til</span><input type="date" data-e="til" value="${esc(e.til)}"></label></div>
    <div class="two"><label class="fld"><span>Første dag</span><input type="date" data-e="dag1" value="${esc(e.dag1)}"></label><label class="fld"><span>Oppmøtetid</span><input type="time" data-e="tid" value="${esc(e.tid)}"></label></div>
-   <p class="hint" style="margin:0">Tomme felt bruker verdien fra registeret og forespørselen. Endringer her gjelder bare dette arket og lagres ikke.</p>
-  </div></details></div>`}).join('')}
-$('#elever').addEventListener('input',ev=>{const el=ev.target.closest('[data-e]');if(!el)return;const k=el.closest('.elev').dataset.k;const e=E.find(x=>x.key===k);
- e[el.dataset.e]=el.value;if(el.dataset.e==='avdId'){e.kontakt=e.tlf=e.sted=e.prosjekt='';tegnElever()}tegnSnart()});
+   <p class="hint" style="margin:0">Tomme felt bruker verdiene fra forespørselen. Endringer her gjelder bare dette arket.</p>
+  </div></details></div>`}).join('');merkFelt()}
+$('#elever').addEventListener('input',ev=>{const el=ev.target.closest('[data-e]');if(!el)return;const e=E.find(x=>x.key===el.closest('.elev').dataset.k);
+ e[el.dataset.e]=el.value;if(el.dataset.e==='ak'){e.kontakt=e.tlf=e.sted='';tegnElever()}tegnSnart()});
 $('#elever').addEventListener('click',ev=>{const b=ev.target.closest('[data-fjern]');if(!b)return;E=E.filter(x=>x.key!==b.dataset.fjern);tegnElever();tegn()});
-$('#leggTil').onclick=()=>{E.push(nyElev());tegnElever();tegn();const ins=$$('[data-e=navn]');ins[ins.length-1].focus()};
-$('#visFlere').onclick=()=>{$('#flereWrap').hidden=!$('#flereWrap').hidden;if(!$('#flereWrap').hidden)$('#flere').focus()};
+function nesteAvd(){const k=A.find(a=>a.antall>E.filter(e=>e.ak===a.key).length);return k?k.key:(A.length===1?A[0].key:'')}
+$('#leggTil').onclick=()=>{E.push(nyElev('',nesteAvd()));tegnElever();tegn();$$('[data-e=navn]').pop().focus()};
 $('#leggTilFlere').onclick=()=>{const n=$('#flere').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);if(!n.length)return toast('Skriv minst ett navn');
- E=E.filter(e=>e.navn.trim()||e.avdId!==((R.avdJa[0]||{}).avdId||''));
- // fordel på avdelingene som har sagt ja, etter antall
- const kvote=R.avdJa.map(a=>({id:a.avdId,igjen:Math.max(0,(a.antall||0)-E.filter(e=>e.avdId===a.avdId).length)}));
- n.forEach(navn=>{const e=nyElev(navn);const k=kvote.find(x=>x.igjen>0);if(k){e.avdId=k.id;k.igjen--}E.push(e)});
- $('#flere').value='';$('#flereWrap').hidden=true;tegnElever();tegn();toast(n.length+' elev'+(n.length>1?'er':'')+' lagt til')};
-$('#tom').onclick=()=>{if(!E.length)return;E.forEach(e=>e.navn='');tegnElever();tegn();toast('Elevnavnene er fjernet')};
+ E=E.filter(e=>e.navn.trim());n.forEach(navn=>E.push(nyElev(navn,nesteAvd())));
+ $('#flere').value='';tegnElever();tegn();const uten=E.filter(e=>!e.ak).length;
+ toast(n.length+' elev'+(n.length>1?'er':'')+' lagt til'+(uten?` – velg avdeling for ${uten}`:''))};
+$('#tom').onclick=()=>{if(!E.length)return;E=[];tegnElever();tegn();toast('Elevnavnene er fjernet')};
 
 /* ====== Utskrift ====== */
 function skrivUt(key){const t=document.title;const e=key?E.find(x=>x.key===key):null;
@@ -512,66 +472,14 @@ function skrivUt(key){const t=document.title;const e=key?E.find(x=>x.key===key):
 $('#skrivAlle').onclick=()=>{if(!E.length)return toast('Legg til en elev først');skrivUt(null)};
 $('#arkene').addEventListener('click',ev=>{const b=ev.target.closest('[data-print]');if(b)skrivUt(b.dataset.print)});
 
-/* ====== Del F når skolen gjennomfører ====== */
-function tegnFSkole(){const vis=C.f.modus==='skole'&&E.length>0;$('#fSkole').hidden=!vis;if(!vis)return;
- const unike=[];E.forEach(e=>{const i=info(e);if(i.avdNavn&&!unike.find(u=>u.avdNavn===i.avdNavn&&u.fra===i.fra&&u.til===i.til))unike.push(i)});
- if(!C.f.forms.trim()){$('#fSkoleInnhold').innerHTML='<div class="warn">Lenken til Forms er ikke lagt inn under Innstillinger.</div>';return}
- const s=skole();
- const linjer=unike.map(i=>`– ${i.avdNavn} (${periodeTxt(i.fra,i.til)}): ${fLenke(fVals(i))}`).join('\n');
- const txt=`Hei${R.lNavn.trim()?' '+R.lNavn.trim().split(' ')[0]:''},\n\nVi vil gjerne høre hvordan elevene opplevde utplasseringen hos Aker Solutions, Stord Yard (${R.id.trim()||'ref. mangler'}). Kan du dele lenken med elevene etter siste dag? Skjemaet tar ca. 2 minutter og spør ikke om navn.\n\nElevene bruker lenken for avdelingen de var på:\n${linjer}\n\nSvarene kommer direkte til Stord Academy.\n\nMed vennlig hilsen\nStord Academy, Aker Solutions\n${ACADEMY}`;
- $('#fSkoleInnhold').innerHTML=`<pre class="mail">${esc(txt)}</pre><div class="row"><button type="button" class="btn sm" id="kopierF">Kopier teksten</button>${R.lEpost.trim()?`<a class="btn sm" href="mailto:${esc(R.lEpost.trim())}?subject=${encodeURIComponent('Elevenes tilbakemelding om utplasseringen – '+(R.id.trim()||''))}&body=${encodeURIComponent(txt)}">Åpne e-post</a>`:''}</div>`;
- $('#kopierF').onclick=()=>kopier(txt,'Teksten er kopiert')}
-async function kopier(t,m){try{await navigator.clipboard.writeText(t);toast(m)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();try{document.execCommand('copy');toast(m)}catch(_){toast('Kunne ikke kopiere')}a.remove()}}
-
-/* ====== Innstillinger ====== */
-const getP=(o,p)=>p.split('.').reduce((x,k)=>x&&x[k],o);
-const setP=(o,p,v)=>{const ks=p.split('.');const l=ks.pop();ks.reduce((x,k)=>x[k],o)[l]=v};
-function settC(){$$('[data-c]').forEach(el=>el.value=getP(C,el.dataset.c)||'');$$('input[name=fmodus]').forEach(r=>r.checked=r.value===C.f.modus);formsStatus();tegnReg()}
-$$('[data-c]').forEach(el=>el.addEventListener('input',()=>{setP(C,el.dataset.c,el.value);lagreC();
- if(el.dataset.c==='felles.tid'&&!R.tid){R.tid=el.value;$('[data-r=tid]').value=R.tid}
- if(el.dataset.c==='f.forms')formsStatus();tegnSnart()}));
-$$('input[name=fmodus]').forEach(r=>r.addEventListener('change',()=>{C.f.modus=r.value;lagreC();tegnSnart()}));
-function formsStatus(){const f=formsInfo();const el=$('#formsStatus');
- if(f.tom){el.innerHTML='<div class="warn">Ikke lagt inn ennå. QR-koden «Din tilbakemelding» vises som «mangler» på arket.</div>';return}
- const mangl=PH.filter(p=>!f.funnet.includes(p));
- el.innerHTML=(!f.ok?'<div class="warn">Lenken må begynne med https://</div>':'')+(f.ok&&!f.ms?'<div class="warn">Dette ser ikke ut som en Forms-lenke. Det går an, men sjekk at skjemaet tar imot svar uten innlogging.</div>':'')+
-  (mangl.length?`<div class="warn">Fant ikke plassholder for: ${mangl.map(p=>'{'+p+'}').join(', ')}. De feltene blir ikke forhåndsutfylt.</div>`:'<div class="okbox" style="margin:6px 0 10px">Alle fem plassholdere er funnet.</div>')}
-$('#testForms').onclick=()=>{if(!C.f.forms.trim())return toast('Lim inn lenken først');
- open(fLenke({ID:'U-2026-999',AVDELING:'Prefab rør',SKOLE:'Stord vidaregåande skule',LINJE:'Vg1 Teknologi- og industrifag (TIP)',PERIODE:'8.2.2027–19.2.2027'}),'_blank','noopener')};
-function tegnReg(){const top=C.reg.filter(a=>!a.parent);
- const rad=(a,sub)=>`<tr class="${sub?'sub':''}" data-id="${a.id}"><td>${esc(a.navn)}${a.gruppe?' <span class="opt">(gruppe)</span>':''}</td>
-  <td><input type="text" data-g="kontakt" value="${esc(a.kontakt)}" placeholder="mangler" autocomplete="off"></td>
-  <td><input type="tel" data-g="telefon" value="${esc(a.telefon)}" placeholder="mangler" autocomplete="off"></td>
-  <td><input type="text" data-g="sted" value="${esc(a.sted)}" placeholder="mangler" autocomplete="off"></td>
-  <td>${a.parent==='prosjekt'&&a.lokal?`<button type="button" class="btn sm ghost dan" data-slett="${a.id}">✕</button>`:''}</td></tr>`;
- $('#regBody').innerHTML=top.map(a=>rad(a)+C.reg.filter(b=>b.parent===a.id).map(b=>rad(b,1)).join('')).join('')}
-$('#regBody').addEventListener('input',ev=>{const el=ev.target.closest('[data-g]');if(!el)return;const a=avd(el.closest('tr').dataset.id);a[el.dataset.g]=el.value;lagreC();tegnSnart();$$('.elev').length&&merkFelt()});
-$('#regBody').addEventListener('click',ev=>{const b=ev.target.closest('[data-slett]');if(!b)return;C.reg=C.reg.filter(a=>a.id!==b.dataset.slett);lagreC();tegnReg();tegnElever();tegn()});
-$('#leggProsjekt').onclick=()=>{const n=$('#nyttProsjekt').value.trim();if(!n)return;C.reg.push({id:'p-'+uid(),navn:n,kontakt:'',telefon:'',sted:'',gruppe:false,parent:'prosjekt',lokal:true});$('#nyttProsjekt').value='';lagreC();tegnReg();tegnElever()};
-
-function lesInn(txt){let x;try{x=JSON.parse(txt)}catch(e){return $('#impStatus').innerHTML='<b style="color:var(--err)">Filen er ikke gyldig.</b>'}
- if(x&&x.type==='utplassering-eksport'&&Array.isArray(x.avd)){
-  const gml=C.reg;
-  C.reg=x.avd.slice().sort((a,b)=>(a.rek||99)-(b.rek||99)).map(a=>{const o=gml.find(g=>g.id===a.id)||{};
-   return{id:a.id,navn:a.navn||'',kontakt:a.kontakt||o.kontakt||'',telefon:a.telefon||o.telefon||'',sted:a.sted||o.sted||'',gruppe:!!a.gruppe,parent:a.parent||null}});
-  gml.filter(g=>g.lokal&&!C.reg.find(a=>a.id===g.id)).forEach(g=>C.reg.push(g));
-  C.req=(x.req||[]).map(r=>({id:r.id,status:r.status,skole:r.skole,trinn:r.trinn,linje:r.linje,fra:r.fra,til:r.til,kontakt:{navn:(r.kontakt||{}).navn||'',tlf:(r.kontakt||{}).tlf||'',epost:(r.kontakt||{}).epost||''},avd:(r.avd||[]).map(a=>({avdId:a.avdId,status:a.status,antall:a.antall||0}))}));
-  C.importDato=new Date().toISOString().slice(0,10);lagreC();settC();fyllReqValg();tegnElever();tegn();
-  $('#impStatus').innerHTML=`<b style="color:var(--ok)">Lest inn:</b> ${C.reg.length} avdelinger og ${C.req.length} forespørsler (eksportert ${esc(x.eksportert||'')}). Velg forespørsel under «Lag infopakke».`;return}
- if(x&&x.type==='utplassering-infopakke-innstillinger'){
-  if(Array.isArray(x.reg))C.reg=x.reg;if(x.felles)C.felles={...C.felles,...x.felles};if(x.f)C.f={...C.f,...x.f};
-  lagreC();settC();tegnElever();tegn();$('#impStatus').innerHTML='<b style="color:var(--ok)">Innstillingene er lest inn.</b>';return}
- $('#impStatus').innerHTML='<b style="color:var(--err)">Kjente ikke igjen filen.</b> Bruk eksport fra admin eller en innstillingsfil herfra.'}
-$('#impFil').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;f.text().then(lesInn);e.target.value=''});
-$('#impBtn').onclick=()=>lesInn($('#impTxt').value);
-$('#eksBtn').onclick=()=>{const b=new Blob([JSON.stringify({type:'utplassering-infopakke-innstillinger',versjon:1,eksportert:new Date().toISOString().slice(0,10),reg:C.reg,felles:C.felles,f:C.f},null,1)],{type:'application/json'});
- const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='infopakke-innstillinger.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
-
-/* ====== Faner ====== */
-$$('[data-tab]').forEach(b=>b.onclick=()=>{$$('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));$('#lag').hidden=b.dataset.tab!=='lag';$('#innst').hidden=b.dataset.tab!=='innst';if(b.dataset.tab==='lag')tegn()});
-
 /* ====== Start ====== */
-fyllSkoler();settR();settC();fyllReqValg();tegnElever();tegn();
+if(L.feil){$('#lenkeFeil').innerHTML='<b>Lenken fra admin kunne ikke brukes.</b> '+L.feil;$('#lenkeFeil').hidden=false}
+if(FRA_ADMIN){$('#fraAdmin').hidden=false;tegnSum()}
+else{$('#forHand').hidden=false;fyllSkoler();fyllLinjer();tegnMAvd();
+ if(!LISTER){$('#forHand .warn').insertAdjacentHTML('beforeend','<br>Listen over skoler kunne ikke lastes. Skriv skole og linje selv.')}}
+addEventListener('hashchange',()=>location.reload());
+tegnElever();tegn();
+if(FRA_ADMIN)$('#flere').focus();
 </script>
 </body>
 </html>

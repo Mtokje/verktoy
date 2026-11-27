@@ -638,7 +638,7 @@ function shPaste(){return`<div class="sh-head"><h2>Lim inn fra skjema</h2><butto
  <label class="fld" style="max-width:240px"><span>Dato mottatt</span><input type="date" id="p-mottatt" value="${today()}"><small>Datoen e-posten kom. 3-dagersfristen regnes herfra.</small></label>
  <button class="btn pri" data-act="paste2">Les inn</button></div><div id="p-prev"></div></div>`}
 function parseSkjema(t){const i=(t||'').indexOf('UTPL1.');if(i<0)return{err:'Fant ingen kode. Lim inn hele e-posten fra skjemaet, eller delen som starter med UTPL1.'};
- const rest=t.slice(i+6),j=rest.indexOf('.SLUTT');if(j<0)return{err:'Koden ser avkuttet ut (mangler .SLUTT på slutten). Be skolen sende på nytt, eller legg inn manuelt fra oppsummeringen i e-posten.'};
+ const rest=t.slice(i+6).replace(/[\s>]/g,''),j=rest.indexOf('.SLUTT');if(j<0)return{err:'Koden ser avkuttet ut (mangler .SLUTT på slutten). Be skolen sende på nytt, eller legg inn manuelt fra oppsummeringen i e-posten.'};
  const c=rest.slice(0,j).replace(/[^A-Za-z0-9_-]/g,'');
  try{const b=atob(c.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((c.length+3)%4));const o=JSON.parse(new TextDecoder().decode(Uint8Array.from(b,ch=>ch.charCodeAt(0))));if(!o||o.v!==1)return{err:'Ukjent versjon av skjemaet.'};return{o}}
  catch(e){return{err:'Koden kunne ikke leses. Den kan ha blitt endret i e-posten. Legg inn manuelt fra oppsummeringen.'}}}

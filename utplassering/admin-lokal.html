@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Utplassering – admin (lokal reserve)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: rolig arbeidsverktøy for koordinator – saklig, raskt å skanne, ingen pynt
+   IDEA: planleggingstavla på kontoret – ukerader med fargede lapper per skoleklasse
+   PICTURE: fristelista og ukekalenderen er selve bildet; statusfargene bærer innholdet
+   COLOUR and TYPE: himmelblått toppfelt, blekk #10223a, oransje kun for forfalt; Outfit + Inter
+   LAYOUT: toppbånd med navigasjon (bunnmeny på mobil), én kolonne maks 1100px, ark for detaljer */
+:root{color-scheme:light dark;--bg:light-dark(#f4f7fa,#0b1726);--card:light-dark(#fff,#12233a);--ink:light-dark(#10223a,#e8eef6);--mut:light-dark(#5a6a7e,#9fb0c4);--line:light-dark(#dbe3ec,#253a52);--sky:light-dark(#4fb3e8,#1d5a80);--skyink:light-dark(#0b2238,#eaf6ff);--or:#ff7a1a;--orbg:light-dark(#fff0e3,#3b2412);--orink:light-dark(#9a3d00,#ffb37a);--soft:light-dark(#eef3f8,#18304b);--ok:light-dark(#157a43,#5fd38e)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:clip;padding-bottom:84px}
+h1,h2,h3{font-family:Outfit,Inter,sans-serif;font-weight:600;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(24px,4vw,32px)}h2{font-size:20px}h3{font-size:17px}
+button,input,select,textarea{font:inherit;color:inherit}
+.top{background:var(--sky);color:var(--skyink)}
+.top-in{max-width:1100px;margin:0 auto;padding:14px max(4vw,16px);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;line-height:1.15;margin-right:auto}
+.brand b{font:600 20px Outfit,Inter,sans-serif}.brand span{font-size:13px;opacity:.85}
+.tabs{display:flex;gap:4px}
+.tabs a,.bnav a{color:inherit;text-decoration:none;border-radius:10px;font-weight:500;position:relative}
+.tabs a{padding:10px 14px}
+.tabs a[aria-current=page]{background:light-dark(rgba(255,255,255,.55),rgba(0,0,0,.28))}
+.badge{display:inline-block;min-width:20px;padding:0 6px;border-radius:10px;background:var(--or);color:#fff;font-size:12px;font-weight:600;text-align:center;line-height:20px;margin-left:6px}
+.bnav{position:fixed;inset:auto 0 0 0;background:var(--card);border-top:1px solid var(--line);display:none;grid-template-columns:repeat(5,1fr);padding:4px 4px calc(4px + env(safe-area-inset-bottom));z-index:20}
+.bnav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;padding:6px 2px;min-height:52px;justify-content:center}
+.bnav a[aria-current=page]{color:light-dark(#0b6fa8,#7cc8f2);background:var(--soft)}
+.bnav svg{width:22px;height:22px}
+.bnav .badge{position:absolute;top:2px;right:14%;margin:0}
+main{max-width:1100px;margin:0 auto;padding:20px max(4vw,16px) 40px}
+.note{font-size:14px;color:var(--mut);margin:0 0 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note.warn{background:var(--orbg);color:var(--orink);padding:10px 12px;border-radius:10px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr))}
+.tiles{display:grid;gap:10px;grid-template-columns:repeat(4,minmax(0,1fr));margin:14px 0 22px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.tile b{display:block;font:600 clamp(26px,5vw,36px)/1.1 Outfit,Inter,sans-serif}
+.tile span{font-size:13px;color:var(--mut)}
+.tile.hot{background:var(--orbg);border-color:transparent}.tile.hot b{color:var(--orink)}
+.sec{margin:22px 0 10px;display:flex;align-items:baseline;gap:10px}
+.sec small{color:var(--mut);font-size:14px}
+.task{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;padding:14px;border-bottom:1px solid var(--line);align-items:start}
+.task:last-child{border-bottom:0}
+.due{font-size:13px;font-weight:600;white-space:nowrap;padding:3px 8px;border-radius:8px;background:var(--soft);min-width:78px;text-align:center}
+.due.over{background:var(--or);color:#fff}.due.now{background:var(--sky);color:var(--skyink)}
+.task .t{font-weight:600}.task .s{font-size:14px;color:var(--mut)}
+.task .acts{grid-column:2;display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.btn{min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:500}
+.btn.sm{min-height:36px;padding:5px 11px;font-size:14px}
+.btn.pri{background:#10223a;color:#fff;border-color:#10223a}
+:root[data-theme=dark] .btn.pri{background:#4fb3e8;color:#0b1726;border-color:#4fb3e8}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .btn.pri{background:#4fb3e8;color:#0b1726;border-color:#4fb3e8}}
+.btn.dan{color:#c62f34;border-color:#e5a3a5}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #ff7a1a;outline-offset:2px}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;border:2px solid transparent}
+.mark{font-size:11px;font-weight:700;background:rgba(255,255,255,.3);border-radius:6px;padding:0 5px}
+.eks{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.02em;padding:1px 7px;border-radius:6px;background:#ffe08a;color:#5a4300}
+.avk{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--orbg);color:var(--orink);border:1px dashed var(--or)}
+.chip{display:inline-block;font-size:13px;padding:2px 9px;border-radius:999px;background:var(--soft);margin:2px 4px 2px 0}
+.chip.q{background:transparent;border:1px dashed var(--mut)}
+.req{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:12px 14px;cursor:pointer;margin-bottom:10px}
+.req .top2{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.req .meta{font-size:14px;color:var(--mut);margin-top:4px}
+.prog{height:8px;border-radius:4px;background:var(--soft);overflow:hidden;display:flex;margin-top:8px}
+.prog i{display:block;height:100%}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.filters button{min-height:38px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:14px}
+.filters button[aria-pressed=true]{background:#10223a;color:#fff;border-color:#10223a}
+.week{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.week:last-child{border-bottom:0}
+.week.cur{background:var(--soft)}.week.tom{padding-block:8px}.week.tom .wk b{font-size:15px;display:inline}
+.wk b{font:600 18px Outfit,Inter,sans-serif;display:block}.wk span{font-size:13px;color:var(--mut)}
+.sums{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.sum{font-size:12px;font-weight:600;padding:1px 7px;border-radius:6px}
+.slot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;width:100%;text-align:left;border:0;border-left:5px solid var(--c);background:var(--card);box-shadow:0 0 0 1px var(--line) inset;border-radius:8px;padding:8px 10px;margin-bottom:6px;cursor:pointer}
+.slot.dash{border-left-style:dashed}
+.slot small{color:var(--mut)}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:6px 12px;font-size:15px;margin:0}
+.dl dt{color:var(--mut)}.dl dd{margin:0}
+.kv{font-size:14px;color:var(--mut)}
+.gap{background:var(--orbg);border-radius:14px;padding:14px;margin:12px 0 18px}
+.hd{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}.hd>*:first-child{flex:1 1 auto}.hd .btn{flex:none}
+.avd h3{margin-bottom:4px}.avd .r{display:grid;grid-template-columns:90px minmax(0,1fr);gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
+.avd .r>span:first-child{color:var(--mut)}
+.sheet{position:fixed;inset:0;z-index:50}
+.sheet[hidden]{display:none}
+.sheet-bg{position:absolute;inset:0;background:rgba(8,20,36,.5)}
+.sheet-panel{position:absolute;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--bg);overflow-y:auto;overscroll-behavior:contain;box-shadow:-10px 0 40px rgba(0,0,0,.25)}
+.sh-head{position:sticky;top:0;z-index:2;background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:10px;align-items:center}
+.sh-head h2{margin-right:auto}
+.sh-body{padding:16px}
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.blk>h3{margin-bottom:10px}
+.line{border:1px solid var(--line);border-left:5px solid var(--c);border-radius:10px;padding:10px 12px;margin-bottom:10px}
+.fld{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.fld>span{font-size:14px;font-weight:500}
+.fld small{color:var(--mut);font-size:13px}
+input[type=text],input[type=number],input[type=date],input[type=email],input[type=tel],select,textarea{width:100%;min-height:44px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-size:16px}
+textarea{min-height:120px;line-height:1.45}
+.two{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.chk{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:4px 12px 4px 8px;border:1px solid var(--line);border-radius:999px;margin:3px 6px 3px 0;cursor:pointer;background:var(--card);font-size:14px}
+.chk input{width:18px;height:18px;margin:0}
+.chk.big{border-radius:10px;width:100%;min-height:48px}
+.tri{min-height:40px;padding:4px 12px;border:1px solid var(--line);border-radius:999px;margin:3px 6px 3px 0;background:var(--card);cursor:pointer;font-size:14px}
+.tri[data-s="1"]{background:#10223a;color:#fff;border-color:#10223a}
+.tri[data-s="2"]{border:2px dashed #10223a;font-weight:600}
+:root[data-theme=dark] .tri[data-s="1"]{background:#4fb3e8;color:#0b1726}
+.forslag{background:var(--soft);border-radius:10px;padding:10px 12px;margin:10px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.mailrow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.mailrow:first-of-type{border-top:0}
+.sent{color:var(--ok);font-weight:600;font-size:14px}
+.notsent{color:var(--mut);font-size:14px}
+.empty{padding:22px;text-align:center;color:var(--mut)}
+.rq{color:#d4343a;margin-left:3px;font-weight:700}
+.reqnote{font-size:14px;color:var(--mut);margin:0 0 12px}
+.fld.err>span{color:#c62f34}
+.fld.err input,.fld.err select{border:2px solid #d4343a;background:light-dark(#fff2f2,#3a1416)}
+.fld.err .chk{border:2px solid #d4343a;background:light-dark(#fff2f2,#3a1416)}
+.rcal{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:12px;background:var(--card)}
+.rc-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.rc-h b{font:600 17px Outfit,Inter,sans-serif}
+.rc-g{display:grid;grid-template-columns:46px repeat(7,minmax(0,1fr));gap:3px}
+.rc-g .hd{font-size:12px;color:var(--mut);text-align:center;padding:2px 0}
+.rc-w{font-size:12px;font-weight:600;color:var(--mut);border:1px dashed var(--line);border-radius:8px;background:transparent;min-height:42px;cursor:pointer;padding:0}
+.rc-w:hover{border-color:var(--mut)}
+.rc-d{min-height:42px;border:0;border-radius:8px;background:transparent;cursor:pointer;font-size:15px;padding:0}
+.rc-d.we{color:var(--mut)}.rc-d.out{visibility:hidden}
+.rc-d.in{background:light-dark(#d6ecfa,#1d4566);border-radius:0}
+.rc-d.s,.rc-d.e{background:#10223a;color:#fff;font-weight:600}
+:root[data-theme=dark] .rc-d.s,:root[data-theme=dark] .rc-d.e{background:#4fb3e8;color:#0b1726}
+.rc-d.today:not(.s):not(.e){box-shadow:inset 0 0 0 2px var(--sky)}
+.rc-sum{font-size:14px;margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fld .errtxt{color:#c62f34;font-size:13px;font-weight:600}
+.note.gul{background:light-dark(#fff6cc,#3a3210);color:light-dark(#5a4300,#ffe08a);padding:10px 12px;border-radius:10px}
+.confirm{background:var(--orbg);border-radius:10px;padding:10px;margin-top:8px}
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#10223a;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+.logg{font-size:13px;color:var(--mut);margin:0;padding-left:18px}
+.noscroll{overflow:hidden}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.seg a{padding:8px 16px;text-decoration:none;color:inherit;font-weight:500;min-height:42px;display:flex;align-items:center}
+.seg a[aria-current=page]{background:#10223a;color:#fff}
+.kwrap{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);margin-top:12px}
+.kmap{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(64px,.9fr) minmax(0,1fr);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 10px}
+.kcol{display:flex;flex-direction:column;gap:8px;position:relative;z-index:1}
+.kl{grid-column:1}.kr{grid-column:3}
+.khead{font-size:12px;font-weight:600;color:var(--mut);text-transform:none;margin:2px 0}
+.kgrp{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;margin:8px 0 0}
+.kgrp i{width:10px;height:10px;border-radius:50%;background:var(--c);display:inline-block}
+.ktile{text-align:left;border:1px solid var(--line);border-left:5px solid var(--c);background:var(--card);border-radius:10px;padding:6px 26px 6px 9px;cursor:pointer;font-size:14px;line-height:1.25;min-height:44px;position:relative}
+.kr .ktile{border-left-width:1px;border-left-color:var(--line);border-right:5px solid #10223a;padding:6px 9px 6px 26px}
+.ktile{hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere}
+.ktile small{display:block;color:var(--mut);font-size:12px}
+.ktile .kn{position:absolute;top:5px;right:7px;font-size:11px;font-weight:700;color:var(--mut)}
+.kr .ktile .kn{right:auto;left:7px}
+.ktile.none{opacity:.6;border-style:dashed}
+.ktile.sel{outline:3px solid var(--or);outline-offset:1px;opacity:1}
+.ktile.dim{opacity:.35}
+.kwires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+.kwires .hit{pointer-events:stroke;cursor:pointer}
+.klabels{position:absolute;inset:0;pointer-events:none;z-index:2}
+.klab{position:absolute;transform:translateX(-50%);pointer-events:auto;max-width:var(--mw);display:flex;flex-direction:column;align-items:center;text-align:center;font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--card);border:2px solid var(--c);color:var(--ink);cursor:pointer;line-height:1.4}
+.klab.q{border-style:dashed}
+.klab span{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kfilt{display:grid;gap:8px 10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));margin:4px 0 2px}
+.kfilt .fld{margin-bottom:4px}
+.kfd>summary{cursor:pointer;font-weight:600;min-height:40px;display:flex;align-items:center;gap:6px}
+@media(min-width:761px){.kfd>summary{display:none}}
+.kfilt select.on{border-color:#ff7a1a;box-shadow:0 0 0 1px #ff7a1a inset}
+.kpanel{margin:0}
+.krow{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
+.krow:first-of-type{border-top:0}
+.kspacer{display:none}
+@media(min-width:1000px){.kwrap{grid-template-columns:minmax(0,1fr) 330px}.kpanel{position:sticky;top:16px;align-self:start}}
+@media(max-width:999px){.kpanel{position:fixed;left:0;right:0;bottom:0;max-height:40vh;overflow:auto;z-index:15;border-radius:16px 16px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.22)}.kpanel.idle{display:none}.kspacer{display:block;height:52vh}}
+@media(max-width:760px){.kpanel{bottom:68px}.kmap{padding:10px 6px;grid-template-columns:minmax(0,1fr) minmax(44px,.55fr) minmax(0,1fr)}.ktile{font-size:13px}}
+@media(max-width:760px){.tabs{display:none}.bnav{display:grid}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:761px){body{padding-bottom:0}}
+@media(max-width:600px){.week{grid-template-columns:minmax(0,1fr);gap:6px}.dl{grid-template-columns:minmax(0,1fr)}.dl dt{margin-top:6px}.two{grid-template-columns:minmax(0,1fr)}.task{grid-template-columns:minmax(0,1fr)}.task .acts{grid-column:1}.due{justify-self:start}}
+@media(prefers-reduced-motion:no-preference){.sheet-panel{animation:inn .18s ease-out}@keyframes inn{from{transform:translateX(30px);opacity:.6}}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand"><b>Utplassering · Stord Yard</b><span>Stord Academy – admin-oversikt (prototype)</span></div>
+  <nav class="tabs" id="tabs"></nav>
+</div></header>
+<main id="view"><p class="empty">Laster …</p></main>
+<nav class="bnav" id="bnav"></nav>
+<div id="sheet" class="sheet" hidden><div class="sheet-bg" data-act="close"></div><div class="sheet-panel" id="panel" role="dialog" aria-modal="true"></div></div>
+<div id="toast" role="status"></div>
+<script id="seed" type="application/json">null</script>
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const LAEREFAG=["Anleggsmaskinfører","Automatisering","Elektriker","Energimontør","Gjenvinning","Industrimaler","Industrimekaniker","Industrioppmåling","Industrirørlegger","Isolatør","Kran- og løfteoperasjon","Logistikk","NDT-kontrollør","Platearbeider","Sveis","Stillasbygger"];
+const ARSAKER=["Ikke kapasitet","Perioden passer ikke","Én dag i uka over tid (innvilges sjelden)","Linje/fag ikke aktuelt","Manglende tilbakemelding fra avdeling","Ikke prioritert (skole/klasse)","Annet"];
+const STATUS=[
+ {k:'mottatt',n:'Mottatt',c:'#2f80ed',t:'#fff'},
+ {k:'vurdering',n:'Til vurdering hos Mats',c:'#8b5cf6',t:'#fff'},
+ {k:'behandling',n:'Under behandling',c:'#f5c542',t:'#10223a'},
+ {k:'reservert',n:'Reservert',c:'#a7e3b5',t:'#0f3d1f'},
+ {k:'bekreftet',n:'Bekreftet',c:'#22a05a',t:'#fff'},
+ {k:'gjennomfort',n:'Gjennomført',c:'#4b5563',t:'#fff'},
+ {k:'avslatt',n:'Avslått',c:'#e5484d',t:'#fff'},
+ {k:'avlyst',n:'Avlyst av skolen',c:'transparent',t:'#d43a3f',b:'2px dashed #e5484d',bar:'#e5484d'}];
+const SM=Object.fromEntries(STATUS.map(s=>[s.k,s]));
+const L2=[{k:'venter',n:'Venter svar',c:'#f5c542'},{k:'ja',n:'Ja',c:'#22a05a'},{k:'nei',n:'Nei',c:'#e5484d'},{k:'kanikke',n:'Kan ikke avgjøre nå',c:'#8b5cf6'},{k:'ingen',n:'Ingen tilbakemelding',c:'#4b5563'}];
+const L2M=Object.fromEntries(L2.map(s=>[s.k,s]));
+const CLOSED=['avslatt','avlyst','gjennomfort'];
+const LINJE_STD={Vg1:["Bygg- og anleggsteknikk","Elektro og datateknologi","Teknologi- og industrifag (TIP)","Salg, service og reiseliv"],Vg2:["Automatisering","Elenergi og ekom","Industriteknologi","Kjøretøy","Tømrer"],Vg3:["Automatiseringsfaget"]};
+const DEF_CFG={frister:{svarSkole:3,purring1:3,ingenSvar:3,paminnelseUker:4},skoler:[
+ {id:'stord',navn:'Stord vidaregåande skule',kort:'Stord vgs',linjer:LINJE_STD},
+ {id:'bomlo',navn:'Bømlo vidaregåande skule',kort:'Bømlo vgs',linjer:{Vg1:["Elektro og datateknologi","Teknologi- og industrifag (TIP)","Naturbruk"],Vg2:["Automatisering","Elenergi og ekom","Industriteknologi"],Vg3:["Automatiseringsfaget"]}}]};
+const NAV=[['i-dag','I dag','M4 12h16M4 6h16M4 18h10'],['foresporsler','Forespørsler','M5 4h14v16H5zM8 9h8M8 13h8M8 17h5'],['kalender','Kalender','M4 6h16v14H4zM4 10h16M9 3v5M15 3v5'],['avdelinger','Avdelinger','M3 20V9l6-4v15M9 20V5l12 4v11M3 20h18'],['mer','Mer','M5 12h.01M12 12h.01M19 12h.01']];
+
+let S={avd:[],req:[],kob:[],cfg:null};let lesTilgang=false;let mode='laster',db=null,note='',sheet=null,pendingSheet=false;
+const ui={filter:'aktive',q:'',calStart:null,calAvslag:false,senere:false,kSel:null,kSkole:'alle',kF:{fag:'',avd:'',linje:''},kSkjul:true};
+const loaded={avd:false,req:false,kob:false,cfg:false};
+
+/* ---------- datoer ---------- */
+const pad=n=>String(n).padStart(2,'0');
+const ds=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const pd=s=>{const[y,m,d]=String(s).split('-').map(Number);return new Date(y,m-1,d)};
+const today=()=>ds(new Date());
+const addDays=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ds(d)};
+const addWd=(s,n)=>{const d=pd(s);let k=0;while(k<n){d.setDate(d.getDate()+1);if(d.getDay()%6)k++}return ds(d)};
+const DG=['søn','man','tir','ons','tor','fre','lør'];
+const fm=s=>{if(!s)return'';const d=pd(s);return d.getDate()+'.'+(d.getMonth()+1)+'.'};
+const fy=s=>{if(!s)return'';const d=pd(s);return d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()};
+const isoWeek=s=>{const d=pd(s);const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y0)/864e5+1)/7)};
+const monday=s=>{const d=pd(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return ds(d)};
+const uke=r=>{if(!r.fra)return'periode ikke satt';const a=isoWeek(r.fra),b=isoWeek(r.til||r.fra);return a===b?'uke '+a:'uke '+a+'–'+b};
+const periode=r=>r.fra?fy(r.fra)+(r.til&&r.til!==r.fra?'–'+fy(r.til):''):'';
+const dueLbl=d=>{const t=today();if(d<t)return'Forfalt '+fm(d);if(d===t)return'I dag';return DG[pd(d).getDay()]+' '+fm(d)};
+
+/* ---------- oppslag og utregning ---------- */
+const cfg=()=>S.cfg||DEF_CFG;
+const F=()=>Object.assign({},DEF_CFG.frister,cfg().frister||{});
+const skole=n=>cfg().skoler.find(s=>s.navn===n);
+const kort=n=>skole(n)?.kort||n;
+const avdBy=id=>S.avd.find(a=>a.id===id);
+const avdNavn=id=>{const a=avdBy(id);if(!a)return'(fjernet avdeling)';return a.parent?'Prosjekt: '+a.navn:a.navn};
+const skById=id=>cfg().skoler.find(s=>s.id===id);
+const SKF=['#2f8fd0','#e07b24','#8b5cf6','#16a34a','#db2777','#0f9e9e'];
+const skFarge=id=>SKF[Math.max(0,cfg().skoler.findIndex(s=>s.id===id))%SKF.length];
+const lk=(sk,t,l)=>sk+'|'+t+'|'+l;const kLk=k=>lk(k.skole,k.trinn,k.linje);
+const kNavn=k=>`${skById(k.skole)?.kort||'(skole fjernet)'} · ${k.trinn} ${k.linje}`;
+const fagTxt=k=>(k.fag||[]).length?k.fag.join(', '):'fag avklares';
+const nyId=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function alleLinjer(skId){const out=[];for(const s of cfg().skoler){if(skId&&skId!=='alle'&&s.id!==skId)continue;for(const t of ['Vg1','Vg2','Vg3'])for(const l of (s.linjer||{})[t]||[])out.push({key:lk(s.id,t,l),sk:s,trinn:t,linje:l})}return out}
+function migrer(){let n=0;for(const a of S.avd){if(!(a.linjer||[]).length)continue;for(const x of a.linjer){const t=x.slice(0,3),l=x.slice(4);for(const s of cfg().skoler)if(((s.linjer||{})[t]||[]).includes(l)&&!S.kob.some(k=>k.avdId===a.id&&kLk(k)===lk(s.id,t,l))){S.kob.push({id:nyId('k'),skole:s.id,trinn:t,linje:l,avdId:a.id,fag:(a.fag||[]).slice()});n++}}delete a.linjer;n++}return n}
+const linjeTxt=r=>((r.trinn||'')+' '+(r.linje||'')).trim();
+const antTxt=r=>(r.antall||0)+' elev'+(+r.antall===1?'':'er');
+const cnt=r=>{let b=0,res=0,pend=0;const ls=r.avd||[];for(const l of ls){if(l.status==='ja'){if(l.avklart)b+=+l.antall||0;else res+=+l.antall||0}else if(l.status==='venter'||l.status==='kanikke')pend++}
+ if(!ls.length){if(['bekreftet','gjennomfort'].includes(r.status))b=+r.antall||0;else if(r.status==='reservert')res=+r.antall||0}return{b,res,pend}};
+function forslag(r){
+ const t=today(),{b,res,pend}=cnt(r);
+ if(r.status==='bekreftet'&&r.til&&r.til<t)return{s:'gjennomfort'};
+ if(!['mottatt','behandling','reservert','bekreftet'].includes(r.status)||!(r.avd||[]).length)return null;
+ const tot=b+res;let s;
+ if(tot===0&&pend===0){const ing=r.avd.some(l=>l.status==='ingen');return r.status==='avslatt'?null:{s:'avslatt',arsak:ing?'Manglende tilbakemelding fra avdeling':(r.avd.find(l=>l.arsak)?.arsak||'Ikke kapasitet')}}
+ if(pend>0&&tot<(+r.antall||0))s='behandling';else if(res>0)s='reservert';else s='bekreftet';
+ return s===r.status?null:{s}}
+function skoleKey(r){if(r.status==='reservert')return'skole-reservert';if(r.status==='bekreftet')return cnt(r).b<(+r.antall||0)?'skole-delvis':'skole-bekreftet';if(r.status==='avslatt')return'skole-avslatt';return null}
+const MALNAVN={'henvendelse':'Første henvendelse','purring1':'Purring','paminnelse':'Påminnelse om reserverte plasser','skole-mottatt':'Svar til skolen: mottatt','skole-reservert':'Svar til skolen: reservert','skole-bekreftet':'Svar til skolen: bekreftet','skole-delvis':'Svar til skolen: delvis','skole-avslatt':'Svar til skolen: avslått'};
+
+function tasks(){
+ const T=[],t=today(),f=F();
+ for(const r of S.req){
+  const sub=`${r.id} · ${kort(r.skole)} · ${linjeTxt(r)} · ${antTxt(r)} · ${uke(r)}`;
+  if(r.status==='vurdering')T.push({r,k:'mats',due:null,t:'Avgjør om forespørselen skal prioriteres',s:sub});
+  if(r.mottatt&&!r.forsteSvar&&!['avslatt','avlyst'].includes(r.status))T.push({r,due:addWd(r.mottatt,f.svarSkole),t:'Svar til skolen (3-dagersfrist)',s:sub,mal:'skole-mottatt'});
+  const sk=skoleKey(r);if(sk&&!(r.sendt||{})[sk])T.push({r,due:r.statusDato||t,t:MALNAVN[sk],s:sub,mal:sk});
+  if(CLOSED.includes(r.status))continue;
+  (r.avd||[]).forEach((l,i)=>{const n=avdNavn(l.avdId);
+   if(l.status==='venter'){
+    if(!l.henvendt)T.push({r,li:i,due:l.lagtTil||t,t:'Send henvendelse til '+n,s:sub,mal:'henvendelse'});
+    else if(!l.purring1)T.push({r,li:i,due:addWd(l.henvendt,f.purring1),t:'Purring til '+n,s:sub,mal:'purring1'});
+    else T.push({r,li:i,due:addWd(l.purring1,f.ingenSvar),t:'Ingen svar fra '+n+' etter purring',s:sub,act:'ingen'});
+   }
+   if(l.status==='kanikke')T.push({r,li:i,due:l.nySjekk||t,t:'Ny sjekk med '+n,s:sub});
+   if(l.status==='ja'&&!l.avklart&&!l.paminnelse&&r.fra)T.push({r,li:i,due:addDays(r.fra,-7*f.paminnelseUker),t:'Påminnelse om reserverte plasser: '+n,s:sub,mal:'paminnelse'});
+  });
+ }
+ return T.sort((a,b)=>(a.due||'').localeCompare(b.due||''));
+}
+
+/* ---------- lagring ---------- */
+const LS='utplassering-prototype-v1';
+const queues={};
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){note='Nettleseren lar ikke prototypen lagre. Endringer forsvinner når du lukker siden – bruk Eksporter under Mer.'}}
+function put(col,obj){
+ if(mode==='db'){const p=col+'/'+obj.id,data=clone(obj);delete data.id;
+  queues[p]=(queues[p]||Promise.resolve()).then(()=>db.doc(p).set(data)).catch(e=>{if(e?.code==='invalid_argument'){lesTilgang=true;sched();toast('Du har ikke skrivetilgang til denne oversikten.')}else toast('Kunne ikke lagre ('+(e?.code||'feil')+'). Prøv igjen.')});
+  return queues[p]}
+ saveLocal();return Promise.resolve()}
+function del(col,id){if(mode==='db'){const p=col+'/'+id;queues[p]=(queues[p]||Promise.resolve()).then(()=>db.doc(p).delete()).catch(()=>toast('Kunne ikke slette.'));return queues[p]}saveLocal();return Promise.resolve()}
+function upReq(r){const i=S.req.findIndex(x=>x.id===r.id);r.endret=today();if(i<0)S.req.push(r);else S.req[i]=r;put('foresporsler',r);refresh()}
+function upAvd(a){const i=S.avd.findIndex(x=>x.id===a.id);if(i<0)S.avd.push(a);else S.avd[i]=a;put('avdelinger',a);refresh()}
+function upCfg(c){S.cfg=c;put('config',Object.assign({id:'main'},c));refresh()}
+const getReq=id=>clone(S.req.find(r=>r.id===id));
+/* v1.0: gjør om gamle statuser (tidlig estimat, personalskjema mottatt/sendt). Returnerer true hvis noe ble endret. */
+function normReq(r){let e=false;
+ if(r.status==='tidlig'){r.status='mottatt';if(!r.mottatt)r.mottatt=r.statusDato||r.opprettet||today();(r.logg=r.logg||[]).unshift({d:today(),t:'Tidlig estimat gjort om til Mottatt (tidlig estimat er fjernet)'});e=true}
+ if(r.status==='ps-mottatt'){r.status='bekreftet';(r.logg=r.logg||[]).unshift({d:today(),t:'Status «Personalskjema mottatt» gjort om til Bekreftet'});e=true}
+ if(r.status==='ps-sendt'){r.status='bekreftet';if(!r.psSendt)r.psSendt=r.statusDato||today();(r.logg=r.logg||[]).unshift({d:today(),t:'Status «Personalskjema sendt» gjort om til Bekreftet med avhuking for personalskjema'});e=true}
+ if(r.type&&r.type!=='reell'){r.type='reell';e=true}
+ return e}
+const normAll=()=>S.req.reduce((n,r)=>n+(normReq(r)?1:0),0);
+const logg=(r,t)=>{(r.logg=r.logg||[]).unshift({d:today(),t})};
+
+function sub(col,apply){return db.collection(col).onSnapshot(s=>{apply(s.docs.map(d=>Object.assign({},d.data(),{id:d.id})));if(!s.metadata.fromCache)loaded[{avdelinger:'avd',foresporsler:'req',koblinger:'kob'}[col]||'cfg']=true;check();sched()},e=>{note='Lagringen svarer ikke ('+(e?.code||'feil')+'). Det du ser kan være utdatert.';sched()})}
+let tmr=null;
+function check(){if(loaded.avd&&loaded.req&&loaded.kob&&loaded.cfg){clearTimeout(tmr);if(note.startsWith('Får ikke'))note=''}}
+function startDb(){
+ tmr=setTimeout(()=>{note='Får ikke kontakt med lagringen ennå. Det du ser kan være utdatert.';sched()},10000);
+ sub('avdelinger',a=>{S.avd=a});sub('foresporsler',r=>{S.req=r;normAll()});sub('koblinger',k=>{S.kob=k});
+ sub('config',c=>{const m=c.find(x=>x.id==='main');if(m){const x=Object.assign({},m);delete x.id;S.cfg=x}});
+}
+function startLocal(){
+ let d=null;try{d=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
+ if(!d){try{d=JSON.parse($('#seed').textContent)}catch(e){}if(d)S=Object.assign(S,{avd:d.avd||[],req:d.req||[],kob:d.kob||[],cfg:d.cfg||null}),saveLocal()}
+ else S=Object.assign(S,d);
+ if(!Array.isArray(S.kob))S.kob=[];const m1=migrer(),m2=normAll();if(m1||m2)saveLocal();
+}
+let raf=0;const sched=()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;refresh(false)})};
+
+/* ---------- små UI-biter ---------- */
+const pill=(k,ps)=>{const s=SM[k]||SM.mottatt;return`<span class="pill" style="background:${s.c};color:${s.t};${s.b?'border:'+s.b:''}">${esc(s.n)}${ps?` <span class="mark" title="Personalskjema sendt til Ankomstsenteret">PS sendt</span>`:''}</span>`};
+const avk='<span class="avk">avklares</span>';
+const orAvk=v=>v||v===0?esc(v):avk;
+const eksB=r=>r.eksempel?'<span class="eks">EKSEMPEL</span>':'';
+async function copyText(t,el){try{await navigator.clipboard.writeText(t);toast('Kopiert')}catch(err){const x=el||Object.assign(document.createElement('textarea'),{value:t});if(!el){x.style.position='fixed';x.style.opacity='0';document.body.appendChild(x)}x.focus();x.select();let ok=false;try{ok=document.execCommand('copy')}catch(e2){}if(!el)x.remove();toast(ok?'Kopiert':'Marker teksten og kopier manuelt')}}
+let tt;function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2600)}
+const opt=(v,l,sel)=>`<option value="${esc(v)}"${sel?' selected':''}>${esc(l)}</option>`;
+const barOf=r=>{const{b,res}=cnt(r),n=Math.max(+r.antall||0,b+res,1);return`<div class="prog" aria-hidden="true"><i style="width:${b/n*100}%;background:#22a05a"></i><i style="width:${res/n*100}%;background:#a7e3b5"></i></div>`};
+const progTxt=r=>{const{b,res}=cnt(r);return`<b>${b} av ${+r.antall||0} bekreftet</b>${res?` · ${res} reservert`:''}`};
+
+/* ---------- Forms-lenke, infopakke-lenke og lister (v1.0) ---------- */
+const PH=['ID','AVDELING','SKOLE','LINJE','PERIODE'];
+const INFOPAKKE_URL='https://mtokje.github.io/verktoy/utplassering/infopakke/#p=';
+function formsInfo(u){u=(u||'').trim();if(!u)return{tom:true,funnet:[]};
+ return{ok:/^https:\/\//.test(u),ms:/forms\.(office|microsoft|cloud\.microsoft)/.test(u),funnet:PH.filter(p=>u.includes('{'+p+'}')||u.toUpperCase().includes('%7B'+p+'%7D'))}}
+function fLenke(u,vals){u=(u||'').trim();if(!u)return'';PH.forEach(p=>{const v=encodeURIComponent(vals[p]||'');u=u.split('{'+p+'}').join(v).replace(new RegExp('%7B'+p+'%7D','gi'),v)});return u}
+const FORMS_TEST={ID:'U-2026-999',AVDELING:'Prefab rør',SKOLE:'Stord vidaregåande skule',LINJE:'Vg1 Teknologi- og industrifag (TIP)',PERIODE:'8.2.2027–19.2.2027'};
+function rensk(o){if(Array.isArray(o))return o.map(rensk).filter(v=>v!==undefined);if(o&&typeof o==='object'){const x={};for(const[k,v]of Object.entries(o)){const r=rensk(v);if(r!==undefined)x[k]=r}return Object.keys(x).length?x:undefined}if(o===''||o==null)return undefined;return typeof o==='string'?o.trim()||undefined:o}
+function b64url(str){const b=new TextEncoder().encode(str);let s='';for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function infopakkeData(r){const c=cfg();const sk=skole(r.skole);
+ const a=(r.avd||[]).filter(l=>l.status==='ja').map(l=>{const x=avdBy(l.avdId);if(!x)return{navn:'(fjernet avdeling)',antall:+l.antall||0};
+  const par=x.parent?avdBy(x.parent):null;return{navn:par?par.navn:x.navn,antall:+l.antall||0,kontakt:x.kontakt,tlf:x.telefon,sted:x.sted,prosjekt:par?x.navn:undefined}});
+ return rensk({v:1,r:{id:r.id,skole:r.skole,kort:sk?.kort,trinn:r.trinn,linje:r.linje,fra:r.fra,til:r.til,laerer:{navn:r.kontakt?.navn,tlf:r.kontakt?.tlf,epost:r.kontakt?.epost}},a,f:c.felles||{},forms:c.forms})}
+const infopakkeUrl=r=>INFOPAKKE_URL+b64url(JSON.stringify(infopakkeData(r)));
+function listerJs(){const c=cfg();const o={oppdatert:today(),skoler:c.skoler.filter(s=>!s.eksempel).map(s=>({id:s.id,navn:s.navn,kort:s.kort||s.navn,linjer:{Vg1:(s.linjer||{}).Vg1||[],Vg2:(s.linjer||{}).Vg2||[],Vg3:(s.linjer||{}).Vg3||[]}})),laerefag:LAEREFAG.slice()};
+ return'window.UTPL_LISTER = '+JSON.stringify(o,null,2)+';\n'}
+
+/* ---------- visninger ---------- */
+function vToday(){
+ const T=tasks(),t=today(),soon=addWd(t,5);
+ const over=T.filter(x=>x.due&&x.due<t),now=T.filter(x=>x.due===t),snart=T.filter(x=>x.due>t&&x.due<=soon),sen=T.filter(x=>x.due>soon),mats=T.filter(x=>x.k==='mats');
+ const row=x=>`<div class="task"><span class="due ${x.due<t?'over':x.due===t?'now':''}">${x.due?esc(dueLbl(x.due)):'Venter'}</span><div><div class="t">${esc(x.t)} ${eksB(x.r)}</div><div class="s">${esc(x.s)}</div>
+  <div class="acts">${x.mal?`<button class="btn sm pri" data-act="mal" data-id="${esc(x.r.id)}" data-key="${x.mal}" data-li="${x.li??''}">Åpne e-postmal</button>`:''}${x.act==='ingen'?`<button class="btn sm pri" data-act="ingen" data-id="${esc(x.r.id)}" data-li="${x.li}">Sett «Ingen tilbakemelding»</button>`:''}<button class="btn sm" data-act="req" data-id="${esc(x.r.id)}">Åpne forespørsel</button></div></div></div>`;
+ const grp=(h,a,sm)=>a.length?`<div class="sec"><h2>${h}</h2><small>${sm||a.length}</small></div><div class="list">${a.map(row).join('')}</div>`:'';
+ // neste 4 uker
+ const end=addDays(t,28);let b=0,res=0,ua=0;
+ for(const r of S.req){if(['avslatt','avlyst'].includes(r.status)||!r.fra||r.fra>end||(r.til||r.fra)<t)continue;const c=cnt(r);b+=c.b;res+=c.res;if(!['bekreftet','gjennomfort'].includes(r.status))ua+=Math.max(0,(+r.antall||0)-c.b-c.res)}
+ return`<div class="row between"><h1>Hva må gjøres i dag</h1><div class="row"><button class="btn" data-act="paste">Lim inn fra skjema</button><button class="btn pri" data-act="newreq">+ Ny forespørsel</button></div></div>
+ <div class="tiles"><div class="tile ${over.length?'hot':''}"><b>${over.length}</b><span>Forfalt</span></div><div class="tile"><b>${now.length}</b><span>I dag</span></div><div class="tile"><b>${snart.length}</b><span>Neste 5 arbeidsdager</span></div><div class="tile"><b>${mats.length}</b><span>Hos Mats</span></div></div>
+ <p class="note">Neste 4 uker: <b>${b}</b> elever bekreftet · <b>${res}</b> reservert · <b>${ua}</b> ikke avklart. <a href="#kalender">Se kalenderen</a></p>
+ ${!over.length&&!now.length?'<div class="card empty">Ingen frister i dag. Godt jobbet.</div>':''}
+ ${grp('Forfalt',over)}${grp('I dag',now)}${grp('Neste 5 arbeidsdager',snart)}${grp('Hos Mats',mats.map(x=>Object.assign({},x,{due:null})),'Tvil om prioritering')}
+ ${sen.length?`<div class="sec"><h2>Senere</h2><small>${sen.length}</small><button class="btn sm ghost" data-act="senere">${ui.senere?'Skjul':'Vis'}</button></div>${ui.senere?`<div class="list">${sen.map(row).join('')}</div>`:''}`:''}`;
+}
+
+function reqCard(r){const s=SM[r.status]||SM.mottatt;const nf=tasks().find(x=>x.r.id===r.id&&x.due);
+ return`<button class="req" style="--c:${s.bar||s.c}" data-act="req" data-id="${esc(r.id)}"><div class="top2"><span><b>${esc(kort(r.skole))} · ${esc(linjeTxt(r))}</b> ${eksB(r)}</span>${pill(r.status,r.psSendt)}</div>
+ <div class="meta">${esc(r.id)} · ${esc(antTxt(r))} · ${esc(uke(r))}${r.fra?' ('+esc(periode(r))+')':''}</div>
+ ${(r.avd||[]).length?`<div class="meta">${progTxt(r)}</div>${barOf(r)}`:''}
+ ${nf?`<div class="meta" style="color:${nf.due<=today()?'var(--orink)':''}">Neste: ${esc(nf.t)} – ${esc(dueLbl(nf.due))}</div>`:''}</button>`}
+function vReqs(){
+ const G={aktive:r=>!CLOSED.includes(r.status),avsluttet:r=>CLOSED.includes(r.status),alle:()=>true};
+ const q=ui.q.trim().toLowerCase();
+ const list=S.req.filter(G[ui.filter]).filter(r=>!q||[r.id,r.skole,kort(r.skole),r.linje,r.trinn,...(r.fag||[])].join(' ').toLowerCase().includes(q)).sort((a,b)=>(a.fra||'9').localeCompare(b.fra||'9'));
+ const n=k=>S.req.filter(G[k]).length;
+ return`<div class="row between"><h1>Forespørsler</h1><div class="row"><button class="btn" data-act="paste">Lim inn fra skjema</button><button class="btn pri" data-act="newreq">+ Ny forespørsel</button></div></div>
+ <div class="filters" role="group" aria-label="Filter">${[['aktive','Aktive'],['avsluttet','Avsluttet'],['alle','Alle']].map(([k,l])=>`<button data-act="filter" data-k="${k}" aria-pressed="${ui.filter===k}">${l} (${n(k)})</button>`).join('')}</div>
+ <div class="fld"><input type="text" id="q" placeholder="Søk på skole, linje, fag eller ID" value="${esc(ui.q)}" aria-label="Søk"></div>
+ ${list.length?list.map(reqCard).join(''):'<div class="card empty">Ingen forespørsler her.</div>'}`}
+
+function vCal(){
+ const t=today();if(!ui.calStart)ui.calStart=addDays(monday(t),-7);
+ const weeks=[];for(let i=0;i<16;i++)weeks.push(addDays(ui.calStart,i*7));
+ const rs=S.req.filter(r=>r.fra&&(ui.calAvslag||!['avslatt','avlyst'].includes(r.status)));
+ const rows=[];let empty=[];const flush=()=>{if(!empty.length)return;const a=empty[0],z=empty[empty.length-1];rows.push(`<div class="week tom ${empty.includes(monday(t))?'cur':''}"><div class="wk"><b>Uke ${isoWeek(a)}${empty.length>1?'–'+isoWeek(z):''}</b></div><span class="kv">Ingen elever</span></div>`);empty=[]};
+ weeks.forEach(m=>{const su=addDays(m,6);const here=rs.filter(r=>r.fra<=su&&(r.til||r.fra)>=m).sort((a,b)=>a.skole.localeCompare(b.skole));
+  let B=0,R=0,U=0;const slots=here.map(r=>{const c=cnt(r),s=SM[r.status];let txt='';
+   if(['avslatt','avlyst'].includes(r.status))txt=`${r.antall} – ${s.n.toLowerCase()}`;
+   else{B+=c.b;R+=c.res;const u=['bekreftet','gjennomfort'].includes(r.status)?0:Math.max(0,(+r.antall||0)-c.b-c.res);U+=u;txt=[c.b?c.b+' bekr.':'',c.res?c.res+' res.':'',u?u+' ikke avklart':''].filter(Boolean).join(' · ')||'0'}
+   return`<button class="slot ${r.status==='avlyst'?'dash':''}" style="--c:${s.bar||s.c}" data-act="req" data-id="${esc(r.id)}"><span><b>${esc(kort(r.skole))}</b> · ${esc(linjeTxt(r))} ${eksB(r)}</span><small>${esc(txt)} · ${esc(s.n)}${r.psSendt?' · PS sendt':''}</small></button>`}).join('');
+  const sm=(v,l,bg,fg)=>v?`<span class="sum" style="background:${bg};color:${fg}">${v} ${l}</span>`:'';
+  if(!here.length){empty.push(m);return}flush();
+  rows.push(`<div class="week ${m===monday(t)?'cur':''}"><div class="wk"><b>Uke ${isoWeek(m)}</b><span>${fm(m)}–${fy(addDays(m,4))}</span><div class="sums">${sm(B,'bekreftet','#22a05a','#fff')}${sm(R,'reservert','#a7e3b5','#0f3d1f')}${sm(U,'ikke avklart','#f5c542','#10223a')}</div></div><div>${slots}</div></div>`)});flush();
+ return`<div class="row between"><h1>Kalender</h1><div class="row"><button class="btn sm" data-act="cal" data-d="-8">‹ Tidligere</button><button class="btn sm" data-act="cal" data-d="0">Denne uka</button><button class="btn sm" data-act="cal" data-d="8">Senere ›</button></div></div>
+ <p class="note">Tallene teller bare bekreftede elever som «bekreftet». Reserverte og ikke avklarte vises hver for seg.</p>
+ <div class="legend">${STATUS.map(s=>pill(s.k)).join('')}</div>
+ <label class="chk"><input type="checkbox" data-ch="calAvslag" ${ui.calAvslag?'checked':''}> Vis avslåtte og avlyste</label>
+ <div class="list" style="margin-top:10px">${rows.join('')}</div>`}
+
+function coverage(){const sure=new Set,uns=new Set;for(const a of S.avd){(a.fag||[]).forEach(f=>sure.add(f));(a.usikre||[]).forEach(f=>uns.add(f))}
+ return{uten:LAEREFAG.filter(f=>!sure.has(f)&&!uns.has(f)),kunUsikker:LAEREFAG.filter(f=>!sure.has(f)&&uns.has(f))}}
+function avdCome(id){const t=today();let b=0,res=0;for(const r of S.req){if(['avslatt','avlyst','gjennomfort'].includes(r.status)||(r.til||r.fra||'')<t)continue;for(const l of r.avd||[])if(l.avdId===id&&l.status==='ja'){if(l.avklart)b+=+l.antall||0;else res+=+l.antall||0}}return{b,res}}
+function avdCard(a){const fag=[...(a.fag||[]).map(f=>`<span class="chip">${esc(f)}</span>`),...(a.usikre||[]).map(f=>`<span class="chip q" title="Usikkert">${esc(f)} ?</span>`)].join('');
+ const c=avdCome(a.id);const projs=S.avd.filter(p=>p.parent===a.id).sort((x,y)=>x.navn.localeCompare(y.navn));
+ return`<div class="card avd"><div class="hd"><h3>${esc(a.navn)}</h3><button class="btn sm" data-act="editavd" data-id="${esc(a.id)}">Endre</button></div>${a.merknad?`<div class="kv">${esc(a.merknad)}</div>`:''}
+ ${a.gruppe?`<div class="r"><span>Prosjekter</span><span>${projs.length?projs.map(p=>`<button class="btn sm" style="margin:2px 4px 2px 0" data-act="editavd" data-id="${esc(p.id)}">${esc(p.navn)}${p.kontakt?' · '+esc(p.kontakt):''}</button>`).join(''):'<span class="kv">Ingen prosjekter lagt inn</span>'}<br><button class="btn sm pri" style="margin-top:6px" data-act="newavd" data-parent="${esc(a.id)}">+ Legg til prosjekt</button></span></div>`:`
+ <div class="r"><span>Fag</span><span>${fag||avk}</span></div>
+ <div class="r"><span>Linjer</span><span>${(()=>{const ks=S.kob.filter(k=>k.avdId===a.id);return ks.length?ks.map(k=>`<span class="chip">${esc(kNavn(k))}</span>`).join(''):avk})()} <button class="btn sm ghost" data-act="kgo" data-id="${esc(a.id)}">Koblinger ›</button></span></div>
+ <div class="r"><span>Kontakt</span><span>${orAvk(a.kontakt)}</span></div>
+ <div class="r"><span>Telefon</span><span>${orAvk(a.telefon)}</span></div>
+ <div class="r"><span>E-post</span><span>${orAvk(a.epost)}</span></div>
+ <div class="r"><span>Sted</span><span>${orAvk(a.sted)}</span></div>
+ <div class="r"><span>Kapasitet</span><span>${a.kapasitet||a.kapasitet===0?esc(a.kapasitet)+' elever samtidig':avk}</span></div>
+ ${c.b||c.res?`<div class="r"><span>Kommende</span><span>${c.b} bekreftet · ${c.res} reservert</span></div>`:''}`}</div>`}
+function vAvd(){
+ const top=S.avd.filter(a=>!a.parent).sort((a,b)=>(a.rek??99)-(b.rek??99)||a.navn.localeCompare(b.navn));
+ const cv=coverage();
+ let miss=0;for(const a of top){if(a.gruppe)continue;if(!(a.fag||[]).length&&!(a.usikre||[]).length)miss++;if(!S.kob.some(k=>k.avdId===a.id))miss++;if(!a.kontakt)miss++;if(!a.telefon)miss++;if(!a.epost)miss++;if(!a.sted)miss++;if(a.kapasitet==null||a.kapasitet==='')miss++}
+ return`<div class="row between"><h1>Avdelinger</h1><button class="btn pri" data-act="newavd">+ Ny avdeling</button></div>
+ <nav class="seg" aria-label="Visning" style="margin:10px 0"><a href="#avdelinger" aria-current="page">Register</a><a href="#koblinger">Koblinger</a></nav>
+ <p class="note">${top.length} avdelinger · ${miss} felt må avklares. Felt merket ${avk} mangler.</p>
+ <div class="gap"><b>Lærefag uten plassering:</b> ${cv.uten.length?cv.uten.map(f=>`<span class="chip">${esc(f)}</span>`).join(''):'ingen'}${cv.kunUsikker.length?`<br><b>Bare usikker plassering:</b> ${cv.kunUsikker.map(f=>`<span class="chip q">${esc(f)} ?</span>`).join('')}`:''}</div>
+ ${top.length?`<div class="grid">${top.map(avdCard).join('')}</div>`:'<div class="card empty">Ingen avdelinger lagt inn ennå.</div>'}`}
+
+function vMer(){const f=F(),c=cfg();const nE=S.req.filter(r=>r.eksempel).length;
+ const fr=(k,l,u)=>`<label class="fld"><span>${l}</span><input type="number" min="0" data-ch="frist" data-k="${k}" value="${esc(f[k])}"><small>${u}</small></label>`;
+ return`<h1>Mer</h1>
+ <div class="blk" style="margin-top:14px"><h3>Lagring</h3><p style="margin:0">${mode==='db'?'Data lagres automatisk og er de samme på mobil og PC når du er logget inn i Claude. Alle som får redigeringstilgang til denne siden, jobber i de samme dataene.':'Lokal modus: data lagres bare i denne nettleseren på denne maskinen. Bruk Eksporter og Importer under for å flytte data mellom maskiner.'}</p></div>
+ <div class="blk"><h3>Frister</h3><div class="two">${fr('svarSkole','Svar til skolen','arbeidsdager etter mottatt')}${fr('purring1','Purring','arbeidsdager etter henvendelse')}${fr('ingenSvar','«Ingen tilbakemelding» foreslås','arbeidsdager etter purring')}${fr('paminnelseUker','Påminnelse om reserverte plasser','uker før oppstart')}</div></div>
+ <div class="blk"><h3>Skoler og linjer</h3>${c.skoler.map(s=>`<div class="mailrow"><span><b>${esc(s.navn)}</b> ${s.eksempel?'<span class="eks">EKSEMPEL</span>':''}<br><span class="kv">${['Vg1','Vg2','Vg3'].map(t=>t+': '+((s.linjer||{})[t]||[]).length).join(' · ')} linjer</span></span><button class="btn sm" data-act="skolelinje" data-id="${esc(s.id)}">Legg til linje</button></div>`).join('')}
+  <div class="two" style="margin-top:10px"><input type="text" id="nySkole" placeholder="Ny skole, fullt navn"><input type="text" id="nyKort" placeholder="Kortnavn, f.eks. Fitjar vgs"></div><button class="btn" style="margin-top:8px" data-act="addskole">Legg til skole</button></div>
+ <div class="blk"><h3>Felles oppmøteinfo</h3><p class="kv" style="margin-top:0">Gjelder alle infopakker. Følger med når du trykker «Lag infopakke».</p>
+  <label class="fld"><span>Oppmøtested første dag</span><input type="text" data-ch="felles" data-k="sted" value="${esc(c.felles?.sted||'')}" placeholder="Ankomstsenteret, adresse eller veibeskrivelse"></label>
+  <div class="two"><label class="fld"><span>Standard oppmøtetid</span><input type="text" data-ch="felles" data-k="tid" value="${esc(c.felles?.tid||'')}" placeholder="f.eks. 07:00"></label><span></span></div>
+  <div class="two"><label class="fld"><span>Hvem eleven ringer hvis ingen møter – navn</span><input type="text" data-ch="felles" data-k="ringNavn" value="${esc(c.felles?.ringNavn||'')}"></label><label class="fld"><span>Telefon</span><input type="tel" data-ch="felles" data-k="ringTlf" value="${esc(c.felles?.ringTlf||'')}"></label></div>
+  ${['sted','tid','ringNavn','ringTlf'].some(k=>!c.felles?.[k])?`<p class="kv" style="margin:0">Felt som står tomme, vises som «mangler» på infopakken.</p>`:''}</div>
+ <div class="blk"><h3>Forms-lenke til elevens tilbakemelding (del F)</h3>
+  <label class="fld"><span>Forhåndsutfylt lenke fra Microsoft Forms</span><input type="url" data-ch="forms" value="${esc(c.forms||'')}" placeholder="https://forms.office.com/…{ID}…" autocomplete="off"></label>
+  <p class="kv" style="margin-top:0">Lenken skal ha plassholderne ${PH.map(p=>`<code>{${p}}</code>`).join(' ')} i de forhåndsutfylte feltene. Se «Del F – elevens tilbakemelding» i prosjektet.</p>
+  ${(()=>{const fi=formsInfo(c.forms);if(fi.tom)return'<p class="kv" style="margin:0"><span class="avk">mangler</span> Infopakkene får rød «MANGLER» der QR-koden til del F skal stå.</p>';
+   return`<ul class="logg" style="margin:0 0 10px">${PH.map(p=>`<li>${fi.funnet.includes(p)?'<span class="sent">✓</span>':'<span style="color:#c62f34;font-weight:700">✗</span>'} {${p}}</li>`).join('')}</ul>
+   ${!fi.ok?'<div class="note warn">Lenken må begynne med https://</div>':''}${fi.ok&&!fi.ms?'<div class="note gul">Lenken ser ikke ut som en Microsoft Forms-lenke. Sjekk at den er riktig.</div>':''}${fi.funnet.length<PH.length?`<div class="note warn">Mangler ${PH.length-fi.funnet.length} av ${PH.length} plassholdere. Lag den forhåndsutfylte lenken på nytt i Forms.</div>`:''}
+   ${fi.ok?`<a class="btn sm" href="${esc(fLenke(c.forms,FORMS_TEST))}" target="_blank" rel="noopener">Test lenken med eksempelverdier</a> <span class="kv">Åpner Forms med ${esc(FORMS_TEST.ID)} og eksempelverdier – sjekk at de fem feltene er fylt ut.</span>`:''}`})()}</div>
+ <div class="blk"><h3>Kopier lister til skjemaet</h3><p style="margin:0 0 10px">Skoler, linjer og lærefag til skjemaet for skolen (del C) og infopakken (del D). Lim innholdet inn i <code>utplassering/lister.js</code> i repoet. Eksempelskoler er ikke med.</p><button class="btn" data-act="lister">Kopier lister til skjemaet</button><div id="lbox"></div></div>
+ <div class="blk"><h3>Eksempeldata</h3><p style="margin:0 0 10px">${nE} oppdiktede forespørsler er merket <span class="eks">EKSEMPEL</span>.</p>${nE?`<button class="btn dan" data-act="fjerneks">Fjern alle eksempler</button><div id="eksConf"></div>`:''}</div>
+ <div class="blk"><h3>Eksporter og importer</h3><p style="margin:0 0 10px">Sikkerhetskopi av avdelinger, koblinger, forespørsler og innstillinger. Ingen elevnavn. Brukes ikke til infopakken – den lages med «Lag infopakke» på forespørselen.</p><div class="row"><button class="btn" data-act="export">Eksporter</button><button class="btn" data-act="import">Importer</button></div><div id="xbox"></div></div>
+ <div class="blk"><h3>Statusfarger</h3><div class="legend">${STATUS.map(s=>pill(s.k)).join('')}</div><p class="kv" style="margin:0">Farger fra grunnlagsdokumentet v1.0, kap. 4.1. «PS sendt» vises når personalskjema er sendt til Ankomstsenteret.</p></div>`}
+
+/* ---------- koblinger ---------- */
+function kData(){const all=alleLinjer(ui.kSkole);const keys=new Set(all.map(l=>l.key));const f=ui.kF;
+ const base=S.kob.filter(k=>keys.has(kLk(k))&&avdBy(k.avdId));
+ const vis=base.filter(k=>(!f.fag||(k.fag||[]).includes(f.fag))&&(!f.avd||k.avdId===f.avd)&&(!f.linje||kLk(k)===f.linje));
+ const filt=!!(f.fag||f.avd||f.linje);const usedL=new Set(vis.map(kLk)),usedA=new Set(vis.map(k=>k.avdId));
+ const lines=all.filter(l=>!(filt||ui.kSkjul)||usedL.has(l.key));const idx=new Map(lines.map((l,i)=>[l.key,i]));
+ const order=S.avd.filter(a=>!a.parent).sort((a,b)=>(a.rek??99)-(b.rek??99)||a.navn.localeCompare(b.navn)).flatMap(a=>[a,...S.avd.filter(p=>p.parent===a.id).sort((x,y)=>x.navn.localeCompare(y.navn))]);
+ const bary=a=>{const v=vis.filter(k=>k.avdId===a.id).map(k=>idx.get(kLk(k)));return v.length?v.reduce((x,y)=>x+y,0)/v.length:null};
+ const avds=order.filter(a=>!filt||usedA.has(a.id)).map((a,i)=>({a,b:bary(a),i})).sort((x,y)=>(x.b==null)-(y.b==null)||(x.b??0)-(y.b??0)||x.i-y.i).map(x=>x.a);
+ return{lines,avds,vis,base,all,filt}}
+function vKob(){const{lines,avds,vis,base,all,filt}=kData();const sel=ui.kSel;
+ const on=k=>sel&&(sel.t==='linje'?kLk(k)===sel.k:k.avdId===sel.k);
+ const near=new Set(sel?vis.filter(on).flatMap(k=>[kLk(k),k.avdId]):[]);
+ let lastSk='';const L=lines.map((l,i)=>{const n=vis.filter(k=>kLk(k)===l.key).length;const isSel=sel&&sel.t==='linje'&&sel.k===l.key;
+  const head=l.sk.id!==lastSk?`<div class="kgrp" style="--c:${skFarge(l.sk.id)}"><i></i>${esc(l.sk.kort||l.sk.navn)}${l.sk.eksempel?' <span class="eks">EKSEMPEL</span>':''}</div>`:'';lastSk=l.sk.id;
+  return head+`<button class="ktile ${n?'':'none'} ${isSel?'sel':sel&&!near.has(l.key)?'dim':''}" style="--c:${skFarge(l.sk.id)}" data-act="ksel" data-t="linje" data-k="${esc(l.key)}" data-ln="${i}"><small>${l.trinn}</small>${esc(l.linje)}${n?`<span class="kn">${n}</span>`:''}</button>`}).join('');
+ const A=avds.map((a,i)=>{const n=vis.filter(k=>k.avdId===a.id).length;const isSel=sel&&sel.t==='avd'&&sel.k===a.id;
+  return`<button class="ktile ${n?'':'none'} ${isSel?'sel':sel&&!near.has(a.id)?'dim':''}" data-act="ksel" data-t="avd" data-k="${esc(a.id)}" data-an="${esc(a.id)}">${a.parent?'<small>Prosjekt</small>':''}${esc(a.navn)}${n?`<span class="kn">${n}</span>`:''}</button>`}).join('');
+ const uten=all.filter(l=>!base.some(k=>kLk(k)===l.key)).length;
+ const fagN=f=>base.filter(k=>(k.fag||[]).includes(f)).length;const fagList=[...new Set([...LAEREFAG,...base.flatMap(k=>k.fag||[])])].sort((a,b)=>a.localeCompare(b,'no'));
+ const avdOpts=S.avd.filter(a=>!a.gruppe||base.some(k=>k.avdId===a.id)).sort((a,b)=>avdNavn(a.id).localeCompare(avdNavn(b.id),'no'));
+ const fsel=(k,lab,opts)=>`<label class="fld"><span>${lab}</span><select data-ch="kf" data-k="${k}" class="${ui.kF[k]?'on':''}">${opts}</select></label>`;
+ const nF=['fag','avd','linje'].filter(k=>ui.kF[k]).length;
+ const filterHtml=`<details class="kfd" ${filt||innerWidth>=761?'open':''}><summary>Filter${nF?` (${nF} aktive)`:''}</summary><div class="kfilt">${fsel('fag','Fag',opt('','Alle fag')+fagList.map(f=>opt(f,f+' ('+fagN(f)+')',ui.kF.fag===f)).join(''))}${fsel('avd','Avdeling',opt('','Alle avdelinger')+avdOpts.map(a=>opt(a.id,avdNavn(a.id),ui.kF.avd===a.id)).join(''))}${fsel('linje','Skolelinje',opt('','Alle skolelinjer')+all.map(l=>opt(l.key,(l.sk.kort||l.sk.navn)+' · '+l.trinn+' '+l.linje,ui.kF.linje===l.key)).join(''))}</div>
+ <div class="row" style="margin-bottom:4px"><label class="chk"><input type="checkbox" data-ch="kskjul" ${ui.kSkjul?'checked':''}> Skjul linjer uten kobling</label>${filt?'<button class="btn sm" data-act="kfnull">Nullstill filter</button>':''}</div></details>`;
+ const sk=cfg().skoler;
+ return`<div class="row between"><h1>Avdelinger</h1><button class="btn pri" data-act="newavd">+ Ny avdeling</button></div>
+ <nav class="seg" aria-label="Visning" style="margin:10px 0"><a href="#avdelinger">Register</a><a href="#koblinger" aria-current="page">Koblinger</a></nav>
+ <p class="note">Hvilke linjer på hvilke skoler passer for hvilke avdelinger, og med hvilke fag. ${all.length} linjer · ${base.length} koblinger · ${uten} linjer uten avdeling.${filt?` <b>Filter: viser ${vis.length} ${vis.length===1?'kobling':'koblinger'}.</b>`:''}</p>
+ <div class="filters" role="group" aria-label="Skole"><button data-act="kskole" data-k="alle" aria-pressed="${ui.kSkole==='alle'}">Alle skoler</button>${sk.map(s=>`<button data-act="kskole" data-k="${esc(s.id)}" aria-pressed="${ui.kSkole===s.id}"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${skFarge(s.id)};margin-right:6px"></span>${esc(s.kort||s.navn)}</button>`).join('')}</div>
+ ${filterHtml}
+ <div class="kwrap"><div><div class="kmap" id="kmap"><svg class="kwires" id="kwires" aria-hidden="true"></svg><div class="klabels" id="klabels"></div>
+  <div class="kcol kl"><div class="khead">Skolelinjer</div>${L||`<span class="kv">${filt?'Ingen koblinger passer filteret.':ui.kSkjul?'Ingen koblede linjer ennå. Ta bort haken for «Skjul linjer uten kobling» for å se alle linjene og legge til koblinger.':'Ingen linjer'}</span>`}</div>
+  <div class="kcol kr"><div class="khead" style="text-align:right">Avdelinger</div>${A}</div></div>${sel?'<div class="kspacer"></div>':''}</div>
+ ${kPanel()}</div>`}
+function kPanel(){const sel=ui.kSel;
+ if(!sel)return`<div class="kpanel idle blk"><h3>Slik bruker du kartet</h3><p style="margin:0 0 8px">Trykk på en linje eller en avdeling for å se koblingene og fagene, og for å legge til nye.</p><p class="kv" style="margin:0">Trykk på en fag-etikett eller en strek for å endre fag eller fjerne koblingen. Stiplede ruter har ingen kobling ennå.</p></div>`;
+ const row=(k,txt)=>`<div class="krow"><span><b>${esc(txt)}</b><br>${(k.fag||[]).length?k.fag.map(f=>`<span class="chip">${esc(f)}</span>`).join(''):avk}</span><button class="btn sm" data-act="kedit" data-id="${esc(k.id)}">Endre</button></div>`;
+ if(sel.t==='linje'){const[skId,t,l]=sel.k.split('|');const s=skById(skId);const ks=S.kob.filter(k=>kLk(k)===sel.k);const used=new Set(ks.map(k=>k.avdId));
+  const opts=S.avd.filter(a=>!a.gruppe&&!used.has(a.id)).sort((a,b)=>avdNavn(a.id).localeCompare(avdNavn(b.id)));
+  return`<div class="kpanel blk"><div class="hd"><h3>${esc(s?.kort||'')} · ${esc(t)} ${esc(l)}</h3><button class="btn sm" data-act="kclose">Lukk</button></div>
+  ${ks.length?ks.map(k=>row(k,avdNavn(k.avdId))).join(''):'<p class="kv">Ingen avdelinger koblet ennå.</p>'}
+  ${opts.length?`<div class="row" style="margin-top:10px"><select id="kAdd" style="flex:1 1 180px" aria-label="Velg avdeling">${opts.map(a=>opt(a.id,avdNavn(a.id))).join('')}</select><button class="btn pri" data-act="kadd">Koble</button></div>`:''}</div>`}
+ const a=avdBy(sel.k);if(!a){ui.kSel=null;return kPanel()}const ks=S.kob.filter(k=>k.avdId===a.id);const used=new Set(ks.map(kLk));
+ const opts=alleLinjer('alle').filter(l=>!used.has(l.key));
+ return`<div class="kpanel blk"><div class="hd"><h3>${esc(avdNavn(a.id))}</h3><button class="btn sm" data-act="kclose">Lukk</button></div>
+ <p class="kv" style="margin:0 0 6px">Fag i avdelingen: ${[...(a.fag||[]),...(a.usikre||[]).map(f=>f+' ?')].map(esc).join(', ')||'avklares'}</p>
+ ${ks.length?ks.map(k=>row(k,kNavn(k))).join(''):'<p class="kv">Ingen linjer koblet ennå.</p>'}
+ ${opts.length?`<div class="row" style="margin-top:10px"><select id="kAdd" style="flex:1 1 180px" aria-label="Velg linje">${opts.map(l=>opt(l.key,(l.sk.kort||l.sk.navn)+' · '+l.trinn+' '+l.linje)).join('')}</select><button class="btn pri" data-act="kadd">Koble</button></div>`:''}</div>`}
+let kro=null;
+function drawK(){const m=$('#kmap');if(!m)return;const svg=$('#kwires'),lab=$('#klabels');const R=m.getBoundingClientRect();const{vis,filt}=kData();const sel=ui.kSel;
+ const showAll=!sel&&vis.length<=14&&(R.width>=560||filt);let P='';const labs=[];
+ for(const k of vis){const lt=m.querySelector(`[data-ln][data-k="${CSS.escape(kLk(k))}"]`),at=m.querySelector(`[data-an="${CSS.escape(k.avdId)}"]`);if(!lt||!at)continue;
+  const ra=lt.getBoundingClientRect(),rb=at.getBoundingClientRect();const x1=ra.right-R.left,y1=ra.top+ra.height/2-R.top,x2=rb.left-R.left,y2=rb.top+rb.height/2-R.top,dx=Math.max(20,(x2-x1)*.55);
+  const on=sel&&(sel.t==='linje'?kLk(k)===sel.k:k.avdId===sel.k);const c=skFarge(k.skole);const d=`M${x1.toFixed(1)},${y1.toFixed(1)} C${(x1+dx).toFixed(1)},${y1.toFixed(1)} ${(x2-dx).toFixed(1)},${y2.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`;
+  P+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="${on?3.2:2}" stroke-opacity="${sel?(on?1:.1):.6}" stroke-linecap="round" ${(k.fag||[]).length?'':'stroke-dasharray="5 5"'}/><path class="hit" d="${d}" fill="none" stroke="transparent" stroke-width="16" data-act="kedit" data-id="${esc(k.id)}"/>`;
+  if(on||showAll)labs.push({x:(x1+x2)/2,y:(y1+y2)/2,k,c,mw:Math.max(56,x2-x1-10)})}
+ svg.innerHTML=P;
+ lab.innerHTML=labs.map(p=>`<button class="klab ${(p.k.fag||[]).length?'':'q'}" style="left:${p.x}px;top:0;--c:${p.c};--mw:${p.mw}px" data-act="kedit" data-id="${esc(p.k.id)}" title="${esc(fagTxt(p.k))}">${(p.k.fag||[]).length?p.k.fag.map(f=>`<span>${esc(f)}</span>`).join(''):'<span>fag avklares</span>'}</button>`).join('');
+ const els=[...lab.children];labs.forEach((p,i)=>{p.h=els[i].offsetHeight});
+ let prev=-1e9;labs.map((p,i)=>i).sort((a,b)=>labs[a].y-labs[b].y).forEach(i=>{const p=labs[i];let t=p.y-p.h/2;if(t<prev+4)t=prev+4;prev=t+p.h;els[i].style.top=t+'px'})}
+function shKob(id){const k=S.kob.find(x=>x.id===id);if(!k)return`<div class="sh-head"><h2>Koblingen finnes ikke lenger</h2><button class="btn sm" data-act="close">Lukk</button></div>`;
+ const a=avdBy(k.avdId);const own=[...new Set([...(a?.fag||[]),...(a?.usikre||[])])];const rest=LAEREFAG.filter(f=>!own.includes(f));
+ const ck=f=>`<label class="chk"><input type="checkbox" name="kfag" value="${esc(f)}" ${(k.fag||[]).includes(f)?'checked':''}> ${esc(f)}${(a?.usikre||[]).includes(f)?' ?':''}</label>`;
+ return`<div class="sh-head"><h2>Kobling</h2><button class="btn sm" data-act="close">Lukk</button></div><div class="sh-body">
+ <div class="blk"><p style="margin:0"><b>${esc(kNavn(k))}</b><br>→ <b>${esc(avdNavn(k.avdId))}</b></p></div>
+ <div class="blk"><h3>Fag for denne koblingen</h3>${own.length?`<p class="kv" style="margin-top:0">Fag i avdelingen</p>${own.map(ck).join('')}`:''}<p class="kv">Andre lærefag</p>${rest.map(ck).join('')}
+ <label class="fld" style="margin-top:10px"><span>Andre fag</span><input type="text" id="k-andre" value="${esc((k.fag||[]).filter(f=>!LAEREFAG.includes(f)&&!own.includes(f)).join(', '))}"><small>Skill med komma.</small></label></div>
+ <button class="btn pri" style="width:100%" data-act="ksave" data-id="${esc(k.id)}">Lagre</button>
+ <button class="btn dan" style="margin-top:14px" data-act="kdel" data-id="${esc(k.id)}">Fjern koblingen</button><div id="kdelConf"></div></div>`}
+
+/* ---------- ark: forespørsel ---------- */
+function shReq(id){const r=S.req.find(x=>x.id===id);if(!r)return`<div class="sh-head"><h2>Fant ikke forespørselen</h2><button class="btn" data-act="close">Lukk</button></div>`;
+ const fs=forslag(r),c=cnt(r),t=today();
+ const lines=(r.avd||[]).map((l,i)=>{const a=avdBy(l.avdId),st=L2M[l.status]||L2M.venter;
+  const mb=(k,show)=>show?`<button class="btn sm" data-act="mal" data-id="${esc(r.id)}" data-key="${k}" data-li="${i}">${MALNAVN[k]}${l[k==='henvendelse'?'henvendt':k]?' ✓':''}</button>`:'';
+  return`<div class="line" style="--c:${st.c}"><div class="hd"><b>${esc(avdNavn(l.avdId))}</b><button class="btn sm ghost" data-act="rmline" data-li="${i}" aria-label="Fjern avdeling">Fjern</button></div>
+  <div class="kv">${a?`${a.kontakt?esc(a.kontakt):'Kontakt '+avk} · tlf ${orAvk(a.telefon)} · e-post ${orAvk(a.epost)}`:''}</div>
+  <div class="two" style="margin-top:8px"><label class="fld"><span>Svar fra avdeling</span><select data-ch="lstatus" data-li="${i}">${L2.map(s=>opt(s.k,s.n,s.k===l.status)).join('')}</select></label>
+  ${l.status==='ja'?`<label class="fld"><span>Antall elever</span><input type="number" min="0" data-ch="lantall" data-li="${i}" value="${esc(l.antall??'')}"></label>`:''}
+  ${l.status==='nei'?`<label class="fld"><span>Årsak</span><select data-ch="larsak" data-li="${i}">${opt('','Velg årsak',!l.arsak)}${ARSAKER.map(a=>opt(a,a,a===l.arsak)).join('')}</select></label>`:''}
+  ${l.status==='kanikke'?`<label class="fld"><span>Dato for ny sjekk</span><input type="date" data-ch="lsjekk" data-li="${i}" value="${esc(l.nySjekk||'')}"></label>`:''}</div>
+  ${l.status==='ja'?`<label class="chk big"><input type="checkbox" data-ch="lavklart" data-li="${i}" ${l.avklart?'checked':''}> Kontaktperson og oppmøtested avklart <span class="kv">(${l.avklart?'teller som bekreftet':'teller som reservert'})</span></label>`:''}
+  ${l.status==='nei'&&l.arsak==='Annet'?`<label class="fld"><span>Årsak (fritekst)</span><input type="text" data-ch="larsaktekst" data-li="${i}" value="${esc(l.arsakTekst||'')}"></label>`:''}
+  <div class="kv" style="margin:6px 0">Henvendelse ${l.henvendt?fm(l.henvendt):'ikke sendt'} · purring ${l.purring1?fm(l.purring1):'–'}${l.paminnelse?' · påminnelse '+fm(l.paminnelse):''}</div>
+  <div class="row">${mb('henvendelse',true)}${mb('purring1',l.status==='venter'&&l.henvendt)}${mb('paminnelse',l.status==='ja'&&!l.avklart)}</div></div>`}).join('');
+ const used=new Set((r.avd||[]).map(l=>l.avdId));const fag=new Set(r.fag||[]);
+ const sid=skole(r.skole)?.id,koblet=new Set(S.kob.filter(k=>k.skole===sid&&k.trinn===r.trinn&&k.linje===r.linje).map(k=>k.avdId));
+ const cand=S.avd.filter(a=>!used.has(a.id)).map(a=>({a,l:koblet.has(a.id),m:[...(a.fag||[]),...(a.usikre||[])].some(f=>fag.has(f))})).sort((x,y)=>(y.l-x.l)||(y.m-x.m)||avdNavn(x.a.id).localeCompare(avdNavn(y.a.id)));
+ const skKeys=['skole-mottatt','skole-reservert','skole-bekreftet','skole-delvis','skole-avslatt'];const curK=skoleKey(r);
+ const mails=skKeys.filter(k=>k==='skole-mottatt'||k===curK||(r.sendt||{})[k]).map(k=>`<div class="mailrow"><span>${MALNAVN[k]}<br>${(r.sendt||{})[k]?`<span class="sent">Sendt ${fy(r.sendt[k])}</span>`:'<span class="notsent">Ikke sendt</span>'}</span><button class="btn sm" data-act="mal" data-id="${esc(r.id)}" data-key="${k}" data-li="">Åpne mal</button></div>`).join('');
+ const svarFrist=r.mottatt?addWd(r.mottatt,F().svarSkole):null;
+ return`<div class="sh-head"><h2>${esc(r.id)}</h2>${eksB(r)}<button class="btn sm" data-act="editreq" data-id="${esc(r.id)}">Rediger</button><button class="btn sm" data-act="close">Lukk</button></div>
+ <div class="sh-body">
+ <div class="blk"><h3 style="margin-bottom:4px">${esc(r.skole)}</h3><div>${esc(linjeTxt(r))} · ${esc(antTxt(r))} · ${esc(uke(r))}${r.fra?' ('+esc(periode(r))+')':''}</div>
+  <div class="row" style="margin-top:10px">${pill(r.status,r.psSendt)} <span>${progTxt(r)}</span></div>${barOf(r)}
+  ${['bekreftet','gjennomfort'].includes(r.status)||r.psSendt?`<label class="chk big" style="margin-top:10px"><input type="checkbox" data-ch="ps" ${r.psSendt?'checked':''}> Personalskjema sendt til Ankomstsenteret${r.psSendt?` <span class="kv">(${fy(r.psSendt)})</span>`:''}</label>`:''}
+  ${fs?`<div class="forslag"><span>Forslag ut fra avdelingssvarene: ${pill(fs.s)}${fs.arsak?` <span class="kv">Årsak: ${esc(fs.arsak)}</span>`:''}</span><button class="btn sm pri" data-act="bruk" data-s="${fs.s}" data-a="${esc(fs.arsak||'')}">Bruk forslaget</button></div>`:''}
+  <label class="fld" style="margin-top:10px"><span>Status (nivå 1)</span><select data-ch="status">${STATUS.map(s=>opt(s.k,s.n,s.k===r.status)).join('')}</select></label>
+  ${r.status==='avslatt'?`<div class="two"><label class="fld"><span>Avslagsårsak</span><select data-ch="avslag">${opt('','Velg årsak',!r.avslag)}${ARSAKER.map(a=>opt(a,a,a===r.avslag)).join('')}</select></label>${r.avslag==='Annet'?`<label class="fld"><span>Årsak (fritekst)</span><input type="text" data-ch="avslagtekst" value="${esc(r.avslagTekst||'')}"></label>`:''}</div>`:''}
+ </div>
+ <div class="blk"><h3>Avdelinger (nivå 2)</h3>${lines||'<p class="kv" style="margin-top:0">Ingen avdelinger spurt ennå.</p>'}
+  ${cand.length?`<div class="row" style="margin-top:6px"><select id="addAvd" style="flex:1 1 220px" aria-label="Velg avdeling">${cand.map(x=>opt(x.a.id,avdNavn(x.a.id)+(x.l?' – linjen er koblet':x.m?' – fag passer':''),false)).join('')}</select><button class="btn" data-act="addline">Spør avdeling</button></div>`:''}</div>
+ ${(r.avd||[]).some(l=>l.status==='ja')?(()=>{const u=infopakkeUrl(r),c=cfg(),ja=(r.avd||[]).filter(l=>l.status==='ja');const m=[];
+  if(!['sted','tid','ringNavn','ringTlf'].every(k=>c.felles?.[k]))m.push('felles oppmøteinfo');if(!c.forms)m.push('Forms-lenke');
+  ja.forEach(l=>{const x=avdBy(l.avdId);if(x&&!x.sted)m.push('sted for '+avdNavn(l.avdId))});
+  return`<div class="blk"><h3>Infopakke</h3><p class="kv" style="margin-top:0">Åpner infopakke-siden med forespørselen og avdelingene som har sagt ja (${ja.length}). Elevnavn skrives inn der og lagres ikke.</p>
+  ${m.length?`<p class="kv" style="margin:0 0 10px">Mangler i admin: ${m.map(esc).join(', ')}. Vises som «mangler» på arket.</p>`:''}
+  <div class="row"><a class="btn pri" href="${esc(u)}" target="_blank" rel="noopener">Lag infopakke</a><button class="btn sm" data-act="copyv" data-v="${esc(u)}">Kopier lenke</button></div></div>`})():''}
+ <div class="blk"><h3>Svar til skolen</h3>${svarFrist?`<p class="kv" style="margin-top:0">Mottatt ${fy(r.mottatt)} · frist ${fy(svarFrist)} · ${r.forsteSvar?`første svar ${fy(r.forsteSvar)} ${r.forsteSvar<=svarFrist?'<span class="sent">innen fristen</span>':'<span style="color:var(--orink);font-weight:600">etter fristen</span>'}`:(svarFrist<t?'<span style="color:var(--orink);font-weight:600">ikke svart – forfalt</span>':'ikke svart ennå')}</p>`:''}${mails}</div>
+ <div class="blk"><h3>Detaljer fra skolen</h3><dl class="dl">
+  ${r.skjemaId?`<dt>Innsendings-ID</dt><dd>${esc(r.skjemaId)} (fra skjemaet)</dd>`:''}
+  ${r.periodeOmtrent?`<dt>Periode</dt><dd><span style="color:var(--orink);font-weight:600">Omtrentlig</span> – skolen oppga uker (${esc(uke(r))}), ikke nøyaktige datoer</dd>`:''}
+  <dt>Kontaktperson</dt><dd>${esc(r.kontakt?.navn||'–')}${r.kontakt?.epost?'<br>'+esc(r.kontakt.epost):''}${r.kontakt?.tlf?'<br>tlf '+esc(r.kontakt.tlf):''}</dd>
+  <dt>Varighet og form</dt><dd>${esc(r.varighet||'–')} · ${r.form==='annet'?'Annet: '+esc(r.formTekst||''):r.form==='endag'?'<span style="color:var(--orink);font-weight:600">Én dag i uka over tid (innvilges sjelden)</span>':'Sammenhengende uker'}</dd>
+  <dt>Fag av interesse</dt><dd>${(r.fag||[]).map(f=>`<span class="chip">${esc(f)}</span>`).join('')||'–'}</dd>
+  <dt>Motivasjon</dt><dd>${r.motivert?'Lærer har snakket med elevene og bekrefter at de er motivert':'<span style="color:var(--orink);font-weight:600">Ikke bekreftet av lærer</span>'}</dd>
+  <dt>Fritekst</dt><dd>${esc(r.fritekst||'–')}</dd></dl></div>
+ ${(r.logg||[]).length?`<div class="blk"><h3>Logg</h3><ul class="logg">${r.logg.slice(0,30).map(x=>`<li>${fy(x.d)}: ${esc(x.t)}</li>`).join('')}</ul></div>`:''}
+ <button class="btn dan" data-act="delreq">Slett forespørselen</button><div id="delConf"></div>
+ </div>`}
+
+/* ---------- ark: skjema forespørsel ---------- */
+function shReqForm(id){const r=id?S.req.find(x=>x.id===id):{type:'reell',trinn:'Vg1',antall:'',form:'sammenhengende',fag:[],motivert:false,mottatt:today(),kontakt:{}};
+ const sk=cfg().skoler;const curS=r.skole||sk[0]?.navn;const ln=(skole(curS)?.linjer||{})[r.trinn||'Vg1']||[];
+ const fagC=LAEREFAG.map(f=>`<label class="chk"><input type="checkbox" name="fag" value="${esc(f)}" ${(r.fag||[]).includes(f)?'checked':''}> ${esc(f)}</label>`).join('');
+ return`<div class="sh-head"><h2>${id?'Rediger '+esc(id):'Ny forespørsel'}</h2><button class="btn sm" data-act="${id?'req':'close'}" data-id="${esc(id||'')}">Avbryt</button></div>
+ <form class="sh-body" id="rf" novalidate>
+ <p class="reqnote">Felt merket <b class="rq">*</b> må fylles ut.</p>
+ <p class="note warn" style="margin-top:0">Ikke skriv elevnavn eller andre opplysninger om elevene her.</p>
+ <div class="blk"><label class="fld"><span>Skole<b class="rq" aria-hidden="true">*</b></span><select id="f-skole" aria-required="true">${sk.map(s=>opt(s.navn,s.navn,s.navn===curS)).join('')}${curS&&!skole(curS)?opt(curS,curS+' (ikke i listen)',true):''}</select><small>Ny skole legges til under Mer.</small></label>
+ <div class="two"><label class="fld"><span>Trinn<b class="rq" aria-hidden="true">*</b></span><select id="f-trinn" aria-required="true">${['Vg1','Vg2','Vg3'].map(t=>opt(t,t,t===(r.trinn||'Vg1'))).join('')}</select></label>
+ <label class="fld"><span>Linje<b class="rq" aria-hidden="true">*</b></span><select id="f-linje" aria-required="true">${ln.length?'':opt('','Ingen linjer – legg til under Mer')}${ln.map(l=>opt(l,l,l===r.linje)).join('')}${r.linje&&!ln.includes(r.linje)?opt(r.linje,r.linje,true):''}</select></label></div>
+ <div class="two"><label class="fld"><span>Antall elever<b class="rq" aria-hidden="true">*</b></span><input type="number" min="1" id="f-antall" aria-required="true" value="${esc(r.antall)}"></label><label class="fld"><span>Dato mottatt</span><input type="date" id="f-mottatt" value="${esc(r.mottatt||today())}"></label></div></div>
+ <div class="blk"><h3>Periode</h3><div id="rcal" class="rcal" aria-label="Velg periode"></div><div class="two"><label class="fld"><span>Fra<b class="rq" aria-hidden="true">*</b></span><input type="date" id="f-fra" aria-required="true" value="${esc(r.fra||'')}"></label><label class="fld"><span>Til</span><input type="date" id="f-til" value="${esc(r.til||'')}"><small>Tom = én uke (fra + 4 dager)</small></label></div><p class="kv" style="margin:0 0 10px">Du kan også skrive datoene direkte i feltene.</p>
+ <label class="fld"><span>Varighet</span><input type="text" id="f-varighet" value="${esc(r.varighet||'')}" placeholder="F.eks. 2 uker. Fylles ut av seg selv hvis tom"></label>
+ <div class="fld"><span>Form</span><div><label class="chk"><input type="radio" name="form" value="sammenhengende" ${!['annet','endag'].includes(r.form)?'checked':''}> Sammenhengende uker</label><label class="chk"><input type="radio" name="form" value="endag" ${r.form==='endag'?'checked':''}> Én dag i uka over tid</label><label class="chk"><input type="radio" name="form" value="annet" ${r.form==='annet'?'checked':''}> Annet</label></div><small>Én dag i uka over tid innvilges sjelden.</small></div>
+ <label class="fld"><span>Beskriv form (hvis annet)</span><input type="text" id="f-formtekst" value="${esc(r.formTekst||'')}"></label></div>
+ <div class="blk"><h3>Fag av interesse</h3>${fagC}</div>
+ <div class="blk"><h3>Kontaktperson på skolen</h3><label class="fld"><span>Navn<b class="rq" aria-hidden="true">*</b></span><input type="text" id="f-knavn" aria-required="true" value="${esc(r.kontakt?.navn||'')}"></label><div class="two"><label class="fld"><span>E-post</span><input type="email" id="f-kepost" value="${esc(r.kontakt?.epost||'')}"></label><label class="fld"><span>Telefon</span><input type="tel" id="f-ktlf" value="${esc(r.kontakt?.tlf||'')}"></label></div></div>
+ <div class="blk"><div class="fld"><label class="chk big"><input type="checkbox" id="f-motivert" aria-required="true" ${r.motivert?'checked':''}> <span>Lærer bekrefter å ha snakket med elevene, og at de er motivert for utplassering ved Aker Solutions, Stord Yard<b class="rq" aria-hidden="true">*</b></span></label></div>
+ <label class="fld" style="margin-top:10px"><span>Fritekst</span><textarea id="f-fritekst">${esc(r.fritekst||'')}</textarea></label></div>
+ <div id="ferr" class="note warn" hidden></div>
+ <button class="btn pri" type="button" data-act="savereq" style="width:100%">${id?'Lagre endringer':'Lagre forespørsel'}</button></form>`}
+
+function saveReqForm(id){const g=x=>$('#f-'+x)?.value.trim()??'';const old=id?getReq(id):null;
+ const type='reell',form=document.querySelector('input[name=form]:checked').value;
+ let fra=g('fra'),til=g('til');if(fra&&!til)til=addDays(fra,4);
+ const errs=[];if(!g('skole'))errs.push(['skole','Velg skole']);if(!g('linje'))errs.push(['linje',$('#f-linje').options.length&&$('#f-linje').options[0].value?'Velg linje':'Ingen linjer for dette trinnet – legg til under Mer']);if(!(+g('antall')>0))errs.push(['antall','Skriv inn antall elever (minst 1)']);if(!fra)errs.push(['fra','Velg fra-dato']);if(fra&&til<fra)errs.push(['til','Til-dato må være etter fra-dato']);
+ if(!g('knavn'))errs.push(['knavn','Skriv inn navnet på kontaktpersonen']);if(!$('#f-motivert').checked)errs.push(['motivert','Læreren må bekrefte dette før forespørselen kan lagres']);
+ if(markErr('f-',errs,'#ferr'))return
+ let varighet=g('varighet');if(!varighet){const w=Math.round(((pd(til)-pd(fra))/864e5+3)/7);varighet=form!=='sammenhengende'?'Se form':(w<=1?'1 uke':w+' uker')}
+ const omtrentEndret=!!(old&&old.periodeOmtrent&&(old.fra!==fra||old.til!==til));
+ const r=Object.assign(old||{avd:[],sendt:{},logg:[],eksempel:false},{type,skole:g('skole'),trinn:g('trinn'),linje:g('linje'),antall:+g('antall'),mottatt:g('mottatt')||today(),fra,til,varighet,form,formTekst:g('formtekst'),
+  fag:[...document.querySelectorAll('input[name=fag]:checked')].map(x=>x.value),kontakt:{navn:g('knavn'),epost:g('kepost'),tlf:g('ktlf')},motivert:$('#f-motivert').checked,fritekst:g('fritekst')});
+ if(!old){const y=today().slice(0,4);const n=Math.max(0,...S.req.map(x=>(x.id.match(new RegExp('^U-'+y+'-(\\d+)$'))||[])[1]).filter(Boolean).map(Number))+1;
+  r.id=`U-${y}-${String(n).padStart(3,'0')}`;r.status='mottatt';r.statusDato=today();r.opprettet=today();logg(r,'Registrert som '+SM[r.status].n.toLowerCase())}
+ else logg(r,'Opplysninger endret')
+ if(omtrentEndret){r.periodeOmtrent=false;logg(r,'Periode satt til nøyaktige datoer (var omtrentlig fra skjemaet)')}
+ upReq(r);openSheet({type:'req',id:r.id});toast('Lagret')}
+
+/* ---------- ark: lim inn fra skjema (del C) ---------- */
+let pasted=null;
+function shPaste(){return`<div class="sh-head"><h2>Lim inn fra skjema</h2><button class="btn sm" data-act="close">Lukk</button></div><div class="sh-body">
+ <div class="blk"><p style="margin-top:0">Kopier hele e-posten skolen sendte fra skjemaet, og lim den inn her. Det holder også med delen som starter med <b>UTPL1.</b> og slutter med <b>.SLUTT</b>.</p>
+ <label class="fld"><span>E-post fra skolen</span><textarea id="p-txt" rows="8" placeholder="Lim inn her"></textarea></label>
+ <label class="fld" style="max-width:240px"><span>Dato mottatt</span><input type="date" id="p-mottatt" value="${today()}"><small>Datoen e-posten kom. 3-dagersfristen regnes herfra.</small></label>
+ <button class="btn pri" data-act="paste2">Les inn</button></div><div id="p-prev"></div></div>`}
+function parseSkjema(t){const i=(t||'').indexOf('UTPL1.');if(i<0)return{err:'Fant ingen kode. Lim inn hele e-posten fra skjemaet, eller delen som starter med UTPL1.'};
+ const rest=t.slice(i+6),j=rest.indexOf('.SLUTT');if(j<0)return{err:'Koden ser avkuttet ut (mangler .SLUTT på slutten). Be skolen sende på nytt, eller legg inn manuelt fra oppsummeringen i e-posten.'};
+ const c=rest.slice(0,j).replace(/[^A-Za-z0-9_-]/g,'');
+ try{const b=atob(c.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((c.length+3)%4));const o=JSON.parse(new TextDecoder().decode(Uint8Array.from(b,ch=>ch.charCodeAt(0))));if(!o||o.v!==1)return{err:'Ukjent versjon av skjemaet.'};return{o}}
+ catch(e){return{err:'Koden kunne ikke leses. Den kan ha blitt endret i e-posten. Legg inn manuelt fra oppsummeringen.'}}}
+function skjemaTilReq(o){const s=v=>String(v??'').trim().slice(0,2000);const d=v=>/^\d{4}-\d{2}-\d{2}$/.test(v||'')?v:'';
+ return{type:'reell',varTidlig:o.t==='tidlig',skole:s(o.s),trinn:['Vg1','Vg2','Vg3'].includes(o.tr)?o.tr:s(o.tr),linje:s(o.l),antall:Math.max(0,Math.min(999,parseInt(o.a)||0)),fra:d(o.f),til:d(o.ti)||d(o.f),periodeOmtrent:!!o.po,varighet:s(o.va),
+  form:['sammenhengende','endag','annet'].includes(o.fo)?o.fo:'sammenhengende',formTekst:s(o.ft),fag:Array.isArray(o.fg)?o.fg.filter(x=>typeof x==='string').map(s):[],kontakt:{navn:s(o.kn),epost:s(o.ke),tlf:s(o.kt)},motivert:!!o.m,fritekst:s(o.x),skjemaId:s(o.id),skjemaSendt:d(o.d)}}
+function prevSkjema(r){const dup=S.req.find(x=>x.skjemaId&&x.skjemaId===r.skjemaId);const sk=skole(r.skole);const lnOk=sk&&((sk.linjer||{})[r.trinn]||[]).includes(r.linje);
+ return`<div class="blk"><h3>Dette blir registrert</h3>
+ ${dup?`<div class="note warn">Denne innsendingen (${esc(r.skjemaId)}) er allerede lest inn som ${esc(dup.id)}. <button class="btn sm" data-act="req" data-id="${esc(dup.id)}">Åpne ${esc(dup.id)}</button></div>`:''}
+ ${!sk?`<div class="note warn">«${esc(r.skole)}» er ikke i skolelisten. Forespørselen vises med fullt skolenavn. Legg skolen til under Mer hvis den blir fast.</div>`:!lnOk?`<div class="note warn">Linjen «${esc(r.trinn+' '+r.linje)}» finnes ikke i listen for ${esc(sk.kort)}.</div>`:''}
+ ${r.form==='endag'?'<div class="note warn">Skolen ber om én dag i uka over tid. Dette innvilges sjelden.</div>':''}
+ ${r.varTidlig?'<div class="note gul">Skjemaet ble sendt som tidlig estimat (gammel versjon av skjemaet). Det registreres som vanlig forespørsel med status «Mottatt».</div>':''}
+ <dl class="dl"><dt>Skole</dt><dd>${esc(r.skole)}</dd><dt>Klasse</dt><dd>${esc(linjeTxt(r))}</dd><dt>Antall</dt><dd>${esc(antTxt(r))}</dd>
+ <dt>Periode</dt><dd>${r.fra?(r.periodeOmtrent?'Omtrent ':'')+esc(uke(r))+' ('+(r.periodeOmtrent?'ca. ':'')+esc(periode(r))+')':'–'}</dd><dt>Varighet og form</dt><dd>${esc(r.varighet||'–')} · ${esc(FORMNAVN[r.form])}${r.formTekst?': '+esc(r.formTekst):''}</dd>
+ <dt>Fag</dt><dd>${r.fag.map(f=>`<span class="chip">${esc(f)}</span>`).join('')||'–'}</dd><dt>Kontaktperson</dt><dd>${esc(r.kontakt.navn)}${r.kontakt.epost?'<br>'+esc(r.kontakt.epost):''}${r.kontakt.tlf?'<br>tlf '+esc(r.kontakt.tlf):''}</dd>
+ <dt>Motivasjon</dt><dd>${r.motivert?'Lærer bekrefter':'<span style="color:var(--orink);font-weight:600">Ikke bekreftet</span>'}</dd><dt>Melding</dt><dd>${esc(r.fritekst||'–')}</dd>
+ <dt>Innsendings-ID</dt><dd>${esc(r.skjemaId)}${r.skjemaSendt?' · fylt ut '+esc(fy(r.skjemaSendt)):''}</dd></dl>
+ ${dup?'':`<button class="btn pri" style="width:100%;margin-top:12px" data-act="paste3">Opprett forespørsel</button>`}</div>`}
+const FORMNAVN={sammenhengende:'Sammenhengende uker',endag:'Én dag i uka over tid',annet:'Annet'};
+function opprettFraSkjema(p,mottatt){if(S.req.some(x=>x.skjemaId&&x.skjemaId===p.skjemaId))return toast('Allerede lest inn');
+ const y=today().slice(0,4);const n=Math.max(0,...S.req.map(x=>(x.id.match(new RegExp('^U-'+y+'-(\\d+)$'))||[])[1]).filter(Boolean).map(Number))+1;
+ const r=Object.assign({avd:[],sendt:{},logg:[],eksempel:false},clone(p),{id:`U-${y}-${String(n).padStart(3,'0')}`,status:'mottatt',mottatt,statusDato:today(),opprettet:today()});const varT=r.varTidlig;delete r.varTidlig;
+ logg(r,'Registrert som '+SM[r.status].n.toLowerCase());if(varT)logg(r,'Skjemaet var sendt som tidlig estimat (gammel versjon) – registrert som vanlig forespørsel');logg(r,'Lest inn fra skjema ('+p.skjemaId+')');pasted=null;upReq(r);openSheet({type:'req',id:r.id});toast('Opprettet '+r.id)}
+function markErr(pre,errs,boxSel){document.querySelectorAll('#panel .fld.err').forEach(f=>{f.classList.remove('err');f.querySelector('.errtxt')?.remove();f.querySelector('[aria-invalid]')?.removeAttribute('aria-invalid')});
+ const box=$(boxSel);if(!errs.length){box.hidden=true;return false}
+ for(const[k,m]of errs){const el=$('#'+pre+k),f=el?.closest('.fld');if(!f)continue;f.classList.add('err');el.setAttribute('aria-invalid','true');f.insertAdjacentHTML('beforeend',`<small class="errtxt">${esc(m)}</small>`)}
+ box.hidden=false;box.textContent=errs.length===1?'Ett felt må rettes – det er markert med rødt.':errs.length+' felt må rettes – de er markert med rødt.';
+ const first=$('#'+pre+errs[0][0]);first?.closest('.fld')?.scrollIntoView({block:'center',behavior:'smooth'});first?.focus({preventScroll:true});return true}
+const MND=['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+let rc={y:2026,m:0};
+function rcInit(){const v=$('#f-fra')?.value||today();const d=pd(v);rc={y:d.getFullYear(),m:d.getMonth()};drawCal()}
+function drawCal(){const box=$('#rcal');if(!box)return;const fra=$('#f-fra').value,til=$('#f-til').value,t=today();
+ const last=new Date(rc.y,rc.m+1,0);let d=pd(monday(ds(new Date(rc.y,rc.m,1))));
+ let h=`<div class="rc-h"><button type="button" class="btn sm" data-act="rc-nav" data-n="-1" aria-label="Forrige måned">‹</button><b>${MND[rc.m]} ${rc.y}</b><button type="button" class="btn sm" data-act="rc-nav" data-n="1" aria-label="Neste måned">›</button></div><div class="rc-g"><span class="hd">Uke</span>${['ma','ti','on','to','fr','lø','sø'].map(x=>`<span class="hd">${x}</span>`).join('')}`;
+ while(d<=last){const mo=ds(d);h+=`<button type="button" class="rc-w" data-act="rc-week" data-d="${mo}" aria-label="Velg uke ${isoWeek(mo)}">${isoWeek(mo)}</button>`;
+  for(let i=0;i<7;i++){const x=ds(d),inM=d.getMonth()===rc.m;const c=[inM?'':'out',i>4?'we':'',x===fra?'s':'',x===til?'e':'',fra&&til&&x>fra&&x<til?'in':'',x===t?'today':''].filter(Boolean).join(' ');
+   h+=`<button type="button" class="rc-d ${c}" data-act="rc-day" data-d="${x}" ${inM?'':'tabindex="-1" aria-hidden="true"'}>${d.getDate()}</button>`;d.setDate(d.getDate()+1)}}
+ const sum=fra?`Valgt: <b>${DG[pd(fra).getDay()]} ${fy(fra)}${til?' – '+DG[pd(til).getDay()]+' '+fy(til):''}</b> · ${uke({fra,til:til||fra})}${til?'':' · trykk på sluttdato'}<button type="button" class="btn sm ghost" data-act="rc-clear">Nullstill</button>`:'Trykk på startdato og deretter sluttdato. Trykk på et ukenummer for å velge hele uka (man–fre).';
+ box.innerHTML=h+`</div><div class="rc-sum">${sum}</div>`}
+function setRange(f,t){$('#f-fra').value=f;$('#f-til').value=t;[$('#f-fra'),$('#f-til')].forEach(el=>{const x=el.closest('.fld.err');if(x&&el.value){x.classList.remove('err');x.querySelector('.errtxt')?.remove();el.removeAttribute('aria-invalid')}});drawCal()}
+/* ---------- ark: avdeling ---------- */
+function allLinjer(){const s=new Set;for(const sk of cfg().skoler)for(const t of ['Vg1','Vg2','Vg3'])for(const l of (sk.linjer||{})[t]||[])s.add(t+' '+l);return[...s]}
+function shAvd(id,parent){const a=id?avdBy(id):{navn:'',fag:[],usikre:[],linjer:[],parent:parent||null};const isP=!!a.parent;
+ const st=f=>(a.fag||[]).includes(f)?1:(a.usikre||[]).includes(f)?2:0;
+ const other=[...(a.fag||[]).filter(f=>!LAEREFAG.includes(f)),...(a.usikre||[]).filter(f=>!LAEREFAG.includes(f)).map(f=>f+'?')].join(', ');
+ return`<div class="sh-head"><h2>${id?esc(a.navn):isP?'Nytt prosjekt':'Ny avdeling'}</h2><button class="btn sm" data-act="close">Avbryt</button></div>
+ <form class="sh-body" id="af" novalidate>
+ <p class="reqnote">Felt merket <b class="rq">*</b> må fylles ut.</p>
+ <div class="blk"><label class="fld"><span>${isP?'Prosjektnavn':'Navn på avdeling'}<b class="rq" aria-hidden="true">*</b></span><input type="text" id="a-navn" aria-required="true" value="${esc(a.navn)}"></label>
+ <label class="fld"><span>Merknad</span><input type="text" id="a-merknad" value="${esc(a.merknad||'')}"></label>
+ ${a.gruppe?'<p class="kv">Dette er en gruppe. Prosjekter legges til fra kortet i avdelingslisten.</p>':''}</div>
+ ${a.gruppe?'':`<div class="blk"><h3>Fag</h3><p class="kv" style="margin-top:0">Trykk én gang for ja, to ganger for usikkert (?), tre ganger for å fjerne.</p>${LAEREFAG.map(f=>`<button type="button" class="tri" data-act="tri" data-f="${esc(f)}" data-s="${st(f)}">${esc(f)}${st(f)===2?' ?':''}</button>`).join('')}
+ <label class="fld" style="margin-top:10px"><span>Andre fag</span><input type="text" id="a-andre" value="${esc(other)}"><small>Skill med komma. Skriv ? bak for usikkert, f.eks. «Transportfaget?».</small></label></div>
+ <div class="blk"><h3>Aktuelle linjer</h3><p class="kv" style="margin:0">Hvilke linjer på hvilke skoler som passer, og med hvilke fag, settes i koblingskartet under Avdelinger → Koblinger.</p></div>
+ <div class="blk"><h3>Kontakt og kapasitet</h3><label class="fld"><span>Kontaktperson</span><input type="text" id="a-kontakt" value="${esc(a.kontakt||'')}"></label>
+ <div class="two"><label class="fld"><span>Telefon</span><input type="tel" id="a-telefon" value="${esc(a.telefon||'')}"></label><label class="fld"><span>E-post</span><input type="email" id="a-epost" value="${esc(a.epost||'')}"></label></div>
+ <label class="fld"><span>Sted</span><input type="text" id="a-sted" value="${esc(a.sted||'')}" placeholder="Hvor avdelingen ligger og hvordan man finner fram"><small>Vises i infopakken.</small></label>
+ <div class="two"><label class="fld"><span>Kapasitet (elever samtidig)</span><input type="number" min="0" id="a-kap" value="${esc(a.kapasitet??'')}"><small>Tomt = avklares</small></label></div></div>`}
+ <div id="aerr" class="note warn" hidden></div>
+ <button class="btn pri" type="button" data-act="saveavd" style="width:100%">Lagre</button>
+ ${id&&!a.gruppe?`<button type="button" class="btn dan" style="margin-top:14px" data-act="delavd" data-id="${esc(id)}">Fjern ${isP?'prosjektet':'avdelingen'}</button><div id="delAConf"></div>`:''}</form>`}
+function saveAvd(id,parent){const a=id?clone(avdBy(id)):{id:null,parent:parent||null,rek:99};const g=x=>$('#a-'+x)?.value.trim()??'';
+ if(markErr('a-',g('navn')?[]:[['navn','Skriv inn et navn']],'#aerr'))return
+ a.navn=g('navn');a.merknad=g('merknad');
+ if(!a.gruppe){a.fag=[];a.usikre=[];document.querySelectorAll('.tri').forEach(b=>{if(b.dataset.s==='1')a.fag.push(b.dataset.f);if(b.dataset.s==='2')a.usikre.push(b.dataset.f)});
+  g('andre').split(',').map(s=>s.trim()).filter(Boolean).forEach(s=>s.endsWith('?')?a.usikre.push(s.slice(0,-1).trim()):a.fag.push(s));
+  delete a.linjer;a.kontakt=g('kontakt');a.telefon=g('telefon');a.epost=g('epost');a.sted=g('sted');a.kapasitet=g('kap')===''?null:+g('kap')}
+ if(!a.id){let base=a.navn.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ø/g,'o').replace(/æ/g,'ae').replace(/å/g,'a').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'avd';let x=base,i=2;while(avdBy(x))x=base+'-'+i++;a.id=x}
+ upAvd(a);closeSheet();toast('Lagret')}
+
+/* ---------- ark: e-postmal ---------- */
+function mal(r,key,li){const l=li!==''&&li!=null?r.avd[+li]:null,a=l?avdBy(l.avdId):null,f=F(),t=today(),c=cnt(r);
+ const fn=n=>(n||'').split(' ')[0];const hei=n=>fn(n)?`Hei ${fn(n)},`:'Hei,';const sig='\n\nMed vennlig hilsen\nStord Academy\nutplassering.stord@akersolutions.com';
+ const lt=linjeTxt(r),u=uke(r),p=periode(r),n=+r.antall||0,ref=`\n\nReferanse: ${r.id}`;
+ const avdList=(r.avd||[]).filter(x=>x.status==='ja').map(x=>`– ${avdNavn(x.avdId)}: ${x.antall} elev${+x.antall===1?'':'er'}${x.avklart?'':' (reservert)'}`).join('\n');
+ const arsak=r.avslag==='Annet'?(r.avslagTekst||'Annet'):(r.avslag||'');
+ const M={
+  henvendelse:[`Utplassering: ${n} elever fra ${lt}, ${u}`,`${hei(a?.kontakt)}\n\nStord Academy har fått forespørsel fra ${r.skole} om utplassering av ${n} elever fra ${lt} i ${u} (${p}).${(r.fag||[]).length?` Elevene er interessert i ${r.fag.join(', ').toLowerCase()}.`:''}${r.form==='annet'&&r.formTekst?` Ønsket form: ${r.formTekst}.`:''}${r.form==='endag'?' Ønsket form: én dag i uka over tid.':''}\n\nKan dere ta imot? Svar gjerne med hvor mange elever dere kan ta, og hvem som blir kontaktperson. Vi ber om svar innen ${fy(addWd(t,f.purring1))}.${ref}${sig}`],
+  purring1:[`Påminnelse: utplassering ${lt}, ${u}`,`${hei(a?.kontakt)}\n\nSender påminnelse om at vi ikke har fått svar på forespørsel om dere kan ta imot ${n} elever fra ${lt} ved ${r.skole} i ${u}. Ved manglende svar på denne e-posten anser vi det som et avslag og informerer skolen om dette.${ref}${sig}`],
+  paminnelse:[`Reserverte plasser: ${l?.antall||''} elever fra ${lt}, ${u}`,`${hei(a?.kontakt)}\n\nDere har sagt ja til å ta imot ${l?.antall||''} elever fra ${lt} ved ${r.skole} i ${u} (${p}). Dette er en påminnelse om at plassene er holdt av til dem.\n\nFor å bekrefte overfor skolen trenger vi:\n– navn og telefonnummer til kontaktpersonen som følger opp elevene\n– oppmøtested i avdelingen\n\nSvar gjerne innen ${fy(addWd(t,3))}.${ref}${sig}`],
+  'skole-mottatt':[`Utplassering ${lt}, ${u} – mottatt`,`${hei(r.kontakt?.navn)}\n\nTakk for forespørselen om utplassering av ${n} elever fra ${lt} i ${u} (${p}). Vi har registrert den og sjekker nå med aktuelle avdelinger.\n\nEndelig svar fra avdelingene kommer som regel tidligst ca. én måned før oppstart. Vi gir beskjed så snart vi vet mer.${ref}${sig}`],
+  'skole-reservert':[`Utplassering ${lt}, ${u} – plasser holdt av`,`${hei(r.kontakt?.navn)}\n\nVi har holdt av plass til ${c.b+c.res} av ${n} elever fra ${lt} i ${u} (${p}). Kontaktperson og oppmøtested avklares nærmere oppstart, og vi bekrefter endelig når det er på plass.${c.pend?'':c.b+c.res<n?`\n\nFor de resterende ${n-c.b-c.res} elevene har vi dessverre ikke plass denne gangen.`:''}${ref}${sig}`],
+  'skole-bekreftet':[`Utplassering ${lt}, ${u} – bekreftet`,`${hei(r.kontakt?.navn)}\n\nVi bekrefter utplassering av ${c.b} elever fra ${lt} i ${u} (${p}).${avdList?'\n\n'+avdList:''}\n\nSend personalskjema for elevene til utplassering.stord@akersolutions.com så snart som mulig, så registrerer vi dem hos Ankomstsenteret. Elevene møter på Ankomstsenteret første dag og får informasjon om oppmøte og kontaktperson før oppstart.${ref}${sig}`],
+  'skole-delvis':[`Utplassering ${lt}, ${u} – delvis bekreftet`,`${hei(r.kontakt?.navn)}\n\nVi har dessverre ikke plass til alle elevene denne gangen. Vi bekrefter ${c.b} av ${n} elever fra ${lt} i ${u} (${p})${c.res?`, og har holdt av plass til ${c.res} til`:''}.${avdList?'\n\n'+avdList:''}\n\nSend personalskjema for de ${c.b} elevene til utplassering.stord@akersolutions.com så snart som mulig, så registrerer vi dem hos Ankomstsenteret.${ref}${sig}`],
+  'skole-avslatt':[`Utplassering ${lt}, ${u} – svar`,`${hei(r.kontakt?.navn)}\n\nVi har dessverre ikke mulighet til å ta imot ${n} elever fra ${lt} i ${u} (${p}).${arsak?`\n\nÅrsak: ${arsak.replace(' (innvilges sjelden)','')}.`:''}\n\n${/Én dag/.test(arsak)?'Vi tar gjerne imot en ny forespørsel om sammenhengende uker.':'Ta gjerne kontakt igjen ved en senere anledning.'}${ref}${sig}`]};
+ const [emne,tekst]=M[key];return{emne,tekst,til:key.startsWith('skole')?`${r.kontakt?.navn||'Kontaktperson på skolen'}${r.kontakt?.epost?' <'+r.kontakt.epost+'>':''}`:(a?`${a.kontakt||'Kontaktperson avklares'}${a.epost?' <'+a.epost+'>':' (e-post avklares)'} – ${avdNavn(l.avdId)}`:''),adr:key.startsWith('skole')?(r.kontakt?.epost||''):(a?.epost||'')}}
+const sentDate=(r,key,li)=>{if(key.startsWith('skole'))return(r.sendt||{})[key];const l=r.avd[+li];return l?l[key==='henvendelse'?'henvendt':key]:null};
+function shMal(id,key,li){const r=S.req.find(x=>x.id===id);const m=mal(r,key,li);const sd=sentDate(r,key,li);
+ return`<div class="sh-head"><h2>${MALNAVN[key]}</h2><button class="btn sm" data-act="req" data-id="${esc(id)}">Tilbake</button><button class="btn sm" data-act="close">Lukk</button></div>
+ <div class="sh-body"><div class="blk"><p class="kv" style="margin-top:0">${esc(r.id)} ${eksB(r)} · Til: <b>${esc(m.til)}</b>${key.startsWith('skole')?'':' · send fra utplassering.stord@akersolutions.com'}</p>${m.adr?`<button class="btn sm" data-act="copyv" data-v="${esc(m.adr)}" style="margin-bottom:10px">Kopier e-postadresse</button>`:''}
+ <label class="fld"><span>Emne</span><input type="text" id="m-emne" value="${esc(m.emne)}"></label><button class="btn sm" data-act="copy" data-t="m-emne">Kopier emne</button>
+ <label class="fld" style="margin-top:12px"><span>Tekst – du kan endre før du kopierer</span><textarea id="m-tekst" rows="14">${esc(m.tekst)}</textarea></label><button class="btn pri" data-act="copy" data-t="m-tekst">Kopier tekst</button></div>
+ <div class="blk"><h3>Sendt?</h3>${sd?`<p style="margin:0 0 10px"><span class="sent">Merket sendt ${fy(sd)}</span></p><button class="btn sm" data-act="unsend" data-id="${esc(id)}" data-key="${key}" data-li="${esc(li)}">Angre</button>`:`<div class="row"><input type="date" id="m-dato" value="${today()}" style="max-width:200px" aria-label="Dato sendt"><button class="btn pri" data-act="send" data-id="${esc(id)}" data-key="${key}" data-li="${esc(li)}">Merk som sendt</button></div><p class="kv">Systemet sender ingenting selv. Send e-posten fra Outlook og huk av her.</p>`}</div></div>`}
+function setSent(id,key,li,d){const r=getReq(id);r.sendt=r.sendt||{};
+ if(key.startsWith('skole')){if(d){r.sendt[key]=d;if(!r.forsteSvar)r.forsteSvar=d}else{delete r.sendt[key];if(!Object.keys(r.sendt).length)r.forsteSvar=null}}
+ else{const l=r.avd[+li],f=key==='henvendelse'?'henvendt':key;l[f]=d||null}
+ logg(r,(d?'Sendt: ':'Angret sendt: ')+MALNAVN[key]+(li!==''&&li!=null&&r.avd[+li]?' – '+avdNavn(r.avd[+li].avdId):''));upReq(r)}
+
+const SKRIV_MELD='<p class="note warn" role="alert" style="border:2px solid #d4343a"><b>Du har ikke skrivetilgang til denne oversikten.</b> Endringer du gjør, blir ikke lagret. Be Mats gi deg tilgangen «Can edit» via «Del».</p>';
+/* ---------- rendering ---------- */
+function curView(){const h=location.hash.slice(1);return NAV.some(n=>n[0]===h)||h==='koblinger'?h:'i-dag'}
+function navHtml(bottom){const v=curView()==='koblinger'?'avdelinger':curView(),over=tasks().filter(x=>x.due&&x.due<=today()).length;
+ return NAV.map(([k,l,d])=>`<a href="#${k}" ${v===k?'aria-current="page"':''}>${bottom?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`:''}${l}${k==='i-dag'&&over?`<span class="badge">${over}</span>`:''}</a>`).join('')}
+function refresh(forceSheet=true){
+ $('#tabs').innerHTML=navHtml(false);$('#bnav').innerHTML=navHtml(true);
+ const v=curView();const banner=(lesTilgang?SKRIV_MELD:'')+(note?`<p class="note warn">${esc(note)}</p>`:'')+(mode==='laster'?'<p class="note">Kobler til lagring …</p>':mode==='lokal'?'<p class="note">Lokal modus – data lagres bare i denne nettleseren. Se Mer for eksport og import.</p>':'')+(S.req.some(r=>r.eksempel)&&v!=='mer'?'<p class="note"><span class="eks">EKSEMPEL</span> betyr oppdiktet testdata. Kan fjernes under Mer.</p>':'');
+ const ae=document.activeElement;const keepQ=ae&&ae.id==='q'?[ae.selectionStart]:null;
+ $('#view').innerHTML=banner+({'i-dag':vToday,'foresporsler':vReqs,'kalender':vCal,'avdelinger':vAvd,'koblinger':vKob,'mer':vMer}[v])();
+ if(kro){kro.disconnect();kro=null}if(v==='koblinger'){drawK();kro=new ResizeObserver(()=>drawK());kro.observe($('#kmap'))}
+ if(keepQ){const q=$('#q');q.focus();q.setSelectionRange(keepQ[0],keepQ[0])}
+ renderSheet(forceSheet)}
+function renderSheet(force){if(!sheet)return;const p=$('#panel');
+ if(sheet.type!=='req'&&!force)return; // skjema og maler tegnes ikke om av ny data
+ const ae=document.activeElement;if(!force&&p.contains(ae)&&/^(INPUT|TEXTAREA)$/.test(ae.tagName)){pendingSheet=true;return}
+ const top=p.scrollTop;p.innerHTML=sheet.type==='req'?shReq(sheet.id):sheet.type==='reqForm'?shReqForm(sheet.id):sheet.type==='avd'?shAvd(sheet.id,sheet.parent):sheet.type==='kob'?shKob(sheet.id):sheet.type==='paste'?shPaste():shMal(sheet.id,sheet.key,sheet.li);if(lesTilgang){const b=p.querySelector('.sh-body');if(b)b.insertAdjacentHTML('afterbegin',SKRIV_MELD)}p.scrollTop=sheet.keepScroll?top:0;sheet.keepScroll=true;if(sheet.type==='reqForm')rcInit()}
+function openSheet(s){sheet=s;$('#sheet').hidden=false;document.body.classList.add('noscroll');renderSheet(true)}
+function closeSheet(){sheet=null;$('#sheet').hidden=true;document.body.classList.remove('noscroll');$('#panel').innerHTML=''}
+
+/* ---------- hendelser ---------- */
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset,a=d.act;
+ if(a==='close')return closeSheet();
+ if(a==='savereq')return saveReqForm(sheet.id);
+ if(a==='rc-nav'){rc.m+=+d.n;if(rc.m<0){rc.m=11;rc.y--}if(rc.m>11){rc.m=0;rc.y++}return drawCal()}
+ if(a==='rc-clear')return setRange('','');
+ if(a==='rc-day'){const x=d.d,f=$('#f-fra').value,t=$('#f-til').value;if(!f||t||x<f)setRange(x,'');else setRange(f,x);return}
+ if(a==='rc-week'){const mo=d.d,fr=addDays(mo,4),f=$('#f-fra').value,t=$('#f-til').value;
+  if(f&&t&&mo>t)setRange(f,fr);else if(f&&!t&&fr>=f)setRange(f,fr);else if(f&&t&&fr<f)setRange(mo,t);else setRange(mo,fr);return}
+ if(a==='saveavd')return saveAvd(sheet.id,sheet.parent);
+ if(a==='req')return openSheet({type:'req',id:d.id});
+ if(a==='newreq')return openSheet({type:'reqForm',id:null});
+ if(a==='paste'){pasted=null;return openSheet({type:'paste'})}
+ if(a==='paste2'){const x=parseSkjema($('#p-txt').value);pasted=x.o?skjemaTilReq(x.o):null;$('#p-prev').innerHTML=x.err?`<div class="note warn">${esc(x.err)}</div>`:prevSkjema(pasted);return}
+ if(a==='paste3'){if(pasted)opprettFraSkjema(pasted,$('#p-mottatt').value||today());return}
+ if(a==='editreq')return openSheet({type:'reqForm',id:d.id});
+ if(a==='mal')return openSheet({type:'mal',id:d.id,key:d.key,li:d.li});
+ if(a==='newavd')return openSheet({type:'avd',id:null,parent:d.parent||null});
+ if(a==='editavd')return openSheet({type:'avd',id:d.id});
+ if(a==='filter'){ui.filter=d.k;return refresh()}
+ if(a==='ksel'){ui.kSel=ui.kSel&&ui.kSel.t===d.t&&ui.kSel.k===d.k?null:{t:d.t,k:d.k};refresh();const el=document.querySelector('.ktile.sel');if(el&&innerWidth<1000){const y=el.getBoundingClientRect().top;if(y<70||y>innerHeight*.45)scrollTo({top:scrollY+y-90,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})}return}
+ if(a==='kclose'){ui.kSel=null;return refresh()}
+ if(a==='kskole'){ui.kSkole=d.k;if(ui.kF.linje&&!ui.kF.linje.startsWith(d.k+'|')&&d.k!=='alle')ui.kF.linje='';return refresh()}
+ if(a==='kfnull'){ui.kF={fag:'',avd:'',linje:''};return refresh()}
+ if(a==='copyv'){copyText(d.v);return}
+ if(a==='kgo'){ui.kSel={t:'avd',k:d.id};if(location.hash==='#koblinger')refresh();else location.hash='#koblinger';return}
+ if(a==='kedit')return openSheet({type:'kob',id:d.id});
+ if(a==='kadd'){const v=$('#kAdd').value;if(!v)return;let k;if(ui.kSel.t==='linje'){const[sk,t,l]=ui.kSel.k.split('|');const av=avdBy(v);k={id:nyId('k'),skole:sk,trinn:t,linje:l,avdId:v,fag:(av?.fag||[]).slice()}}else{const[sk,t,l]=v.split('|');const av=avdBy(ui.kSel.k);k={id:nyId('k'),skole:sk,trinn:t,linje:l,avdId:ui.kSel.k,fag:(av?.fag||[]).slice()}}
+  S.kob.push(k);put('koblinger',k);refresh();return toast('Koblet. Juster fag ved behov.')}
+ if(a==='ksave'){const k=clone(S.kob.find(x=>x.id===d.id));k.fag=[...new Set([...[...document.querySelectorAll('input[name=kfag]:checked')].map(x=>x.value),...$('#k-andre').value.split(',').map(x=>x.trim()).filter(Boolean)])];const i=S.kob.findIndex(x=>x.id===k.id);S.kob[i]=k;put('koblinger',k);closeSheet();refresh();return toast('Lagret')}
+ if(a==='kdel'){$('#kdelConf').innerHTML=`<div class="confirm">Fjerne koblingen? <button class="btn sm dan" data-act="kdel2" data-id="${esc(d.id)}">Ja, fjern</button></div>`;return}
+ if(a==='kdel2'){S.kob=S.kob.filter(x=>x.id!==d.id);del('koblinger',d.id);closeSheet();refresh();return toast('Koblingen er fjernet')}
+ if(a==='senere'){ui.senere=!ui.senere;return refresh()}
+ if(a==='cal'){const n=+d.d;ui.calStart=n?addDays(ui.calStart,n*7):addDays(monday(today()),-7);return refresh()}
+ if(a==='tri'){e.preventDefault();const s=(+b.dataset.s+1)%3;b.dataset.s=s;b.textContent=b.dataset.f+(s===2?' ?':'');return}
+ if(a==='ingen'){const r=getReq(d.id),l=r.avd[+d.li];l.status='ingen';l.svarDato=today();logg(r,'Ingen tilbakemelding fra '+avdNavn(l.avdId)+' etter 2. purring');upReq(r);return openSheet({type:'req',id:r.id})}
+ if(a==='copy'){const el=$('#'+d.t);try{await navigator.clipboard.writeText(el.value);toast('Kopiert')}catch(err){el.focus();el.select();try{document.execCommand('copy');toast('Kopiert')}catch(e2){toast('Marker teksten og kopier manuelt')}}return}
+ if(a==='send'){setSent(d.id,d.key,d.li,$('#m-dato').value||today());toast('Merket som sendt');return openSheet({type:'req',id:d.id})}
+ if(a==='unsend'){setSent(d.id,d.key,d.li,null);return renderSheet(true)}
+ if(a==='bruk'){const r=getReq(sheet.id);setStatus(r,d.s);if(d.a)r.avslag=d.a;upReq(r);return}
+ if(a==='addline'){const r=getReq(sheet.id);const id=$('#addAvd').value;(r.avd=r.avd||[]).push({avdId:id,status:'venter',lagtTil:today()});logg(r,'Spurt: '+avdNavn(id));upReq(r);return}
+ if(a==='rmline'){const r=getReq(sheet.id);const l=r.avd.splice(+d.li,1)[0];logg(r,'Fjernet avdeling: '+avdNavn(l.avdId));upReq(r);return}
+ if(a==='delreq'){$('#delConf').innerHTML=`<div class="confirm">Slette ${esc(sheet.id)} for godt? <button class="btn sm dan" data-act="delreq2">Ja, slett</button></div>`;return}
+ if(a==='delreq2'){const id=sheet.id;S.req=S.req.filter(r=>r.id!==id);del('foresporsler',id);closeSheet();refresh();return toast('Slettet')}
+ if(a==='delavd'){const inUse=S.req.some(r=>(r.avd||[]).some(l=>l.avdId===d.id));$('#delAConf').innerHTML=`<div class="confirm">${inUse?'Avdelingen er brukt i forespørsler. Der vises den som «fjernet avdeling». ':''}Fjerne for godt? <button type="button" class="btn sm dan" data-act="delavd2" data-id="${esc(d.id)}">Ja, fjern</button></div>`;return}
+ if(a==='delavd2'){S.avd=S.avd.filter(x=>x.id!==d.id);del('avdelinger',d.id);for(const k of S.kob.filter(k=>k.avdId===d.id))del('koblinger',k.id);S.kob=S.kob.filter(k=>k.avdId!==d.id);if(ui.kSel?.k===d.id)ui.kSel=null;closeSheet();refresh();return toast('Fjernet')}
+ if(a==='addskole'){const n=$('#nySkole').value.trim(),k=$('#nyKort').value.trim();if(!n)return toast('Skriv inn navnet på skolen');const c=clone(cfg());c.skoler.push({id:'s'+Date.now().toString(36),navn:n,kort:k||n,linjer:{Vg1:[],Vg2:[],Vg3:[]}});upCfg(c);return toast('Skole lagt til')}
+ if(a==='skolelinje'){const box=b.parentElement;if(box.querySelector('.addl'))return;box.insertAdjacentHTML('beforeend',`<div class="addl row" style="width:100%"><select style="max-width:110px" aria-label="Trinn">${['Vg1','Vg2','Vg3'].map(t=>opt(t,t)).join('')}</select><input type="text" placeholder="Navn på linje" style="flex:1 1 180px"><button class="btn sm pri" data-act="skolelinje2" data-id="${esc(d.id)}">Legg til</button></div>`);return}
+ if(a==='skolelinje2'){const w=b.parentElement,t=w.querySelector('select').value,n=w.querySelector('input').value.trim();if(!n)return;const c=clone(cfg());const s=c.skoler.find(x=>x.id===d.id);s.linjer=s.linjer||{};(s.linjer[t]=s.linjer[t]||[]).push(n);upCfg(c);return toast('Linje lagt til')}
+ if(a==='fjerneks'){$('#eksConf').innerHTML='<div class="confirm">Fjerne alle eksempelforespørsler? <button class="btn sm dan" data-act="fjerneks2">Ja, fjern</button></div>';return}
+ if(a==='fjerneks2'){const ids=S.req.filter(r=>r.eksempel).map(r=>r.id);S.req=S.req.filter(r=>!r.eksempel);for(const id of ids)await del('foresporsler',id);const c=clone(cfg());if(c.skoler.some(s=>s.eksempel)){c.skoler=c.skoler.filter(s=>!s.eksempel);upCfg(c)}refresh();return toast('Eksempler fjernet')}
+ if(a==='lister'){const t=listerJs();$('#lbox').innerHTML=`<label class="fld" style="margin-top:12px"><span>Innhold i utplassering/lister.js (oppdatert ${fy(today())})</span><textarea id="ltxt" rows="10" readonly>${esc(t)}</textarea></label><button class="btn pri" data-act="copy" data-t="ltxt">Kopier på nytt</button>`;copyText(t,$('#ltxt'));return}
+ if(a==='export'){const json=JSON.stringify({type:'utplassering-eksport',versjon:1,eksportert:today(),avd:S.avd,req:S.req,kob:S.kob,cfg:cfg()},null,1);
+  $('#xbox').innerHTML=`<label class="fld" style="margin-top:12px"><span>Eksport (${S.req.length} forespørsler, ${S.avd.length} avdelinger, ${S.kob.length} koblinger)</span><textarea id="xtxt" rows="8" readonly>${esc(json)}</textarea></label><div class="row"><button class="btn pri" data-act="copy" data-t="xtxt">Kopier</button>${mode==='lokal'?'<button class="btn" data-act="dl">Last ned fil</button>':''}</div><p class="kv">Lim inn i «Importer» på den andre maskinen, eller lagre teksten som en fil.</p>`;return}
+ if(a==='dl'){try{const u=URL.createObjectURL(new Blob([$('#xtxt').value],{type:'application/json'}));const x=document.createElement('a');x.href=u;x.download='utplassering-'+today()+'.json';document.body.appendChild(x);x.click();x.remove()}catch(err){toast('Nedlasting virker ikke her – bruk Kopier')}return}
+ if(a==='import'){$('#xbox').innerHTML=`<label class="fld" style="margin-top:12px"><span>Lim inn eksport, eller velg fil</span><textarea id="itxt" rows="6"></textarea></label><input type="file" id="ifil" accept=".json,application/json" style="margin-bottom:10px"><div class="confirm">Import erstatter alle avdelinger, koblinger, forespørsler og innstillinger her. <button class="btn sm dan" data-act="import2">Importer og erstatt</button></div>`;return}
+ if(a==='import2'){let x;try{x=JSON.parse($('#itxt').value)}catch(err){return toast('Teksten er ikke en gyldig eksport')}
+  if(!x||x.type!=='utplassering-eksport'||!Array.isArray(x.avd)||!Array.isArray(x.req))return toast('Teksten er ikke en gyldig eksport');
+  b.disabled=true;b.textContent='Importerer …';const oldA=S.avd.map(v=>v.id),oldR=S.req.map(v=>v.id),oldK=S.kob.map(v=>v.id);
+  S.avd=x.avd;S.req=x.req;S.kob=Array.isArray(x.kob)?x.kob:[];S.cfg=x.cfg||null;migrer();normAll();
+  if(mode==='db'){for(const v of x.avd)await put('avdelinger',v);for(const v of x.req)await put('foresporsler',v);for(const id of oldA)if(!x.avd.some(v=>v.id===id))await del('avdelinger',id);for(const id of oldR)if(!x.req.some(v=>v.id===id))await del('foresporsler',id);for(const v of S.kob)await put('koblinger',v);for(const id of oldK)if(!S.kob.some(v=>v.id===id))await del('koblinger',id);if(x.cfg)await put('config',Object.assign({id:'main'},x.cfg))}else saveLocal();
+  refresh();return toast('Importert')}
+});
+document.addEventListener('change',e=>{const el=e.target,d=el.dataset;{const f=el.closest?.('.fld.err');if(f&&(el.type==='checkbox'?el.checked:(el.value||'').trim())){f.classList.remove('err');f.querySelector('.errtxt')?.remove();el.removeAttribute('aria-invalid')}}
+ if(el.id==='ifil'&&el.files[0]){el.files[0].text().then(t=>{$('#itxt').value=t});return}
+ if(el.id==='f-fra'||el.id==='f-til'){if(el.id==='f-fra'&&el.value){const x=pd(el.value);rc={y:x.getFullYear(),m:x.getMonth()}}drawCal();return}
+ if(el.id==='f-skole'||el.id==='f-trinn'){const s=skole($('#f-skole').value),ln=(s?.linjer||{})[$('#f-trinn').value]||[];$('#f-linje').innerHTML=ln.map(l=>opt(l,l)).join('')||opt('','Ingen linjer – legg til under Mer');return}
+ if(d.ch==='calAvslag'){ui.calAvslag=el.checked;return refresh()}
+ if(d.ch==='kf'){ui.kF[d.k]=el.value;ui.kSel=null;return refresh()}
+ if(d.ch==='kskjul'){ui.kSkjul=el.checked;return refresh()}
+ if(d.ch==='felles'){const c=clone(cfg());c.felles=Object.assign({},c.felles||{},{[d.k]:el.value.trim()});upCfg(c);return toast('Lagret')}
+ if(d.ch==='forms'){const c=clone(cfg());c.forms=el.value.trim();upCfg(c);return toast('Lagret')}
+ if(d.ch==='frist'){const c=clone(cfg());c.frister=Object.assign({},F(),{[d.k]:Math.max(0,+el.value||0)});upCfg(c);return toast('Frist lagret')}
+ if(!d.ch||!sheet||sheet.type!=='req')return;
+ const r=getReq(sheet.id);const l=d.li!==undefined?r.avd[+d.li]:null;
+ if(d.ch==='status'){setStatus(r,el.value)}
+ else if(d.ch==='ps'){r.psSendt=el.checked?today():null;logg(r,el.checked?'Personalskjema sendt til Ankomstsenteret':'Avhuking for personalskjema fjernet')}
+ else if(d.ch==='avslag'){r.avslag=el.value;logg(r,'Avslagsårsak: '+el.value)}
+ else if(d.ch==='avslagtekst'){r.avslagTekst=el.value}
+ else if(d.ch==='lstatus'){const was=l.status;l.status=el.value;if(was==='venter'&&el.value!=='venter')l.svarDato=today();if(el.value==='ja'&&l.antall==null){const{b,res}=cnt(r);l.antall=Math.max(1,(+r.antall||0)-b-res)}logg(r,avdNavn(l.avdId)+': '+L2M[el.value].n)}
+ else if(d.ch==='lantall'){l.antall=Math.max(0,+el.value||0)}
+ else if(d.ch==='lavklart'){l.avklart=el.checked;logg(r,avdNavn(l.avdId)+': kontaktperson og oppmøtested '+(el.checked?'avklart':'ikke avklart'))}
+ else if(d.ch==='larsak'){l.arsak=el.value}else if(d.ch==='larsaktekst'){l.arsakTekst=el.value}
+ else if(d.ch==='lsjekk'){l.nySjekk=el.value}
+ upReq(r)});
+function setStatus(r,s){if(r.status===s)return;r.status=s;r.statusDato=today();if(s==='mottatt'&&!r.mottatt)r.mottatt=today();logg(r,'Status: '+SM[s].n)}
+document.addEventListener('input',e=>{const f=e.target.closest?.('.fld.err');if(f&&e.target.type!=='checkbox'&&(e.target.value||'').trim()){f.classList.remove('err');f.querySelector('.errtxt')?.remove();e.target.removeAttribute('aria-invalid')}
+ if(e.target.id==='q'){ui.q=e.target.value;refresh(false)}});
+document.addEventListener('submit',e=>{e.preventDefault();if(e.target.id==='rf')saveReqForm(sheet.id);if(e.target.id==='af')saveAvd(sheet.id,sheet.parent)});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches?.('#rf input,#af input')){e.preventDefault();e.target.closest('#rf')?saveReqForm(sheet.id):saveAvd(sheet.id,sheet.parent)}});
+document.addEventListener('focusout',()=>{if(pendingSheet)setTimeout(()=>{const ae=document.activeElement;if(!$('#panel').contains(ae)||!/^(INPUT|TEXTAREA)$/.test(ae.tagName)){pendingSheet=false;renderSheet(true)}},0)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sheet)closeSheet()});
+addEventListener('hashchange',()=>{window.scrollTo(0,0);refresh(false)});
+
+/* ---------- oppstart ---------- */
+refresh();
+(async()=>{let w=0;while(!(window.claude&&typeof window.claude.use==='function')&&w<20){await new Promise(r=>setTimeout(r,100));w++}
+ let d=null;if(window.claude&&typeof window.claude.use==='function'){try{d=await window.claude.use('db')}catch(e){d=null}}
+ if(d){db=d;mode='db';startDb();try{const u=await window.claude.use('user');const kan=u&&u.can?await u.can('data.write'):null;if(kan===false){lesTilgang=true;sched()}}catch(e){}}else{mode='lokal';startLocal()}refresh(false)})();
+}
+</script>
+</body>
+</html>

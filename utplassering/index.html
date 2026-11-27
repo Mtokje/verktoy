@@ -110,20 +110,10 @@ footer a{color:inherit}
   </div>
 
   <div id="errbox" class="errbox" role="alert" tabindex="-1" hidden></div>
+  <div id="listeFeil" class="errbox" role="alert" hidden><b>Listene over skoler og fag kunne ikke lastes.</b> Last siden på nytt. Hjelper ikke det, kan du velge «Annen skole» og skrive inn skole og linje selv.</div>
 
   <section class="sec">
-    <h2><span class="num">1</span>Hva sender dere?</h2>
-    <fieldset class="q" id="q-type">
-      <legend class="sr" hidden>Type forespørsel</legend>
-      <div class="cards">
-        <label class="tcard"><input type="radio" name="type" value="tidlig"><span><b>Tidlig estimat</b><small>Omtrent antall og periode. Ikke bindende. Hjelper oss å planlegge.</small></span></label>
-        <label class="tcard"><input type="radio" name="type" value="reell"><span><b>Reell forespørsel</b><small>Dere ønsker plass til elevene. Vi svarer innen 3 arbeidsdager.</small></span></label>
-      </div>
-    </fieldset>
-  </section>
-
-  <section class="sec">
-    <h2><span class="num">2</span>Skole og klasse</h2>
+    <h2><span class="num">1</span>Skole og klasse</h2>
     <fieldset class="q" id="q-skole">
       <legend>Skole</legend>
       <div class="chips" id="skoler"></div>
@@ -146,11 +136,11 @@ footer a{color:inherit}
   </section>
 
   <section class="sec">
-    <h2><span class="num">3</span>Når og hvordan</h2>
+    <h2><span class="num">2</span>Når og hvordan</h2>
     <fieldset class="q" id="q-periode">
       <legend>Periode</legend>
       <div class="chips" style="margin-bottom:10px">
-        <label class="chip"><input type="radio" name="pmode" value="dato"><span>Nøyaktige datoer</span></label>
+        <label class="chip"><input type="radio" name="pmode" value="dato" checked><span>Nøyaktige datoer</span></label>
         <label class="chip"><input type="radio" name="pmode" value="omtrent"><span>Omtrent (uker)</span></label>
       </div>
       <div id="pDato" hidden>
@@ -192,13 +182,13 @@ footer a{color:inherit}
   </section>
 
   <section class="sec">
-    <h2><span class="num">4</span>Fag av interesse <span class="opt">(valgfritt)</span></h2>
+    <h2><span class="num">3</span>Fag av interesse <span class="opt">(valgfritt)</span></h2>
     <p class="hint" style="margin:-6px 0 10px">Velg gjerne flere. La stå tomt hvis dere ikke vet ennå.</p>
     <div class="chips fag" id="fag"></div>
   </section>
 
   <section class="sec">
-    <h2><span class="num">5</span>Kontaktperson på skolen</h2>
+    <h2><span class="num">4</span>Kontaktperson på skolen</h2>
     <div class="q" id="q-knavn"><label class="fld"><span>Navn</span><input type="text" id="knavn" autocomplete="name"></label></div>
     <div class="two">
       <div class="q" id="q-kepost"><label class="fld"><span>E-post</span><input type="email" id="kepost" autocomplete="email" inputmode="email"></label></div>
@@ -207,10 +197,9 @@ footer a{color:inherit}
   </section>
 
   <section class="sec">
-    <h2><span class="num">6</span>Bekreft og send</h2>
+    <h2><span class="num">5</span>Bekreft og send</h2>
     <div class="q" id="q-motivert">
       <label class="confirm"><input type="checkbox" id="motivert"><span>Lærer bekrefter å ha snakket med elevene, og at de er motivert for utplassering ved Aker Solutions, Stord Yard</span></label>
-      <p class="hint" id="motivertHint" hidden>Ikke påkrevd for tidlig estimat. Kan bekreftes når dere sender reell forespørsel.</p>
     </div>
     <div class="q">
       <label class="fld"><span>Melding <span class="opt">(valgfritt)</span></span><textarea id="fritekst" placeholder="Annet vi bør vite. Ikke skriv elevnavn."></textarea></label>
@@ -269,13 +258,13 @@ footer a{color:inherit}
 <footer>Stord Academy, Aker Solutions Stord Yard · Skjemaet lagrer ingenting på nett. Det du fyller ut, ligger bare i nettleseren din og sendes kun med e-posten du selv sender.</footer>
 <div id="toast" role="status"></div>
 
+<script src="lister.js"></script>
 <script>
 (()=>{
-/* ---------- Faste lister – identiske med admin-prototypen (del B) og grunnlagsdokumentet kap. 3 ---------- */
-const LAEREFAG=["Anleggsmaskinfører","Automatisering","Elektriker","Energimontør","Gjenvinning","Industrimaler","Industrimekaniker","Industrioppmåling","Industrirørlegger","Isolatør","Kran- og løfteoperasjon","Logistikk","NDT-kontrollør","Platearbeider","Sveis","Stillasbygger"];
-const SKOLER=[
- {id:'stord',navn:'Stord vidaregåande skule',kort:'Stord vgs',linjer:{Vg1:["Bygg- og anleggsteknikk","Elektro og datateknologi","Teknologi- og industrifag (TIP)","Salg, service og reiseliv"],Vg2:["Automatisering","Elenergi og ekom","Industriteknologi","Kjøretøy","Tømrer"],Vg3:["Automatiseringsfaget"]}},
- {id:'bomlo',navn:'Bømlo vidaregåande skule',kort:'Bømlo vgs',linjer:{Vg1:["Elektro og datateknologi","Teknologi- og industrifag (TIP)","Naturbruk"],Vg2:["Automatisering","Elenergi og ekom","Industriteknologi"],Vg3:["Automatiseringsfaget"]}}];
+/* ---------- Skoler, linjer og lærefag hentes fra den felles filen lister.js (grunnlagsdokumentet 7.1) ---------- */
+const LISTER=window.UTPL_LISTER&&typeof window.UTPL_LISTER==='object'?window.UTPL_LISTER:null;
+const SKOLER=LISTER&&Array.isArray(LISTER.skoler)?LISTER.skoler.filter(x=>x&&x.id&&x.navn):[];
+const LAEREFAG=LISTER&&Array.isArray(LISTER.laerefag)?LISTER.laerefag.filter(x=>typeof x==='string'):[];
 const TRINN=['Vg1','Vg2','Vg3'];
 const TIL='utplassering.stord@akersolutions.com';
 const KEY='utplassering-skjema-v1';
@@ -293,7 +282,8 @@ let tt;const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on')
 
 /* ---------- Bygg valg ---------- */
 const chip=(name,val,label,type='radio')=>`<label class="chip"><input type="${type}" name="${name}" value="${esc(val)}"><span>${esc(label)}</span></label>`;
-$('#skoler').innerHTML=SKOLER.map(s=>chip('skole',s.id,s.kort)).join('')+chip('skole','annen','Annen skole');
+$('#skoler').innerHTML=SKOLER.map(s=>chip('skole',s.id,s.kort||s.navn)).join('')+chip('skole','annen','Annen skole');
+if(!LISTER){$('#listeFeil').hidden=false}
 $('#trinn').innerHTML=TRINN.map(t=>chip('trinn',t,t)).join('');
 $('#fag').innerHTML=LAEREFAG.map(f=>chip('fag',f,f,'checkbox')).join('');
 const Y0=new Date().getFullYear();$('#aar').innerHTML=[Y0,Y0+1].map(y=>chip('aar',String(y),String(y))).join('');
@@ -315,7 +305,7 @@ function renderLinjer(keep){
  box.hidden=false;fri.hidden=true;
  const s=SKOLER.find(x=>x.id===sk);
  if(!s||!tr){box.innerHTML='<p class="hint" style="margin:0">Velg skole og trinn først.</p>';return}
- const ls=s.linjer[tr]||[];
+ const ls=(s.linjer||{})[tr]||[];
  box.innerHTML=ls.map(l=>chip('linje',l,l)).join('')||'<p class="hint" style="margin:0">Ingen linjer på dette trinnet.</p>';
  if(keep)setVal('linje',keep);
 }
@@ -323,12 +313,10 @@ function renderLinjer(keep){
 /* ---------- Dynamikk ---------- */
 let varighetAuto=true;
 function sync(){
- const type=val('type');
  $('#annenSkole').hidden=val('skole')!=='annen';
- if(type&&!pmodeTouched&&!val('pmode'))setVal('pmode',type==='tidlig'?'omtrent':'dato');
+ if(!val('pmode'))setVal('pmode','dato');
  const pm=val('pmode');$('#pDato').hidden=pm!=='dato';$('#pOmtrent').hidden=pm!=='omtrent';
  if(pm==='omtrent'&&!val('aar')){const w=isoWeek(ds(new Date()));setVal('aar',String(w>=44?Y0+1:Y0))}
- $('#motivertHint').hidden=type!=='tidlig';
  const f=val('form');$('#formFri').hidden=f!=='annet';$('#endagWarn').hidden=f!=='endag';
  $('#varighetFri').hidden=val('varighet')!=='annet';
  const pv=periodeVerdi();
@@ -359,7 +347,7 @@ $('#fra').min=ds(new Date());
 function collect(){
  const sk=val('skole'),s=SKOLER.find(x=>x.id===sk);
  const v=val('varighet');const f=val('form');
- return{type:val('type'),skoleId:sk,skole:sk==='annen'?$('#skoleNavn').value.trim():(s?s.navn:''),trinn:val('trinn'),
+ return{type:'reell',skoleId:sk,skole:sk==='annen'?$('#skoleNavn').value.trim():(s?s.navn:''),trinn:val('trinn'),
   linje:sk==='annen'?$('#linjeNavn').value.trim():val('linje'),antall:+$('#antall').value||0,...(()=>{const pv=periodeVerdi();return{periode:pv.m,fra:pv.fra,til:pv.til,aar:pv.y||'',ukeFra:pv.a||'',ukeTil:pv.b||'',periodeFeil:pv.bad||''}})(),
   varighetValg:v,varighet:v==='annet'?$('#varighetTekst').value.trim():v,form:f,formTekst:f==='annet'?$('#formTekst').value.trim():'',
   fag:$$('input[name=fag]:checked').map(x=>x.value),kontakt:{navn:$('#knavn').value.trim(),epost:$('#kepost').value.trim(),tlf:$('#ktlf').value.trim()},
@@ -367,7 +355,7 @@ function collect(){
 let state={step:'form',sid:null,sendtDato:null};
 function save(){store.set({draft:collect(),state,varighetAuto,raw:{skoleNavn:$('#skoleNavn').value,linjeNavn:$('#linjeNavn').value,varighetTekst:$('#varighetTekst').value,formTekst:$('#formTekst').value,ukeFra:$('#ukeFra').value,ukeTil:$('#ukeTil').value,datoFra:$('#fra').value,datoTil:$('#til').value},pmodeTouched})}
 function restore(o){if(!o||!o.draft)return;const d=o.draft;
- if(d.type)setVal('type',d.type);if(d.skoleId)setVal('skole',d.skoleId);if(d.trinn)setVal('trinn',d.trinn);
+ if(d.skoleId)setVal('skole',d.skoleId);if(d.trinn)setVal('trinn',d.trinn);
  renderLinjer(d.skoleId!=='annen'?d.linje:'');
  $('#skoleNavn').value=o.raw?.skoleNavn||'';$('#linjeNavn').value=o.raw?.linjeNavn||'';
  $('#antall').value=d.antall||'';
@@ -384,7 +372,6 @@ function restore(o){if(!o||!o.draft)return;const d=o.draft;
 function clearBad(q){if(q){q.classList.remove('bad');q.querySelector('.err-msg')?.remove()}}
 function validate(d){
  const E=[];const add=(id,msg,short)=>E.push({id,msg,short});
- if(!d.type)add('q-type','Velg tidlig estimat eller reell forespørsel.','type forespørsel');
  if(!d.skoleId)add('q-skole','Velg skole.','skole');else if(d.skoleId==='annen'&&!d.skole)add('q-skole','Skriv inn navnet på skolen.','navn på skolen');
  if(!d.trinn)add('q-trinn','Velg trinn.','trinn');
  if(!d.linje)add('q-linje',d.skoleId==='annen'?'Skriv inn linje.':'Velg linje.','linje');
@@ -405,7 +392,7 @@ function validate(d){
  if(!d.form)add('q-form','Velg hvordan utplasseringen skal gå.','form');else if(d.form==='annet'&&!d.formTekst)add('q-form','Beskriv kort hvordan.','form');
  if(!d.kontakt.navn)add('q-knavn','Skriv inn navnet ditt.','navn på kontaktperson');
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.kontakt.epost))add('q-kepost','Skriv inn en gyldig e-postadresse.','e-post');
- if(d.type==='reell'&&!d.motivert)add('q-motivert','Bekreft at du har snakket med elevene, og at de er motivert. Påkrevd for reell forespørsel.','bekreftelse om motivasjon');
+ if(!d.motivert)add('q-motivert','Bekreft at du har snakket med elevene, og at de er motivert.','bekreftelse om motivasjon');
  return E}
 function showErrors(E){
  $$('.q.bad').forEach(clearBad);
@@ -426,10 +413,9 @@ function kode(d){
  return'UTPL1.'+b64url(JSON.stringify(o))+'.SLUTT'}
 const kortSkole=d=>d.skoleId!=='annen'?(SKOLER.find(s=>s.id===d.skoleId)?.kort||d.skole):d.skole;
 function rows(d){return[
- ['Type',d.type==='tidlig'?'Tidlig estimat (ikke bindende)':'Reell forespørsel'],
  ['Skole',d.skole+(d.skoleId==='annen'?' (annen skole)':'')],
  ['Klasse',d.trinn+' '+d.linje],
- ['Antall elever',(d.type==='tidlig'?'ca. ':'')+d.antall],
+ ['Antall elever',d.antall],
  ['Periode',d.periode==='omtrent'?`Omtrent uke ${d.ukeFra}${d.ukeTil!==d.ukeFra?'–'+d.ukeTil:''} ${d.aar} (ca. ${fy(d.fra)}–${fy(d.til)})`:`${fy(d.fra)}–${fy(d.til)} (${ukeTxt(d.fra,d.til)})`],
  ['Varighet',d.varighet],
  ['Form',d.form==='annet'?'Annet: '+d.formTekst:formNavn[d.form]+(d.form==='endag'?' (innvilges sjelden)':'')],
@@ -438,7 +424,7 @@ function rows(d){return[
  ['Motivasjon',d.motivert?'Lærer bekrefter å ha snakket med elevene, og at de er motivert for utplassering ved Aker Solutions, Stord Yard':'Ikke bekreftet ennå'],
  ['Melding',d.fritekst||'–']]}
 function epost(d){
- const emne=`Utplassering: ${d.type==='tidlig'?'Tidlig estimat':'Reell forespørsel'} – ${kortSkole(d)}, ${d.trinn} ${d.linje}, ${d.antall} elever, ${ukeTxt(d.fra,d.til)}`;
+ const emne=`Forespørsel om utplassering – ${kortSkole(d)}, ${d.trinn} ${d.linje}, ${d.antall} elever, ${ukeTxt(d.fra,d.til)}`;
  const tekst=`Forespørsel om utplassering ved Aker Solutions, Stord Yard\n\n`+rows(d).map(([k,v])=>`${k}: ${v}`).join('\n')+
   `\n\nInnsendings-ID: ${state.sid}\n\nKode til Stord Academy (ikke endre):\n${kode(d)}\n\nSendt fra skjemaet til Stord Academy.`;
  return{emne,tekst}}
@@ -451,16 +437,12 @@ function prepSend(){const d=collect();const m=epost(d);
  $('#sum').innerHTML=rows(d).map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')+`<dt>Innsendings-ID</dt><dd><span class="ref">${esc(state.sid)}</span></dd>`;
  return m}
 function prepDone(){const d=collect();$('#doneId').textContent=state.sid;
- const reell=d.type==='reell';
- $('#doneTitle').textContent=reell?'Takk for forespørselen':'Takk for estimatet';
- $('#doneSteps').innerHTML=(reell?[
+ $('#doneTitle').textContent='Takk for forespørselen';
+ $('#doneSteps').innerHTML=[
   ['Vi registrerer forespørselen','Dere får et referansenummer (f.eks. U-2026-014) i svaret fra oss.'],
   ['Svar innen 3 arbeidsdager','Vi bekrefter at forespørselen er mottatt og sier hva vi gjør videre.'],
   ['Vi spør aktuelle avdelinger','Endelig svar om plass kommer som regel tidligst ca. én måned før oppstart. Dere kan få plass til alle, noen eller ingen.'],
-  ['Når plassene er bekreftet','Dere sender personalskjema med navn på elevene til utplassering.stord@akersolutions.com. Elevene får informasjon om oppmøte og kontaktperson før oppstart.']]:[
-  ['Vi noterer estimatet','Det er ikke bindende for noen av oss, men hjelper oss å planlegge. Dere får et referansenummer i svaret fra oss.'],
-  ['Send reell forespørsel når dere vet mer','Bruk det samme skjemaet og velg «Reell forespørsel». Da svarer vi innen 3 arbeidsdager.'],
-  ['Ingen elevnavn ennå','Navn sendes i personalskjemaet når plassene er bekreftet.']])
+  ['Når plassene er bekreftet','Dere sender personalskjema med navn på elevene til utplassering.stord@akersolutions.com. Elevene får informasjon om oppmøte og kontaktperson før oppstart.']]
   .map(([b,t])=>`<li><b>${esc(b)}</b>${esc(t)}</li>`).join('')}
 
 $('#form').addEventListener('submit',e=>{e.preventDefault();const d=collect();const E=validate(d);showErrors(E);if(E.length)return;

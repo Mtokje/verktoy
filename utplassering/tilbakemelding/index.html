@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tilbakemelding om utplasseringselev – Aker Solutions, Stord Yard</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Del E – kontaktpersonens tilbakemelding om eleven. Samme visuelle språk som del C.
+   Elevopplysningene ligger i lenkens #-del (sendes aldri til serveren) og lagres ikke. */
+:root{color-scheme:light;--bg:#f4f7fa;--card:#fff;--ink:#10223a;--mut:#5a6a7e;--line:#dbe3ec;--sky:#4fb3e8;--skyink:#0b2238;--or:#ff7a1a;--orbg:#fff0e3;--orink:#9a3d00;--soft:#eef3f8;--ok:#157a43;--okbg:#e6f5ec;--err:#c62f34}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2{font-family:Outfit,Inter,sans-serif;font-weight:600;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(22px,6vw,28px)}h2{font-size:17px}
+button,input,textarea{font:inherit;color:inherit}
+.top{background:var(--sky);color:var(--skyink)}
+.top-in{max-width:600px;margin:0 auto;padding:16px 16px 18px}
+.top small{display:block;font-size:13px;opacity:.85;margin-bottom:4px}
+.top p{margin:6px 0 0;font-size:15px}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;padding:1px 7px;border-radius:6px;background:#ffe08a;color:#5a4300;vertical-align:middle;margin-left:6px}
+main{max-width:600px;margin:0 auto;padding:14px 16px 40px}
+.elev{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.elev .navn{font:600 22px/1.2 Outfit,Inter,sans-serif;margin:2px 0 8px;overflow-wrap:anywhere}
+.elev dl{margin:0;display:grid;grid-template-columns:92px 1fr;gap:2px 10px;font-size:14px}
+.elev dt{color:var(--mut)}.elev dd{margin:0;overflow-wrap:anywhere}
+.lbl0{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
+.linkbtn{background:none;border:0;padding:0;color:var(--mut);text-decoration:underline;font-size:14px;cursor:pointer;margin-top:8px}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.q{margin:0 0 16px;border:0;padding:0}
+.q:last-child{margin-bottom:0}
+.q>legend,.q>.lbl{display:block;font-weight:600;font-size:15px;margin:0 0 6px;padding:0}
+.opt{font-weight:400;color:var(--mut);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip span{display:flex;align-items:center;min-height:44px;padding:8px 14px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);font-size:15px;cursor:pointer;user-select:none}
+.chip input:checked+span{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip input:focus-visible+span{outline:3px solid var(--or);outline-offset:2px}
+input[type=text],input[type=date],textarea{width:100%;min-height:48px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);font-size:16px}
+textarea{min-height:88px;line-height:1.45;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.fld{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fld>span{font-size:14px;font-weight:500}
+.two{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.err-msg{color:var(--err);font-size:13px;font-weight:600;margin-top:6px}
+.bad .chip span,.bad input[type=text]{border-color:var(--err)}
+.errbox{background:#fdecec;color:#8a1c20;border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:15px}
+.warn{background:var(--orbg);color:var(--orink);border-left:4px solid var(--or);border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:12px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;padding:12px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);font-weight:600;font-size:16px;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--mut);font-weight:500;min-height:44px}
+.stack{display:grid;gap:10px}
+.note{font-size:13px;color:var(--mut);margin:10px 0 0}
+.ok{display:flex;gap:12px;align-items:center;background:var(--okbg);color:var(--ok);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.ok svg{flex:none;width:32px;height:32px}
+.ok h1{font-size:22px;color:var(--ok)}
+.sum{white-space:pre-wrap;font-size:14px;background:var(--soft);border-radius:10px;padding:10px 12px;margin:0;overflow-wrap:anywhere}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+#toast.on{opacity:1}
+[hidden]{display:none!important}
+@media(max-width:400px){.two{grid-template-columns:1fr}.elev dl{grid-template-columns:1fr;gap:0}.elev dt{margin-top:6px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <small>Aker Solutions, Stord Yard · Stord Academy</small>
+  <h1>Tilbakemelding om utplasseringselev <span class="tag">TESTVERSJON</span></h1>
+  <p>For kontaktpersonen siste dag. Tar under 2 minutter.</p>
+</div></header>
+
+<main>
+<!-- ============ SKJEMA ============ -->
+<form id="form" novalidate autocomplete="off">
+  <div id="nodata" class="warn" hidden><b>Lenken mangler opplysninger om eleven.</b> Skriv inn navnet som står under QR-koden på elevens ark, og avdelingen.</div>
+
+  <div class="elev" id="elevKort">
+    <div class="lbl0">Eleven</div>
+    <div class="navn" id="vNavn"></div>
+    <dl id="vInfo"></dl>
+    <button type="button" class="linkbtn" id="endre">Stemmer ikke dette? Rett opp</button>
+  </div>
+
+  <section class="sec" id="manuell" hidden>
+    <label class="fld" id="f-navn"><span>Elevens navn</span><input type="text" id="mNavn" autocomplete="off" autocapitalize="words" spellcheck="false"></label>
+    <label class="fld" id="f-avd"><span>Avdeling</span><input type="text" id="mAvd" autocomplete="off"></label>
+    <div class="two">
+      <label class="fld"><span>Fra <span class="opt">(valgfritt)</span></span><input type="date" id="mFra"></label>
+      <label class="fld"><span>Til <span class="opt">(valgfritt)</span></span><input type="date" id="mTil"></label>
+    </div>
+  </section>
+
+  <div id="errbox" class="errbox" role="alert" tabindex="-1" hidden></div>
+
+  <section class="sec">
+    <fieldset class="q" id="q-oppmote">
+      <legend>Oppmøte</legend>
+      <div class="chips" data-name="oppmote"></div>
+    </fieldset>
+    <fieldset class="q" id="q-innsats">
+      <legend>Innsats</legend>
+      <div class="chips" data-name="innsats"></div>
+    </fieldset>
+    <fieldset class="q" id="q-interesse">
+      <legend>Interesse for faget</legend>
+      <div class="chips" data-name="interesse"></div>
+    </fieldset>
+    <fieldset class="q" id="q-laerling">
+      <legend>Ville du tatt eleven som lærling?</legend>
+      <div class="chips" data-name="laerling"></div>
+    </fieldset>
+    <label class="q" style="display:block"><span class="lbl">Kommentar <span class="opt">(valgfritt)</span></span>
+      <textarea id="fritekst" placeholder="Hva gikk bra? Noe eleven bør jobbe med?"></textarea></label>
+  </section>
+
+  <section class="sec">
+    <label class="fld" id="f-av" style="margin:0"><span>Fylt ut av</span><input type="text" id="av" autocomplete="name" placeholder="Ditt navn"></label>
+  </section>
+
+  <div class="stack">
+    <button type="submit" class="btn pri">Send tilbakemelding</button>
+  </div>
+  <p class="note">Skjemaet lagrer ingenting. «Send» åpner en ferdig e-post fra deg til <span id="mottTxt"></span>.</p>
+</form>
+
+<!-- ============ SEND ============ -->
+<section id="sendSteg" hidden>
+  <div class="sec">
+    <h2 style="margin-bottom:8px">E-posten er klar</h2>
+    <p style="margin:0 0 10px;font-size:15px">Åpnet ikke e-posten seg? Kopier teksten og send den til <b id="mottTxt2"></b>.</p>
+    <div class="stack">
+      <a class="btn pri" id="mailBtn" href="#">Åpne e-post igjen</a>
+      <button type="button" class="btn" id="kopierTekst">Kopier teksten</button>
+      <button type="button" class="btn" id="kopierAdr">Kopier e-postadressene</button>
+      <button type="button" class="btn" id="sendtBtn">Jeg har sendt e-posten</button>
+      <button type="button" class="btn ghost" id="tilbake">Tilbake til skjemaet</button>
+    </div>
+  </div>
+  <details class="sec"><summary style="cursor:pointer;font-weight:600">Vis teksten</summary><pre class="sum" id="sumTxt" style="margin-top:10px"></pre></details>
+</section>
+
+<!-- ============ TAKK ============ -->
+<section id="takk" hidden>
+  <div class="ok" role="status">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>
+    <div><h1>Takk for tilbakemeldingen</h1><div style="font-size:15px">Den går til skolen og Stord Academy.</div></div>
+  </div>
+  <div class="sec" style="font-size:15px">Takk for at du tok imot eleven. Du kan lukke siden nå.</div>
+</section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+const ACADEMY='utplassering.stord@akersolutions.com';
+const VALG={
+ oppmote:['Presis hver dag','Stort sett presis','For sent eller borte flere ganger'],
+ innsats:['Svært god','God','Varierende','Svak'],
+ interesse:['Stor','God','Noe','Liten'],
+ laerling:['Ja','Kanskje','Nei','Vet ikke']};
+const NAVN={oppmote:'Oppmøte',innsats:'Innsats',interesse:'Interesse for faget',laerling:'Ville tatt eleven som lærling'};
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pd=s=>{const[y,m,d]=String(s).split('-').map(Number);return new Date(y,m-1,d)};
+const fy=s=>{if(!/^\d{4}-\d\d-\d\d$/.test(s||''))return '';const d=pd(s);return d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()};
+const periode=(f,t)=>f&&t&&f!==t?fy(f)+'–'+fy(t):fy(f||t);
+let tt;const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2400)};
+
+/* ---------- Les lenken (#d=…) ---------- */
+function decode(h){
+ try{const m=/[#&]d=([A-Za-z0-9_-]+)/.exec(h||'');if(!m)return null;
+  let b=m[1].replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';
+  const bytes=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+  const o=JSON.parse(new TextDecoder().decode(bytes));return o&&typeof o==='object'?o:null}catch(e){return null}}
+const D=decode(location.hash)||{};
+const S={id:D.id||'',navn:D.n||'',avd:D.a||'',kontakt:D.k||'',fra:D.f||'',til:D.t||'',skole:D.s||'',linje:D.l||'',skoleEpost:D.e||''};
+const harData=!!(S.navn&&S.avd);
+
+/* sesjonslagring: kun svarene (ikke navnet), slik at skjemaet overlever at e-postappen åpnes */
+const SKEY='utpl-e-'+(S.id||'x')+'-'+(S.avd||'x').slice(0,20);
+const ss={get(){try{return JSON.parse(sessionStorage.getItem(SKEY)||'null')}catch(e){return null}},set(v){try{sessionStorage.setItem(SKEY,JSON.stringify(v))}catch(e){}},del(){try{sessionStorage.removeItem(SKEY)}catch(e){}}};
+
+/* ---------- Bygg ---------- */
+$$('.chips[data-name]').forEach(el=>{const n=el.dataset.name;
+ el.innerHTML=VALG[n].map(v=>`<label class="chip"><input type="radio" name="${n}" value="${esc(v)}"><span>${esc(v)}</span></label>`).join('')});
+const mottakere=()=>[S.skoleEpost,ACADEMY].filter(Boolean);
+const mottTekst=()=>S.skoleEpost?'skolen ('+S.skoleEpost+') og Stord Academy':'Stord Academy, som sender den videre til skolen';
+$('#mottTxt').textContent=mottTekst();$('#mottTxt2').textContent=mottakere().join(', ');
+
+function visElev(){
+ const navn=$('#mNavn').value.trim()||S.navn,avd=$('#mAvd').value.trim()||S.avd;
+ $('#vNavn').textContent=navn||'Navn mangler';
+ const p=periode($('#mFra').value||S.fra,$('#mTil').value||S.til);
+ const rows=[['Avdeling',avd||'–'],['Periode',p||'–'],['Skole',[S.skole,S.linje].filter(Boolean).join(', ')||'–'],['Ref.',S.id||'–']];
+ $('#vInfo').innerHTML=rows.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('');
+}
+$('#mNavn').value=S.navn;$('#mAvd').value=S.avd;$('#mFra').value=S.fra;$('#mTil').value=S.til;
+if(!harData){$('#nodata').hidden=false;$('#manuell').hidden=false;$('#elevKort').hidden=true}
+$('#endre').onclick=()=>{$('#manuell').hidden=false;$('#endre').hidden=true;$('#mNavn').focus()};
+['#mNavn','#mAvd','#mFra','#mTil'].forEach(s=>$(s).addEventListener('input',visElev));
+if(S.kontakt)$('#av').value=S.kontakt;
+visElev();
+
+const val=n=>($(`input[name="${n}"]:checked`)||{}).value||'';
+function lagre(){ss.set({o:val('oppmote'),i:val('innsats'),r:val('interesse'),l:val('laerling'),f:$('#fritekst').value,av:$('#av').value,steg:$('#sendSteg').hidden?'skjema':'send'})}
+function gjenopprett(){const v=ss.get();if(!v)return;
+ const set=(n,x)=>{const e=x&&$(`input[name="${n}"][value="${CSS.escape(x)}"]`);if(e)e.checked=true};
+ set('oppmote',v.o);set('innsats',v.i);set('interesse',v.r);set('laerling',v.l);$('#fritekst').value=v.f||'';if(v.av)$('#av').value=v.av;
+ if(v.steg==='send'&&valider(true))visSend()}
+$('#form').addEventListener('change',()=>{lagre();rensFeil()});$('#form').addEventListener('input',lagre);
+
+/* ---------- Validering ---------- */
+function rensFeil(){$$('.bad').forEach(e=>{const n=e.id.replace(/^q-|^f-/,'');
+ const ok=e.id.startsWith('q-')?!!val(n):(e.querySelector('input')?.value.trim());
+ if(ok){e.classList.remove('bad');e.querySelector('.err-msg')?.remove()}});
+ if(!$$('.bad').length)$('#errbox').hidden=true}
+function valider(stille){
+ $$('.bad').forEach(e=>e.classList.remove('bad'));$$('.err-msg').forEach(e=>e.remove());
+ const feil=[];
+ const merk=(id,txt)=>{const e=$('#'+id);feil.push([id,txt]);if(!stille){e.classList.add('bad');e.insertAdjacentHTML('beforeend',`<div class="err-msg">${esc(txt)}</div>`)}};
+ if(!($('#mNavn').value.trim()||S.navn)){$('#manuell').hidden=false;merk('f-navn','Skriv elevens navn')}
+ if(!($('#mAvd').value.trim()||S.avd)){$('#manuell').hidden=false;merk('f-avd','Skriv avdelingen')}
+ Object.keys(VALG).forEach(n=>{if(!val(n))merk('q-'+n,'Velg ett svar')});
+ if(!$('#av').value.trim())merk('f-av','Skriv navnet ditt');
+ if(stille)return !feil.length;
+ const box=$('#errbox');
+ if(feil.length){box.innerHTML='<b>Mangler '+feil.length+' svar.</b>';box.hidden=false;$('#'+feil[0][0]).scrollIntoView({behavior:'smooth',block:'center'});return false}
+ box.hidden=true;return true}
+
+/* ---------- E-post ---------- */
+function tekst(){
+ const navn=$('#mNavn').value.trim()||S.navn,avd=$('#mAvd').value.trim()||S.avd;
+ const p=periode($('#mFra').value||S.fra,$('#mTil').value||S.til);
+ const L=['Tilbakemelding om utplasseringselev – Aker Solutions, Stord Yard','',
+  'Elev: '+navn,'Avdeling: '+avd];
+ if(p)L.push('Periode: '+p);
+ if(S.skole||S.linje)L.push('Skole: '+[S.skole,S.linje].filter(Boolean).join(', '));
+ if(S.id)L.push('Forespørsels-ID: '+S.id);
+ L.push('');
+ Object.keys(VALG).forEach(n=>L.push(NAVN[n]+': '+val(n)));
+ const ft=$('#fritekst').value.trim();
+ L.push('','Kommentar: '+(ft||'–'),'','Fylt ut av: '+$('#av').value.trim()+' ('+avd+')');
+ if(!S.skoleEpost)L.push('','Til Stord Academy: skolens e-post manglet i lenken. Send svaret videre til skolen.');
+ return L.join('\n')}
+const emne=()=>'Tilbakemelding om utplasseringselev'+(S.id?' – '+S.id:'');
+const mailHref=()=>'mailto:'+mottakere().join(',')+'?subject='+encodeURIComponent(emne())+'&body='+encodeURIComponent(tekst());
+function visSend(){$('#form').hidden=true;$('#sendSteg').hidden=false;$('#sumTxt').textContent=tekst();$('#mailBtn').href=mailHref();lagre();scrollTo(0,0)}
+
+$('#form').addEventListener('submit',e=>{e.preventDefault();if(!valider())return;visSend();location.href=mailHref()});
+$('#tilbake').onclick=()=>{$('#sendSteg').hidden=true;$('#form').hidden=false;lagre()};
+async function kopier(t,m){try{await navigator.clipboard.writeText(t);toast(m)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();try{document.execCommand('copy');toast(m)}catch(_){toast('Kunne ikke kopiere')}a.remove()}}
+$('#kopierTekst').onclick=()=>kopier('Emne: '+emne()+'\n\n'+tekst(),'Teksten er kopiert');
+$('#kopierAdr').onclick=()=>kopier(mottakere().join(', '),'Adressene er kopiert');
+$('#sendtBtn').onclick=()=>{ss.del();$('#sendSteg').hidden=true;$('#takk').hidden=false;scrollTo(0,0)};
+gjenopprett();
+</script>
+</body>
+</html>

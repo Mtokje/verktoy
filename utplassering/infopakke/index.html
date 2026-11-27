@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Infopakke til utplasseringselever – Stord Academy</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Del D – infopakke-generator for Grace. Samme visuelle språk som del B/C.
+   Elevnavn finnes bare i minnet mens siden er åpen, i arket og i QR-lenken. Ingenting med elevnavn lagres. */
+:root{color-scheme:light;--bg:#f4f7fa;--card:#fff;--ink:#10223a;--mut:#5a6a7e;--line:#dbe3ec;--sky:#4fb3e8;--skyink:#0b2238;--or:#ff7a1a;--orbg:#fff0e3;--orink:#9a3d00;--soft:#eef3f8;--ok:#157a43;--okbg:#e6f5ec;--err:#c62f34;--errbg:#fdecec}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:Outfit,Inter,sans-serif;font-weight:600;line-height:1.15;margin:0}
+h1{font-size:24px}h2{font-size:18px}h3{font-size:15px}
+button,input,textarea,select{font:inherit;color:inherit}
+.top{background:var(--sky);color:var(--skyink)}
+.top-in{max-width:1400px;margin:0 auto;padding:14px 18px 0;display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 24px}
+.top small{display:block;font-size:13px;opacity:.85}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;padding:1px 7px;border-radius:6px;background:#ffe08a;color:#5a4300;vertical-align:middle;margin-left:6px}
+.tabs{display:flex;gap:4px;margin-left:auto}
+.tabs button{border:0;background:transparent;padding:10px 14px;border-radius:10px 10px 0 0;font-weight:600;cursor:pointer;color:var(--skyink)}
+.tabs button[aria-selected=true]{background:var(--bg)}
+.wrap{max-width:1400px;margin:0 auto;padding:16px 18px 48px}
+.cols{display:grid;grid-template-columns:minmax(340px,480px) 1fr;gap:18px;align-items:start}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.sec>h2{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font:600 13px Inter,sans-serif;flex:none}
+.privacy{display:flex;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:14px;margin-bottom:14px}
+.privacy svg{flex:none;width:20px;height:20px;margin-top:1px;color:var(--sky)}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}
+.fld>span{font-size:13px;font-weight:600}
+.opt{font-weight:400;color:var(--mut);font-size:12px}
+.hint{font-size:13px;color:var(--mut);margin:2px 0 8px}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=url],select,textarea{width:100%;min-height:42px;padding:8px 10px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);font-size:15px}
+textarea{min-height:80px;line-height:1.4;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+input.miss,select.miss{border-color:var(--err);background:var(--errbg)}
+.two{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.three{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:8px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.sm{min-height:34px;padding:4px 10px;font-size:13px}
+.btn.dan{color:var(--err)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--mut)}
+.btn.wide{width:100%}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.elev{border:1.5px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;background:#fbfcfe}
+.elev-h{display:grid;grid-template-columns:28px 1fr 1.3fr auto;gap:8px;align-items:center}
+.elev-h .nr{font-weight:700;color:var(--mut);text-align:center}
+.elev details{margin-top:6px}
+.elev summary{cursor:pointer;font-size:13px;color:var(--mut)}
+.elev .more{padding-top:8px}
+.from{font-size:12px;color:var(--mut)}
+.missbox{background:var(--errbg);color:#8a1c20;border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:14px}
+.missbox ul{margin:4px 0 0;padding-left:20px}
+.okbox{background:var(--okbg);color:var(--ok);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:14px;font-weight:600}
+.warn{background:var(--orbg);color:var(--orink);border-left:4px solid var(--or);border-radius:10px;padding:8px 12px;font-size:13px;margin:6px 0 10px}
+.prevbar{position:sticky;top:0;z-index:3;background:var(--bg);padding:6px 0 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.prevbar h2{margin-right:auto}
+.arkwrap{margin:0 auto 22px;width:fit-content;box-shadow:0 2px 14px rgba(16,34,58,.14);background:#fff}
+.arkbar{display:flex;gap:8px;justify-content:center;margin:-12px 0 26px}
+.empty{color:var(--mut);text-align:center;padding:40px 10px;border:2px dashed var(--line);border-radius:14px}
+table.reg{width:100%;border-collapse:collapse;font-size:14px}
+table.reg th{text-align:left;font-size:12px;color:var(--mut);font-weight:600;padding:4px 6px;border-bottom:1px solid var(--line)}
+table.reg td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.reg td:first-child{font-weight:600;width:24%}
+table.reg input{min-height:36px;font-size:14px;padding:5px 8px}
+table.reg tr.sub td:first-child{padding-left:20px;font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip span{display:flex;align-items:center;min-height:40px;padding:6px 14px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);font-size:14px;cursor:pointer}
+.chip input:checked+span{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip input:focus-visible+span{outline:3px solid var(--or);outline-offset:2px}
+pre.mail{white-space:pre-wrap;font:13px/1.45 Inter,sans-serif;background:var(--soft);border-radius:10px;padding:10px 12px;margin:6px 0;overflow-wrap:anywhere}
+code{font-size:13px;background:var(--soft);padding:1px 5px;border-radius:5px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+#toast.on{opacity:1}
+[hidden]{display:none!important}
+@media(max-width:900px){.cols{grid-template-columns:1fr}.prevbar{position:static}}
+@media(max-width:480px){.two,.three{grid-template-columns:1fr}.elev-h{grid-template-columns:24px 1fr auto}.elev-h select{grid-column:2/4}.tabs{margin-left:0}}
+
+/* ================= ARKET (A4) ================= */
+.ark{width:210mm;height:297mm;padding:9mm 11mm 7mm;display:flex;flex-direction:column;gap:3mm;background:#fff;color:#10223a;font:9.6pt/1.38 Inter,system-ui,sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ark .a-top{background:#4fb3e8;color:#0b2238;border-radius:3.5mm;padding:4mm 5mm}
+.ark .a-org{font-size:8.5pt;font-weight:600;opacity:.85}
+.ark .a-row{display:flex;justify-content:space-between;gap:6mm;align-items:flex-end;margin-top:1mm}
+.ark .a-h{font:600 12pt Outfit,Inter,sans-serif}
+.ark .a-navn{font:700 21pt/1.1 Outfit,Inter,sans-serif;overflow-wrap:anywhere}
+.ark .a-ref{text-align:right;font-size:8.5pt;line-height:1.3;flex:none}
+.ark .a-ref b{display:block;font-size:10.5pt}
+.ark .a-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2.6mm}
+.ark .box{border:.35mm solid #c9d5e2;border-radius:2.6mm;padding:2.4mm 3mm}
+.ark .box.hl{border-color:#10223a;border-width:.5mm}
+.ark .box .k{font-size:7.6pt;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#5a6a7e;margin-bottom:.6mm}
+.ark .box .v{font-weight:600;font-size:10.2pt;line-height:1.3}
+.ark .box .s{font-size:8.8pt;color:#33455c;margin-top:.4mm}
+.ark .mangler{display:inline-block;background:#fdecec;color:#c62f34;border:.3mm solid #c62f34;border-radius:1.2mm;padding:0 1.4mm;font-weight:700;font-size:8pt;text-transform:uppercase;letter-spacing:.03em}
+.ark .a-intro{font-size:9.8pt}
+.ark .a-intro b{font:600 11.5pt Outfit,Inter,sans-serif;display:block;margin-bottom:.6mm}
+.ark .a-txt{display:grid;grid-template-columns:1.25fr 1fr;gap:5mm}
+.ark h3{font:600 10.8pt Outfit,Inter,sans-serif;margin:0 0 1.2mm}
+.ark ul{margin:0;padding-left:4.4mm}
+.ark li{margin:0 0 .9mm}
+.ark li.utk{background:#fff3c4;box-shadow:-4.4mm 0 0 #fff3c4,1mm 0 0 #fff3c4;border-radius:.6mm}
+.ark .utk-lbl{display:inline-block;background:#ffe08a;color:#5a4300;font-size:7.4pt;font-weight:700;padding:.4mm 1.6mm;border-radius:1mm;margin-bottom:1.4mm;letter-spacing:.02em}
+.ark .siste p{margin:0 0 1.2mm}
+.ark .a-qr{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-top:auto}
+.ark .qrb{border:.5mm solid #10223a;border-radius:3mm;padding:3mm;display:grid;grid-template-columns:34mm 1fr;gap:3.4mm;align-items:center}
+.ark .qrb.f{border:.5mm dashed #4fb3e8;background:#f2f9fd}
+.ark .qrb .qr svg,.ark .qrb .qr .qrmiss{width:34mm;height:34mm;display:block}
+.ark .qrb .qrmiss{display:grid!important;place-items:center;text-align:center;border:.4mm dashed #c62f34;border-radius:2mm;font-size:8pt;color:#c62f34;font-weight:700;padding:2mm}
+.ark .qrb .who{display:inline-block;font-size:7.6pt;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.3mm 1.8mm;border-radius:1mm;background:#10223a;color:#fff;margin-bottom:1.2mm}
+.ark .qrb.f .who{background:#4fb3e8;color:#0b2238}
+.ark .qrb .t{font:600 11pt/1.2 Outfit,Inter,sans-serif;margin-bottom:1mm}
+.ark .qrb .d{font-size:8.6pt;color:#33455c}
+.ark .qrname{font:700 10.5pt/1.2 Inter,sans-serif;text-align:center;margin-top:1.2mm;overflow-wrap:anywhere}
+.ark .qrb .qr{text-align:center}
+.ark .qrb.nf{grid-template-columns:1fr}
+.ark .a-foot{font-size:7.8pt;color:#5a6a7e;display:flex;justify-content:space-between;gap:4mm;border-top:.3mm solid #dbe3ec;padding-top:1.6mm}
+
+@page{size:A4;margin:0}
+@media print{
+ body{background:#fff}
+ .ui,.top,.prevbar,.arkbar,#toast{display:none!important}
+ .wrap,.cols{display:block;padding:0;margin:0;max-width:none}
+ .arkwrap{zoom:1!important;box-shadow:none;margin:0}
+ .arkwrap+.arkwrap .ark{break-before:page}
+ body.en .arkwrap:not(.valgt){display:none!important}
+ #innst{display:none!important}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div style="padding-bottom:12px"><small>Stord Academy · Utplassering</small>
+  <h1>Infopakke til elever <span class="tag">TESTVERSJON</span></h1></div>
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="lag">Lag infopakke</button>
+    <button role="tab" aria-selected="false" data-tab="innst">Innstillinger og register</button>
+  </div>
+</div></header>
+
+<div class="wrap">
+<!-- ===================== LAG INFOPAKKE ===================== -->
+<div id="lag" class="cols">
+ <div class="ui">
+  <div class="privacy" role="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <span><b>Elevnavn lagres ikke.</b> De finnes bare på arket og i QR-koden. Lukker du siden, er navnene borte. Lag PDF eller skriv ut før du lukker.</span>
+  </div>
+
+  <section class="sec">
+    <h2><span class="num">1</span>Forespørsel</h2>
+    <label class="fld" id="velgReqWrap"><span>Velg fra admin <span class="opt">(etter import under Innstillinger)</span></span>
+      <select id="velgReq"></select></label>
+    <div class="two">
+      <label class="fld"><span>Forespørsels-ID</span><input type="text" data-r="id" placeholder="U-2026-001" autocomplete="off"></label>
+      <label class="fld"><span>Skole</span><select data-r="skoleId"></select></label>
+    </div>
+    <label class="fld" id="annenSkoleWrap" hidden><span>Navn på skolen</span><input type="text" data-r="skoleNavn" autocomplete="off"></label>
+    <div class="two">
+      <label class="fld"><span>Trinn</span><select data-r="trinn"></select></label>
+      <label class="fld"><span>Linje</span><select data-r="linjeSel"></select></label>
+    </div>
+    <label class="fld" id="linjeFriWrap" hidden><span>Linje</span><input type="text" data-r="linjeFri" autocomplete="off"></label>
+    <div class="two">
+      <label class="fld"><span>Periode fra</span><input type="date" data-r="fra"></label>
+      <label class="fld"><span>Periode til</span><input type="date" data-r="til"></label>
+    </div>
+    <div class="two">
+      <label class="fld"><span>Oppmøte første dag</span><input type="date" data-r="dag1"></label>
+      <label class="fld"><span>Oppmøtetid</span><input type="time" data-r="tid"></label>
+    </div>
+    <p class="hint" style="margin-top:-4px">Første dag settes lik fra-datoen. Oppmøtetid hentes fra Innstillinger hvis den er lagt inn der.</p>
+    <h3 style="margin:6px 0 6px">Lærer på skolen</h3>
+    <label class="fld"><span>Navn</span><input type="text" data-r="lNavn" autocomplete="off"></label>
+    <div class="two">
+      <label class="fld"><span>Telefon</span><input type="tel" data-r="lTlf" autocomplete="off"></label>
+      <label class="fld"><span>E-post <span class="opt">(tilbakemeldingen sendes hit)</span></span><input type="email" data-r="lEpost" autocomplete="off"></label>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2><span class="num">2</span>Elever</h2>
+    <div id="elever"></div>
+    <div class="row">
+      <button type="button" class="btn" id="leggTil">+ Legg til elev</button>
+      <button type="button" class="btn ghost" id="visFlere">Lim inn flere navn</button>
+    </div>
+    <div id="flereWrap" hidden style="margin-top:10px">
+      <label class="fld"><span>Ett navn per linje <span class="opt">(får første avdeling som har sagt ja, kan endres etterpå)</span></span>
+      <textarea id="flere" autocomplete="off" spellcheck="false"></textarea></label>
+      <button type="button" class="btn pri" id="leggTilFlere">Legg til navnene</button>
+    </div>
+  </section>
+
+  <section class="sec" id="fSkole" hidden>
+    <h2>Elevens tilbakemelding – til skolen</h2>
+    <p class="hint">Skolen gjennomfører elevens tilbakemelding (valgt under Innstillinger). Send lenken til læreren. Lenken har ikke elevnavn, bare avdeling, skole, linje og periode.</p>
+    <div id="fSkoleInnhold"></div>
+  </section>
+ </div>
+
+ <div>
+  <div class="prevbar ui">
+    <h2>Ark (<span id="antArk">0</span>)</h2>
+    <button type="button" class="btn pri" id="skrivAlle">Skriv ut / lagre PDF – alle</button>
+    <button type="button" class="btn ghost" id="tom">Tøm elevnavn</button>
+  </div>
+  <div id="mangelboks" class="ui"></div>
+  <div id="arkene"></div>
+ </div>
+</div>
+
+<!-- ===================== INNSTILLINGER ===================== -->
+<div id="innst" hidden>
+ <div class="cols" style="grid-template-columns:minmax(340px,520px) 1fr">
+  <div>
+   <section class="sec">
+     <h2>Oppmøte første dag</h2>
+     <p class="hint">Gjelder alle ark. Lagres på denne maskinen.</p>
+     <label class="fld"><span>Oppmøtested – Ankomstsenteret <span class="opt">(adresse eller veibeskrivelse)</span></span><input type="text" data-c="felles.sted" autocomplete="off"></label>
+     <label class="fld"><span>Standard oppmøtetid</span><input type="time" data-c="felles.tid"></label>
+     <h3 style="margin:6px 0">Hvis ingen møter eleven</h3>
+     <div class="two">
+       <label class="fld"><span>Eleven ringer</span><input type="text" data-c="felles.ringNavn" placeholder="Navn eller funksjon" autocomplete="off"></label>
+       <label class="fld"><span>Telefon</span><input type="tel" data-c="felles.ringTlf" autocomplete="off"></label>
+     </div>
+   </section>
+
+   <section class="sec">
+     <h2>Elevens tilbakemelding (del F)</h2>
+     <fieldset style="border:0;padding:0;margin:0 0 10px"><legend class="fld" style="font-size:13px;font-weight:600;padding:0;margin-bottom:6px">Hvem gjennomfører?</legend>
+     <div class="chips">
+       <label class="chip"><input type="radio" name="fmodus" value="academy"><span>Stord Academy – QR på arket</span></label>
+       <label class="chip"><input type="radio" name="fmodus" value="skole"><span>Skolen – vi sender lenke</span></label>
+     </div></fieldset>
+     <label class="fld"><span>Forhåndsutfylt lenke fra Microsoft Forms</span><input type="url" data-c="f.forms" placeholder="https://forms.office.com/…{ID}…" autocomplete="off"></label>
+     <div id="formsStatus"></div>
+     <p class="hint">Lag lenken i Forms med plassholderne <code>{ID}</code> <code>{AVDELING}</code> <code>{SKOLE}</code> <code>{LINJE}</code> <code>{PERIODE}</code> i de forhåndsutfylte feltene. Se oppskriften i prosjektet.</p>
+     <button type="button" class="btn sm" id="testForms">Test lenken med eksempelverdier</button>
+   </section>
+
+   <section class="sec">
+     <h2>Flytt innstillinger</h2>
+     <p class="hint">Hent registeret fra admin: «Mer» → «Eksporter» i admin, og velg filen her. Elevnavn finnes ikke i eksporten.</p>
+     <label class="fld"><span>Admin-eksport eller innstillingsfil</span><input type="file" id="impFil" accept=".json,application/json"></label>
+     <details><summary style="cursor:pointer;font-size:13px;color:var(--mut)">Eller lim inn teksten</summary>
+       <textarea id="impTxt" style="margin-top:6px"></textarea>
+       <button type="button" class="btn sm" id="impBtn" style="margin-top:6px">Les inn</button></details>
+     <div id="impStatus" class="hint" style="margin-top:8px"></div>
+     <div class="row" style="margin-top:6px">
+       <button type="button" class="btn sm" id="eksBtn">Last ned innstillinger (til en annen PC)</button>
+     </div>
+   </section>
+  </div>
+
+  <div>
+   <section class="sec">
+     <h2>Avdelingsregister</h2>
+     <p class="hint">Kopi av registeret i admin, med feltet «Sted» i tillegg. Endringer her lagres bare på denne maskinen. Tomme felt vises som «mangler» på arket. Hentes på nytt fra admin ved import (stedsfeltet beholdes).</p>
+     <div style="overflow-x:auto"><table class="reg"><thead><tr><th>Avdeling</th><th>Kontaktperson</th><th>Telefon</th><th>Sted / hvordan finne fram</th><th></th></tr></thead><tbody id="regBody"></tbody></table></div>
+     <div class="row" style="margin-top:10px"><input type="text" id="nyttProsjekt" placeholder="Nytt prosjekt (navn)" style="max-width:260px" autocomplete="off"><button type="button" class="btn sm" id="leggProsjekt">+ Legg til prosjekt</button></div>
+   </section>
+  </div>
+ </div>
+</div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* QR Code Generator for JavaScript – Copyright (c) 2009 Kazuhiko Arase – MIT-lisens – https://github.com/kazuhikoarase/qrcode-generator */
+var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"</title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"</description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="</svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1})},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(){var t=n("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});
+</script>
+<script>
+'use strict';
+/* ====== Faste verdier (grunnlagsdokumentet v0.8) ====== */
+const HMS_GODKJENT=false; // Settes til true når Mats har godkjent HMS-teksten. Fjerner gul merking.
+const ACADEMY='utplassering.stord@akersolutions.com';
+const E_FAST='https://mtokje.github.io/verktoy/utplassering/tilbakemelding/';
+const KEY='utplassering-infopakke-v1';
+const SKOLER=[
+ {id:'stord',navn:'Stord vidaregåande skule',kort:'Stord vgs',linjer:{Vg1:["Bygg- og anleggsteknikk","Elektro og datateknologi","Teknologi- og industrifag (TIP)","Salg, service og reiseliv"],Vg2:["Automatisering","Elenergi og ekom","Industriteknologi","Kjøretøy","Tømrer"],Vg3:["Automatiseringsfaget"]}},
+ {id:'bomlo',navn:'Bømlo vidaregåande skule',kort:'Bømlo vgs',linjer:{Vg1:["Elektro og datateknologi","Teknologi- og industrifag (TIP)","Naturbruk"],Vg2:["Automatisering","Elenergi og ekom","Industriteknologi"],Vg3:["Automatiseringsfaget"]}}];
+const TRINN=['Vg1','Vg2','Vg3'];
+const REG0=[
+ ['plateverksted-3','Plateverksted 3','Nils Anders Nilsen'],['praksisverksted','Praksisverksted (Stord Academy)','Freddy Sporsheim'],
+ ['ndt','NDT',''],['demolering','Demolering',''],['provisorisk-elektro','Provisorisk elektro','Daniel Playfoot'],
+ ['prosjekt','Prosjekt','',true],['prefab-ror','Prefab rør','Inge Buchvold'],['kaldboying','Kaldbøying',''],['lager','Lager',''],
+ ['tools-and-equipment','Tools and Equipment',''],['transport','Transport','Geir Åge'],['stillas','Stillas',''],
+ ['overflate-fabrikasjon','Overflate, Fabrikasjon','Eugen Brask'],['isolasjon','Isolasjon (Stord Academy, Isolasjonsfabrikken, prosjekt)','Brian Nielsen'],
+ ['cnc-automasjon-robotikk','CNC / Automasjon / Robotikk','']
+].map(([id,navn,kontakt,gruppe])=>({id,navn,kontakt,telefon:'',sted:'',gruppe:!!gruppe,parent:null}));
+const STATUSNAVN={tidlig:'Tidlig estimat',mottatt:'Mottatt',vurdering:'Til vurdering hos Mats',behandling:'Under behandling',reservert:'Reservert',bekreftet:'Bekreftet','ps-mottatt':'Personalskjema mottatt','ps-sendt':'Personalskjema sendt',gjennomfort:'Gjennomført',avslatt:'Avslått',avlyst:'Avlyst av skolen'};
+const FORVENTER=[
+ ['Møt presis hver dag, på avtalt sted. Blir du syk eller forsinket, ringer du kontaktpersonen din før arbeidstid og gir beskjed til skolen.',0],
+ ['Følg alltid beskjeder fra kontaktpersonen og andre som har ansvar for deg.',0],
+ ['Bruk verneutstyret du får utdelt, hele tiden der det er påbudt.',1],
+ ['Gå ikke alene rundt på området. Hold deg der du har fått beskjed om å være.',1],
+ ['Spør hvis du er usikker. Det er alltid lov, og det er alltid riktig.',0],
+ ['Si fra med en gang hvis du ser noe farlig eller noe skjer med deg.',1],
+ ['Mobilen brukes bare i pauser, og du tar ikke bilder eller film på området uten tillatelse.',1],
+ ['Vis respekt for alle du møter, og behandle utstyr og verktøy ordentlig.',0],
+ ['Du betjener ikke maskiner, kjøretøy eller utstyr uten at du har fått opplæring og klar beskjed om at du kan.',1]];
+const FORVENTE=[
+ ['At noen tar imot deg første dag og viser deg hvor du skal være.',0],['En fast kontaktperson du kan spørre.',0],
+ ['Nødvendig sikkerhetsinformasjon og verneutstyr.',1],['Reelle arbeidsoppgaver tilpasset nivået ditt.',0],
+ ['En tilbakemelding til deg og skolen når utplasseringen er over.',0]];
+
+/* ====== Hjelpere ====== */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pd=s=>{const[y,m,d]=String(s).split('-').map(Number);return new Date(y,m-1,d)};
+const okDato=s=>/^\d{4}-\d\d-\d\d$/.test(s||'');
+const fy=s=>{if(!okDato(s))return '';const d=pd(s);return d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()};
+const langDato=s=>{if(!okDato(s))return '';const t=pd(s).toLocaleDateString('nb-NO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});return t.charAt(0).toUpperCase()+t.slice(1)};
+const periodeTxt=(f,t)=>okDato(f)&&okDato(t)&&f!==t?fy(f)+'–'+fy(t):fy(f||t);
+const b64url=s=>{const b=new TextEncoder().encode(s);let x='';b.forEach(c=>x+=String.fromCharCode(c));return btoa(x).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+let tt;const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2600)};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const M=t=>`<span class="mangler">mangler${t?': '+esc(t):''}</span>`;
+
+/* ====== Innstillinger (lagres lokalt – aldri elevnavn) ====== */
+function nyC(){return{reg:REG0.map(a=>({...a})),felles:{sted:'',tid:'',ringNavn:'',ringTlf:''},f:{modus:'academy',forms:''},req:[],importDato:null}}
+function lastC(){try{const c=JSON.parse(localStorage.getItem(KEY)||'null');if(!c)return nyC();const d=nyC();
+ return{reg:Array.isArray(c.reg)&&c.reg.length?c.reg:d.reg,felles:{...d.felles,...c.felles},f:{...d.f,...c.f},req:Array.isArray(c.req)?c.req:[],importDato:c.importDato||null}}catch(e){return nyC()}}
+let C=lastC();
+const lagreC=()=>{try{localStorage.setItem(KEY,JSON.stringify(C))}catch(e){toast('Kunne ikke lagre innstillingene i nettleseren')}};
+
+/* ====== Arbeidsdata (kun i minnet) ====== */
+let R={reqId:'',id:'',skoleId:'stord',skoleNavn:'',trinn:'Vg1',linjeSel:'',linjeFri:'',fra:'',til:'',dag1:'',tid:C.felles.tid||'',lNavn:'',lTlf:'',lEpost:'',avdJa:[]};
+let E=[];
+const nyElev=navn=>({key:uid(),navn:navn||'',avdId:(R.avdJa[0]||{}).avdId||'',prosjekt:'',kontakt:'',tlf:'',sted:'',fra:'',til:'',dag1:'',tid:''});
+
+/* ====== Utledning ====== */
+const skole=()=>R.skoleId==='annen'?{navn:R.skoleNavn.trim(),kort:R.skoleNavn.trim()}:(SKOLER.find(s=>s.id===R.skoleId)||{navn:'',kort:''});
+const linje=()=>R.skoleId==='annen'||R.linjeSel==='__fri'?R.linjeFri.trim():R.linjeSel;
+const avd=id=>C.reg.find(a=>a.id===id);
+function info(e){
+ const a=avd(e.avdId);const sub=a&&a.parent?avd(a.parent):null;
+ let avdNavn='';if(a){avdNavn=a.gruppe?(e.prosjekt.trim()?'Prosjekt: '+e.prosjekt.trim():''):(sub?sub.navn+': '+a.navn:a.navn)}
+ return{a,avdNavn,kontakt:e.kontakt.trim()||(a?a.kontakt:''),tlf:e.tlf.trim()||(a?a.telefon:''),sted:e.sted.trim()||(a?a.sted:''),
+  fra:e.fra||R.fra,til:e.til||R.til,dag1:e.dag1||R.dag1||e.fra||R.fra,tid:e.tid||R.tid}}
+function eUrl(){return /^https?:$/.test(location.protocol)?new URL('../tilbakemelding/',location.href).href:E_FAST}
+function eLenke(e,i){const s=skole();const o={v:1,id:R.id.trim(),n:e.navn.trim(),a:i.avdNavn,k:i.kontakt,f:i.fra,t:i.til,s:s.kort||s.navn,l:[R.trinn,linje()].filter(Boolean).join(' '),e:R.lEpost.trim()};
+ Object.keys(o).forEach(k=>{if(o[k]===''||o[k]==null)delete o[k]});return eUrl()+'#d='+b64url(JSON.stringify(o))}
+const PH=['ID','AVDELING','SKOLE','LINJE','PERIODE'];
+function formsInfo(){const u=(C.f.forms||'').trim();if(!u)return{ok:false,tom:true};
+ const funnet=PH.filter(p=>u.includes('{'+p+'}')||u.toUpperCase().includes('%7B'+p+'%7D'));
+ return{ok:/^https:\/\//.test(u),funnet,ms:/forms\.(office|microsoft|cloud\.microsoft)/.test(u)}}
+function fLenke(vals){let u=(C.f.forms||'').trim();if(!u)return '';
+ PH.forEach(p=>{const v=encodeURIComponent(vals[p]||'');u=u.split('{'+p+'}').join(v).replace(new RegExp('%7B'+p+'%7D','gi'),v)});return u}
+const fVals=i=>{const s=skole();return{ID:R.id.trim(),AVDELING:i.avdNavn,SKOLE:s.navn,LINJE:[R.trinn,linje()].filter(Boolean).join(' '),PERIODE:periodeTxt(i.fra,i.til)}};
+function qrSvg(text){try{const q=qrcode(0,'M');q.addData(text);q.make();return q.createSvgTag({cellSize:4,margin:0,scalable:true}).replace('<svg ','<svg shape-rendering="crispEdges" ')}catch(e){return '<div class="qrmiss">Lenken er for lang for QR-kode</div>'}}
+
+/* ====== Mangler ====== */
+function mangler(e,i){const m=[];
+ if(!e.navn.trim())m.push('elevens navn');
+ if(!R.id.trim())m.push('forespørsels-ID');else if(!/^(U-\d{4}-\d{3}|EKS-\d+)$/.test(R.id.trim()))m.push('forespørsels-ID har feil format (U-ÅÅÅÅ-NNN)');
+ if(!okDato(i.fra)||!okDato(i.til))m.push('periode');
+ if(!okDato(i.dag1))m.push('dato første dag');
+ if(!i.tid)m.push('oppmøtetid');
+ if(!C.felles.sted.trim())m.push('oppmøtested (Ankomstsenteret)');
+ if(!C.felles.ringNavn.trim()||!C.felles.ringTlf.trim())m.push('hvem eleven ringer hvis ingen møter');
+ if(!i.a)m.push('avdeling');else{
+  if(i.a.gruppe&&!e.prosjekt.trim())m.push('navn på prosjektet');
+  if(!i.sted)m.push('sted for avdelingen');
+  if(!i.kontakt)m.push('kontaktperson');
+  if(!i.tlf)m.push('telefon til kontaktperson')}
+ if(!R.lNavn.trim())m.push('lærerens navn');
+ if(!R.lTlf.trim())m.push('lærerens telefon');
+ if(!R.lEpost.trim())m.push('lærerens e-post (tilbakemeldingen går da bare til Stord Academy)');
+ if(C.f.modus==='academy'&&!C.f.forms.trim())m.push('lenke til elevens skjema (Forms) under Innstillinger');
+ return m}
+
+/* ====== Arket ====== */
+const li=([t,u])=>`<li${u&&!HMS_GODKJENT?' class="utk"':''}>${esc(t)}</li>`;
+const utkLbl=()=>HMS_GODKJENT?'':'<div class="utk-lbl">UTKAST – gule linjer må kontrolleres mot rutinene på yarden</div>';
+function ark(e,i){
+ const s=skole(),l=linje();
+ const v=(x,t)=>x?esc(x):M(t);
+ const fr=C.f.modus==='academy';
+ const flink=fr?fLenke(fVals(i)):'';
+ const fBox=fr?`<div class="qrb f"><div class="qr">${flink?qrSvg(flink):'<div class="qrmiss">MANGLER lenke til elevskjema</div>'}</div>
+   <div><span class="who">For deg</span><div class="t">Din tilbakemelding</div><div class="d">Skann selv siste dag. Fortell oss hvordan utplasseringen var. Tar 2 minutter, og vi spør ikke om navnet ditt.</div></div></div>`
+  :`<div class="qrb f nf"><div><span class="who">For deg</span><div class="t">Din tilbakemelding</div><div class="d">Etter utplasseringen sender skolen din deg en lenke til et kort skjema om hvordan du hadde det. Tar 2 minutter, og vi spør ikke om navnet ditt.</div></div></div>`;
+ const ftekst=fr?'Vi vil også høre hvordan du syntes utplasseringen var. Skann QR-koden «Din tilbakemelding» siste dag.':'Vi vil også høre hvordan du syntes utplasseringen var. Skolen sender deg en lenke etter utplasseringen.';
+ const tidTxt=i.tid?'kl. '+esc(i.tid.replace(':','.')):M('tid');
+ return `<article class="ark">
+ <header class="a-top"><div class="a-org">Aker Solutions, Stord Yard · Stord Academy</div>
+  <div class="a-row"><div><div class="a-h">Infopakke – utplassering</div><div class="a-navn">${e.navn.trim()?esc(e.navn.trim()):M('navn')}</div></div>
+  <div class="a-ref">Periode<b>${periodeTxt(i.fra,i.til)?esc(periodeTxt(i.fra,i.til)):M()}</b>Ref.<b>${v(R.id.trim())}</b></div></div></header>
+ <section class="a-grid">
+  <div class="box hl"><div class="k">Første dag</div><div class="v">${okDato(i.dag1)?esc(langDato(i.dag1)):M('dato')}<br>${tidTxt}</div><div class="s">Møt opp på <b>Ankomstsenteret</b><br>${v(C.felles.sted.trim(),'sted')}</div></div>
+  <div class="box hl"><div class="k">Hvis ingen møter deg</div><div class="v">Ring ${v(C.felles.ringNavn.trim(),'hvem')}</div><div class="s">Tlf. ${v(C.felles.ringTlf.trim())}</div></div>
+  <div class="box"><div class="k">Skolen din</div><div class="v">${v(R.lNavn.trim(),'lærer')}</div><div class="s">Tlf. ${v(R.lTlf.trim())}<br>${esc([s.kort||s.navn,R.trinn,l].filter(Boolean).join(', '))}</div></div>
+  <div class="box"><div class="k">Avdelingen din</div><div class="v">${v(i.avdNavn,i.a&&i.a.gruppe?'prosjekt':'')}</div><div class="s">${v(i.sted,'sted')}</div></div>
+  <div class="box"><div class="k">Kontaktperson</div><div class="v">${v(i.kontakt)}</div><div class="s">Tlf. ${v(i.tlf)}</div></div>
+  <div class="box"><div class="k">Blir du syk eller forsinket</div><div class="s" style="margin:0">Ring kontaktpersonen din før arbeidstid, og gi beskjed til skolen.</div></div>
+ </section>
+ <div class="a-intro"><b>Velkommen som utplasseringselev ved Aker Solutions, Stord Yard</b>Du skal være med i en ekte arbeidshverdag. Vi forventer ikke at du kan faget, men at du møter opp, følger med og viser interesse.</div>
+ <section class="a-txt">
+  <div><h3>Dette forventer vi av deg</h3>${utkLbl()}<ul>${FORVENTER.map(li).join('')}</ul></div>
+  <div><h3>Dette kan du forvente av oss</h3><ul>${FORVENTE.map(li).join('')}</ul>
+   <div class="siste" style="margin-top:3mm"><h3>Siste dag</h3><p>Vis QR-koden på dette arket til kontaktpersonen din. Den åpner et kort skjema der kontaktpersonen gir tilbakemelding til skolen og Stord Academy.</p><p>${ftekst}</p></div></div>
+ </section>
+ <section class="a-qr">
+  <div class="qrb"><div class="qr">${qrSvg(eLenke(e,i))}<div class="qrname">${e.navn.trim()?esc(e.navn.trim()):M('navn')}</div></div>
+   <div><span class="who">For kontaktpersonen</span><div class="t">Siste dag: vis denne koden til kontaktpersonen</div><div class="d">Kontaktpersonen skanner og gir tilbakemelding om deg til skolen og Stord Academy.</div></div></div>
+  ${fBox}
+ </section>
+ <footer class="a-foot"><span>Spørsmål om utplasseringen: Stord Academy, ${ACADEMY}</span><span>Ref. ${esc(R.id.trim()||'–')}</span></footer>
+</article>`}
+
+/* ====== Tegn forhåndsvisning ====== */
+let rt;const tegnSnart=()=>{clearTimeout(rt);rt=setTimeout(tegn,120)};
+function tegn(){
+ const box=$('#arkene');$('#antArk').textContent=E.length;
+ if(!E.length){box.innerHTML='<div class="empty">Legg til en elev for å se arket.</div>';$('#mangelboks').innerHTML='';return}
+ const miss=[];
+ box.innerHTML=E.map((e,n)=>{const i=info(e);const m=mangler(e,i);if(m.length)miss.push([n,e,m]);
+  return `<div class="arkwrap" data-k="${e.key}">${ark(e,i)}</div><div class="arkbar ui"><button type="button" class="btn sm" data-print="${e.key}">Skriv ut / PDF – bare dette arket</button></div>`}).join('');
+ $('#mangelboks').innerHTML=miss.length?`<div class="missbox"><b>${miss.reduce((s,x)=>s+x[2].length,0)} felt mangler.</b> Feltene står som «mangler» på arket. Fyll dem ut her eller under Innstillinger før du skriver ut.<ul>${miss.map(([n,e,m])=>`<li><b>Ark ${n+1}${e.navn.trim()?' ('+esc(e.navn.trim())+')':''}:</b> ${m.map(esc).join(', ')}</li>`).join('')}</ul></div>`:'<div class="okbox">Alle felt er fylt ut.</div>';
+ skaler();tegnFSkole();merkFelt()}
+function skaler(){const w=$('#arkene').clientWidth;const px=210*96/25.4;const z=Math.min(1,(w-4)/px);$$('.arkwrap').forEach(a=>a.style.zoom=z)}
+addEventListener('resize',skaler);
+function merkFelt(){
+ const tom=sel=>{const e=$(sel);return e&&!e.value.trim()};
+ [['[data-r=id]'],['[data-r=fra]'],['[data-r=til]'],['[data-r=dag1]'],['[data-r=tid]'],['[data-r=lNavn]'],['[data-r=lTlf]'],['[data-r=lEpost]']].forEach(([s])=>{const e=$(s);if(e)e.classList.toggle('miss',!!E.length&&tom(s))});
+ $$('.elev').forEach(el=>{const e=E.find(x=>x.key===el.dataset.k);if(!e)return;const i=info(e);
+  el.querySelector('[data-e=navn]').classList.toggle('miss',!e.navn.trim());el.querySelector('[data-e=avdId]').classList.toggle('miss',!i.a);
+  const f=el.querySelector('.from');if(f)f.innerHTML=i.a?`Fra registeret: ${i.kontakt?esc(i.kontakt):'<b style="color:var(--err)">kontaktperson mangler</b>'} · ${i.tlf?esc(i.tlf):'<b style="color:var(--err)">telefon mangler</b>'} · ${i.sted?esc(i.sted):'<b style="color:var(--err)">sted mangler</b>'}`:''})}
+
+/* ====== Skjema: forespørsel ====== */
+function fyllSkoler(){$('[data-r=skoleId]').innerHTML=SKOLER.map(s=>`<option value="${s.id}">${esc(s.kort)}</option>`).join('')+'<option value="annen">Annen skole</option>';
+ $('[data-r=trinn]').innerHTML=TRINN.map(t=>`<option>${t}</option>`).join('')}
+function fyllLinjer(){const s=SKOLER.find(x=>x.id===R.skoleId);const ann=R.skoleId==='annen';
+ $('#annenSkoleWrap').hidden=!ann;
+ const sel=$('[data-r=linjeSel]');sel.closest('.fld').hidden=ann;
+ if(!ann){const ls=(s&&s.linjer[R.trinn])||[];if(R.linjeSel&&R.linjeSel!=='__fri'&&!ls.includes(R.linjeSel)){R.linjeFri=R.linjeSel;R.linjeSel='__fri'}
+  sel.innerHTML='<option value="">Velg linje</option>'+ls.map(l=>`<option>${esc(l)}</option>`).join('')+'<option value="__fri">Annen linje</option>';sel.value=R.linjeSel}
+ $('#linjeFriWrap').hidden=!(ann||R.linjeSel==='__fri')}
+function settR(){$$('[data-r]').forEach(el=>{const k=el.dataset.r;if(k in R)el.value=R[k]??''});fyllLinjer()}
+function fyllReqValg(){const sel=$('#velgReq');const reqs=C.req.filter(r=>!['tidlig','avslatt','avlyst'].includes(r.status));
+ $('#velgReqWrap').hidden=!C.req.length;
+ const rek=['bekreftet','ps-mottatt','ps-sendt','reservert'];
+ const g=(t,a)=>a.length?`<optgroup label="${t}">${a.map(r=>`<option value="${esc(r.id)}">${esc(r.id)} · ${esc(kortSkoleNavn(r.skole))} ${esc(r.trinn||'')} ${esc(r.linje||'')} · ${esc(periodeTxt(r.fra,r.til))} · ${esc(STATUSNAVN[r.status]||r.status||'')}</option>`).join('')}</optgroup>`:'';
+ const sort=a=>a.sort((x,y)=>String(x.fra).localeCompare(String(y.fra)));
+ sel.innerHTML='<option value="">– Skriv inn selv –</option>'+g('Bekreftet / reservert',sort(reqs.filter(r=>rek.includes(r.status))))+g('Andre',sort(reqs.filter(r=>!rek.includes(r.status))));
+ sel.value=R.reqId}
+const kortSkoleNavn=n=>(SKOLER.find(s=>s.navn===n)||{}).kort||n||'';
+$('#velgReq').addEventListener('change',e=>{const r=C.req.find(x=>x.id===e.target.value);R.reqId=e.target.value;
+ if(r){const s=SKOLER.find(x=>x.navn===r.skole);
+  Object.assign(R,{id:r.id,skoleId:s?s.id:'annen',skoleNavn:s?'':r.skole||'',trinn:r.trinn||'Vg1',linjeSel:'',linjeFri:'',fra:r.fra||'',til:r.til||'',dag1:r.fra||'',
+   lNavn:(r.kontakt||{}).navn||'',lTlf:(r.kontakt||{}).tlf||'',lEpost:(r.kontakt||{}).epost||'',avdJa:(r.avd||[]).filter(a=>a.status==='ja')});
+  if(s&&s.linjer[R.trinn]&&s.linjer[R.trinn].includes(r.linje))R.linjeSel=r.linje;else if(s){R.linjeSel='__fri';R.linjeFri=r.linje||''}else R.linjeFri=r.linje||'';
+  E.forEach(x=>{if(!x.avdId&&R.avdJa[0])x.avdId=R.avdJa[0].avdId});
+  if(!E.length)E.push(nyElev());
+  const ant=R.avdJa.reduce((s,a)=>s+(a.antall||0),0);if(ant)toast(`${ant} plass${ant>1?'er':''} med «Ja» fra ${R.avdJa.length} avdeling${R.avdJa.length>1?'er':''}`)}
+ else R.avdJa=[];
+ settR();tegnElever();tegn()});
+$$('[data-r]').forEach(el=>el.addEventListener('input',()=>{const k=el.dataset.r;R[k]=el.value;
+ if(k==='fra'){if(!R.dag1||R.dag1===R._fraFor)R.dag1=R.fra;R._fraFor=R.fra;$('[data-r=dag1]').value=R.dag1;if(okDato(R.fra)&&(!R.til||R.til<R.fra)){const d=pd(R.fra);d.setDate(d.getDate()+4);R.til=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');$('[data-r=til]').value=R.til}}
+ if(k==='skoleId'||k==='trinn'){if(k==='skoleId')R.linjeSel='';fyllLinjer()}
+ if(k==='linjeSel')fyllLinjer();
+ tegnSnart()}));
+
+/* ====== Skjema: elever ====== */
+function avdOptions(valgt){const ja=R.avdJa.map(a=>a.avdId).filter(id=>avd(id));
+ const opt=a=>{const p=a.parent?avd(a.parent):null;const n=p?p.navn+': '+a.navn:a.navn+(a.gruppe?' (skriv prosjektnavn)':'');return `<option value="${a.id}"${a.id===valgt?' selected':''}>${esc(n)}</option>`};
+ const alle=C.reg.filter(a=>!ja.includes(a.id));
+ return '<option value="">Velg avdeling</option>'+(ja.length?`<optgroup label="Har sagt ja til denne forespørselen">${ja.map(id=>opt(avd(id))).join('')}</optgroup><optgroup label="Alle avdelinger">`:'')+alle.map(opt).join('')+(ja.length?'</optgroup>':'')}
+function tegnElever(){
+ $('#elever').innerHTML=E.map((e,n)=>{const a=avd(e.avdId);return `<div class="elev" data-k="${e.key}">
+  <div class="elev-h"><span class="nr">${n+1}</span><input type="text" data-e="navn" value="${esc(e.navn)}" placeholder="Elevens navn" aria-label="Elevens navn" autocomplete="off" spellcheck="false" autocapitalize="words">
+  <select data-e="avdId" aria-label="Avdeling">${avdOptions(e.avdId)}</select>
+  <button type="button" class="btn sm ghost dan" data-fjern="${e.key}" aria-label="Fjern elev">✕</button></div>
+  ${a&&a.gruppe?`<label class="fld" style="margin:8px 0 0 36px"><span>Navn på prosjektet</span><input type="text" data-e="prosjekt" value="${esc(e.prosjekt)}" autocomplete="off"></label>`:''}
+  <div class="from" style="margin:6px 0 0 36px"></div>
+  <details style="margin-left:36px"><summary>Endre for dette arket (kontaktperson, sted, periode, tid)</summary><div class="more">
+   <div class="two"><label class="fld"><span>Kontaktperson</span><input type="text" data-e="kontakt" value="${esc(e.kontakt)}" placeholder="${esc(a?a.kontakt:'')}" autocomplete="off"></label>
+   <label class="fld"><span>Telefon</span><input type="tel" data-e="tlf" value="${esc(e.tlf)}" placeholder="${esc(a?a.telefon:'')}" autocomplete="off"></label></div>
+   <label class="fld"><span>Sted</span><input type="text" data-e="sted" value="${esc(e.sted)}" placeholder="${esc(a?a.sted:'')}" autocomplete="off"></label>
+   <div class="two"><label class="fld"><span>Fra</span><input type="date" data-e="fra" value="${esc(e.fra)}"></label><label class="fld"><span>Til</span><input type="date" data-e="til" value="${esc(e.til)}"></label></div>
+   <div class="two"><label class="fld"><span>Første dag</span><input type="date" data-e="dag1" value="${esc(e.dag1)}"></label><label class="fld"><span>Oppmøtetid</span><input type="time" data-e="tid" value="${esc(e.tid)}"></label></div>
+   <p class="hint" style="margin:0">Tomme felt bruker verdien fra registeret og forespørselen. Endringer her gjelder bare dette arket og lagres ikke.</p>
+  </div></details></div>`}).join('')}
+$('#elever').addEventListener('input',ev=>{const el=ev.target.closest('[data-e]');if(!el)return;const k=el.closest('.elev').dataset.k;const e=E.find(x=>x.key===k);
+ e[el.dataset.e]=el.value;if(el.dataset.e==='avdId'){e.kontakt=e.tlf=e.sted=e.prosjekt='';tegnElever()}tegnSnart()});
+$('#elever').addEventListener('click',ev=>{const b=ev.target.closest('[data-fjern]');if(!b)return;E=E.filter(x=>x.key!==b.dataset.fjern);tegnElever();tegn()});
+$('#leggTil').onclick=()=>{E.push(nyElev());tegnElever();tegn();const ins=$$('[data-e=navn]');ins[ins.length-1].focus()};
+$('#visFlere').onclick=()=>{$('#flereWrap').hidden=!$('#flereWrap').hidden;if(!$('#flereWrap').hidden)$('#flere').focus()};
+$('#leggTilFlere').onclick=()=>{const n=$('#flere').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);if(!n.length)return toast('Skriv minst ett navn');
+ E=E.filter(e=>e.navn.trim()||e.avdId!==((R.avdJa[0]||{}).avdId||''));
+ // fordel på avdelingene som har sagt ja, etter antall
+ const kvote=R.avdJa.map(a=>({id:a.avdId,igjen:Math.max(0,(a.antall||0)-E.filter(e=>e.avdId===a.avdId).length)}));
+ n.forEach(navn=>{const e=nyElev(navn);const k=kvote.find(x=>x.igjen>0);if(k){e.avdId=k.id;k.igjen--}E.push(e)});
+ $('#flere').value='';$('#flereWrap').hidden=true;tegnElever();tegn();toast(n.length+' elev'+(n.length>1?'er':'')+' lagt til')};
+$('#tom').onclick=()=>{if(!E.length)return;E.forEach(e=>e.navn='');tegnElever();tegn();toast('Elevnavnene er fjernet')};
+
+/* ====== Utskrift ====== */
+function skrivUt(key){const t=document.title;const e=key?E.find(x=>x.key===key):null;
+ document.title=e?'Infopakke '+(e.navn.trim()||'elev')+' '+(R.id||''):'Infopakker '+(R.id||'');
+ document.body.classList.toggle('en',!!key);$$('.arkwrap').forEach(a=>a.classList.toggle('valgt',a.dataset.k===key));
+ setTimeout(()=>{print();setTimeout(()=>{document.title=t;document.body.classList.remove('en')},500)},50)}
+$('#skrivAlle').onclick=()=>{if(!E.length)return toast('Legg til en elev først');skrivUt(null)};
+$('#arkene').addEventListener('click',ev=>{const b=ev.target.closest('[data-print]');if(b)skrivUt(b.dataset.print)});
+
+/* ====== Del F når skolen gjennomfører ====== */
+function tegnFSkole(){const vis=C.f.modus==='skole'&&E.length>0;$('#fSkole').hidden=!vis;if(!vis)return;
+ const unike=[];E.forEach(e=>{const i=info(e);if(i.avdNavn&&!unike.find(u=>u.avdNavn===i.avdNavn&&u.fra===i.fra&&u.til===i.til))unike.push(i)});
+ if(!C.f.forms.trim()){$('#fSkoleInnhold').innerHTML='<div class="warn">Lenken til Forms er ikke lagt inn under Innstillinger.</div>';return}
+ const s=skole();
+ const linjer=unike.map(i=>`– ${i.avdNavn} (${periodeTxt(i.fra,i.til)}): ${fLenke(fVals(i))}`).join('\n');
+ const txt=`Hei${R.lNavn.trim()?' '+R.lNavn.trim().split(' ')[0]:''},\n\nVi vil gjerne høre hvordan elevene opplevde utplasseringen hos Aker Solutions, Stord Yard (${R.id.trim()||'ref. mangler'}). Kan du dele lenken med elevene etter siste dag? Skjemaet tar ca. 2 minutter og spør ikke om navn.\n\nElevene bruker lenken for avdelingen de var på:\n${linjer}\n\nSvarene kommer direkte til Stord Academy.\n\nMed vennlig hilsen\nStord Academy, Aker Solutions\n${ACADEMY}`;
+ $('#fSkoleInnhold').innerHTML=`<pre class="mail">${esc(txt)}</pre><div class="row"><button type="button" class="btn sm" id="kopierF">Kopier teksten</button>${R.lEpost.trim()?`<a class="btn sm" href="mailto:${esc(R.lEpost.trim())}?subject=${encodeURIComponent('Elevenes tilbakemelding om utplasseringen – '+(R.id.trim()||''))}&body=${encodeURIComponent(txt)}">Åpne e-post</a>`:''}</div>`;
+ $('#kopierF').onclick=()=>kopier(txt,'Teksten er kopiert')}
+async function kopier(t,m){try{await navigator.clipboard.writeText(t);toast(m)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();try{document.execCommand('copy');toast(m)}catch(_){toast('Kunne ikke kopiere')}a.remove()}}
+
+/* ====== Innstillinger ====== */
+const getP=(o,p)=>p.split('.').reduce((x,k)=>x&&x[k],o);
+const setP=(o,p,v)=>{const ks=p.split('.');const l=ks.pop();ks.reduce((x,k)=>x[k],o)[l]=v};
+function settC(){$$('[data-c]').forEach(el=>el.value=getP(C,el.dataset.c)||'');$$('input[name=fmodus]').forEach(r=>r.checked=r.value===C.f.modus);formsStatus();tegnReg()}
+$$('[data-c]').forEach(el=>el.addEventListener('input',()=>{setP(C,el.dataset.c,el.value);lagreC();
+ if(el.dataset.c==='felles.tid'&&!R.tid){R.tid=el.value;$('[data-r=tid]').value=R.tid}
+ if(el.dataset.c==='f.forms')formsStatus();tegnSnart()}));
+$$('input[name=fmodus]').forEach(r=>r.addEventListener('change',()=>{C.f.modus=r.value;lagreC();tegnSnart()}));
+function formsStatus(){const f=formsInfo();const el=$('#formsStatus');
+ if(f.tom){el.innerHTML='<div class="warn">Ikke lagt inn ennå. QR-koden «Din tilbakemelding» vises som «mangler» på arket.</div>';return}
+ const mangl=PH.filter(p=>!f.funnet.includes(p));
+ el.innerHTML=(!f.ok?'<div class="warn">Lenken må begynne med https://</div>':'')+(f.ok&&!f.ms?'<div class="warn">Dette ser ikke ut som en Forms-lenke. Det går an, men sjekk at skjemaet tar imot svar uten innlogging.</div>':'')+
+  (mangl.length?`<div class="warn">Fant ikke plassholder for: ${mangl.map(p=>'{'+p+'}').join(', ')}. De feltene blir ikke forhåndsutfylt.</div>`:'<div class="okbox" style="margin:6px 0 10px">Alle fem plassholdere er funnet.</div>')}
+$('#testForms').onclick=()=>{if(!C.f.forms.trim())return toast('Lim inn lenken først');
+ open(fLenke({ID:'U-2026-999',AVDELING:'Prefab rør',SKOLE:'Stord vidaregåande skule',LINJE:'Vg1 Teknologi- og industrifag (TIP)',PERIODE:'8.2.2027–19.2.2027'}),'_blank','noopener')};
+function tegnReg(){const top=C.reg.filter(a=>!a.parent);
+ const rad=(a,sub)=>`<tr class="${sub?'sub':''}" data-id="${a.id}"><td>${esc(a.navn)}${a.gruppe?' <span class="opt">(gruppe)</span>':''}</td>
+  <td><input type="text" data-g="kontakt" value="${esc(a.kontakt)}" placeholder="mangler" autocomplete="off"></td>
+  <td><input type="tel" data-g="telefon" value="${esc(a.telefon)}" placeholder="mangler" autocomplete="off"></td>
+  <td><input type="text" data-g="sted" value="${esc(a.sted)}" placeholder="mangler" autocomplete="off"></td>
+  <td>${a.parent==='prosjekt'&&a.lokal?`<button type="button" class="btn sm ghost dan" data-slett="${a.id}">✕</button>`:''}</td></tr>`;
+ $('#regBody').innerHTML=top.map(a=>rad(a)+C.reg.filter(b=>b.parent===a.id).map(b=>rad(b,1)).join('')).join('')}
+$('#regBody').addEventListener('input',ev=>{const el=ev.target.closest('[data-g]');if(!el)return;const a=avd(el.closest('tr').dataset.id);a[el.dataset.g]=el.value;lagreC();tegnSnart();$$('.elev').length&&merkFelt()});
+$('#regBody').addEventListener('click',ev=>{const b=ev.target.closest('[data-slett]');if(!b)return;C.reg=C.reg.filter(a=>a.id!==b.dataset.slett);lagreC();tegnReg();tegnElever();tegn()});
+$('#leggProsjekt').onclick=()=>{const n=$('#nyttProsjekt').value.trim();if(!n)return;C.reg.push({id:'p-'+uid(),navn:n,kontakt:'',telefon:'',sted:'',gruppe:false,parent:'prosjekt',lokal:true});$('#nyttProsjekt').value='';lagreC();tegnReg();tegnElever()};
+
+function lesInn(txt){let x;try{x=JSON.parse(txt)}catch(e){return $('#impStatus').innerHTML='<b style="color:var(--err)">Filen er ikke gyldig.</b>'}
+ if(x&&x.type==='utplassering-eksport'&&Array.isArray(x.avd)){
+  const gml=C.reg;
+  C.reg=x.avd.slice().sort((a,b)=>(a.rek||99)-(b.rek||99)).map(a=>{const o=gml.find(g=>g.id===a.id)||{};
+   return{id:a.id,navn:a.navn||'',kontakt:a.kontakt||o.kontakt||'',telefon:a.telefon||o.telefon||'',sted:a.sted||o.sted||'',gruppe:!!a.gruppe,parent:a.parent||null}});
+  gml.filter(g=>g.lokal&&!C.reg.find(a=>a.id===g.id)).forEach(g=>C.reg.push(g));
+  C.req=(x.req||[]).map(r=>({id:r.id,status:r.status,skole:r.skole,trinn:r.trinn,linje:r.linje,fra:r.fra,til:r.til,kontakt:{navn:(r.kontakt||{}).navn||'',tlf:(r.kontakt||{}).tlf||'',epost:(r.kontakt||{}).epost||''},avd:(r.avd||[]).map(a=>({avdId:a.avdId,status:a.status,antall:a.antall||0}))}));
+  C.importDato=new Date().toISOString().slice(0,10);lagreC();settC();fyllReqValg();tegnElever();tegn();
+  $('#impStatus').innerHTML=`<b style="color:var(--ok)">Lest inn:</b> ${C.reg.length} avdelinger og ${C.req.length} forespørsler (eksportert ${esc(x.eksportert||'')}). Velg forespørsel under «Lag infopakke».`;return}
+ if(x&&x.type==='utplassering-infopakke-innstillinger'){
+  if(Array.isArray(x.reg))C.reg=x.reg;if(x.felles)C.felles={...C.felles,...x.felles};if(x.f)C.f={...C.f,...x.f};
+  lagreC();settC();tegnElever();tegn();$('#impStatus').innerHTML='<b style="color:var(--ok)">Innstillingene er lest inn.</b>';return}
+ $('#impStatus').innerHTML='<b style="color:var(--err)">Kjente ikke igjen filen.</b> Bruk eksport fra admin eller en innstillingsfil herfra.'}
+$('#impFil').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;f.text().then(lesInn);e.target.value=''});
+$('#impBtn').onclick=()=>lesInn($('#impTxt').value);
+$('#eksBtn').onclick=()=>{const b=new Blob([JSON.stringify({type:'utplassering-infopakke-innstillinger',versjon:1,eksportert:new Date().toISOString().slice(0,10),reg:C.reg,felles:C.felles,f:C.f},null,1)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='infopakke-innstillinger.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+
+/* ====== Faner ====== */
+$$('[data-tab]').forEach(b=>b.onclick=()=>{$$('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));$('#lag').hidden=b.dataset.tab!=='lag';$('#innst').hidden=b.dataset.tab!=='innst';if(b.dataset.tab==='lag')tegn()});
+
+/* ====== Start ====== */
+fyllSkoler();settR();settC();fyllReqValg();tegnElever();tegn();
+</script>
+</body>
+</html>

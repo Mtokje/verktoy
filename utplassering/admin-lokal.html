@@ -792,7 +792,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
  if(a==='senere'){ui.senere=!ui.senere;return refresh()}
  if(a==='cal'){const n=+d.d;ui.calStart=n?addDays(ui.calStart,n*7):addDays(monday(today()),-7);return refresh()}
  if(a==='tri'){e.preventDefault();const s=(+b.dataset.s+1)%3;b.dataset.s=s;b.textContent=b.dataset.f+(s===2?' ?':'');return}
- if(a==='ingen'){const r=getReq(d.id),l=r.avd[+d.li];l.status='ingen';l.svarDato=today();logg(r,'Ingen tilbakemelding fra '+avdNavn(l.avdId)+' etter 2. purring');upReq(r);return openSheet({type:'req',id:r.id})}
+ if(a==='ingen'){const r=getReq(d.id),l=r.avd[+d.li];l.status='ingen';l.svarDato=today();logg(r,'Ingen tilbakemelding fra '+avdNavn(l.avdId)+' etter purring');upReq(r);return openSheet({type:'req',id:r.id})}
  if(a==='copy'){const el=$('#'+d.t);try{await navigator.clipboard.writeText(el.value);toast('Kopiert')}catch(err){el.focus();el.select();try{document.execCommand('copy');toast('Kopiert')}catch(e2){toast('Marker teksten og kopier manuelt')}}return}
  if(a==='send'){setSent(d.id,d.key,d.li,$('#m-dato').value||today());toast('Merket som sendt');return openSheet({type:'req',id:d.id})}
  if(a==='unsend'){setSent(d.id,d.key,d.li,null);return renderSheet(true)}

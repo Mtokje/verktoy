@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Forespørsel om utplassering – Aker Solutions, Stord Yard</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="Skjema for skoler som ønsker utplassering av elever ved Aker Solutions, Stord Yard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Del C – forespørselsskjema. Samme visuelle språk som admin-oversikten (del B):
+   himmelblått toppfelt, blekk #10223a, oransje kun for advarsler; Outfit + Inter. Mobil først. */
+:root{color-scheme:light;--bg:#f4f7fa;--card:#fff;--ink:#10223a;--mut:#5a6a7e;--line:#dbe3ec;--sky:#4fb3e8;--skyink:#0b2238;--or:#ff7a1a;--orbg:#fff0e3;--orink:#9a3d00;--soft:#eef3f8;--ok:#157a43;--okbg:#e6f5ec;--err:#c62f34}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:Outfit,Inter,sans-serif;font-weight:600;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(24px,6vw,32px)}h2{font-size:19px}
+button,input,textarea{font:inherit;color:inherit}
+.top{background:var(--sky);color:var(--skyink)}
+.top-in{max-width:640px;margin:0 auto;padding:18px 16px 20px}
+.top small{display:block;font-size:13px;opacity:.85;margin-bottom:4px}
+.top p{margin:8px 0 0;font-size:15px}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;padding:1px 7px;border-radius:6px;background:#ffe08a;color:#5a4300;vertical-align:middle;margin-left:6px}
+main{max-width:640px;margin:0 auto;padding:16px 16px 48px}
+.privacy{display:flex;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:14px}
+.privacy svg{flex:none;width:20px;height:20px;margin-top:1px;color:var(--sky)}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.sec>h2{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font:600 14px Inter,sans-serif;flex:none}
+.q{margin:0 0 16px;border:0;padding:0}
+.q:last-child{margin-bottom:0}
+.q>legend,.q>.lbl{display:block;font-weight:600;font-size:15px;margin:0 0 6px;padding:0}
+.opt{font-weight:400;color:var(--mut);font-size:13px}
+.hint{font-size:13px;color:var(--mut);margin:4px 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip span{display:flex;align-items:center;min-height:44px;padding:8px 14px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);font-size:15px;cursor:pointer;user-select:none}
+.chip input:checked+span{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip input:focus-visible+span{outline:3px solid var(--or);outline-offset:2px}
+.chips.fag .chip span{font-size:14px;min-height:40px;padding:6px 12px}
+.chips.fag .chip input:checked+span::before{content:"✓";margin-right:6px;font-weight:700}
+.cards{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.tcard{position:relative}
+.tcard input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.tcard>span{display:block;height:100%;border:2px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:var(--card)}
+.tcard b{display:block;font:600 16px Outfit,Inter,sans-serif;margin-bottom:4px}
+.tcard small{display:block;font-size:13px;color:var(--mut);line-height:1.35}
+.tcard input:checked+span{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset;background:var(--soft)}
+.tcard input:focus-visible+span{outline:3px solid var(--or);outline-offset:2px}
+input[type=text],input[type=email],input[type=tel],input[type=date],textarea{width:100%;min-height:48px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);font-size:16px}
+textarea{min-height:96px;line-height:1.45;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.two{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld>span{font-size:14px;font-weight:500}
+.mt{margin-top:10px}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:48px;height:48px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);font-size:22px;font-weight:600;cursor:pointer;line-height:1}
+.stepper input{width:80px;text-align:center;font-size:20px;font-weight:600}
+.weeks{font-size:14px;color:var(--mut);margin-top:6px;min-height:21px}
+.warn{background:var(--orbg);color:var(--orink);border-left:4px solid var(--or);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.warn b{display:block;margin-bottom:2px}
+.confirm{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:var(--card)}
+.confirm input{width:24px;height:24px;flex:none;margin:1px 0 0;accent-color:#10223a}
+.confirm:has(input:checked){border-color:var(--ink);background:var(--soft)}
+.err-msg{color:var(--err);font-size:13px;font-weight:600;margin-top:6px}
+.bad>.chips .chip span,.bad input[type=text],.bad input[type=email],.bad input[type=date],.bad .tcard>span,.bad .confirm,.bad.confirm{border-color:var(--err)}
+.errbox{background:#fdecec;color:#8a1c20;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:15px}
+.errbox ul{margin:6px 0 0;padding-left:20px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;padding:12px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);font-weight:600;font-size:16px;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--mut);font-weight:500;min-height:44px}
+.stack{display:grid;gap:10px}
+.sum{margin:0;display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:15px}
+.sum dt{color:var(--mut)}.sum dd{margin:0;overflow-wrap:anywhere}
+.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{position:relative;padding:0 0 14px 40px;counter-increment:s}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:600;font-size:14px}
+.steps li b{display:block}
+.ok{display:flex;gap:12px;align-items:center;background:var(--okbg);color:var(--ok);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.ok svg{flex:none;width:32px;height:32px}
+.ok h1{font-size:22px;color:var(--ok)}
+.ref{font:600 15px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--soft);padding:2px 8px;border-radius:6px}
+.mailto{font-size:14px;color:var(--mut);margin:0}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+#toast.on{opacity:1}
+footer{max-width:640px;margin:0 auto;padding:0 16px 32px;font-size:13px;color:var(--mut)}
+footer a{color:inherit}
+[hidden]{display:none!important}
+@media(max-width:420px){.two{grid-template-columns:1fr}.sum{grid-template-columns:1fr;gap:0}.sum dt{margin-top:8px}}
+@media(max-width:360px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <small>Aker Solutions, Stord Yard · Stord Academy</small>
+  <h1>Forespørsel om utplassering <span class="tag">TESTVERSJON</span></h1>
+  <p>For skoler som ønsker å sende elever på utplassering. Tar ca. 3 minutter.</p>
+</div></header>
+
+<main>
+<!-- ============ STEG 1: SKJEMA ============ -->
+<form id="form" novalidate>
+  <div class="privacy" role="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <span><b>Ikke skriv elevnavn eller andre opplysninger om enkeltelever.</b> Navn sendes senere i personalskjemaet, når plassene er bekreftet.</span>
+  </div>
+
+  <div id="errbox" class="errbox" role="alert" tabindex="-1" hidden></div>
+
+  <section class="sec">
+    <h2><span class="num">1</span>Hva sender dere?</h2>
+    <fieldset class="q" id="q-type">
+      <legend class="sr" hidden>Type forespørsel</legend>
+      <div class="cards">
+        <label class="tcard"><input type="radio" name="type" value="tidlig"><span><b>Tidlig estimat</b><small>Omtrent antall og periode. Ikke bindende. Hjelper oss å planlegge.</small></span></label>
+        <label class="tcard"><input type="radio" name="type" value="reell"><span><b>Reell forespørsel</b><small>Dere ønsker plass til elevene. Vi svarer innen 3 arbeidsdager.</small></span></label>
+      </div>
+    </fieldset>
+  </section>
+
+  <section class="sec">
+    <h2><span class="num">2</span>Skole og klasse</h2>
+    <fieldset class="q" id="q-skole">
+      <legend>Skole</legend>
+      <div class="chips" id="skoler"></div>
+      <div id="annenSkole" class="mt" hidden><input type="text" id="skoleNavn" placeholder="Navn på skolen" autocomplete="organization" aria-label="Navn på skolen"></div>
+    </fieldset>
+    <fieldset class="q" id="q-trinn">
+      <legend>Trinn</legend>
+      <div class="chips" id="trinn"></div>
+    </fieldset>
+    <fieldset class="q" id="q-linje">
+      <legend>Linje</legend>
+      <div class="chips" id="linjer"><p class="hint" style="margin:0">Velg skole og trinn først.</p></div>
+      <div id="linjeFri" hidden><input type="text" id="linjeNavn" placeholder="F.eks. Teknologi- og industrifag" aria-label="Linje"></div>
+    </fieldset>
+    <div class="q" id="q-antall">
+      <label class="lbl" for="antall">Antall elever</label>
+      <div class="stepper"><button type="button" data-step="-1" aria-label="Færre elever">−</button><input type="text" inputmode="numeric" pattern="[0-9]*" id="antall" value="" placeholder="0" autocomplete="off"><button type="button" data-step="1" aria-label="Flere elever">+</button></div>
+      <p class="hint" id="antallHint"></p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2><span class="num">3</span>Når og hvordan</h2>
+    <div class="q" id="q-periode">
+      <span class="lbl" id="periodeLbl">Periode</span>
+      <div class="two">
+        <label class="fld"><span id="fraLbl">Fra</span><input type="date" id="fra"></label>
+        <label class="fld"><span id="tilLbl">Til</span><input type="date" id="til"></label>
+      </div>
+      <div class="weeks" id="weeks" aria-live="polite"></div>
+    </div>
+    <fieldset class="q" id="q-varighet">
+      <legend>Varighet</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="varighet" value="1 uke"><span>1 uke</span></label>
+        <label class="chip"><input type="radio" name="varighet" value="2 uker"><span>2 uker</span></label>
+        <label class="chip"><input type="radio" name="varighet" value="3 uker"><span>3 uker</span></label>
+        <label class="chip"><input type="radio" name="varighet" value="annet"><span>Annet</span></label>
+      </div>
+      <div id="varighetFri" class="mt" hidden><input type="text" id="varighetTekst" placeholder="F.eks. 4 uker, eller 10 onsdager" aria-label="Beskriv varighet"></div>
+      <p class="hint" id="varighetHint" hidden>Valgt ut fra datoene. Endre om det ikke stemmer.</p>
+    </fieldset>
+    <fieldset class="q" id="q-form">
+      <legend>Hvordan skal utplasseringen gå?</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="form" value="sammenhengende"><span>Sammenhengende uker</span></label>
+        <label class="chip"><input type="radio" name="form" value="endag"><span>Én dag i uka over tid</span></label>
+        <label class="chip"><input type="radio" name="form" value="annet"><span>Annet</span></label>
+      </div>
+      <div id="formFri" class="mt" hidden><input type="text" id="formTekst" placeholder="Beskriv kort" aria-label="Beskriv form"></div>
+      <div id="endagWarn" class="warn" role="status" hidden><b>Dette innvilges sjelden.</b>Avdelingene har vanskelig for å følge opp elever én dag i uka over lang tid. Dere kan sende forespørselen, men sammenhengende uker gir mye større sjanse for plass.</div>
+    </fieldset>
+  </section>
+
+  <section class="sec">
+    <h2><span class="num">4</span>Fag av interesse <span class="opt">(valgfritt)</span></h2>
+    <p class="hint" style="margin:-6px 0 10px">Velg gjerne flere. La stå tomt hvis dere ikke vet ennå.</p>
+    <div class="chips fag" id="fag"></div>
+  </section>
+
+  <section class="sec">
+    <h2><span class="num">5</span>Kontaktperson på skolen</h2>
+    <div class="q" id="q-knavn"><label class="fld"><span>Navn</span><input type="text" id="knavn" autocomplete="name"></label></div>
+    <div class="two">
+      <div class="q" id="q-kepost"><label class="fld"><span>E-post</span><input type="email" id="kepost" autocomplete="email" inputmode="email"></label></div>
+      <div class="q" id="q-ktlf"><label class="fld"><span>Telefon <span class="opt">(valgfritt)</span></span><input type="tel" id="ktlf" autocomplete="tel" inputmode="tel"></label></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2><span class="num">6</span>Bekreft og send</h2>
+    <div class="q" id="q-motivert">
+      <label class="confirm"><input type="checkbox" id="motivert"><span>Jeg bekrefter at elevene er motivert for utplassering ved Aker Solutions, Stord Yard.</span></label>
+      <p class="hint" id="motivertHint" hidden>Ikke påkrevd for tidlig estimat. Kan bekreftes når dere sender reell forespørsel.</p>
+    </div>
+    <div class="q">
+      <label class="fld"><span>Melding <span class="opt">(valgfritt)</span></span><textarea id="fritekst" placeholder="Annet vi bør vite. Ikke skriv elevnavn."></textarea></label>
+    </div>
+    <button class="btn pri" type="submit">Gå videre</button>
+  </section>
+</form>
+
+<!-- ============ STEG 2: SEND E-POST ============ -->
+<section id="send" hidden>
+  <div class="sec">
+    <h2 style="margin-bottom:6px">Siste steg: send e-posten</h2>
+    <p style="margin:0 0 14px">Skjemaet sender ikke noe selv. Trykk på knappen under. Da åpnes en ferdig utfylt e-post til Stord Academy, og du trykker «Send».</p>
+    <div class="stack">
+      <a class="btn pri" id="mailBtn" href="#">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Åpne e-post
+      </a>
+      <button class="btn" type="button" id="sentBtn">Jeg har sendt e-posten</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2 style="margin-bottom:6px">Åpnet ikke e-posten seg?</h2>
+    <p style="margin:0 0 10px;font-size:15px">Kopier teksten og lim den inn i en ny e-post til <b>kurs.stord@akersolutions.com</b>.</p>
+    <div class="stack">
+      <button class="btn" type="button" id="copyBtn">Kopier teksten</button>
+      <button class="btn" type="button" id="copyAddr">Kopier e-postadressen</button>
+    </div>
+    <p class="mailto" id="longNote" style="margin-top:10px" hidden>Teksten er lang. Hvis e-posten virker avkuttet, bruk «Kopier teksten» i stedet.</p>
+  </div>
+
+  <div class="sec">
+    <h2 style="margin-bottom:10px">Dette sender du</h2>
+    <dl class="sum" id="sum"></dl>
+  </div>
+  <button class="btn ghost" type="button" id="backBtn">‹ Tilbake og endre</button>
+</section>
+
+<!-- ============ STEG 3: KVITTERING ============ -->
+<section id="done" hidden>
+  <div class="ok" role="status">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>
+    <div><h1 id="doneTitle">Takk for forespørselen</h1><div style="font-size:14px">Innsendings-ID: <span class="ref" id="doneId"></span></div></div>
+  </div>
+  <div class="sec">
+    <h2 style="margin-bottom:12px">Dette skjer videre</h2>
+    <ol class="steps" id="doneSteps"></ol>
+    <p class="hint" style="margin:0">Fikk du ikke sendt e-posten? <a href="#" id="againSend">Gå tilbake til sending</a>.</p>
+  </div>
+  <div class="sec">
+    <p style="margin:0 0 10px">Spørsmål? Send e-post til <b>kurs.stord@akersolutions.com</b>. Oppgi referansenummeret når dere har fått det.</p>
+    <button class="btn" type="button" id="newBtn">Send en ny forespørsel</button>
+  </div>
+</section>
+</main>
+<footer>Stord Academy, Aker Solutions Stord Yard · Skjemaet lagrer ingenting på nett. Det du fyller ut, ligger bare i nettleseren din og sendes kun med e-posten du selv sender.</footer>
+<div id="toast" role="status"></div>
+
+<script>
+(()=>{
+/* ---------- Faste lister – identiske med admin-prototypen (del B) og grunnlagsdokumentet kap. 3 ---------- */
+const LAEREFAG=["Anleggsmaskinfører","Automatisering","Elektriker","Energimontør","Gjenvinning","Industrimaler","Industrimekaniker","Industrioppmåling","Industrirørlegger","Isolatør","Kran- og løfteoperasjon","Logistikk","NDT-kontrollør","Platearbeider","Sveis","Stillasbygger"];
+const SKOLER=[
+ {id:'stord',navn:'Stord vidaregåande skule',kort:'Stord vgs',linjer:{Vg1:["Bygg- og anleggsteknikk","Elektro og datateknologi","Teknologi- og industrifag (TIP)","Salg, service og reiseliv"],Vg2:["Automatisering","Elenergi og ekom","Industriteknologi","Kjøretøy","Tømrer"],Vg3:["Automatiseringsfaget"]}},
+ {id:'bomlo',navn:'Bømlo vidaregåande skule',kort:'Bømlo vgs',linjer:{Vg1:["Elektro og datateknologi","Teknologi- og industrifag (TIP)","Naturbruk"],Vg2:["Automatisering","Elenergi og ekom","Industriteknologi"],Vg3:["Automatiseringsfaget"]}}];
+const TRINN=['Vg1','Vg2','Vg3'];
+const TIL='kurs.stord@akersolutions.com';
+const KEY='utplassering-skjema-v1';
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const ds=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const pd=s=>{const[y,m,d]=String(s).split('-').map(Number);return new Date(y,m-1,d)};
+const fy=s=>{const d=pd(s);return d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()};
+const isoWeek=s=>{const d=pd(s);const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y0)/864e5+1)/7)};
+const ukeTxt=(f,t)=>{const a=isoWeek(f),b=isoWeek(t||f);return a===b?'uke '+a:'uke '+a+'–'+b};
+const store={get(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}},set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}},del(){try{localStorage.removeItem(KEY)}catch(e){}}};
+let tt;const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2400)};
+
+/* ---------- Bygg valg ---------- */
+const chip=(name,val,label,type='radio')=>`<label class="chip"><input type="${type}" name="${name}" value="${esc(val)}"><span>${esc(label)}</span></label>`;
+$('#skoler').innerHTML=SKOLER.map(s=>chip('skole',s.id,s.kort)).join('')+chip('skole','annen','Annen skole');
+$('#trinn').innerHTML=TRINN.map(t=>chip('trinn',t,t)).join('');
+$('#fag').innerHTML=LAEREFAG.map(f=>chip('fag',f,f,'checkbox')).join('');
+
+const val=n=>(document.querySelector(`input[name="${n}"]:checked`)||{}).value||'';
+const setVal=(n,v)=>{const el=document.querySelector(`input[name="${n}"][value="${CSS.escape(v)}"]`);if(el)el.checked=true};
+
+function renderLinjer(keep){
+ const sk=val('skole'),tr=val('trinn');const box=$('#linjer'),fri=$('#linjeFri');
+ if(sk==='annen'){box.hidden=true;fri.hidden=false;return}
+ box.hidden=false;fri.hidden=true;
+ const s=SKOLER.find(x=>x.id===sk);
+ if(!s||!tr){box.innerHTML='<p class="hint" style="margin:0">Velg skole og trinn først.</p>';return}
+ const ls=s.linjer[tr]||[];
+ box.innerHTML=ls.map(l=>chip('linje',l,l)).join('')||'<p class="hint" style="margin:0">Ingen linjer på dette trinnet.</p>';
+ if(keep)setVal('linje',keep);
+}
+
+/* ---------- Dynamikk ---------- */
+let varighetAuto=true;
+function sync(){
+ const type=val('type');
+ $('#annenSkole').hidden=val('skole')!=='annen';
+ $('#fraLbl').textContent=type==='tidlig'?'Omtrent fra':'Fra';
+ $('#tilLbl').textContent=type==='tidlig'?'Omtrent til':'Til';
+ $('#motivertHint').hidden=type!=='tidlig';
+ const f=val('form');$('#formFri').hidden=f!=='annet';$('#endagWarn').hidden=f!=='endag';
+ $('#varighetFri').hidden=val('varighet')!=='annet';
+ const fra=$('#fra').value,til=$('#til').value;
+ $('#weeks').textContent=fra&&til&&til>=fra?ukeTxt(fra,til)+(type==='tidlig'?' (omtrent)':''):'';
+ const a=+$('#antall').value||0;$('#antallHint').textContent=a>8?'Mange elever på én gang kan bli fordelt på flere avdelinger, eller få delvis plass.':'';
+ save();
+}
+function autoVarighet(){
+ const fra=$('#fra').value,til=$('#til').value;if(!varighetAuto||!fra||!til||til<fra)return;
+ const days=(pd(til)-pd(fra))/864e5+1;const w=Math.ceil(days/7);
+ if(w>=1&&w<=3){setVal('varighet',w===1?'1 uke':w+' uker');$('#varighetHint').hidden=false;clearBad($('#q-varighet'))}
+}
+document.addEventListener('change',e=>{
+ const n=e.target.name,id=e.target.id;
+ if(n==='skole'||n==='trinn')renderLinjer();
+ if(n==='varighet'){varighetAuto=false;$('#varighetHint').hidden=true}
+ if(id==='fra'){const t=$('#til');t.min=e.target.value;if(e.target.value&&(!t.value||t.value<e.target.value)){const d=pd(e.target.value);d.setDate(d.getDate()+4);t.value=ds(d)}}
+ if(id==='fra'||id==='til')autoVarighet();
+ clearBad(e.target.closest('.q'));sync();
+});
+document.addEventListener('input',e=>{if(e.target.matches('input[type=text],input[type=email],input[type=tel],textarea')){if(e.target.id==='antall')e.target.value=e.target.value.replace(/\D/g,'').slice(0,3);clearBad(e.target.closest('.q'));sync()}});
+$$('[data-step]').forEach(b=>b.addEventListener('click',()=>{const i=$('#antall');i.value=Math.max(1,Math.min(99,(+i.value||0)+ +b.dataset.step));clearBad($('#q-antall'));sync()}));
+$('#fra').min=ds(new Date());
+
+/* ---------- Lagring av utkast (kun i denne nettleseren) ---------- */
+function collect(){
+ const sk=val('skole'),s=SKOLER.find(x=>x.id===sk);
+ const v=val('varighet');const f=val('form');
+ return{type:val('type'),skoleId:sk,skole:sk==='annen'?$('#skoleNavn').value.trim():(s?s.navn:''),trinn:val('trinn'),
+  linje:sk==='annen'?$('#linjeNavn').value.trim():val('linje'),antall:+$('#antall').value||0,fra:$('#fra').value,til:$('#til').value,
+  varighetValg:v,varighet:v==='annet'?$('#varighetTekst').value.trim():v,form:f,formTekst:f==='annet'?$('#formTekst').value.trim():'',
+  fag:$$('input[name=fag]:checked').map(x=>x.value),kontakt:{navn:$('#knavn').value.trim(),epost:$('#kepost').value.trim(),tlf:$('#ktlf').value.trim()},
+  motivert:$('#motivert').checked,fritekst:$('#fritekst').value.trim()}}
+let state={step:'form',sid:null,sendtDato:null};
+function save(){store.set({draft:collect(),state,varighetAuto,raw:{skoleNavn:$('#skoleNavn').value,linjeNavn:$('#linjeNavn').value,varighetTekst:$('#varighetTekst').value,formTekst:$('#formTekst').value}})}
+function restore(o){if(!o||!o.draft)return;const d=o.draft;
+ if(d.type)setVal('type',d.type);if(d.skoleId)setVal('skole',d.skoleId);if(d.trinn)setVal('trinn',d.trinn);
+ renderLinjer(d.skoleId!=='annen'?d.linje:'');
+ $('#skoleNavn').value=o.raw?.skoleNavn||'';$('#linjeNavn').value=o.raw?.linjeNavn||'';
+ $('#antall').value=d.antall||'';$('#fra').value=d.fra||'';$('#til').value=d.til||'';
+ if(d.varighetValg)setVal('varighet',d.varighetValg);$('#varighetTekst').value=o.raw?.varighetTekst||'';
+ if(d.form)setVal('form',d.form);$('#formTekst').value=o.raw?.formTekst||'';
+ (d.fag||[]).forEach(f=>setVal('fag',f));
+ $('#knavn').value=d.kontakt?.navn||'';$('#kepost').value=d.kontakt?.epost||'';$('#ktlf').value=d.kontakt?.tlf||'';
+ $('#motivert').checked=!!d.motivert;$('#fritekst').value=d.fritekst||'';
+ varighetAuto=o.varighetAuto!==false;state=Object.assign(state,o.state||{});}
+
+/* ---------- Validering ---------- */
+function clearBad(q){if(q){q.classList.remove('bad');q.querySelector('.err-msg')?.remove()}}
+function validate(d){
+ const E=[];const add=(id,msg,short)=>E.push({id,msg,short});
+ if(!d.type)add('q-type','Velg tidlig estimat eller reell forespørsel.','type forespørsel');
+ if(!d.skoleId)add('q-skole','Velg skole.','skole');else if(d.skoleId==='annen'&&!d.skole)add('q-skole','Skriv inn navnet på skolen.','navn på skolen');
+ if(!d.trinn)add('q-trinn','Velg trinn.','trinn');
+ if(!d.linje)add('q-linje',d.skoleId==='annen'?'Skriv inn linje.':'Velg linje.','linje');
+ if(!(d.antall>0))add('q-antall','Skriv inn antall elever.','antall elever');
+ const t=ds(new Date());
+ if(!d.fra||!d.til)add('q-periode','Velg både fra- og til-dato.','periode');
+ else if(d.til<d.fra)add('q-periode','Til-datoen må være etter fra-datoen.','periode');
+ else if(d.fra<t)add('q-periode','Fra-datoen har allerede vært.','periode');
+ if(!d.varighetValg)add('q-varighet','Velg varighet.','varighet');else if(d.varighetValg==='annet'&&!d.varighet)add('q-varighet','Beskriv varigheten.','varighet');
+ if(!d.form)add('q-form','Velg hvordan utplasseringen skal gå.','form');else if(d.form==='annet'&&!d.formTekst)add('q-form','Beskriv kort hvordan.','form');
+ if(!d.kontakt.navn)add('q-knavn','Skriv inn navnet ditt.','navn på kontaktperson');
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.kontakt.epost))add('q-kepost','Skriv inn en gyldig e-postadresse.','e-post');
+ if(d.type==='reell'&&!d.motivert)add('q-motivert','Bekreft at elevene er motivert. Påkrevd for reell forespørsel.','bekreftelse om motivasjon');
+ return E}
+function showErrors(E){
+ $$('.q.bad').forEach(clearBad);
+ const box=$('#errbox');
+ if(!E.length){box.hidden=true;return}
+ for(const x of E){const q=document.getElementById(x.id);q.classList.add('bad');q.insertAdjacentHTML('beforeend',`<div class="err-msg">${esc(x.msg)}</div>`)}
+ box.innerHTML=`<b>Noe mangler:</b> ${esc(E.map(x=>x.short).join(', '))}.`;box.hidden=false;
+ document.getElementById(E[0].id).scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+/* ---------- E-post og kode ---------- */
+const formNavn={sammenhengende:'Sammenhengende uker',endag:'Én dag i uka over tid',annet:'Annet'};
+const sidNy=()=>{const d=new Date();const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';const b=crypto.getRandomValues(new Uint8Array(4));for(const x of b)r+=a[x%a.length];return`S-${String(d.getFullYear()).slice(2)}${pad(d.getMonth()+1)}${pad(d.getDate())}-${r}`};
+function b64url(str){const by=new TextEncoder().encode(str);let s='';for(const x of by)s+=String.fromCharCode(x);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function kode(d){
+ const o={v:1,id:state.sid,t:d.type,s:d.skole,ny:d.skoleId==='annen'?1:0,tr:d.trinn,l:d.linje,a:d.antall,f:d.fra,ti:d.til,va:d.varighet,fo:d.form,ft:d.formTekst,fg:d.fag,kn:d.kontakt.navn,ke:d.kontakt.epost,kt:d.kontakt.tlf,m:d.motivert?1:0,x:d.fritekst,d:ds(new Date())};
+ for(const k of Object.keys(o))if(o[k]===''||(Array.isArray(o[k])&&!o[k].length))delete o[k];
+ return'UTPL1.'+b64url(JSON.stringify(o))+'.SLUTT'}
+const kortSkole=d=>d.skoleId!=='annen'?(SKOLER.find(s=>s.id===d.skoleId)?.kort||d.skole):d.skole;
+function rows(d){return[
+ ['Type',d.type==='tidlig'?'Tidlig estimat (ikke bindende)':'Reell forespørsel'],
+ ['Skole',d.skole+(d.skoleId==='annen'?' (annen skole)':'')],
+ ['Klasse',d.trinn+' '+d.linje],
+ ['Antall elever',(d.type==='tidlig'?'ca. ':'')+d.antall],
+ ['Periode',`${fy(d.fra)}–${fy(d.til)} (${ukeTxt(d.fra,d.til)})${d.type==='tidlig'?', omtrent':''}`],
+ ['Varighet',d.varighet],
+ ['Form',d.form==='annet'?'Annet: '+d.formTekst:formNavn[d.form]+(d.form==='endag'?' (innvilges sjelden)':'')],
+ ['Fag av interesse',d.fag.length?d.fag.join(', '):'Ikke valgt'],
+ ['Kontaktperson',[d.kontakt.navn,d.kontakt.epost,d.kontakt.tlf&&('tlf '+d.kontakt.tlf)].filter(Boolean).join(', ')],
+ ['Motivasjon',d.motivert?'Lærer bekrefter at elevene er motivert for utplassering ved Aker Solutions, Stord Yard':'Ikke bekreftet ennå'],
+ ['Melding',d.fritekst||'–']]}
+function epost(d){
+ const emne=`Utplassering: ${d.type==='tidlig'?'Tidlig estimat':'Reell forespørsel'} – ${kortSkole(d)}, ${d.trinn} ${d.linje}, ${d.antall} elever, ${ukeTxt(d.fra,d.til)}`;
+ const tekst=`Forespørsel om utplassering ved Aker Solutions, Stord Yard\n\n`+rows(d).map(([k,v])=>`${k}: ${v}`).join('\n')+
+  `\n\nInnsendings-ID: ${state.sid}\n\nKode til Stord Academy (ikke endre):\n${kode(d)}\n\nSendt fra skjemaet til Stord Academy.`;
+ return{emne,tekst}}
+
+/* ---------- Steg ---------- */
+function show(step){state.step=step;$('#form').hidden=step!=='form';$('#send').hidden=step!=='send';$('#done').hidden=step!=='done';save();window.scrollTo(0,0)}
+function prepSend(){const d=collect();const m=epost(d);
+ const href=`mailto:${TIL}?subject=${encodeURIComponent(m.emne)}&body=${encodeURIComponent(m.tekst)}`;
+ $('#mailBtn').href=href;$('#longNote').hidden=href.length<1900;
+ $('#sum').innerHTML=rows(d).map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')+`<dt>Innsendings-ID</dt><dd><span class="ref">${esc(state.sid)}</span></dd>`;
+ return m}
+function prepDone(){const d=collect();$('#doneId').textContent=state.sid;
+ const reell=d.type==='reell';
+ $('#doneTitle').textContent=reell?'Takk for forespørselen':'Takk for estimatet';
+ $('#doneSteps').innerHTML=(reell?[
+  ['Vi registrerer forespørselen','Dere får et referansenummer (f.eks. U-2026-014) i svaret fra oss.'],
+  ['Svar innen 3 arbeidsdager','Vi bekrefter at forespørselen er mottatt og sier hva vi gjør videre.'],
+  ['Vi spør aktuelle avdelinger','Endelig svar om plass kommer som regel tidligst ca. én måned før oppstart. Dere kan få plass til alle, noen eller ingen.'],
+  ['Når plassene er bekreftet','Dere sender personalskjema med navn på elevene til kurs.stord@akersolutions.com. Elevene får informasjon om oppmøte og kontaktperson før oppstart.']]:[
+  ['Vi noterer estimatet','Det er ikke bindende for noen av oss, men hjelper oss å planlegge. Dere får et referansenummer i svaret fra oss.'],
+  ['Send reell forespørsel når dere vet mer','Bruk det samme skjemaet og velg «Reell forespørsel». Da svarer vi innen 3 arbeidsdager.'],
+  ['Ingen elevnavn ennå','Navn sendes i personalskjemaet når plassene er bekreftet.']])
+  .map(([b,t])=>`<li><b>${esc(b)}</b>${esc(t)}</li>`).join('')}
+
+$('#form').addEventListener('submit',e=>{e.preventDefault();const d=collect();const E=validate(d);showErrors(E);if(E.length)return;
+ if(!state.sid)state.sid=sidNy();prepSend();show('send')});
+$('#backBtn').addEventListener('click',()=>show('form'));
+$('#mailBtn').addEventListener('click',()=>{state.mailOpened=true;save()});
+$('#sentBtn').addEventListener('click',()=>{state.sendtDato=ds(new Date());prepDone();show('done')});
+$('#againSend').addEventListener('click',e=>{e.preventDefault();prepSend();show('send')});
+async function copy(t,ok){try{await navigator.clipboard.writeText(t);toast(ok)}catch(err){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');toast(ok)}catch(e2){toast('Kunne ikke kopiere. Marker teksten manuelt.')}a.remove()}}
+$('#copyBtn').addEventListener('click',()=>{const m=epost(collect());copy('Emne: '+m.emne+'\n\n'+m.tekst,'Teksten er kopiert')});
+$('#copyAddr').addEventListener('click',()=>copy(TIL,'Adressen er kopiert'));
+$('#newBtn').addEventListener('click',()=>{const k=collect().kontakt;
+ $('#form').reset();renderLinjer();$('#knavn').value=k.navn;$('#kepost').value=k.epost;$('#ktlf').value=k.tlf;
+ varighetAuto=true;$('#varighetHint').hidden=true;state={step:'form',sid:null,sendtDato:null};$$('.q.bad').forEach(clearBad);$('#errbox').hidden=true;sync();show('form')});
+
+/* ---------- Oppstart: gjenopprett utkast (f.eks. etter at e-postappen ble åpnet) ---------- */
+const saved=store.get();restore(saved);sync();
+if(state.step==='send'&&state.sid){prepSend();show('send')}
+else if(state.step==='done'&&state.sid){prepDone();show('done')}
+})();
+</script>
+</body>
+</html>

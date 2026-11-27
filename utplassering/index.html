@@ -209,7 +209,7 @@ footer a{color:inherit}
   <section class="sec">
     <h2><span class="num">6</span>Bekreft og send</h2>
     <div class="q" id="q-motivert">
-      <label class="confirm"><input type="checkbox" id="motivert"><span>Jeg bekrefter at elevene er motivert for utplassering ved Aker Solutions, Stord Yard.</span></label>
+      <label class="confirm"><input type="checkbox" id="motivert"><span>Jeg bekrefter å ha snakket med elevene, og at de er motivert for utplassering ved Aker Solutions, Stord Yard.</span></label>
       <p class="hint" id="motivertHint" hidden>Ikke påkrevd for tidlig estimat. Kan bekreftes når dere sender reell forespørsel.</p>
     </div>
     <div class="q">
@@ -405,7 +405,7 @@ function validate(d){
  if(!d.form)add('q-form','Velg hvordan utplasseringen skal gå.','form');else if(d.form==='annet'&&!d.formTekst)add('q-form','Beskriv kort hvordan.','form');
  if(!d.kontakt.navn)add('q-knavn','Skriv inn navnet ditt.','navn på kontaktperson');
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.kontakt.epost))add('q-kepost','Skriv inn en gyldig e-postadresse.','e-post');
- if(d.type==='reell'&&!d.motivert)add('q-motivert','Bekreft at elevene er motivert. Påkrevd for reell forespørsel.','bekreftelse om motivasjon');
+ if(d.type==='reell'&&!d.motivert)add('q-motivert','Bekreft at du har snakket med elevene, og at de er motivert. Påkrevd for reell forespørsel.','bekreftelse om motivasjon');
  return E}
 function showErrors(E){
  $$('.q.bad').forEach(clearBad);
@@ -435,7 +435,7 @@ function rows(d){return[
  ['Form',d.form==='annet'?'Annet: '+d.formTekst:formNavn[d.form]+(d.form==='endag'?' (innvilges sjelden)':'')],
  ['Fag av interesse',d.fag.length?d.fag.join(', '):'Ikke valgt'],
  ['Kontaktperson',[d.kontakt.navn,d.kontakt.epost,d.kontakt.tlf&&('tlf '+d.kontakt.tlf)].filter(Boolean).join(', ')],
- ['Motivasjon',d.motivert?'Lærer bekrefter at elevene er motivert for utplassering ved Aker Solutions, Stord Yard':'Ikke bekreftet ennå'],
+ ['Motivasjon',d.motivert?'Lærer bekrefter å ha snakket med elevene, og at de er motivert for utplassering ved Aker Solutions, Stord Yard':'Ikke bekreftet ennå'],
  ['Melding',d.fritekst||'–']]}
 function epost(d){
  const emne=`Utplassering: ${d.type==='tidlig'?'Tidlig estimat':'Reell forespørsel'} – ${kortSkole(d)}, ${d.trinn} ${d.linje}, ${d.antall} elever, ${ukeTxt(d.fra,d.til)}`;

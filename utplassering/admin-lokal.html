@@ -211,6 +211,8 @@ const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clone=o=>JSON.parse(JSON.stringify(o));
 const LAEREFAG=["Anleggsmaskinfører","Automatisering","Elektriker","Energimontør","Gjenvinning","Industrimaler","Industrimekaniker","Industrioppmåling","Industrirørlegger","Isolatør","Kran- og løfteoperasjon","Logistikk","NDT-kontrollør","Platearbeider","Sveis","Stillasbygger"];
+/* Linje → lærefag (grunnlagsdokumentet 3.3b). Nøkkel «trinn|linje», gjelder alle skoler. Standard fra 28.11.2026 (udir.no, utdanning.no, SNL). Lagres i config/main.linjefag når den endres under «Mer». */
+const LINJEFAG_STD={"Vg1|Bygg- og anleggsteknikk":["Anleggsmaskinfører","Industrimaler","Isolatør","Stillasbygger"],"Vg1|Elektro og datateknologi":["Automatisering","Elektriker","Energimontør","NDT-kontrollør"],"Vg1|Teknologi- og industrifag (TIP)":["Gjenvinning","Industrimekaniker","Industrioppmåling","Industrirørlegger","Kran- og løfteoperasjon","Logistikk","NDT-kontrollør","Platearbeider","Sveis"],"Vg1|Salg, service og reiseliv":[],"Vg1|Naturbruk":[],"Vg2|Automatisering":["Automatisering"],"Vg2|Elenergi og ekom":["Elektriker","Energimontør"],"Vg2|Industriteknologi":["Gjenvinning","Industrimekaniker","Industrioppmåling","Industrirørlegger","Kran- og løfteoperasjon","NDT-kontrollør","Platearbeider","Sveis"],"Vg2|Kjøretøy":[],"Vg2|Tømrer":[],"Vg3|Automatiseringsfaget":["Automatisering"]};
 const ARSAKER=["Ikke kapasitet","Perioden passer ikke","Én dag i uka over tid (innvilges sjelden)","Linje/fag ikke aktuelt","Manglende tilbakemelding fra avdeling","Ikke prioritert (skole/klasse)","Annet"];
 const STATUS=[
  {k:'mottatt',n:'Mottatt',c:'#1F6FB2',t:'#fff'},
@@ -266,6 +268,12 @@ const kNavn=k=>`${skById(k.skole)?.kort||'(skole fjernet)'} · ${k.trinn} ${k.li
 const fagTxt=k=>(k.fag||[]).length?k.fag.join(', '):'fag avklares';
 const nyId=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function alleLinjer(skId){const out=[];for(const s of cfg().skoler){if(skId&&skId!=='alle'&&s.id!==skId)continue;for(const t of ['Vg1','Vg2','Vg3'])for(const l of (s.linjer||{})[t]||[])out.push({key:lk(s.id,t,l),sk:s,trinn:t,linje:l})}return out}
+const lfKey=(t,l)=>t+'|'+l;const linjeFag=()=>cfg().linjefag||LINJEFAG_STD;
+function lfLinjer(){const seen=new Set(),out=[];for(const t of ['Vg1','Vg2','Vg3'])for(const s of cfg().skoler){if(s.eksempel)continue;for(const l of (s.linjer||{})[t]||[]){const k=lfKey(t,l);if(!seen.has(k)){seen.add(k);out.push({k,t,l})}}}return out}
+/* Koblinger som mangler ut fra linje → lærefag og avdelingenes fag. Eksisterende koblinger røres ikke. */
+function kFyllPlan(){const lf=linjeFag(),ny=[],ukjent=new Set();for(const s of cfg().skoler){if(s.eksempel)continue;for(const t of ['Vg1','Vg2','Vg3'])for(const l of (s.linjer||{})[t]||[]){const f0=lf[lfKey(t,l)];if(!f0){ukjent.add(lfKey(t,l));continue}if(!f0.length)continue;
+ for(const a of S.avd){if(a.gruppe)continue;const f=(a.fag||[]).filter(x=>f0.includes(x));if(!f.length)continue;if(S.kob.some(k=>k.avdId===a.id&&kLk(k)===lk(s.id,t,l)))continue;ny.push({skole:s.id,trinn:t,linje:l,avdId:a.id,fag:f})}}}
+ return{ny,ukjent:[...ukjent]}}
 function migrer(){let n=0;for(const a of S.avd){if(!(a.linjer||[]).length)continue;for(const x of a.linjer){const t=x.slice(0,3),l=x.slice(4);for(const s of cfg().skoler)if(((s.linjer||{})[t]||[]).includes(l)&&!S.kob.some(k=>k.avdId===a.id&&kLk(k)===lk(s.id,t,l))){S.kob.push({id:nyId('k'),skole:s.id,trinn:t,linje:l,avdId:a.id,fag:(a.fag||[]).slice()});n++}}delete a.linjer;n++}return n}
 const linjeTxt=r=>((r.trinn||'')+' '+(r.linje||'')).trim();
 const antTxt=r=>(r.antall||0)+' elev'+(+r.antall===1?'':'er');
@@ -455,6 +463,8 @@ function vMer(){const f=F(),c=cfg();const nE=S.req.filter(r=>r.eksempel).length;
  <div class="blk"><h3>Frister</h3><div class="two">${fr('svarSkole','Svar til skolen','arbeidsdager etter mottatt')}${fr('purring1','Purring','arbeidsdager etter henvendelse')}${fr('ingenSvar','«Ingen tilbakemelding» foreslås','arbeidsdager etter purring')}${fr('paminnelseUker','Påminnelse om reserverte plasser','uker før oppstart')}</div></div>
  <div class="blk"><h3>Skoler og linjer</h3>${c.skoler.map(s=>`<div class="mailrow"><span><b>${esc(s.navn)}</b> ${s.eksempel?'<span class="eks">EKSEMPEL</span>':''}<br><span class="kv">${['Vg1','Vg2','Vg3'].map(t=>t+': '+((s.linjer||{})[t]||[]).length).join(' · ')} linjer</span></span><button class="btn sm" data-act="skolelinje" data-id="${esc(s.id)}">Legg til linje</button></div>`).join('')}
   <div class="two" style="margin-top:10px"><input type="text" id="nySkole" placeholder="Ny skole, fullt navn"><input type="text" id="nyKort" placeholder="Kortnavn, f.eks. Fitjar vgs"></div><button class="btn" style="margin-top:8px" data-act="addskole">Legg til skole</button></div>
+ <div class="blk"><h3>Linjer og lærefag</h3><p style="margin:0 0 6px">Hvilke lærefag hver linje kan føre til fagbrev i. Gjelder alle skoler. Brukes av «Fyll ut koblinger» under Avdelinger → Koblinger: en linje kobles til avdelinger som har minst ett av fagene.</p><p class="kv" style="margin:0 0 4px">Forslaget bygger på udir.no, utdanning.no og SNL (28.11.2026). Sjekk gjerne med skolene.</p>
+  ${lfLinjer().map(x=>{const f=linjeFag()[x.k];return`<div class="mailrow"><span><b>${x.t} ${esc(x.l)}</b><br><span class="kv">${f==null?'<span class="avk">ikke satt</span>':f.length?esc(f.join(', ')):'ingen av lærefagene våre'}</span></span><button class="btn sm" data-act="lfedit" data-k="${esc(x.k)}">Endre</button></div>`}).join('')}</div>
  <div class="blk"><h3>Felles oppmøteinfo</h3><p class="kv" style="margin-top:0">Gjelder alle infopakker. Følger med når du trykker «Lag infopakke».</p>
   <label class="fld"><span>Oppmøtested første dag</span><input type="text" data-ch="felles" data-k="sted" value="${esc(c.felles?.sted||'')}" placeholder="Ankomstsenteret, adresse eller veibeskrivelse"></label>
   <div class="two"><label class="fld"><span>Standard oppmøtetid</span><input type="text" data-ch="felles" data-k="tid" value="${esc(c.felles?.tid||'')}" placeholder="f.eks. 07:00"></label><span></span></div>
@@ -502,6 +512,7 @@ function vKob(){const{lines,avds,vis,base,all,filt}=kData();const sel=ui.kSel;
  <nav class="seg" aria-label="Visning" style="margin:10px 0"><a href="#avdelinger">Register</a><a href="#koblinger" aria-current="page">Koblinger</a></nav>
  <p class="note">Hvilke linjer på hvilke skoler passer for hvilke avdelinger, og med hvilke fag. ${all.length} linjer · ${base.length} koblinger · ${uten} linjer uten avdeling.${filt?` <b>Filter: viser ${vis.length} ${vis.length===1?'kobling':'koblinger'}.</b>`:''}</p>
  <div class="filters" role="group" aria-label="Skole"><button data-act="kskole" data-k="alle" aria-pressed="${ui.kSkole==='alle'}">Alle skoler</button>${sk.map(s=>`<button data-act="kskole" data-k="${esc(s.id)}" aria-pressed="${ui.kSkole===s.id}"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${skFarge(s.id)};margin-right:6px"></span>${esc(s.kort||s.navn)}</button>`).join('')}</div>
+ ${(()=>{const pl=kFyllPlan();return`<div class="row" style="margin:-2px 0 12px"><button class="btn sm" data-act="kfyll">Fyll ut koblinger</button><span class="kv">${pl.ny.length?`${pl.ny.length} ${pl.ny.length===1?'kobling mangler':'koblinger mangler'} ut fra «Linjer og lærefag» under Mer.`:'Alle koblinger fra «Linjer og lærefag» under Mer er på plass.'}</span></div><div id="kfyllConf"></div>`})()}
  ${filterHtml}
  <div class="kwrap"><div><div class="kmap" id="kmap"><svg class="kwires" id="kwires" aria-hidden="true"></svg><div class="klabels" id="klabels"></div>
   <div class="kcol kl"><div class="khead">Skolelinjer</div>${L||`<span class="kv">${filt?'Ingen koblinger passer filteret.':ui.kSkjul?'Ingen koblede linjer ennå. Ta bort haken for «Skjul linjer uten kobling» for å se alle linjene og legge til koblinger.':'Ingen linjer'}</span>`}</div>
@@ -542,6 +553,12 @@ function shKob(id){const k=S.kob.find(x=>x.id===id);if(!k)return`<div class="sh-
  <label class="fld" style="margin-top:10px"><span>Andre fag</span><input type="text" id="k-andre" value="${esc((k.fag||[]).filter(f=>!LAEREFAG.includes(f)&&!own.includes(f)).join(', '))}"><small>Skill med komma.</small></label></div>
  <button class="btn pri" style="width:100%" data-act="ksave" data-id="${esc(k.id)}">Lagre</button>
  <button class="btn dan" style="margin-top:14px" data-act="kdel" data-id="${esc(k.id)}">Fjern koblingen</button><div id="kdelConf"></div></div>`}
+
+function shLf(key){const[t,l]=key.split('|');const f=linjeFag()[key]||[];
+ return`<div class="sh-head"><h2>Linje og lærefag</h2><button class="btn sm" data-act="close">Lukk</button></div><div class="sh-body">
+ <div class="blk"><p style="margin:0"><b>${t} ${esc(l)}</b> kan føre til fagbrev i:</p></div>
+ <div class="blk">${LAEREFAG.map(x=>`<label class="chk"><input type="checkbox" name="lffag" value="${esc(x)}" ${f.includes(x)?'checked':''}> ${esc(x)}</label>`).join('')}<p class="kv" style="margin-bottom:0">Ingen haker = linjen fører ikke til noen av lærefagene våre. Eksisterende koblinger endres ikke; bruk «Fyll ut koblinger» etterpå.</p></div>
+ <button class="btn pri" style="width:100%" data-act="lfsave" data-k="${esc(key)}">Lagre</button></div>`}
 
 /* ---------- ark: forespørsel ---------- */
 function shReq(id){const r=S.req.find(x=>x.id===id);if(!r)return`<div class="sh-head"><h2>Fant ikke forespørselen</h2><button class="btn" data-act="close">Lukk</button></div>`;
@@ -756,7 +773,7 @@ function refresh(forceSheet=true){
 function renderSheet(force){if(!sheet)return;const p=$('#panel');
  if(sheet.type!=='req'&&!force)return; // skjema og maler tegnes ikke om av ny data
  const ae=document.activeElement;if(!force&&p.contains(ae)&&/^(INPUT|TEXTAREA)$/.test(ae.tagName)){pendingSheet=true;return}
- const top=p.scrollTop;p.innerHTML=sheet.type==='req'?shReq(sheet.id):sheet.type==='reqForm'?shReqForm(sheet.id):sheet.type==='avd'?shAvd(sheet.id,sheet.parent):sheet.type==='kob'?shKob(sheet.id):sheet.type==='paste'?shPaste():shMal(sheet.id,sheet.key,sheet.li);if(lesTilgang){const b=p.querySelector('.sh-body');if(b)b.insertAdjacentHTML('afterbegin',SKRIV_MELD)}p.scrollTop=sheet.keepScroll?top:0;sheet.keepScroll=true;if(sheet.type==='reqForm')rcInit()}
+ const top=p.scrollTop;p.innerHTML=sheet.type==='req'?shReq(sheet.id):sheet.type==='reqForm'?shReqForm(sheet.id):sheet.type==='avd'?shAvd(sheet.id,sheet.parent):sheet.type==='kob'?shKob(sheet.id):sheet.type==='lf'?shLf(sheet.k):sheet.type==='paste'?shPaste():shMal(sheet.id,sheet.key,sheet.li);if(lesTilgang){const b=p.querySelector('.sh-body');if(b)b.insertAdjacentHTML('afterbegin',SKRIV_MELD)}p.scrollTop=sheet.keepScroll?top:0;sheet.keepScroll=true;if(sheet.type==='reqForm')rcInit()}
 function openSheet(s){sheet=s;$('#sheet').hidden=false;document.body.classList.add('noscroll');renderSheet(true)}
 function closeSheet(){sheet=null;$('#sheet').hidden=true;document.body.classList.remove('noscroll');$('#panel').innerHTML=''}
 
@@ -787,6 +804,13 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
  if(a==='copyv'){copyText(d.v);return}
  if(a==='kgo'){ui.kSel={t:'avd',k:d.id};if(location.hash==='#koblinger')refresh();else location.hash='#koblinger';return}
  if(a==='kedit')return openSheet({type:'kob',id:d.id});
+ if(a==='lfedit')return openSheet({type:'lf',k:d.k});
+ if(a==='lfsave'){const c=clone(cfg());c.linjefag=Object.assign({},linjeFag(),{[d.k]:[...document.querySelectorAll('input[name=lffag]:checked')].map(x=>x.value)});closeSheet();upCfg(c);return toast('Lagret')}
+ if(a==='kfyll'){const pl=kFyllPlan(),box=$('#kfyllConf');const uk=pl.ukjent.length?`<p class="kv" style="margin:6px 0 0">${pl.ukjent.length} ${pl.ukjent.length===1?'linje':'linjer'} har ikke lærefag satt under Mer og får ingen koblinger: ${esc(pl.ukjent.map(k=>k.replace('|',' ')).join(', '))}.</p>`:'';
+  if(!pl.ny.length){box.innerHTML=`<div class="note">Ingen nye koblinger å lage. Endre «Linjer og lærefag» under Mer eller fagene på avdelingene for å få flere.${uk}</div>`;return}
+  const per=cfg().skoler.filter(s=>!s.eksempel).map(s=>[s,pl.ny.filter(k=>k.skole===s.id).length]).filter(x=>x[1]).map(([s,n])=>esc(s.kort||s.navn)+': '+n).join(' · ');
+  box.innerHTML=`<div class="confirm">Lage ${pl.ny.length} nye ${pl.ny.length===1?'kobling':'koblinger'} (${per})? Fagene på hver kobling blir de fagene linjen og avdelingen har felles. Eksisterende koblinger endres ikke. <button class="btn sm pri" data-act="kfyll2">Ja, lag dem</button>${uk}</div>`;return}
+ if(a==='kfyll2'){const pl=kFyllPlan();b.disabled=true;b.textContent='Lager …';for(const x of pl.ny){const k=Object.assign({id:nyId('k')},x);S.kob.push(k);await put('koblinger',k)}refresh();return toast(pl.ny.length+' koblinger lagt til')}
  if(a==='kadd'){const v=$('#kAdd').value;if(!v)return;let k;if(ui.kSel.t==='linje'){const[sk,t,l]=ui.kSel.k.split('|');const av=avdBy(v);k={id:nyId('k'),skole:sk,trinn:t,linje:l,avdId:v,fag:(av?.fag||[]).slice()}}else{const[sk,t,l]=v.split('|');const av=avdBy(ui.kSel.k);k={id:nyId('k'),skole:sk,trinn:t,linje:l,avdId:ui.kSel.k,fag:(av?.fag||[]).slice()}}
   S.kob.push(k);put('koblinger',k);refresh();return toast('Koblet. Juster fag ved behov.')}
  if(a==='ksave'){const k=clone(S.kob.find(x=>x.id===d.id));k.fag=[...new Set([...[...document.querySelectorAll('input[name=kfag]:checked')].map(x=>x.value),...$('#k-andre').value.split(',').map(x=>x.trim()).filter(Boolean)])];const i=S.kob.findIndex(x=>x.id===k.id);S.kob[i]=k;put('koblinger',k);closeSheet();refresh();return toast('Lagret')}
